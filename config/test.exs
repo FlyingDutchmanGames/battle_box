@@ -1,6 +1,5 @@
 use Mix.Config
 
-# Configure your database
 config :battle_box, BattleBox.Repo,
   username: "postgres",
   password: "postgres",
@@ -8,11 +7,8 @@ config :battle_box, BattleBox.Repo,
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
 config :battle_box, BattleBoxWeb.Endpoint,
   http: [port: 4002],
   server: false
 
-# Print only warnings and errors during test
 config :logger, level: :warn

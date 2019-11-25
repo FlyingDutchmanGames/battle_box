@@ -18,9 +18,4 @@ defmodule BattleBoxWeb.Router do
 
     get "/", PageController, :index
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", BattleBoxWeb do
-  #   pipe_through :api
-  # end
 end
