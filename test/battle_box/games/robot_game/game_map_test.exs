@@ -4,12 +4,12 @@ defmodule BattleBox.Games.RobotGame.GameMapTest do
 
   describe "default" do
     test "it has the correct number of spaces" do
-      map = GameMap.default
+      map = GameMap.default()
       assert length(Enum.into(map.terrain, [])) == 361
     end
 
     test "all the spaces are represented" do
-      map = GameMap.default
+      map = GameMap.default()
 
       expected_positions = for row <- 0..18, col <- 0..18, do: {row, col}
       actual_positions = Map.keys(map.terrain)
