@@ -34,6 +34,52 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
   end
 
   describe "apply_spawn/1" do
+    test "it will create robots" do
+      test_terrain = %{
+        {0, 0} => :spawn,
+        {1, 1} => :spawn
+      }
+
+      game =
+        Game.new()
+        |> put_in([:terrain], test_terrain)
+        |> put_in([:settings, :spawn_per_player], 1)
+
+      assert length(game.robots) == 0
+      game = Logic.apply_spawn(game)
+      assert length(game.robots) == 2
+
+      assert [{0, 0}, {1, 1}] ==
+               game.robots
+               |> Enum.map(&Map.get(&1, :location))
+               |> Enum.sort()
+
+      assert game.players == Enum.map(game.robots, &Map.get(&1, :player_id)) |> Enum.sort()
+    end
+
+    test "it will destroy an existing robot on a spawn point" do
+      test_terrain = %{
+        {0, 0} => :spawn,
+        {1, 1} => :spawn
+      }
+
+      existing_robots = [
+        %{robot_id: "DESTROY_ME_1", location: {0, 0}},
+        %{robot_id: "DESTROY_ME_2", location: {1, 1}}
+      ]
+
+      game =
+        Game.new()
+        |> put_in([:terrain], test_terrain)
+        |> put_in([:settings, :spawn_per_player], 1)
+        |> put_in([:robots], existing_robots)
+
+      game = Logic.apply_spawn(game)
+
+      Enum.each(game.robots, fn robot ->
+        refute robot.robot_id in ["DESTROY_ME_1", "DESTROY_ME_2"]
+      end)
+    end
   end
 
   defp game_with_turn_and_spawn_every(turn, spawn_every) do
