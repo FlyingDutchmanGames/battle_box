@@ -3,7 +3,7 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
   alias BattleBox.Games.RobotGame.Settings
 
   test "it has the correct default settings" do
-    assert %Settings{
+    assert %{
              spawn_every: 10,
              spawn_per_player: 5,
              robot_hp: 50,
@@ -11,6 +11,6 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
              collision_damage: 5,
              suicide_damage: 15,
              max_turns: 100
-           } == %Settings{}
+           } == Settings.new()
   end
 end
