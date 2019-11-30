@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Game do
-  alias BattleBox.Games.RobotGame.{GameMap, Settings}
+  alias BattleBox.Games.RobotGame.{Terrain, Settings}
 
   def new() do
-    %{terrain: GameMap.default(), robots: [], turn: 0, settings: Settings.new(), event_log: []}
+    %{terrain: Terrain.default(), robots: [], turn: 0, settings: Settings.new(), event_log: []}
   end
 end

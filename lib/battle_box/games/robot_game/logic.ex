@@ -1,6 +1,11 @@
 defmodule BattleBox.Games.RobotGame.Logic do
-  def calculate_turn(game, moves) do
-    game = if spawning_round?(game), do: apply_spawn(game), else: game
+  def calculate_turn(game, valid_moves) do
+    game =
+      if spawning_round?(game),
+        do: apply_spawn(game),
+        else: game
+
+    game
   end
 
   def apply_spawn(_game) do
