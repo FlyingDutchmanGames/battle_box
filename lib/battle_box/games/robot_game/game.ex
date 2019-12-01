@@ -31,7 +31,16 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def get_suicide_damage(%{settings: %{suicide_damage: damage}}), do: damage
 
-  def apply_damage(_game, _location, _damage), do: raise("NOT IMPLEMENTED")
+  def apply_damage_to_location(game, location, damage) do
+    new_robots =
+      game.robots
+      |> Enum.map(fn
+        %{location: ^location} = robot -> update_in(robot.hp, &(&1 - damage))
+        robot -> robot
+      end)
+
+    put_in(game.robots, new_robots)
+  end
 
   def adjacent_locations({row, col}),
     do: [

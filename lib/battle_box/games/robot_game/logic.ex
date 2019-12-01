@@ -5,11 +5,11 @@ defmodule BattleBox.Games.RobotGame.Logic do
       robots: 1,
       get_robot: 2,
       add_robots: 2,
-      apply_damage: 3,
       remove_robots: 2,
       get_attack_damage: 1,
       get_suicide_damage: 1,
-      adjacent_locations: 1
+      adjacent_locations: 1,
+      apply_damage_to_location: 3
     ]
 
   def calculate_turn(game, moves) do
@@ -67,7 +67,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
           do: damage / 2,
           else: damage
 
-      apply_damage(game, damage_location, damage)
+      apply_damage_to_location(game, damage_location, damage)
     end)
   end
 
