@@ -171,4 +171,25 @@ defmodule BattleBox.Games.RobotGame.GameTest do
                |> Game.get_robot("TEST_ROBOT_ID")
     end
   end
+
+  describe "remove_robot_at_location/2" do
+    test "is a noop if there is no robot at that location" do
+      game = Game.new()
+      assert game == Game.remove_robot_at_location(game, {0, 0})
+    end
+
+    test "you can remove a robot at a location" do
+      game = Game.new()
+
+      robots = [
+        %{player_id: "TEST_PLAYER", location: {1, 1}},
+        %{player_id: "TEST_PLAYER_2", location: {2, 2}}
+      ]
+
+      game = Game.add_robots(game, robots)
+      assert length(Game.robots(game)) == 2
+      game = Game.remove_robot_at_location(game, {1, 1})
+      assert [%{location: {2, 2}}] = Game.robots(game)
+    end
+  end
 end

@@ -63,6 +63,14 @@ defmodule BattleBox.Games.RobotGame.Game do
     update_in(game, [:robots], fn robots -> [robot | robots] end)
   end
 
+  def remove_robot_at_location(game, location) do
+    robot =
+      robots(game)
+      |> Enum.find(fn robot -> robot.location == location end)
+
+    remove_robot(game, robot)
+  end
+
   def remove_robots(game, robot_ids), do: Enum.reduce(robot_ids, game, &remove_robot(&2, &1))
 
   def remove_robot(game, %{robot_id: robot_id}), do: remove_robot(game, robot_id)
