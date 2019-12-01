@@ -3,71 +3,46 @@ defmodule BattleBox.Games.RobotGame.Logic do
     only: [
       spawns: 1,
       robots: 1,
-      get_robot: 2,
       add_robots: 2,
       remove_robots: 2,
       get_attack_damage: 1,
       get_suicide_damage: 1,
       adjacent_locations: 1,
+      remove_robot_at_location: 2,
       apply_damage_to_location: 3
     ]
 
-  def calculate_turn(game, moves) do
+  def calculate_turn(game, _moves) do
     game =
       if spawning_round?(game),
         do: apply_spawn(game),
         else: game
 
-    game
-    |> apply_movements(moves)
-    |> apply_attacks_and_suicides(moves)
-    |> update_in([:round], &(&1 + 1))
+    update_in(game.round, &(&1 + 1))
   end
 
-  def apply_movements(game, _moves) do
-    game
+  def apply_attack(game, location, guard_locations) do
+    damage = get_attack_damage(game)
+
+    damage =
+      if location in guard_locations,
+        do: damage / 2,
+        else: damage
+
+    apply_damage_to_location(game, location, damage)
   end
 
-  def apply_attacks_and_suicides(game, moves) do
-    moves_for_surviving_robots =
-      for %{robot_id: robot_id} = move <- moves,
-          %{location: actor_location} <- get_robot(game, robot_id),
-          do: Map.merge(%{actor_location: actor_location}, move)
+  def apply_suicide(game, location, guard_locations) do
+    damage = get_suicide_damage(game)
+    game = remove_robot_at_location(game, location)
 
-    %{
-      attack: attacks,
-      suicides: suicides,
-      guards: guards
-    } = Enum.group_by(moves_for_surviving_robots, fn move -> move.type end)
-
-    gaurded_locations = Enum.map(guards, fn guard -> guard.actor_location end)
-
-    attack_damages =
-      attacks
-      |> Enum.filter(fn %{target: target, actor_location: actor_location} ->
-        target in adjacent_locations(actor_location)
-      end)
-      |> Enum.map(fn attack -> {attack.target, get_attack_damage(game)} end)
-
-    suicide_damages =
-      suicides
-      |> Enum.flat_map(fn suicide ->
-        damage = get_suicide_damage(game)
-
-        Enum.map(adjacent_locations(suicide.actor_location), fn damage_location ->
-          {damage_location, damage}
-        end)
-      end)
-
-    damages = Enum.concat(attack_damages, suicide_damages)
-
-    Enum.reduce(damages, game, fn {damage_location, damage}, game ->
+    Enum.reduce(adjacent_locations(location), game, fn loc, game ->
       damage =
-        if damage_location in gaurded_locations,
+        if loc in guard_locations,
           do: damage / 2,
           else: damage
 
-      apply_damage_to_location(game, damage_location, damage)
+      apply_damage_to_location(game, loc, damage)
     end)
   end
 

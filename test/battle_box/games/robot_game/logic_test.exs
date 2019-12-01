@@ -63,7 +63,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         {1, 1} => :spawn
       }
 
-      existing_robots = [
+      robots = [
         %{player_id: "1", robot_id: "DESTROY_ME_1", location: {0, 0}},
         %{player_id: "2", robot_id: "DESTROY_ME_2", location: {1, 1}}
       ]
@@ -72,7 +72,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         Game.new()
         |> put_in([:terrain], test_terrain)
         |> put_in([:settings, :spawn_per_player], 1)
-        |> Game.add_robots(existing_robots)
+        |> Game.add_robots(robots)
 
       game = Logic.apply_spawn(game)
 
@@ -80,6 +80,26 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         refute robot.robot_id in ["DESTROY_ME_1", "DESTROY_ME_2"]
       end)
     end
+  end
+
+  describe "apply_attack" do
+    test "An attack on an empty square is a noop" do
+      robots = [
+        %{player_id: "1", location: {0, 0}},
+        %{player_id: "2", location: {1, 1}}
+      ]
+
+      game =
+        Game.new()
+        |> Game.add_robots(robots)
+
+      raise "NOT FINISHED"
+    end
+
+    test "An attack on a guarded location yields half damage"
+  end
+
+  describe "apply_suicide" do
   end
 
   defp game_with_turn_and_spawn_every(turn, spawn_every) do
