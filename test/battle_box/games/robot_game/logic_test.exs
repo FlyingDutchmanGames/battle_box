@@ -64,19 +64,19 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       }
 
       existing_robots = [
-        %{robot_id: "DESTROY_ME_1", location: {0, 0}},
-        %{robot_id: "DESTROY_ME_2", location: {1, 1}}
+        %{player_id: "1", robot_id: "DESTROY_ME_1", location: {0, 0}},
+        %{player_id: "2", robot_id: "DESTROY_ME_2", location: {1, 1}}
       ]
 
       game =
         Game.new()
         |> put_in([:terrain], test_terrain)
         |> put_in([:settings, :spawn_per_player], 1)
-        |> put_in([:robots], existing_robots)
+        |> Game.add_robots(existing_robots)
 
       game = Logic.apply_spawn(game)
 
-      Enum.each(game.robots, fn robot ->
+      Enum.each(Game.robots(game), fn robot ->
         refute robot.robot_id in ["DESTROY_ME_1", "DESTROY_ME_2"]
       end)
     end

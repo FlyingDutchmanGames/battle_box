@@ -1,7 +1,8 @@
 defmodule BattleBox.Games.RobotGame.Logic do
-  alias BattleBox.Games.RobotGame.Terrain
+  import BattleBox.Games.RobotGame.Game,
+    only: [spawns: 1, robots: 1, add_robots: 2, remove_robots: 2]
 
-  def calculate_turn(game, valid_moves) do
+  def calculate_turn(game, _valid_moves) do
     game =
       if spawning_round?(game),
         do: apply_spawn(game),
@@ -12,7 +13,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
   def apply_spawn(game) do
     spawn_locations =
-      Terrain.spawn(game.terrain)
+      spawns(game)
       |> Enum.shuffle()
       |> Enum.take(game.settings.spawn_per_player * length(game.players))
 
@@ -22,18 +23,17 @@ defmodule BattleBox.Games.RobotGame.Logic do
       |> Enum.map(fn {spawn_location, player} ->
         %{
           player_id: player,
-          location: spawn_location,
-          hp: game.settings.robot_hp,
-          robot_id: Ecto.UUID.generate()
+          location: spawn_location
         }
       end)
 
-    robots =
-      game.robots
-      |> Enum.reject(fn %{location: location} -> location in spawn_locations end)
-      |> Enum.concat(spawned_robots)
+    destroyed_robots =
+      robots(game)
+      |> Enum.filter(fn robot -> robot.location in spawn_locations end)
 
-    put_in(game, [:robots], robots)
+    game
+    |> remove_robots(destroyed_robots)
+    |> add_robots(spawned_robots)
   end
 
   def spawning_round?(%{settings: %{spawn_every: spawn_every}, turn: turn}),
