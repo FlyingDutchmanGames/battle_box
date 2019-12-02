@@ -14,6 +14,13 @@ defmodule BattleBox.Games.RobotGame.Logic do
           %{location: location} = get_robot(game, robot_id),
           do: location
 
+    movements = grouped_moves[:move] || []
+
+    game =
+      Enum.reduce(movements, game, fn movement, game ->
+        apply_movement(game, movement.robot_id, movement.target, movements, guard_locations)
+      end)
+
     game =
       Enum.reduce(grouped_moves[:attack] || [], game, fn attack, game ->
         apply_attack(game, attack.target, guard_locations)
@@ -26,6 +33,10 @@ defmodule BattleBox.Games.RobotGame.Logic do
       end)
 
     update_in(game.turn, &(&1 + 1))
+  end
+
+  def apply_movement(game, _robot_id, _target, _movements, _guard_locations) do
+    game
   end
 
   def apply_attack(game, location, guard_locations) do
