@@ -37,6 +37,9 @@ defmodule BattleBox.Games.RobotGame.Game do
   def get_robot(game, robot_id),
     do: Enum.find(game.robots, fn robot -> robot.robot_id == robot_id end)
 
+  def get_robot_at_location(game, location),
+    do: Enum.find(game.robots, fn robot -> robot.location == location end)
+
   def get_attack_damage(%{settings: %{attack_range: %{min: val, max: val}}}), do: val
 
   def get_attack_damage(%{settings: %{attack_range: %{min: min, max: max}}}),

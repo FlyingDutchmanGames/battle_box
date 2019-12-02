@@ -68,6 +68,20 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "get_robot_at_location/2" do
+    test "it gives nil if there isn't a robot at that location" do
+      assert nil == Game.get_robot_at_location(Game.new(), {0, 0})
+    end
+
+    test "it can give back a robot if there is one at a location" do
+      robot = %{player_id: "TEST", robot_id: "TEST", location: {0, 0}, hp: 42}
+
+      assert ^robot =
+        Game.add_robot(Game.new(), robot)
+        |> Game.get_robot_at_location({0,0})
+    end
+  end
+
   describe "move_robot/3" do
     test "trying to move a robot that doesn't exist is a noop" do
       game = Game.new()
