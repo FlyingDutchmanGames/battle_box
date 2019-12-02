@@ -27,7 +27,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     damage =
       if location in guard_locations,
-        do: damage / 2,
+        do: Integer.floor_div(damage, 2),
         else: damage
 
     apply_damage_to_location(game, location, damage)
@@ -40,7 +40,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     Enum.reduce(adjacent_locations(location), game, fn loc, game ->
       damage =
         if loc in guard_locations,
-          do: damage / 2,
+          do: Integer.floor_div(damage, 2),
           else: damage
 
       apply_damage_to_location(game, loc, damage)
