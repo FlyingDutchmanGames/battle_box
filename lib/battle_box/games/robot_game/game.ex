@@ -44,6 +44,8 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def get_suicide_damage(%{settings: %{suicide_damage: damage}}), do: damage
 
+  def get_collision_damage(%{settings: %{collision_damage: damage}}), do: damage
+
   def apply_damage_to_location(game, location, damage) do
     new_robots =
       game.robots

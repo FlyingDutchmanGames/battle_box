@@ -19,7 +19,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
         do: apply_spawn(game),
         else: game
 
-    update_in(game.round, &(&1 + 1))
+    update_in(game.turn, &(&1 + 1))
   end
 
   def apply_attack(game, location, guard_locations) do
