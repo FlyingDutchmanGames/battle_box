@@ -35,8 +35,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
     update_in(game.turn, &(&1 + 1))
   end
 
-  def apply_movement(game, _robot_id, _target, _movements, _guard_locations) do
-    game
+  def apply_movement(game, robot_id, target, _movements, _guard_locations) do
+    move_robot(game, robot_id, target)
   end
 
   def apply_attack(game, location, guard_locations) do
