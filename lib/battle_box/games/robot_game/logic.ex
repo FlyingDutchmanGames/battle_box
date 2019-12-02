@@ -1,23 +1,29 @@
 defmodule BattleBox.Games.RobotGame.Logic do
-  import BattleBox.Games.RobotGame.Game,
-    only: [
-      spawns: 1,
-      robots: 1,
-      add_robots: 2,
-      remove_robots: 2,
-      spawning_round?: 1,
-      get_attack_damage: 1,
-      get_suicide_damage: 1,
-      adjacent_locations: 1,
-      remove_robot_at_location: 2,
-      apply_damage_to_location: 3
-    ]
+  import BattleBox.Games.RobotGame.Game
 
-  def calculate_turn(game, _moves) do
+  def calculate_turn(game, moves) do
     game =
       if spawning_round?(game),
         do: apply_spawn(game),
         else: game
+
+    grouped_moves = Enum.group_by(moves, fn move -> move.type end)
+
+    guard_locations =
+      for %{robot_id: robot_id} <- grouped_moves[:guards] || [],
+          %{location: location} = get_robot(game, robot_id),
+          do: location
+
+    game =
+      Enum.reduce(grouped_moves[:attack] || [], game, fn attack, game ->
+        apply_attack(game, attack.target, guard_locations)
+      end)
+
+    game =
+      Enum.reduce(grouped_moves[:suicide] || [], game, fn suicide, game ->
+        %{location: suicide_location} = get_robot(game, suicide.robot_id)
+        apply_suicide(game, suicide_location, guard_locations)
+      end)
 
     update_in(game.turn, &(&1 + 1))
   end

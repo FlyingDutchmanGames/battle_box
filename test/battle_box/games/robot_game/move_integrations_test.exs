@@ -11,13 +11,13 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   # 🐢 - A guarding robot
   # 🤕 - A regular non guarding robot
 
-  test "you can move into a normal square", do: run_test("▶1")
-  test "you can move into a spawn square", do: run_test("▶2")
-  test "you can not move into an obstacle", do: run_test("→3")
-  test "you can not move into an invalid square", do: run_test("→0")
-  test "you can not move into a guarding robot", do: run_test("→🐢")
-  test "you can not move into a non guarding robot, but it will take damage", do: run_test("→🤕")
-  test "two robots can move so long as they are both moving", do: run_test("▶▶1")
+  # test "you can move into a normal square", do: run_test("▶1")
+  # test "you can move into a spawn square", do: run_test("▶2")
+  # test "you can not move into an obstacle", do: run_test("→3")
+  # test "you can not move into an invalid square", do: run_test("→0")
+  # test "you can not move into a guarding robot", do: run_test("→🐢")
+  # test "you can not move into a non guarding robot, but it will take damage", do: run_test("→🤕")
+  # test "two robots can move so long as they are both moving", do: run_test("▶▶1")
 
   defp run_test(scenario) do
     graphs =
@@ -45,7 +45,6 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       graph_with_indexes
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
       |> Enum.map(fn {location, type} -> robot_move(location, type) end)
-      |> IO.inspect(label: "MOVES")
 
     after_turn = Logic.calculate_turn(initial_game, moves)
 
