@@ -65,6 +65,16 @@ defmodule BattleBox.Games.RobotGame.Game do
       {row, col - 1}
     ]
 
+  def move_robot(game, robot_id, location) do
+    update_in(
+      game.robots,
+      &Enum.map(&1, fn
+        %{robot_id: ^robot_id} = robot -> put_in(robot.location, location)
+        robot -> robot
+      end)
+    )
+  end
+
   def add_robots(game, robots), do: Enum.reduce(robots, game, &add_robot(&2, &1))
 
   def add_robot(game, %{player_id: _, location: _} = robot) do

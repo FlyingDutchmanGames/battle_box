@@ -68,6 +68,21 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "move_robot/3" do
+    test "trying to move a robot that doesn't exist is a noop" do
+      game = Game.new()
+      assert ^game = Game.move_robot(game, "DOES_NOT_EXIST", {42, 42})
+    end
+
+    test "you can move a robot" do
+      assert [%{location: {42, 42}}] =
+               Game.new()
+               |> Game.add_robot(%{player_id: "player_1", robot_id: "TEST", location: {0, 0}})
+               |> Game.move_robot("TEST", {42, 42})
+               |> Game.robots()
+    end
+  end
+
   describe "add_robot/2" do
     test "add_robot will add a robot and append hp and robot id" do
       game = Game.new(%{settings: %{robot_hp: 42}})
