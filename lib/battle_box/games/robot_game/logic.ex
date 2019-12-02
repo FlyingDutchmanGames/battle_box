@@ -5,6 +5,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
       robots: 1,
       add_robots: 2,
       remove_robots: 2,
+      spawning_round?: 1,
       get_attack_damage: 1,
       get_suicide_damage: 1,
       adjacent_locations: 1,
@@ -70,7 +71,4 @@ defmodule BattleBox.Games.RobotGame.Logic do
     |> remove_robots(destroyed_robots)
     |> add_robots(spawned_robots)
   end
-
-  def spawning_round?(%{settings: %{spawn_every: spawn_every}, turn: turn}),
-    do: rem(turn, spawn_every) == 0
 end

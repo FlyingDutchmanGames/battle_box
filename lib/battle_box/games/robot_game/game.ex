@@ -23,6 +23,9 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def robots(game), do: game.robots
 
+  def spawning_round?(game),
+    do: rem(game.turn, game.settings.spawn_every) == 0
+
   def get_robot(game, robot_id),
     do: Enum.find(game.robots, fn robot -> robot.robot_id == robot_id end)
 
