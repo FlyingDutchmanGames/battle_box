@@ -50,7 +50,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       terrain = %{{0, 0} => :normal, {0, 1} => :normal}
 
       assert %{location: {0, 1}} =
-               Game.new(%{turn: 2, terrain: terrain})
+               Game.new(%{spawn?: false, terrain: terrain})
                |> Game.add_robot(%{player_id: "player_1", robot_id: "TEST", location: {0, 0}})
                |> apply_movement(
                  "TEST",
@@ -65,7 +65,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       terrain = %{{0, 0} => :normal, {0, 1} => :inaccessible}
 
       assert %{location: {0, 0}, hp: 45} =
-               Game.new(%{turn: 2, terrain: terrain})
+               Game.new(%{spawn?: false, terrain: terrain})
                |> Game.add_robot(%{player_id: "player_1", robot_id: "TEST", location: {0, 0}})
                |> apply_movement(
                  "TEST",
@@ -80,7 +80,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       terrain = %{{0, 0} => :normal, {0, 1} => :normal}
 
       after_move =
-        Game.new(%{turn: 2, terrain: terrain})
+        Game.new(%{spawn?: false, terrain: terrain})
         |> Game.add_robots([
           %{player_id: "player_1", robot_id: "TEST", location: {0, 0}},
           %{player_id: "player_1", robot_id: "IN_SPACE", location: {0, 1}}
@@ -89,6 +89,23 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
 
       assert %{location: {0, 0}, hp: 45} = Game.get_robot(after_move, "TEST")
       assert %{location: {0, 1}, hp: 45} = Game.get_robot(after_move, "IN_SPACE")
+    end
+
+    test "if you try to move into a guarded space, you don't move, you take damage, and the other robot doesn't" do
+      terrain = %{{0, 0} => :normal, {0, 1} => :normal}
+
+      after_move =
+        Game.new(%{spawn?: false, terrain: terrain})
+        |> Game.add_robots([
+          %{player_id: "player_1", robot_id: "TEST", location: {0, 0}},
+          %{player_id: "player_1", robot_id: "IN_SPACE", location: {0, 1}}
+        ])
+        |> apply_movement("TEST", {0, 1}, [%{robot_id: "TEST", type: :move, target: {0, 1}}], [
+          {0, 1}
+        ])
+
+      assert %{location: {0, 0}, hp: 45} = Game.get_robot(after_move, "TEST")
+      assert %{location: {0, 1}, hp: 50} = Game.get_robot(after_move, "IN_SPACE")
     end
   end
 

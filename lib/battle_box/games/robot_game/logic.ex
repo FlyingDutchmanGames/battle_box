@@ -10,7 +10,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     grouped_moves = Enum.group_by(moves, fn move -> move.type end)
 
     guard_locations =
-      for %{robot_id: robot_id} <- grouped_moves[:guards] || [],
+      for %{robot_id: robot_id} <- grouped_moves[:guard] || [],
           %{location: location} = get_robot(game, robot_id),
           do: location
 
@@ -35,8 +35,24 @@ defmodule BattleBox.Games.RobotGame.Logic do
     update_in(game.turn, &(&1 + 1))
   end
 
-  def apply_movement(game, robot_id, target, _movements, _guard_locations) do
-    move_robot(game, robot_id, target)
+  def apply_movement(game, robot_id, target, _movements, guard_locations) do
+    %{location: current_location} = get_robot(game, robot_id)
+
+    with {:space_occupied?, nil} <- {:space_occupied?, get_robot_at_location(game, target)},
+         {:terrain_accessible?, true} <-
+           {:terrain_accessible?, game.terrain[target] in [:normal, :spawn]} do
+      move_robot(game, robot_id, target)
+    else
+      {:space_occupied?, _robot} ->
+        [target, current_location]
+        |> Enum.reject(fn location -> location in guard_locations end)
+        |> Enum.reduce(game, fn location, game ->
+          apply_damage_to_location(game, location, get_collision_damage(game))
+        end)
+
+      {:terrain_accessible?, false} ->
+        apply_damage_to_location(game, current_location, get_collision_damage(game))
+    end
   end
 
   def apply_attack(game, location, guard_locations) do

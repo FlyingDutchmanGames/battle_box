@@ -17,7 +17,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
         robots: [],
         turn: 0,
         terrain: Terrain.default(),
-        players: ["player_1", "player_2"]
+        players: ["player_1", "player_2"],
+        spawn?: true
       }
 
       assert correct_defaults == Game.new()
@@ -77,8 +78,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot = %{player_id: "TEST", robot_id: "TEST", location: {0, 0}, hp: 42}
 
       assert ^robot =
-        Game.add_robot(Game.new(), robot)
-        |> Game.get_robot_at_location({0,0})
+               Game.add_robot(Game.new(), robot)
+               |> Game.get_robot_at_location({0, 0})
     end
   end
 

@@ -11,12 +11,12 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   # 🐢 - A guarding robot
   # 🤕 - A regular non guarding robot
 
-  # test "you can move into a normal square", do: run_test("▶1")
-  # test "you can move into a spawn square", do: run_test("▶2")
-  # test "you can not move into an obstacle", do: run_test("→3")
-  # test "you can not move into an invalid square", do: run_test("→0")
-  # test "you can not move into a guarding robot", do: run_test("→🐢")
-  # test "you can not move into a non guarding robot, but it will take damage", do: run_test("→🤕")
+  test "you can move into a normal square", do: run_test("▶1")
+  test "you can move into a spawn square", do: run_test("▶2")
+  test "you can not move into an obstacle", do: run_test("→3")
+  test "you can not move into an invalid square", do: run_test("→0")
+  test "you can not move into a guarding robot", do: run_test("→🐢")
+  test "you can not move into a non guarding robot, but it will take damage", do: run_test("→🤕")
   # test "two robots can move so long as they are both moving", do: run_test("▶▶1")
 
   defp run_test(scenario) do
@@ -38,7 +38,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       |> Enum.map(fn {loc, _} -> %{robot_id: robot_id(loc), player_id: "P1", location: loc} end)
 
     initial_game =
-      Game.new(%{terrain: terrain})
+      Game.new(%{terrain: terrain, spawn?: false})
       |> Game.add_robots(robots)
 
     moves =
