@@ -1,22 +1,30 @@
 defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Games.RobotGame.Terrain
 
-  def new() do
-    %{
-      terrain: Terrain.default(),
-      robots: [],
-      turn: 0,
-      settings: %{
-        spawn_every: 10,
-        spawn_per_player: 5,
-        robot_hp: 50,
-        attack_range: %{min: 8, max: 10},
-        collision_damage: 5,
-        suicide_damage: 15,
-        max_turns: 100
+  def new(opts \\ %{}) do
+    settings =
+      Map.merge(
+        %{
+          spawn_every: 10,
+          spawn_per_player: 5,
+          robot_hp: 50,
+          attack_range: %{min: 8, max: 10},
+          collision_damage: 5,
+          suicide_damage: 15,
+          max_turns: 100
+        },
+        opts[:settings] || %{}
+      )
+
+    Map.merge(
+      %{
+        terrain: Terrain.default(),
+        robots: [],
+        turn: 0,
+        players: ["player_1", "player_2"]
       },
-      players: ["player_1", "player_2"]
-    }
+      Map.merge(opts, %{settings: settings})
+    )
   end
 
   def spawns(game), do: Terrain.spawn(game.terrain)

@@ -2,24 +2,35 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Terrain}
 
-  test "it has the correct defaults" do
-    correct_defaults = %{
-      settings: %{
-        spawn_every: 10,
-        spawn_per_player: 5,
-        robot_hp: 50,
-        attack_range: %{min: 8, max: 10},
-        collision_damage: 5,
-        suicide_damage: 15,
-        max_turns: 100
-      },
-      robots: [],
-      turn: 0,
-      terrain: Terrain.default(),
-      players: ["player_1", "player_2"]
-    }
+  describe "new/1" do
+    test "it has the correct defaults" do
+      correct_defaults = %{
+        settings: %{
+          spawn_every: 10,
+          spawn_per_player: 5,
+          robot_hp: 50,
+          attack_range: %{min: 8, max: 10},
+          collision_damage: 5,
+          suicide_damage: 15,
+          max_turns: 100
+        },
+        robots: [],
+        turn: 0,
+        terrain: Terrain.default(),
+        players: ["player_1", "player_2"]
+      }
 
-    assert correct_defaults == Game.new()
+      assert correct_defaults == Game.new()
+    end
+
+    test "you can override any top level key" do
+      assert %{turn: 42, players: ["player_1", "player_2"]} = Game.new(%{turn: 42})
+    end
+
+    test "you can selectively override settings" do
+      settings = %{max_turns: 42, robot_hp: 42}
+      assert %{suicide_damage: 15, robot_hp: 42} = Game.new(%{settings: settings}).settings
+    end
   end
 
   describe "spawning_round?/1" do
@@ -38,7 +49,9 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       ]
 
       Enum.each(should_spawn, fn %{turn: turn, spawn_every: spawn_every} ->
-        assert Game.spawning_round?(game_with_turn_and_spawn_every(turn, spawn_every))
+        assert Game.spawning_round?(
+                 Game.new(%{turn: turn, settings: %{spawn_every: spawn_every}})
+               )
       end)
 
       should_not_spawn = [
@@ -48,16 +61,16 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       ]
 
       Enum.each(should_not_spawn, fn %{turn: turn, spawn_every: spawn_every} ->
-        refute Game.spawning_round?(game_with_turn_and_spawn_every(turn, spawn_every))
+        refute Game.spawning_round?(
+                 Game.new(%{turn: turn, settings: %{spawn_every: spawn_every}})
+               )
       end)
     end
   end
 
   describe "add_robot/2" do
     test "add_robot will add a robot and append hp and robot id" do
-      game =
-        Game.new()
-        |> put_in([:settings, :robot_hp], 42)
+      game = Game.new(%{settings: %{robot_hp: 42}})
 
       assert Game.robots(game) == []
       robot = %{player_id: "TEST_PLAYER", location: {1, 1}}
@@ -91,50 +104,42 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "add_robots/2 allows you to add multiple robots" do
-      game = Game.new()
-
       robots = [
         %{player_id: "TEST_PLAYER", location: {1, 1}},
         %{player_id: "TEST_PLAYER_2", location: {2, 2}}
       ]
 
-      game = Game.add_robots(game, robots)
+      game = Game.add_robots(Game.new(), robots)
       assert length(Game.robots(game)) == 2
     end
   end
 
   describe "remove_robot" do
     test "you can remove a robot" do
-      game = Game.new()
-
       robot = %{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID"}
 
-      game = Game.add_robot(game, robot)
+      game = Game.add_robot(Game.new(), robot)
       assert length(Game.robots(game)) == 1
       game = Game.remove_robot(game, robot)
       assert length(Game.robots(game)) == 0
     end
 
     test "you can remove a robot by an id" do
-      game = Game.new()
-
       robot = %{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID"}
 
-      game = Game.add_robot(game, robot)
+      game = Game.add_robot(Game.new(), robot)
       assert length(Game.robots(game)) == 1
       game = Game.remove_robot(game, "TEST_ROBOT_ID")
       assert length(Game.robots(game)) == 0
     end
 
     test "you can multiple robots" do
-      game = Game.new()
-
       robots = [
         %{player_id: "TEST_PLAYER", location: {1, 1}},
         %{player_id: "TEST_PLAYER_2", location: {2, 2}}
       ]
 
-      game = Game.add_robots(game, robots)
+      game = Game.add_robots(Game.new(), robots)
       assert length(Game.robots(game)) == 2
       game = Game.remove_robots(game, Game.robots(game))
       assert length(Game.robots(game)) == 0
@@ -143,39 +148,29 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "get_robot/2" do
     test "you can get a robot by id" do
-      game = Game.new()
       robot = %{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID", hp: 50}
-      game = Game.add_robot(game, robot)
+      game = Game.add_robot(Game.new(), robot)
       assert ^robot = Game.get_robot(game, "TEST_ROBOT_ID")
     end
 
     test "trying to get a robot by id that doesn't exist gives `nil`" do
-      game = Game.new()
-      assert nil == Game.get_robot(game, "TEST_ROBOT_ID")
+      assert nil == Game.get_robot(Game.new(), "DOES_NOT_EXIST")
     end
   end
 
   describe "get_attack_damage" do
     test "you can get an attack damage" do
       game = Game.new()
+      damage = Game.get_attack_damage(game)
 
-      1..100
-      |> Enum.each(fn _ ->
-        damage = Game.get_attack_damage(game)
-
-        assert damage >= game.settings.attack_range.min &&
-                 damage <= game.settings.attack_range.max
-      end)
+      assert damage >= game.settings.attack_range.min &&
+               damage <= game.settings.attack_range.max
     end
   end
 
   describe "get_suicide_damage" do
     test "it gets the value set in settings" do
-      game =
-        Game.new()
-        |> put_in([:settings, :suicide_damage], 42)
-
-      assert 42 = Game.get_suicide_damage(game)
+      assert 42 = Game.get_suicide_damage(Game.new(%{settings: %{suicide_damage: 42}}))
     end
   end
 
@@ -210,23 +205,15 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "you can remove a robot at a location" do
-      game = Game.new()
-
       robots = [
         %{player_id: "TEST_PLAYER", location: {1, 1}},
         %{player_id: "TEST_PLAYER_2", location: {2, 2}}
       ]
 
-      game = Game.add_robots(game, robots)
+      game = Game.add_robots(Game.new(), robots)
       assert length(Game.robots(game)) == 2
       game = Game.remove_robot_at_location(game, {1, 1})
       assert [%{location: {2, 2}}] = Game.robots(game)
     end
-  end
-
-  defp game_with_turn_and_spawn_every(turn, spawn_every) do
-    Game.new()
-    |> put_in([:settings, :spawn_every], spawn_every)
-    |> put_in([:turn], turn)
   end
 end

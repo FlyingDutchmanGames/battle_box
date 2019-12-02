@@ -9,17 +9,14 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         {1, 1} => :spawn
       }
 
-      game =
-        Game.new()
-        |> put_in([:terrain], test_terrain)
-        |> put_in([:settings, :spawn_per_player], 1)
+      game = Game.new(%{terrain: test_terrain, settings: %{spawn_per_player: 1}})
 
-      assert length(game.robots) == 0
+      assert length(Game.robots(game)) == 0
       game = Logic.apply_spawn(game)
-      assert length(game.robots) == 2
+      assert length(Game.robots(game)) == 2
 
       assert [{0, 0}, {1, 1}] ==
-               game.robots
+               Game.robots(game)
                |> Enum.map(&Map.get(&1, :location))
                |> Enum.sort()
 
@@ -37,15 +34,11 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         %{player_id: "2", robot_id: "DESTROY_ME_2", location: {1, 1}}
       ]
 
-      game =
-        Game.new()
-        |> put_in([:terrain], test_terrain)
-        |> put_in([:settings, :spawn_per_player], 1)
-        |> Game.add_robots(robots)
-
-      game = Logic.apply_spawn(game)
-
-      Enum.each(Game.robots(game), fn robot ->
+      Game.new(%{terrain: test_terrain, settings: %{spawn_per_player: 1}})
+      |> Game.add_robots(robots)
+      |> Logic.apply_spawn()
+      |> Game.robots()
+      |> Enum.each(fn robot ->
         refute robot.robot_id in ["DESTROY_ME_1", "DESTROY_ME_2"]
       end)
     end
