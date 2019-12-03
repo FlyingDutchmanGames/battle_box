@@ -61,6 +61,16 @@ defmodule BattleBox.Games.RobotGame.Game do
     put_in(game.robots, new_robots)
   end
 
+  def apply_damage_to_robot(game, robot_id, damage) do
+    update_in(
+      game.robots,
+      &Enum.map(&1, fn
+        %{robot_id: ^robot_id} = robot -> update_in(robot.hp, fn hp -> hp - damage end)
+        robot -> robot
+      end)
+    )
+  end
+
   def adjacent_locations({row, col}),
     do: [
       {row + 1, col},

@@ -16,9 +16,30 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     movements = grouped_moves[:move] || []
 
+    move_results =
+      Enum.map(movements, fn movement -> apply_movement(game, movement, movements) end)
+
     game =
-      Enum.reduce(movements, game, fn movement, game ->
-        apply_movement(game, movement.robot_id, movement.target, movements, guard_locations)
+      Enum.reduce(move_results, game, fn move_result, game ->
+        case move_result do
+          {:no_move, {:collision, reason}, robot}
+          when reason in [:invalid_terrain, :multiple_attempting_to_enter] ->
+            apply_damage_to_robot(game, robot.robot_id, get_collision_damage(game))
+
+          {:no_move, {:collision, {:robot_collision, collided_robot}}, robot} ->
+            game
+            |> apply_damage_to_robot(robot.robot_id, get_collision_damage(game))
+            |> apply_damage_to_robot(
+              collided_robot.robot_id,
+              if(collided_robot.location in guard_locations,
+                do: 0,
+                else: get_collision_damage(game)
+              )
+            )
+
+          {:move, target, robot} ->
+            move_robot(game, robot.robot_id, target)
+        end
       end)
 
     game =
@@ -35,24 +56,46 @@ defmodule BattleBox.Games.RobotGame.Logic do
     update_in(game.turn, &(&1 + 1))
   end
 
-  def apply_movement(game, robot_id, target, _movements, guard_locations) do
-    %{location: current_location} = get_robot(game, robot_id)
+  def apply_movement(game, move, movements, stuck_robots \\ []) do
+    robot = get_robot(game, move.robot_id)
 
-    with {:space_occupied?, nil} <- {:space_occupied?, get_robot_at_location(game, target)},
-         {:terrain_accessible?, true} <-
-           {:terrain_accessible?, game.terrain[target] in [:normal, :spawn]} do
-      move_robot(game, robot_id, target)
+    with {:valid_terrain?, true} <- {:valid_terrain?, valid_terrain?(game, move.target)},
+         {:contention?, false} <-
+           {:contention?, attempts_to_enter_space(movements, move.target) > 1},
+         {:current_occupant, nil} <- {:current_occupant, get_robot_at_location(game, move.target)} do
+      {:move, move.target, robot}
     else
-      {:space_occupied?, _robot} ->
-        [target, current_location]
-        |> Enum.reject(fn location -> location in guard_locations end)
-        |> Enum.reduce(game, fn location, game ->
-          apply_damage_to_location(game, location, get_collision_damage(game))
-        end)
+      {:valid_terrain?, false} ->
+        {:no_move, {:collision, :invalid_terrain}, robot}
 
-      {:terrain_accessible?, false} ->
-        apply_damage_to_location(game, current_location, get_collision_damage(game))
+      {:contention?, true} ->
+        {:no_move, {:collision, :multiple_attempting_to_enter}, robot}
+
+      {:current_occupant, occupying_robot} ->
+        if occupying_robot in stuck_robots do
+          {:move, move.target, robot}
+        else
+          with occupying_robot_move when not is_nil(occupying_robot_move) <-
+                 Enum.find(movements, fn movement ->
+                   movement.robot_id == occupying_robot.robot_id
+                 end),
+               {:move, _, _} <-
+                 apply_movement(game, occupying_robot_move, movements, [robot | stuck_robots]) do
+            {:move, move.target, robot}
+          else
+            _ ->
+              {:no_move, {:collision, {:robot_collision, occupying_robot}}, robot}
+          end
+        end
     end
+  end
+
+  def attempts_to_enter_space(movements, location) do
+    length(Enum.filter(movements, &(&1.target == location)))
+  end
+
+  def valid_terrain?(game, location) do
+    game.terrain[location] in [:normal, :spawn]
   end
 
   def apply_attack(game, location, guard_locations) do

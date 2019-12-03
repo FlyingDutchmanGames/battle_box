@@ -17,13 +17,39 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   test "you can not move into an invalid square", do: run_test("→0")
   test "you can not move into a guarding robot", do: run_test("→🐢")
   test "you can not move into a non guarding robot, but it will take damage", do: run_test("→🤕")
-  # test "two robots can move so long as they are both moving", do: run_test("▶▶1")
+  test "two robots can't move into the same square", do: run_test("→1←")
+  test "two robots can move so long as they are both moving", do: run_test("▶▶1")
+  test "many robots can move so long as they are both moving", do: run_test("▶▶▶▶▶▶▶▶▶▶▶▶1")
+  test "A train of robots can fail to move if the front fails to move", do: run_test("→→0")
+
+  test "A large train of robots can fail to move if the front fails to move",
+    do: run_test("→→→→→→0")
+
+  test "Two robots can swap places", do: run_test("▶◀")
+
+  test "A clock rotation can be made",
+    do:
+      run_test("""
+      ▶▼
+      ▲◀   
+      """)
+
+  test "A long train of moves works",
+    do:
+      run_test("""
+        ▶▶▶▶▶▶▶▶▶▶▶▶▼
+        ▲◀◀◀◀◀◀◀◀◀◀◀◀    
+      """)
+
+  test "train collision", do: run_test("→→←←")
 
   defp run_test(scenario) do
     graphs =
       scenario
       |> String.split("\n")
       |> Enum.map(&String.graphemes/1)
+      |> Enum.map(&Enum.reject(&1, fn grapheme -> String.trim(grapheme) == "" end))
+      |> Enum.reject(fn line -> line == [] end)
 
     graph_with_indexes =
       for {row, row_num} <- Enum.with_index(graphs),
@@ -73,8 +99,8 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   end
 
   defp validate_collision_damage(initial_game, after_turn, robot_id) do
-    assert Game.get_collision_damage(initial_game) ==
-             Game.get_robot(initial_game, robot_id).hp - Game.get_robot(after_turn, robot_id).hp
+    damage = Game.get_robot(initial_game, robot_id).hp - Game.get_robot(after_turn, robot_id).hp
+    assert damage > 0 && rem(damage, Game.get_collision_damage(initial_game)) == 0
   end
 
   defp validate_moved(initial_game, after_turn, robot_id, move_direction) do
@@ -84,8 +110,8 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
     expected =
       case move_direction do
-        "▲" -> {1, 0}
-        "▼" -> {-1, 0}
+        "▲" -> {-1, 0}
+        "▼" -> {1, 0}
         "▶" -> {0, 1}
         "◀" -> {0, -1}
       end
@@ -130,8 +156,8 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   defp move_move({row, col} = location, type) do
     target =
       case type do
-        x when x in ["▲", "↑"] -> {row + 1, col}
-        x when x in ["▼", "↓"] -> {row - 1, col}
+        x when x in ["▲", "↑"] -> {row - 1, col}
+        x when x in ["▼", "↓"] -> {row + 1, col}
         x when x in ["▶", "→"] -> {row, col + 1}
         x when x in ["◀", "←"] -> {row, col - 1}
       end
