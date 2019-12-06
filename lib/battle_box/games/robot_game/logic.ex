@@ -42,6 +42,9 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
       {:no_move, reason, robot} ->
         case reason do
+          :illegal_target ->
+            game
+
           :invalid_terrain ->
             apply_damage_to_robot(game, robot.id, collision_damage(game))
 
@@ -67,6 +70,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     moves_to_location = Enum.filter(movements, &(&1.target == move.target))
 
     space_info = %{
+      move_target_adjacent?: move.target in adjacent_locations(robot.location),
       valid_terrain?: game.terrain[move.target] in [:normal, :spawn],
       contention?: length(moves_to_location) > 1,
       current_occupant: robot_currently_at_location,
@@ -79,6 +83,9 @@ defmodule BattleBox.Games.RobotGame.Logic do
     }
 
     case space_info do
+      %{move_target_adjacent?: false} ->
+        {:no_move, :illegal_target, robot}
+
       %{valid_terrain?: false} ->
         {:no_move, :invalid_terrain, robot}
 

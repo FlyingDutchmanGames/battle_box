@@ -2,6 +2,24 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   use ExUnit.Case
   alias BattleBox.Games.RobotGame.{Game, Logic}
 
+  test "you can't move to a location that is not adjacent" do
+    terrain = %{
+      {0, 0} => :normal,
+      {0, 1} => :normal,
+      {1, 1} => :normal,
+      {1, 0} => :normal
+    }
+
+    game =
+      Game.new(terrain: terrain, spawn?: false)
+      |> Game.add_robot(%{id: "A", player_id: "A", location: {0, 0}})
+
+    assert %{location: {0, 0}} =
+             game
+             |> Logic.calculate_turn([%{type: :move, target: {1, 1}, robot_id: "A"}])
+             |> Game.get_robot("A")
+  end
+
   # 0 - Invalid
   # 1 - Normal
   # 2 - Spawn
