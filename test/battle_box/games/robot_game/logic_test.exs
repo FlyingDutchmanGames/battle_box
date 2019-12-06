@@ -76,39 +76,50 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
   end
 
   describe "apply_suicide" do
-    test "suicide on an empty board is a noop" do
-      game = Game.new()
-      assert ^game = apply_suicide(game, {0, 0}, [])
-    end
-
     test "suicide inflicts damage on adjacent robots" do
       suicide_robot_location = {1, 1}
-      other_robot_locations = [{2, 1}, {0, 1}, {1, 2}, {1, 0}]
+      affected_robots = [{2, 1}, {0, 1}, {1, 2}, {1, 0}]
+      robot_locations = [suicide_robot_location | affected_robots]
+
+      id = fn {x, y} -> "#{x},#{y}" end
 
       robots =
-        other_robot_locations
-        |> Enum.map(&%{player_id: "1", hp: 50, location: &1})
+        robot_locations
+        |> Enum.map(&%{player_id: "1", hp: 50, location: &1, id: id.(&1)})
 
-      assert [%{hp: 0}, %{hp: 0}, %{hp: 0}, %{hp: 0}] =
-               Game.new(suicide_damage: 50)
-               |> Game.add_robots(robots)
-               |> apply_suicide(suicide_robot_location, [])
-               |> Game.robots()
+      affected_robots_after_turn =
+        Game.new(suicide_damage: 50)
+        |> Game.add_robots(robots)
+        |> apply_suicide(id.(suicide_robot_location), [])
+        |> Game.robots()
+
+      Enum.each(affected_robots_after_turn, fn robot ->
+        assert robot.location in affected_robots
+        assert robot.hp == 0
+      end)
     end
 
     test "suicide in guarded locations yields half damage" do
       suicide_robot_location = {1, 1}
-      other_robot_locations = [{2, 1}, {0, 1}, {1, 2}, {1, 0}]
+      affected_robots = [{2, 1}, {0, 1}, {1, 2}, {1, 0}]
+      robot_locations = [suicide_robot_location | affected_robots]
+
+      id = fn {x, y} -> "#{x},#{y}" end
 
       robots =
-        other_robot_locations
-        |> Enum.map(&%{player_id: "1", hp: 50, location: &1})
+        robot_locations
+        |> Enum.map(&%{player_id: "1", hp: 50, location: &1, id: id.(&1)})
 
-      assert [%{hp: 25}, %{hp: 25}, %{hp: 25}, %{hp: 25}] =
-               Game.new(suicide_damage: 50)
-               |> Game.add_robots(robots)
-               |> apply_suicide(suicide_robot_location, other_robot_locations)
-               |> Game.robots()
+      affected_robots_after_turn =
+        Game.new(suicide_damage: 50)
+        |> Game.add_robots(robots)
+        |> apply_suicide(id.(suicide_robot_location), affected_robots)
+        |> Game.robots()
+
+      Enum.each(affected_robots_after_turn, fn robot ->
+        assert robot.location in affected_robots
+        assert robot.hp == 25
+      end)
     end
   end
 end

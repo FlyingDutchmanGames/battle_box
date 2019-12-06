@@ -49,8 +49,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     game =
       Enum.reduce(grouped_moves[:suicide] || [], game, fn suicide, game ->
-        %{location: suicide_location} = get_robot(game, suicide.id)
-        apply_suicide(game, suicide_location, guard_locations)
+        apply_suicide(game, suicide.robot_id, guard_locations)
       end)
 
     update_in(game.turn, &(&1 + 1))
@@ -110,10 +109,11 @@ defmodule BattleBox.Games.RobotGame.Logic do
     end
   end
 
-  def apply_suicide(game, location, guard_locations) do
-    game = remove_robot_at_location(game, location)
+  def apply_suicide(game, id, guard_locations) do
+    robot = get_robot(game, id)
+    game = remove_robot(game, id)
 
-    Enum.reduce(adjacent_locations(location), game, fn loc, game ->
+    Enum.reduce(adjacent_locations(robot.location), game, fn loc, game ->
       case get_robot_at_location(game, loc) do
         nil ->
           game
