@@ -101,12 +101,15 @@ defmodule BattleBox.Games.RobotGame.Logic do
   def apply_attack(game, location, guard_locations) do
     damage = get_attack_damage(game)
 
-    damage =
-      if location in guard_locations,
-        do: Integer.floor_div(damage, 2),
-        else: damage
+    case get_robot_at_location(game, location) do
+      nil ->
+        game
 
-    apply_damage_to_location(game, location, damage)
+      robot ->
+        if location in guard_locations,
+          do: apply_damage_to_robot(game, robot.robot_id, Integer.floor_div(damage, 2)),
+          else: apply_damage_to_robot(game, robot.robot_id, damage)
+    end
   end
 
   def apply_suicide(game, location, guard_locations) do
@@ -114,12 +117,15 @@ defmodule BattleBox.Games.RobotGame.Logic do
     game = remove_robot_at_location(game, location)
 
     Enum.reduce(adjacent_locations(location), game, fn loc, game ->
-      damage =
-        if loc in guard_locations,
-          do: Integer.floor_div(damage, 2),
-          else: damage
+      case get_robot_at_location(game, loc) do
+        nil ->
+          game
 
-      apply_damage_to_location(game, loc, damage)
+        robot ->
+          if loc in guard_locations,
+            do: apply_damage_to_robot(game, robot.robot_id, Integer.floor_div(damage, 2)),
+            else: apply_damage_to_robot(game, robot.robot_id, damage)
+      end
     end)
   end
 

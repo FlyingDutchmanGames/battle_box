@@ -47,17 +47,6 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def get_collision_damage(%{collision_damage: damage}), do: damage
 
-  def apply_damage_to_location(game, location, damage) do
-    new_robots =
-      game.robots
-      |> Enum.map(fn
-        %{location: ^location} = robot -> update_in(robot.hp, &(&1 - damage))
-        robot -> robot
-      end)
-
-    put_in(game.robots, new_robots)
-  end
-
   def apply_damage_to_robot(game, robot_id, damage) do
     update_in(
       game.robots,

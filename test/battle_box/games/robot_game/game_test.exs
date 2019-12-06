@@ -200,24 +200,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
-  describe "apply_damage_to_location/3" do
-    test "applying damage to a location without a robot is basically a noop" do
-      game = Game.new()
-      assert game == Game.apply_damage_to_location(game, {0, 0}, 42)
-    end
-
-    test "applying damage to a location with a robot will do some damage" do
-      game = Game.new()
-      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID", hp: 50}
-
-      assert %{hp: 1} =
-               game
-               |> Game.add_robot(robot)
-               |> Game.apply_damage_to_location({1, 1}, 49)
-               |> Game.get_robot("TEST_ROBOT_ID")
-    end
-  end
-
   describe "remove_robot_at_location/2" do
     test "is a noop if there is no robot at that location" do
       game = Game.new()
