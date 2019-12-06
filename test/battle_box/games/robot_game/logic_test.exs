@@ -31,17 +31,18 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       }
 
       robots = [
-        %{player_id: "1", robot_id: "DESTROY_ME_1", location: {0, 0}},
-        %{player_id: "2", robot_id: "DESTROY_ME_2", location: {1, 1}}
+        %{player_id: "1", id: "DESTROY_ME_1", location: {0, 0}},
+        %{player_id: "2", id: "DESTROY_ME_2", location: {1, 1}}
       ]
 
-      Game.new(terrain: test_terrain, spawn_per_player: 1)
-      |> Game.add_robots(robots)
-      |> apply_spawn()
-      |> Game.robots()
-      |> Enum.each(fn robot ->
-        refute robot.robot_id in ["DESTROY_ME_1", "DESTROY_ME_2"]
-      end)
+      robots =
+        Game.new(terrain: test_terrain, spawn_per_player: 1)
+        |> Game.add_robots(robots)
+        |> apply_spawn()
+        |> Game.robots()
+
+      assert length(robots) == 2
+      Enum.each(robots, fn robot -> refute robot.id in ["DESTROY_ME_1", "DESTROY_ME_2"] end)
     end
   end
 
@@ -53,7 +54,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
 
     test "An attack on an unguarded location yields full damage" do
       robot_location = {0, 0}
-      robot = %{location: robot_location, player_id: "1", hp: 50, robot_id: "TEST"}
+      robot = %{location: robot_location, player_id: "1", hp: 50, id: "TEST"}
 
       assert %{hp: 0} =
                Game.new(attack_damage: 50)
@@ -64,7 +65,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
 
     test "An attack on a guarded location yields half damage" do
       robot_location = {0, 0}
-      robot = %{location: robot_location, player_id: "1", hp: 50, robot_id: "TEST"}
+      robot = %{location: robot_location, player_id: "1", hp: 50, id: "TEST"}
 
       assert %{hp: 25} =
                Game.new(attack_damage: 50)

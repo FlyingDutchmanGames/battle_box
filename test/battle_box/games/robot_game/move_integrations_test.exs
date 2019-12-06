@@ -61,7 +61,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
     robots =
       graph_with_indexes
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
-      |> Enum.map(fn {loc, _} -> %{robot_id: robot_id(loc), player_id: "P1", location: loc} end)
+      |> Enum.map(fn {loc, _} -> %{id: robot_id(loc), player_id: "P1", location: loc} end)
 
     initial_game =
       Game.new(terrain: terrain, spawn?: false)

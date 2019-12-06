@@ -69,7 +69,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "it can give back a robot if there is one at a location" do
-      robot = %{player_id: "TEST", robot_id: "TEST", location: {0, 0}, hp: 42}
+      robot = %{player_id: "TEST", id: "TEST", location: {0, 0}, hp: 42}
 
       assert Robot.new(robot) ==
                Game.add_robot(Game.new(), robot)
@@ -86,7 +86,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "you can move a robot" do
       assert [%{location: {42, 42}}] =
                Game.new()
-               |> Game.add_robot(%{player_id: "player_1", robot_id: "TEST", location: {0, 0}})
+               |> Game.add_robot(%{player_id: "player_1", id: "TEST", location: {0, 0}})
                |> Game.move_robot("TEST", {42, 42})
                |> Game.robots()
     end
@@ -102,7 +102,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       assert [
                %{
-                 robot_id: robot_id,
+                 id: robot_id,
                  hp: 42,
                  player_id: "TEST_PLAYER",
                  location: {1, 1}
@@ -114,12 +114,12 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "allows for overriding the robot_id and hp" do
       game = Game.new()
-      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID", hp: 999}
+      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, id: "TEST_ROBOT_ID", hp: 999}
       game = Game.add_robot(game, robot)
 
       assert [
                %{
-                 robot_id: "TEST_ROBOT_ID",
+                 id: "TEST_ROBOT_ID",
                  hp: 999,
                  player_id: "TEST_PLAYER",
                  location: {1, 1}
@@ -140,7 +140,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "remove_robot" do
     test "you can remove a robot" do
-      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID"}
+      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, id: "TEST_ROBOT_ID"}
 
       game = Game.add_robot(Game.new(), robot)
       assert length(Game.robots(game)) == 1
@@ -149,7 +149,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "you can remove a robot by an id" do
-      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID"}
+      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, id: "TEST_ROBOT_ID"}
 
       game = Game.add_robot(Game.new(), robot)
       assert length(Game.robots(game)) == 1
@@ -172,11 +172,10 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "get_robot/2" do
     test "you can get a robot by id" do
-      robot =
-        Robot.new(%{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID", hp: 50})
+      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, id: "TEST_ROBOT_ID", hp: 50}
 
       game = Game.add_robot(Game.new(), robot)
-      assert ^robot = Game.get_robot(game, "TEST_ROBOT_ID")
+      assert Robot.new(robot) == Game.get_robot(game, "TEST_ROBOT_ID")
     end
 
     test "trying to get a robot by id that doesn't exist gives `nil`" do

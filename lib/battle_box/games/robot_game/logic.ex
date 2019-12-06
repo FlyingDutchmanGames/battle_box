@@ -10,8 +10,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
     grouped_moves = Enum.group_by(moves, fn move -> move.type end)
 
     guard_locations =
-      for %{robot_id: robot_id} <- grouped_moves[:guard] || [],
-          %{location: location} = get_robot(game, robot_id),
+      for %{robot_id: id} <- grouped_moves[:guard] || [],
+          %{location: location} = get_robot(game, id),
           do: location
 
     movements = grouped_moves[:move] || []
@@ -24,13 +24,13 @@ defmodule BattleBox.Games.RobotGame.Logic do
         case move_result do
           {:no_move, {:collision, reason}, robot}
           when reason in [:invalid_terrain, :multiple_attempting_to_enter] ->
-            apply_damage_to_robot(game, robot.robot_id, collision_damage(game))
+            apply_damage_to_robot(game, robot.id, collision_damage(game))
 
           {:no_move, {:collision, {:robot_collision, collided_robot}}, robot} ->
             game
-            |> apply_damage_to_robot(robot.robot_id, collision_damage(game))
+            |> apply_damage_to_robot(robot.id, collision_damage(game))
             |> apply_damage_to_robot(
-              collided_robot.robot_id,
+              collided_robot.id,
               if(collided_robot.location in guard_locations,
                 do: guarded_collision_damage(game),
                 else: collision_damage(game)
@@ -38,7 +38,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
             )
 
           {:move, target, robot} ->
-            move_robot(game, robot.robot_id, target)
+            move_robot(game, robot.id, target)
         end
       end)
 
@@ -49,7 +49,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     game =
       Enum.reduce(grouped_moves[:suicide] || [], game, fn suicide, game ->
-        %{location: suicide_location} = get_robot(game, suicide.robot_id)
+        %{location: suicide_location} = get_robot(game, suicide.id)
         apply_suicide(game, suicide_location, guard_locations)
       end)
 
@@ -77,7 +77,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
         else
           with occupying_robot_move when not is_nil(occupying_robot_move) <-
                  Enum.find(movements, fn movement ->
-                   movement.robot_id == occupying_robot.robot_id
+                   movement.robot_id == occupying_robot.id
                  end),
                {:move, _, _} <-
                  apply_movement(game, occupying_robot_move, movements, [robot | stuck_robots]) do
@@ -105,8 +105,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
       robot ->
         if location in guard_locations,
-          do: apply_damage_to_robot(game, robot.robot_id, guarded_attack_damage(game)),
-          else: apply_damage_to_robot(game, robot.robot_id, attack_damage(game))
+          do: apply_damage_to_robot(game, robot.id, guarded_attack_damage(game)),
+          else: apply_damage_to_robot(game, robot.id, attack_damage(game))
     end
   end
 
@@ -120,8 +120,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
         robot ->
           if loc in guard_locations,
-            do: apply_damage_to_robot(game, robot.robot_id, guarded_suicide_damage(game)),
-            else: apply_damage_to_robot(game, robot.robot_id, suicide_damage(game))
+            do: apply_damage_to_robot(game, robot.id, guarded_suicide_damage(game)),
+            else: apply_damage_to_robot(game, robot.id, suicide_damage(game))
       end
     end)
   end
