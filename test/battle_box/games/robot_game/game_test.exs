@@ -23,8 +23,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "you can override any top level key" do
-      assert %{turn: 42, players: ["player_1", "player_2"]} = Game.new(%{turn: 42})
-      assert %{suicide_damage: 15, robot_hp: 42} = Game.new(%{suicide_damage: 15, robot_hp: 42})
+      assert %{turn: 42, players: ["player_1", "player_2"]} = Game.new(turn: 42)
+      assert %{suicide_damage: 15, robot_hp: 42} = Game.new(suicide_damage: 15, robot_hp: 42)
     end
   end
 
@@ -90,7 +90,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "add_robot/2" do
     test "add_robot will add a robot and append hp and robot id" do
-      game = Game.new(%{robot_hp: 42})
+      game = Game.new(robot_hp: 42)
 
       assert Game.robots(game) == []
       robot = %{player_id: "TEST_PLAYER", location: {1, 1}}
@@ -190,7 +190,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "get_suicide_damage" do
     test "it gets the value set in settings" do
-      assert 42 = Game.get_suicide_damage(Game.new(%{suicide_damage: 42}))
+      assert 42 = Game.get_suicide_damage(Game.new(suicide_damage: 42))
     end
   end
 

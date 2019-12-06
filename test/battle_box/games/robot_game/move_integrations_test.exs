@@ -64,7 +64,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       |> Enum.map(fn {loc, _} -> %{robot_id: robot_id(loc), player_id: "P1", location: loc} end)
 
     initial_game =
-      Game.new(%{terrain: terrain, spawn?: false})
+      Game.new(terrain: terrain, spawn?: false)
       |> Game.add_robots(robots)
 
     moves =

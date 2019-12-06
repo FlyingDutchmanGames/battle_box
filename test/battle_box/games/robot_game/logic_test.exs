@@ -10,7 +10,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         {1, 1} => :spawn
       }
 
-      game = Game.new(%{terrain: test_terrain, spawn_per_player: 1})
+      game = Game.new(terrain: test_terrain, spawn_per_player: 1)
 
       assert length(Game.robots(game)) == 0
       game = apply_spawn(game)
@@ -35,7 +35,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         %{player_id: "2", robot_id: "DESTROY_ME_2", location: {1, 1}}
       ]
 
-      Game.new(%{terrain: test_terrain, spawn_per_player: 1})
+      Game.new(terrain: test_terrain, spawn_per_player: 1)
       |> Game.add_robots(robots)
       |> apply_spawn()
       |> Game.robots()
@@ -56,7 +56,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       robot = %{location: robot_location, player_id: "1", hp: 50, robot_id: "TEST"}
 
       assert %{hp: 0} =
-               Game.new(%{attack_range: %{min: 50, max: 50}})
+               Game.new(attack_range: %{always: 50})
                |> Game.add_robot(robot)
                |> apply_attack(robot_location, [])
                |> Game.get_robot("TEST")
@@ -67,7 +67,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       robot = %{location: robot_location, player_id: "1", hp: 50, robot_id: "TEST"}
 
       assert %{hp: 25} =
-               Game.new(%{attack_range: %{min: 50, max: 50}})
+               Game.new(attack_range: %{always: 50})
                |> Game.add_robot(robot)
                |> apply_attack(robot_location, [robot_location])
                |> Game.get_robot("TEST")
@@ -89,7 +89,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         |> Enum.map(&%{player_id: "1", hp: 50, location: &1})
 
       assert [%{hp: 0}, %{hp: 0}, %{hp: 0}, %{hp: 0}] =
-               Game.new(%{suicide_damage: 50})
+               Game.new(suicide_damage: 50)
                |> Game.add_robots(robots)
                |> apply_suicide(suicide_robot_location, [])
                |> Game.robots()
@@ -104,7 +104,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         |> Enum.map(&%{player_id: "1", hp: 50, location: &1})
 
       assert [%{hp: 25}, %{hp: 25}, %{hp: 25}, %{hp: 25}] =
-               Game.new(%{suicide_damage: 50})
+               Game.new(suicide_damage: 50)
                |> Game.add_robots(robots)
                |> apply_suicide(suicide_robot_location, other_robot_locations)
                |> Game.robots()

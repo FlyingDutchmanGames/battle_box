@@ -1,7 +1,9 @@
 defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Games.RobotGame.Terrain
 
-  def new(opts \\ %{}) do
+  def new(opts \\ []) do
+    opts = Enum.into(opts, %{})
+
     Map.merge(
       %{
         terrain: Terrain.default(),
@@ -33,6 +35,8 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def get_robot_at_location(game, location),
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
+
+  def get_attack_damage(%{attack_range: %{always: val}}), do: val
 
   def get_attack_damage(%{attack_range: %{min: val, max: val}}), do: val
 
