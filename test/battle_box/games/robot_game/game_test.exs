@@ -1,6 +1,6 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
   use ExUnit.Case, async: true
-  alias BattleBox.Games.RobotGame.{Game, Terrain}
+  alias BattleBox.Games.RobotGame.{Game, Terrain, Robot}
 
   describe "new/1" do
     test "it has the correct defaults" do
@@ -71,7 +71,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "it can give back a robot if there is one at a location" do
       robot = %{player_id: "TEST", robot_id: "TEST", location: {0, 0}, hp: 42}
 
-      assert ^robot =
+      assert Robot.new(robot) ==
                Game.add_robot(Game.new(), robot)
                |> Game.get_robot_at_location({0, 0})
     end
@@ -172,7 +172,9 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "get_robot/2" do
     test "you can get a robot by id" do
-      robot = %{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID", hp: 50}
+      robot =
+        Robot.new(%{player_id: "TEST_PLAYER", location: {1, 1}, robot_id: "TEST_ROBOT_ID", hp: 50})
+
       game = Game.add_robot(Game.new(), robot)
       assert ^robot = Game.get_robot(game, "TEST_ROBOT_ID")
     end

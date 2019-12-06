@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.Game do
-  alias BattleBox.Games.RobotGame.Terrain
+  alias BattleBox.Games.RobotGame.{Terrain, Robot}
 
   defstruct terrain: Terrain.default(),
             robots: [],
@@ -37,7 +37,7 @@ defmodule BattleBox.Games.RobotGame.Game do
       game
       | robots:
           Enum.map(game.robots, fn
-            %{robot_id: ^robot_id} = robot -> update_in(robot.hp, &(&1 - damage))
+            %{robot_id: ^robot_id} = robot -> Robot.apply_damage(robot, damage)
             robot -> robot
           end)
     }
@@ -64,13 +64,16 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def add_robots(game, robots), do: Enum.reduce(robots, game, &add_robot(&2, &1))
 
-  def add_robot(game, %{player_id: _, location: _} = robot) do
-    default_robot_settings = %{
-      hp: game.robot_hp,
-      robot_id: Ecto.UUID.generate()
-    }
-
-    robot = Map.merge(default_robot_settings, robot)
+  def add_robot(game, %{player_id: _, location: _} = opts) do
+    robot =
+      Map.merge(
+        %{
+          hp: game.robot_hp,
+          robot_id: Ecto.UUID.generate()
+        },
+        opts
+      )
+      |> Robot.new()
 
     %__MODULE__{game | robots: [robot | game.robots]}
   end
