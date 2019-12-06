@@ -32,7 +32,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
             |> apply_damage_to_robot(
               collided_robot.robot_id,
               if(collided_robot.location in guard_locations,
-                do: 0,
+                do: guarded_collision_damage(game),
                 else: collision_damage(game)
               )
             )
@@ -99,8 +99,6 @@ defmodule BattleBox.Games.RobotGame.Logic do
   end
 
   def apply_attack(game, location, guard_locations) do
-    damage = attack_damage(game)
-
     case get_robot_at_location(game, location) do
       nil ->
         game

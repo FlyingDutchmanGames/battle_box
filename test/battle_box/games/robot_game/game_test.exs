@@ -8,7 +8,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
         spawn_every: 10,
         spawn_per_player: 5,
         robot_hp: 50,
-        attack_range: %{min: 8, max: 10},
+        attack_damage: %{min: 8, max: 10},
         collision_damage: 5,
         suicide_damage: 15,
         max_turns: 100,
@@ -56,6 +56,10 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       Enum.each(should_not_spawn, fn settings ->
         refute Game.spawning_round?(Game.new(settings))
       end)
+    end
+
+    test "spawn?: false is never a spawning round" do
+      refute Game.spawning_round?(Game.new(spawn?: false, spawn_every: 10, turn: 10))
     end
   end
 
@@ -183,16 +187,21 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new()
       damage = Game.attack_damage(game)
 
-      assert damage >= game.attack_range.min &&
-               damage <= game.attack_range.max
+      assert damage >= game.attack_damage.min &&
+               damage <= game.attack_damage.max
     end
 
     test "guarded attack damage is 50% of regular damage rounding down to the integer" do
-      game = Game.new(attack_damage: %{always: 10})
-      assert 5 == Game.guarded_attack_damage(game)
+      game = Game.new(attack_damage: 100)
+      assert 50 == Game.guarded_attack_damage(game)
 
-      game = Game.new(attack_damage: %{always: 9})
-      assert 4 == Game.guarded_attack_damage(game)
+      game = Game.new(attack_damage: 99)
+      assert 49 == Game.guarded_attack_damage(game)
+    end
+
+    test "it works if the the min and max attack are the same" do
+      game = Game.new(attack_damage: %{min: 50, max: 50})
+      assert 50 == Game.attack_damage(game)
     end
   end
 

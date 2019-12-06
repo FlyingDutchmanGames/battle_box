@@ -56,7 +56,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       robot = %{location: robot_location, player_id: "1", hp: 50, robot_id: "TEST"}
 
       assert %{hp: 0} =
-               Game.new(attack_range: %{always: 50})
+               Game.new(attack_damage: 50)
                |> Game.add_robot(robot)
                |> apply_attack(robot_location, [])
                |> Game.get_robot("TEST")
@@ -67,7 +67,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       robot = %{location: robot_location, player_id: "1", hp: 50, robot_id: "TEST"}
 
       assert %{hp: 25} =
-               Game.new(attack_range: %{always: 50})
+               Game.new(attack_damage: 50)
                |> Game.add_robot(robot)
                |> apply_attack(robot_location, [robot_location])
                |> Game.get_robot("TEST")

@@ -14,7 +14,7 @@ defmodule BattleBox.Games.RobotGame.Game do
         spawn_every: 10,
         spawn_per_player: 5,
         robot_hp: 50,
-        attack_range: %{min: 8, max: 10},
+        attack_damage: %{min: 8, max: 10},
         collision_damage: 5,
         suicide_damage: 15,
         max_turns: 100
@@ -35,21 +35,6 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def get_robot_at_location(game, location),
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
-
-  def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
-
-  def attack_damage(%{attack_range: %{always: val}}), do: val
-
-  def attack_damage(%{attack_range: %{min: val, max: val}}), do: val
-
-  def attack_damage(%{attack_range: %{min: min, max: max}}),
-    do: min + :rand.uniform(max - min)
-
-  def suicide_damage(%{suicide_damage: damage}), do: damage
-
-  def guarded_suicide_damage(game), do: Integer.floor_div(suicide_damage(game), 2)
-
-  def collision_damage(%{collision_damage: damage}), do: damage
 
   def apply_damage_to_robot(game, robot_id, damage) do
     update_in(
@@ -101,9 +86,30 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 
   def remove_robots(game, robot_ids), do: Enum.reduce(robot_ids, game, &remove_robot(&2, &1))
-
   def remove_robot(game, %{robot_id: robot_id}), do: remove_robot(game, robot_id)
 
   def remove_robot(game, robot_id),
     do: update_in(game.robots, &Enum.reject(&1, fn robot -> robot.robot_id == robot_id end))
+
+  def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
+  def attack_damage(game), do: get_damage(game, :attack_damage)
+
+  def guarded_suicide_damage(game), do: Integer.floor_div(suicide_damage(game), 2)
+  def suicide_damage(%{suicide_damage: damage}), do: damage
+
+  def guarded_collision_damage(_game), do: 0
+  def collision_damage(game), do: get_damage(game, :collision_damage)
+
+  defp get_damage(game, type) do
+    case game[type] do
+      %{max: value, min: value} ->
+        value
+
+      %{max: max, min: min} ->
+        min + :rand.uniform(max - min)
+
+      value when is_integer(value) ->
+        value
+    end
+  end
 end
