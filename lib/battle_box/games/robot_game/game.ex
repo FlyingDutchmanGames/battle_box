@@ -36,16 +36,20 @@ defmodule BattleBox.Games.RobotGame.Game do
   def get_robot_at_location(game, location),
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
 
-  def get_attack_damage(%{attack_range: %{always: val}}), do: val
+  def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
 
-  def get_attack_damage(%{attack_range: %{min: val, max: val}}), do: val
+  def attack_damage(%{attack_range: %{always: val}}), do: val
 
-  def get_attack_damage(%{attack_range: %{min: min, max: max}}),
+  def attack_damage(%{attack_range: %{min: val, max: val}}), do: val
+
+  def attack_damage(%{attack_range: %{min: min, max: max}}),
     do: min + :rand.uniform(max - min)
 
-  def get_suicide_damage(%{suicide_damage: damage}), do: damage
+  def suicide_damage(%{suicide_damage: damage}), do: damage
 
-  def get_collision_damage(%{collision_damage: damage}), do: damage
+  def guarded_suicide_damage(game), do: Integer.floor_div(suicide_damage(game), 2)
+
+  def collision_damage(%{collision_damage: damage}), do: damage
 
   def apply_damage_to_robot(game, robot_id, damage) do
     update_in(

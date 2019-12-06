@@ -24,16 +24,16 @@ defmodule BattleBox.Games.RobotGame.Logic do
         case move_result do
           {:no_move, {:collision, reason}, robot}
           when reason in [:invalid_terrain, :multiple_attempting_to_enter] ->
-            apply_damage_to_robot(game, robot.robot_id, get_collision_damage(game))
+            apply_damage_to_robot(game, robot.robot_id, collision_damage(game))
 
           {:no_move, {:collision, {:robot_collision, collided_robot}}, robot} ->
             game
-            |> apply_damage_to_robot(robot.robot_id, get_collision_damage(game))
+            |> apply_damage_to_robot(robot.robot_id, collision_damage(game))
             |> apply_damage_to_robot(
               collided_robot.robot_id,
               if(collided_robot.location in guard_locations,
                 do: 0,
-                else: get_collision_damage(game)
+                else: collision_damage(game)
               )
             )
 
@@ -99,7 +99,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
   end
 
   def apply_attack(game, location, guard_locations) do
-    damage = get_attack_damage(game)
+    damage = attack_damage(game)
 
     case get_robot_at_location(game, location) do
       nil ->
@@ -107,13 +107,12 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
       robot ->
         if location in guard_locations,
-          do: apply_damage_to_robot(game, robot.robot_id, Integer.floor_div(damage, 2)),
-          else: apply_damage_to_robot(game, robot.robot_id, damage)
+          do: apply_damage_to_robot(game, robot.robot_id, guarded_attack_damage(game)),
+          else: apply_damage_to_robot(game, robot.robot_id, attack_damage(game))
     end
   end
 
   def apply_suicide(game, location, guard_locations) do
-    damage = get_suicide_damage(game)
     game = remove_robot_at_location(game, location)
 
     Enum.reduce(adjacent_locations(location), game, fn loc, game ->
@@ -123,8 +122,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
         robot ->
           if loc in guard_locations,
-            do: apply_damage_to_robot(game, robot.robot_id, Integer.floor_div(damage, 2)),
-            else: apply_damage_to_robot(game, robot.robot_id, damage)
+            do: apply_damage_to_robot(game, robot.robot_id, guarded_suicide_damage(game)),
+            else: apply_damage_to_robot(game, robot.robot_id, suicide_damage(game))
       end
     end)
   end

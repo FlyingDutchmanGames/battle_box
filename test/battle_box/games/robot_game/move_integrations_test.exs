@@ -100,7 +100,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
   defp validate_collision_damage(initial_game, after_turn, robot_id) do
     damage = Game.get_robot(initial_game, robot_id).hp - Game.get_robot(after_turn, robot_id).hp
-    assert damage > 0 && rem(damage, Game.get_collision_damage(initial_game)) == 0
+    assert damage > 0 && rem(damage, Game.collision_damage(initial_game)) == 0
   end
 
   defp validate_moved(initial_game, after_turn, robot_id, move_direction) do

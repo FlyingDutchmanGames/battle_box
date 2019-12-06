@@ -178,19 +178,35 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
-  describe "get_attack_damage" do
+  describe "attack_damage" do
     test "you can get an attack damage" do
       game = Game.new()
-      damage = Game.get_attack_damage(game)
+      damage = Game.attack_damage(game)
 
       assert damage >= game.attack_range.min &&
                damage <= game.attack_range.max
     end
+
+    test "guarded attack damage is 50% of regular damage rounding down to the integer" do
+      game = Game.new(attack_damage: %{always: 10})
+      assert 5 == Game.guarded_attack_damage(game)
+
+      game = Game.new(attack_damage: %{always: 9})
+      assert 4 == Game.guarded_attack_damage(game)
+    end
   end
 
-  describe "get_suicide_damage" do
+  describe "suicide_damage" do
     test "it gets the value set in settings" do
-      assert 42 = Game.get_suicide_damage(Game.new(suicide_damage: 42))
+      assert 42 = Game.suicide_damage(Game.new(suicide_damage: 42))
+    end
+
+    test "guarded suicide damage is 50% of regular damage rounding down to the integer" do
+      game = Game.new(suicide_damage: 10)
+      assert 5 == Game.guarded_suicide_damage(game)
+
+      game = Game.new(suicide_damage: 9)
+      assert 4 == Game.guarded_suicide_damage(game)
     end
   end
 
