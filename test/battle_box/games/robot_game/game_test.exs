@@ -4,7 +4,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "new/1" do
     test "it has the correct defaults" do
-      correct_defaults = %{
+      correct_defaults = %Game{
         spawn_every: 10,
         spawn_per_player: 5,
         robot_hp: 50,

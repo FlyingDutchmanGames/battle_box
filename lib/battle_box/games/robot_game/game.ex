@@ -1,26 +1,22 @@
 defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Games.RobotGame.Terrain
 
+  defstruct terrain: Terrain.default(),
+            robots: [],
+            turn: 0,
+            players: ["player_1", "player_2"],
+            spawn?: true,
+            spawn_every: 10,
+            spawn_per_player: 5,
+            robot_hp: 50,
+            attack_damage: %{min: 8, max: 10},
+            collision_damage: 5,
+            suicide_damage: 15,
+            max_turns: 100
+
   def new(opts \\ []) do
     opts = Enum.into(opts, %{})
-
-    Map.merge(
-      %{
-        terrain: Terrain.default(),
-        robots: [],
-        turn: 0,
-        players: ["player_1", "player_2"],
-        spawn?: true,
-        spawn_every: 10,
-        spawn_per_player: 5,
-        robot_hp: 50,
-        attack_damage: %{min: 8, max: 10},
-        collision_damage: 5,
-        suicide_damage: 15,
-        max_turns: 100
-      },
-      opts
-    )
+    Map.merge(%__MODULE__{}, opts)
   end
 
   def spawns(game), do: Terrain.spawn(game.terrain)
@@ -37,13 +33,14 @@ defmodule BattleBox.Games.RobotGame.Game do
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
 
   def apply_damage_to_robot(game, robot_id, damage) do
-    update_in(
-      game.robots,
-      &Enum.map(&1, fn
-        %{robot_id: ^robot_id} = robot -> update_in(robot.hp, fn hp -> hp - damage end)
-        robot -> robot
-      end)
-    )
+    %__MODULE__{
+      game
+      | robots:
+          Enum.map(game.robots, fn
+            %{robot_id: ^robot_id} = robot -> update_in(robot.hp, &(&1 - damage))
+            robot -> robot
+          end)
+    }
   end
 
   def adjacent_locations({row, col}),
@@ -55,13 +52,14 @@ defmodule BattleBox.Games.RobotGame.Game do
     ]
 
   def move_robot(game, robot_id, location) do
-    update_in(
-      game.robots,
-      &Enum.map(&1, fn
-        %{robot_id: ^robot_id} = robot -> put_in(robot.location, location)
-        robot -> robot
-      end)
-    )
+    %__MODULE__{
+      game
+      | robots:
+          Enum.map(game.robots, fn
+            %{robot_id: ^robot_id} = robot -> put_in(robot.location, location)
+            robot -> robot
+          end)
+    }
   end
 
   def add_robots(game, robots), do: Enum.reduce(robots, game, &add_robot(&2, &1))
@@ -74,7 +72,7 @@ defmodule BattleBox.Games.RobotGame.Game do
 
     robot = Map.merge(default_robot_settings, robot)
 
-    update_in(game, [:robots], fn robots -> [robot | robots] end)
+    %__MODULE__{game | robots: [robot | game.robots]}
   end
 
   def remove_robot_at_location(game, location) do
@@ -92,16 +90,16 @@ defmodule BattleBox.Games.RobotGame.Game do
     do: update_in(game.robots, &Enum.reject(&1, fn robot -> robot.robot_id == robot_id end))
 
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
-  def attack_damage(game), do: get_damage(game, :attack_damage)
+  def attack_damage(game), do: calc_damage(game.attack_damage)
 
   def guarded_suicide_damage(game), do: Integer.floor_div(suicide_damage(game), 2)
   def suicide_damage(%{suicide_damage: damage}), do: damage
 
   def guarded_collision_damage(_game), do: 0
-  def collision_damage(game), do: get_damage(game, :collision_damage)
+  def collision_damage(game), do: calc_damage(game.collision_damage)
 
-  defp get_damage(game, type) do
-    case game[type] do
+  defp calc_damage(damage) do
+    case damage do
       %{max: value, min: value} ->
         value
 
