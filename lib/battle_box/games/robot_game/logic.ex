@@ -19,9 +19,13 @@ defmodule BattleBox.Games.RobotGame.Logic do
           do: move
 
     game =
+      Enum.reduce(movements, game, fn move, game ->
+        apply_movement(game, move, movements, guarded_locations)
+      end)
+
+    game =
       Enum.reduce(moves, game, fn move, game ->
         case move.type do
-          :move -> apply_movement(game, move, movements, guarded_locations)
           :attack -> apply_attack(game, move.target, guarded_locations)
           :suicide -> apply_suicide(game, move.robot_id, guarded_locations)
           _ -> game
@@ -55,22 +59,23 @@ defmodule BattleBox.Games.RobotGame.Logic do
       {:move, target, robot} ->
         move_robot(game, robot.id, target)
     end
-
   end
 
   def calc_movement(game, move, movements, stuck_robots \\ []) do
     robot = get_robot(game, move.robot_id)
-    robot_currently_at_location = get_robot_at_location(game, move.target) 
-    moves_to_location =Enum.filter(movements, & &1.target == move.target)
+    robot_currently_at_location = get_robot_at_location(game, move.target)
+    moves_to_location = Enum.filter(movements, &(&1.target == move.target))
 
     space_info = %{
       valid_terrain?: game.terrain[move.target] in [:normal, :spawn],
       contention?: length(moves_to_location) > 1,
       current_occupant: robot_currently_at_location,
-      current_occupant_in_stuck_robots?: (if robot_currently_at_location, do:
-        robot_currently_at_location.id in stuck_robots),
-      current_occupant_move: (if robot_currently_at_location,
-        do: Enum.find(movements, & &1.robot_id == robot_currently_at_location.id))
+      current_occupant_in_stuck_robots?:
+        if(robot_currently_at_location, do: robot_currently_at_location.id in stuck_robots),
+      current_occupant_move:
+        if(robot_currently_at_location,
+          do: Enum.find(movements, &(&1.robot_id == robot_currently_at_location.id))
+        )
     }
 
     case space_info do
@@ -78,7 +83,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
         {:no_move, :invalid_terrain, robot}
 
       %{contention?: true} ->
-        {:no_move, :contention, robot} 
+        {:no_move, :contention, robot}
 
       %{current_occupant: other_robot, current_occupant_move: nil} when not is_nil(other_robot) ->
         {:no_move, {:collision, other_robot}, robot}
