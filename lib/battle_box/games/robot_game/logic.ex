@@ -37,6 +37,9 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
   def apply_movement(game, move, movements, guarded_locations) do
     case calc_movement(game, move, movements) do
+      {:move, target, robot} ->
+        move_robot(game, robot.id, target)
+
       {:no_move, reason, robot} ->
         case reason do
           :invalid_terrain ->
@@ -55,9 +58,6 @@ defmodule BattleBox.Games.RobotGame.Logic do
             |> apply_damage_to_robot(robot.id, collision_damage(game))
             |> apply_damage_to_robot(other_robot.id, other_robot_damage)
         end
-
-      {:move, target, robot} ->
-        move_robot(game, robot.id, target)
     end
   end
 
