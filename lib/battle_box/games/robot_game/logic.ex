@@ -127,7 +127,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     spawn_locations =
       spawns(game)
       |> Enum.shuffle()
-      |> Enum.take(game.settings.spawn_per_player * length(game.players))
+      |> Enum.take(game.spawn_per_player * length(game.players))
 
     spawned_robots =
       spawn_locations

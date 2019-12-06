@@ -5,15 +5,13 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "new/1" do
     test "it has the correct defaults" do
       correct_defaults = %{
-        settings: %{
-          spawn_every: 10,
-          spawn_per_player: 5,
-          robot_hp: 50,
-          attack_range: %{min: 8, max: 10},
-          collision_damage: 5,
-          suicide_damage: 15,
-          max_turns: 100
-        },
+        spawn_every: 10,
+        spawn_per_player: 5,
+        robot_hp: 50,
+        attack_range: %{min: 8, max: 10},
+        collision_damage: 5,
+        suicide_damage: 15,
+        max_turns: 100,
         robots: [],
         turn: 0,
         terrain: Terrain.default(),
@@ -26,11 +24,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "you can override any top level key" do
       assert %{turn: 42, players: ["player_1", "player_2"]} = Game.new(%{turn: 42})
-    end
-
-    test "you can selectively override settings" do
-      settings = %{max_turns: 42, robot_hp: 42}
-      assert %{suicide_damage: 15, robot_hp: 42} = Game.new(%{settings: settings}).settings
+      assert %{suicide_damage: 15, robot_hp: 42} = Game.new(%{suicide_damage: 15, robot_hp: 42})
     end
   end
 
@@ -49,10 +43,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
         %{turn: 0, spawn_every: 12_323_123_123}
       ]
 
-      Enum.each(should_spawn, fn %{turn: turn, spawn_every: spawn_every} ->
-        assert Game.spawning_round?(
-                 Game.new(%{turn: turn, settings: %{spawn_every: spawn_every}})
-               )
+      Enum.each(should_spawn, fn settings ->
+        assert Game.spawning_round?(Game.new(settings))
       end)
 
       should_not_spawn = [
@@ -61,10 +53,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
         %{turn: 10, spawn_every: 20}
       ]
 
-      Enum.each(should_not_spawn, fn %{turn: turn, spawn_every: spawn_every} ->
-        refute Game.spawning_round?(
-                 Game.new(%{turn: turn, settings: %{spawn_every: spawn_every}})
-               )
+      Enum.each(should_not_spawn, fn settings ->
+        refute Game.spawning_round?(Game.new(settings))
       end)
     end
   end
@@ -100,7 +90,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "add_robot/2" do
     test "add_robot will add a robot and append hp and robot id" do
-      game = Game.new(%{settings: %{robot_hp: 42}})
+      game = Game.new(%{robot_hp: 42})
 
       assert Game.robots(game) == []
       robot = %{player_id: "TEST_PLAYER", location: {1, 1}}
@@ -193,14 +183,14 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new()
       damage = Game.get_attack_damage(game)
 
-      assert damage >= game.settings.attack_range.min &&
-               damage <= game.settings.attack_range.max
+      assert damage >= game.attack_range.min &&
+               damage <= game.attack_range.max
     end
   end
 
   describe "get_suicide_damage" do
     test "it gets the value set in settings" do
-      assert 42 = Game.get_suicide_damage(Game.new(%{settings: %{suicide_damage: 42}}))
+      assert 42 = Game.get_suicide_damage(Game.new(%{suicide_damage: 42}))
     end
   end
 

@@ -2,29 +2,22 @@ defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Games.RobotGame.Terrain
 
   def new(opts \\ %{}) do
-    settings =
-      Map.merge(
-        %{
-          spawn_every: 10,
-          spawn_per_player: 5,
-          robot_hp: 50,
-          attack_range: %{min: 8, max: 10},
-          collision_damage: 5,
-          suicide_damage: 15,
-          max_turns: 100
-        },
-        opts[:settings] || %{}
-      )
-
     Map.merge(
       %{
         terrain: Terrain.default(),
         robots: [],
         turn: 0,
         players: ["player_1", "player_2"],
-        spawn?: true
+        spawn?: true,
+        spawn_every: 10,
+        spawn_per_player: 5,
+        robot_hp: 50,
+        attack_range: %{min: 8, max: 10},
+        collision_damage: 5,
+        suicide_damage: 15,
+        max_turns: 100
       },
-      Map.merge(opts, %{settings: settings})
+      opts
     )
   end
 
@@ -33,7 +26,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   def robots(game), do: game.robots
 
   def spawning_round?(game),
-    do: game.spawn? && rem(game.turn, game.settings.spawn_every) == 0
+    do: game.spawn? && rem(game.turn, game.spawn_every) == 0
 
   def get_robot(game, robot_id),
     do: Enum.find(game.robots, fn robot -> robot.robot_id == robot_id end)
@@ -41,14 +34,14 @@ defmodule BattleBox.Games.RobotGame.Game do
   def get_robot_at_location(game, location),
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
 
-  def get_attack_damage(%{settings: %{attack_range: %{min: val, max: val}}}), do: val
+  def get_attack_damage(%{attack_range: %{min: val, max: val}}), do: val
 
-  def get_attack_damage(%{settings: %{attack_range: %{min: min, max: max}}}),
+  def get_attack_damage(%{attack_range: %{min: min, max: max}}),
     do: min + :rand.uniform(max - min)
 
-  def get_suicide_damage(%{settings: %{suicide_damage: damage}}), do: damage
+  def get_suicide_damage(%{suicide_damage: damage}), do: damage
 
-  def get_collision_damage(%{settings: %{collision_damage: damage}}), do: damage
+  def get_collision_damage(%{collision_damage: damage}), do: damage
 
   def apply_damage_to_location(game, location, damage) do
     new_robots =
@@ -93,7 +86,7 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def add_robot(game, %{player_id: _, location: _} = robot) do
     default_robot_settings = %{
-      hp: game.settings.robot_hp,
+      hp: game.robot_hp,
       robot_id: Ecto.UUID.generate()
     }
 
