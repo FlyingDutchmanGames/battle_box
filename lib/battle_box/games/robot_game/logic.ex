@@ -26,8 +26,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
     game =
       Enum.reduce(moves, game, fn move, game ->
         case move.type do
-          :attack -> apply_attack(game, move.target, guarded_locations)
-          :suicide -> apply_suicide(game, move.robot_id, guarded_locations)
+          :attack -> apply_attack(game, move, guarded_locations)
+          :suicide -> apply_suicide(game, move, guarded_locations)
           _ -> game
         end
       end)
@@ -35,7 +35,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     update_in(game.turn, &(&1 + 1))
   end
 
-  def apply_movement(game, move, movements, guarded_locations) do
+  defp apply_movement(game, move, movements, guarded_locations) do
     case calc_movement(game, move, movements) do
       {:move, target, robot} ->
         move_robot(game, robot.id, target)
@@ -64,7 +64,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     end
   end
 
-  def calc_movement(game, move, movements, stuck_robots \\ []) do
+  defp calc_movement(game, move, movements, stuck_robots \\ []) do
     robot = get_robot(game, move.robot_id)
     robot_currently_at_location = get_robot_at_location(game, move.target)
     moves_to_location = Enum.filter(movements, &(&1.target == move.target))
@@ -98,7 +98,12 @@ defmodule BattleBox.Games.RobotGame.Logic do
       %{current_occupant_in_stuck_robots?: true} ->
         {:move, move.target, robot}
 
-      %{valid_terrain?: true, contention?: false, current_occupant: nil} ->
+      %{
+        move_target_adjacent?: true,
+        valid_terrain?: true,
+        contention?: false,
+        current_occupant: nil
+      } ->
         {:move, move.target, robot}
 
       %{current_occupant: other_robot, current_occupant_move: other_robot_move} ->
@@ -112,21 +117,33 @@ defmodule BattleBox.Games.RobotGame.Logic do
     end
   end
 
-  def apply_attack(game, location, guard_locations) do
-    case get_robot_at_location(game, location) do
-      nil ->
+  defp apply_attack(game, move, guard_locations) do
+    robot = get_robot(game, move.robot_id)
+
+    attack_conditions = %{
+      attack_target_adjacent?: move.target in adjacent_locations(robot.location),
+      guarded?: move.target in guard_locations,
+      target_space_occupant: get_robot_at_location(game, move.target)
+    }
+
+    case attack_conditions do
+      %{attack_target_adjacent?: false} ->
         game
 
-      robot ->
-        if location in guard_locations,
-          do: apply_damage_to_robot(game, robot.id, guarded_attack_damage(game)),
-          else: apply_damage_to_robot(game, robot.id, attack_damage(game))
+      %{target_space_occupant: nil} ->
+        game
+
+      %{target_space_occupant: other_robot, guarded?: true} when not is_nil(other_robot) ->
+        apply_damage_to_robot(game, other_robot.id, guarded_attack_damage(game))
+
+      %{target_space_occupant: other_robot, guarded?: false} when not is_nil(other_robot) ->
+        apply_damage_to_robot(game, other_robot.id, attack_damage(game))
     end
   end
 
-  def apply_suicide(game, id, guard_locations) do
-    robot = get_robot(game, id)
-    game = remove_robot(game, id)
+  defp apply_suicide(game, move, guard_locations) do
+    robot = get_robot(game, move.robot_id)
+    game = remove_robot(game, move.robot_id)
 
     Enum.reduce(adjacent_locations(robot.location), game, fn loc, game ->
       case get_robot_at_location(game, loc) do

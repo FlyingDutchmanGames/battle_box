@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.TerrainTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.Terrain
 
   @test_terrain %{

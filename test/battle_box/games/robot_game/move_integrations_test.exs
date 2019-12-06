@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Logic}
 
   test "you can't move to a location that is not adjacent" do
