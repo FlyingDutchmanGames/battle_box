@@ -152,7 +152,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   test "You can't move into the square of a suiciding robot", %{game: game} do
     robots = [
       %{id: "A", player_id: "A", location: {0, 0}},
-      %{id: "B", player_id: "B", location: {1, 0}},
+      %{id: "B", player_id: "B", location: {1, 0}}
     ]
 
     moves = [

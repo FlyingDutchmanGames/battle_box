@@ -1,0 +1,11 @@
+<% {rows, cols} = Game.dimensions(@game) %>
+
+<div class="robot-game-board">
+  <%= for row <- 0..rows do %>
+    <div class="board-row">
+      <%= for col <- 0..cols do %>
+        <div class='<%= "board-location #{@game.terrain[{row, col}]}" %>'></div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

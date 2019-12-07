@@ -19,6 +19,8 @@ defmodule BattleBox.Games.RobotGame.Game do
     Map.merge(%__MODULE__{}, opts)
   end
 
+  def dimensions(game), do: Terrain.dimensions(game.terrain)
+
   def spawns(game), do: Terrain.spawn(game.terrain)
 
   def robots(game), do: game.robots

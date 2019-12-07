@@ -1,2 +1,7 @@
 @import "../../deps/phoenix_live_view/assets/css/live_view.css";
 
+body {
+  margin: 0;
+  padding: 0;
+}
+

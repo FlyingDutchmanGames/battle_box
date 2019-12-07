@@ -1,0 +1,26 @@
+.robot-game-board {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.robot-game-board .board-row {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.robot-game-board .board-location {
+  width: 30px;
+  height: 30px;
+  background-color: red;
+  border: 1px solid black;
+}
+
+.robot-game-board .board-location.normal {
+  background-color: white;
+}
+.robot-game-board .board-location.spawn {
+  background-color: yellow;
+}
+.robot-game-board .board-location.inaccessible {
+  background-color: gray;
+}
