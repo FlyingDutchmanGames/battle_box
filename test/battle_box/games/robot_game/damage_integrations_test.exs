@@ -113,7 +113,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     assert %{hp: 10} = Game.get_robot(after_turn, "A")
   end
 
-  test "you can attack yourself I guess? ¯\_(ツ)_/¯", %{game: game} do
+  test "you can't attack yourself I guess? ¯\_(ツ)_/¯", %{game: game} do
     robots = [
       %{id: "A", player_id: "A", location: {0, 0}}
     ]
@@ -147,5 +147,22 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     assert %{hp: 5} = Game.get_robot(after_turn, "B")
     assert %{hp: 5} = Game.get_robot(after_turn, "C")
     assert %{hp: 10} = Game.get_robot(after_turn, "D")
+  end
+
+  test "You can't move into the square of a suiciding robot", %{game: game} do
+    robots = [
+      %{id: "A", player_id: "A", location: {0, 0}},
+      %{id: "B", player_id: "B", location: {1, 0}},
+    ]
+
+    moves = [
+      %{type: :suicide, robot_id: "A"},
+      %{type: :move, target: {0, 0}, robot_id: "B"}
+    ]
+
+    inital_game = Game.add_robots(game, robots)
+    after_turn = Logic.calculate_turn(inital_game, moves)
+
+    assert %{location: {1, 0}} = Game.get_robot(after_turn, "B")
   end
 end
