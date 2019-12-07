@@ -1,14 +1,11 @@
 defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Logic}
+  import BattleBox.Games.RobotGame.Terrain.Helpers
 
   test "you can't move to a location that is not adjacent" do
-    terrain = %{
-      {0, 0} => :normal,
-      {0, 1} => :normal,
-      {1, 1} => :normal,
-      {1, 0} => :normal
-    }
+    terrain = ~t/1 1
+                 1 1/
 
     game =
       Game.new(terrain: terrain, spawn?: false)

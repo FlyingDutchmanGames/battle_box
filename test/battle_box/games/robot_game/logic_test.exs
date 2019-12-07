@@ -2,13 +2,12 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.Game
   import BattleBox.Games.RobotGame.Logic
+  import BattleBox.Games.RobotGame.Terrain.Helpers
 
   describe "apply_spawn/1" do
     test "it will create robots" do
-      test_terrain = %{
-        {0, 0} => :spawn,
-        {1, 1} => :spawn
-      }
+      test_terrain = ~t/2 1
+                        1 2/
 
       game = Game.new(terrain: test_terrain, spawn_per_player: 1)
 
@@ -25,10 +24,8 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
     end
 
     test "it will destroy an existing robot on a spawn point" do
-      test_terrain = %{
-        {0, 0} => :spawn,
-        {1, 1} => :spawn
-      }
+      test_terrain = ~t/2 1
+                        1 2/
 
       robots = [
         %{player_id: "1", id: "DESTROY_ME_1", location: {0, 0}},
