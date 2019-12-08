@@ -1,0 +1,2 @@
+<% {row, col} = @robot.location %>
+<div class="robot" style='<%= "grid-row: #{row}; grid-column: #{col};" %>'></div>

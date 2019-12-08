@@ -5,6 +5,8 @@ defmodule BattleBoxWeb.RobotGame.PlayLive do
 
   def mount(_session, socket) do
     game = Game.new()
+    robot = %{player_id: 10, location: {10, 10}}
+    game = Game.add_robot(game, robot)
     {:ok, assign(socket, game: game)}
   end
 

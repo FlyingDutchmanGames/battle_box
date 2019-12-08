@@ -20,3 +20,11 @@
 .robot-game-board .board-location.obstacle {
   background-color: brown;
 }
+
+.robot-game-board .robot {
+  width: 30px;
+  height: 30px;
+  border-radius: 100px;
+  background-color: green;
+  border: 2px solid purple;
+}
