@@ -17,3 +17,6 @@
 .robot-game-board .board-location.inaccessible {
   background-color: gray;
 }
+.robot-game-board .board-location.obstacle {
+  background-color: brown;
+}
