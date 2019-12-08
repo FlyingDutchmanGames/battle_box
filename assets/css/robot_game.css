@@ -1,17 +1,10 @@
 .robot-game-board {
-  display: flex;
-  flex-flow: column nowrap;
-}
-
-.robot-game-board .board-row {
-  display: flex;
-  flex-flow: row nowrap;
+  display: grid;
 }
 
 .robot-game-board .board-location {
   width: 30px;
   height: 30px;
-  background-color: red;
   border: 1px solid black;
 }
 

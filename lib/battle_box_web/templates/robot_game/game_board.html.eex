@@ -1,11 +1,7 @@
 <% {rows, cols} = Game.dimensions(@game) %>
 
-<div class="robot-game-board">
-  <%= for row <- 0..rows do %>
-    <div class="board-row">
-      <%= for col <- 0..cols do %>
-        <div class='<%= "board-location #{@game.terrain[{row, col}]}" %>'></div>
-      <% end %>
-    </div>
+<div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{rows}, max-content)" %>'>
+  <%= for {location, terrain_type} <- @game.terrain do %>
+    <%= render("game_board_piece.html", terrain: terrain_type, location: location) %>
   <% end %>
 </div>
