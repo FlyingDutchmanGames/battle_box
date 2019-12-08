@@ -1,0 +1,12 @@
+<% {row, col} = @location %>
+<% number =
+  case {row, col} do
+    {0, col} -> col
+    {row, 0} -> row
+    _ -> nil
+  end
+%>
+
+<div class='<%= "terrain #{@terrain}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
+  <div class="number"><%= number %></div>
+</div>

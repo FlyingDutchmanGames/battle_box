@@ -2,22 +2,29 @@
   display: grid;
 }
 
-.robot-game-board .board-location {
+.robot-game-board .terrain {
   width: 30px;
   height: 30px;
   border: 1px solid black;
+  display: flex;
 }
 
-.robot-game-board .board-location.normal {
+.robot-game-board .terrain .number {
+  color: gray;
+  user-select: none;
+  margin: auto;
+}
+
+.robot-game-board .terrain.normal {
   background-color: white;
 }
-.robot-game-board .board-location.spawn {
+.robot-game-board .terrain.spawn {
   background-color: yellow;
 }
-.robot-game-board .board-location.inaccessible {
-  background-color: gray;
+.robot-game-board .terrain.inaccessible {
+  background-color: lightgray;
 }
-.robot-game-board .board-location.obstacle {
+.robot-game-board .terrain.obstacle {
   background-color: brown;
 }
 
