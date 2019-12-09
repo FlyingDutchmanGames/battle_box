@@ -12,7 +12,7 @@ selected =
 <%= if selected != "selected" do %>
   <div
     class='<%= "robot #{@robot.player_id} #{selected}" %>'
-    style='<%= "grid-row: #{row}; grid-column: #{col};" %>'
+    style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'
     phx-click="select-robot"
     phx-value-robot-id="<%= @robot.id %>">
     <div class="health"><%= @robot.hp %></div>
@@ -21,11 +21,11 @@ selected =
 <% else %>
   <div
     class='<%= "robot #{@robot.player_id} #{selected}" %>'
-    style='<%= "grid-row: #{row}; grid-column: #{col};" %>'
+    style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'
     phx-click="select-robot"
     phx-value-robot-id="<%= @robot.id %>">
   </div>
-  <div class='<%= "move-option #{@robot.player_id}" %>' style='<%= "grid-row: #{row}; grid-column: #{col};" %>'>
+  <div class='<%= "move-option #{@robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
     <div
        class="move-icon"
        phx-click="create-move"
@@ -42,7 +42,7 @@ selected =
        phx-value-target-col="<%= col %>">💣</div>
   </div>
   <%= for {row, col} <- Game.available_adjacent_locations(@game, @robot.location) do %>
-    <div class='<%= "move-option #{@robot.player_id}" %>' style='<%= "grid-row: #{row}; grid-column: #{col};" %>'>
+    <div class='<%= "move-option #{@robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
       <div
          class="move-icon"
          phx-click="create-move"

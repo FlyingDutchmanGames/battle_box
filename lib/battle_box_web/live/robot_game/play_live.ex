@@ -50,7 +50,8 @@ defmodule BattleBoxWeb.RobotGame.PlayLive do
       %{player_id: "player_1", location: {10, 9}, id: "1"},
       %{player_id: "player_2", location: {10, 10}, id: "2"},
       %{player_id: "player_1", location: {11, 11}, id: "3"},
-      %{player_id: "player_2", location: {12, 12}, id: "4"}
+      %{player_id: "player_2", location: {12, 12}, id: "4"},
+      %{player_id: "player_1", location: {7, 1}, id: "5"}
     ]
 
     game = Game.add_robots(game, robots)
