@@ -1,2 +1,4 @@
 <% {row, col} = @robot.location %>
-<div class="robot" style='<%= "grid-row: #{row}; grid-column: #{col};" %>'></div>
+<div class='<%= "robot #{@robot.player_id} " %>' style='<%= "grid-row: #{row}; grid-column: #{col};" %>'>
+  <div class="health"><%= @robot.hp %></div>
+</div>

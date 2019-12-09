@@ -29,9 +29,29 @@
 }
 
 .robot-game-board .robot {
+  display: flex;
   width: 30px;
   height: 30px;
-  border-radius: 100px;
+  border-radius: 10px;
   background-color: green;
-  border: 2px solid purple;
+  border-style: solid;
+  border-color: purple;
+  border-width: 2px;
+}
+
+.robot-game-board .robot.player_1 {
+  background-color: #ffcccc;
+  border-color: #990000;
+}
+
+.robot-game-board .robot.player_2 {
+  background-color: #cce6ff;
+  border-color: #0059b3;
+}
+
+.robot-game-board .robot .health {
+  font-size: 0.8em;
+  color: black;
+  user-select: none;
+  margin: auto;
 }
