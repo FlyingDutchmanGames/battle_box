@@ -1,4 +1,17 @@
 <% {row, col} = @robot.location %>
-<div class='<%= "robot #{@robot.player_id} selected" %>' style='<%= "grid-row: #{row}; grid-column: #{col};" %>'>
+<%
+id = @robot.id
+selected =
+  case @selected do
+    nil -> ""
+    ^id -> "selected"
+    _ -> "non-selected"
+  end
+%>
+<div
+  class='<%= "robot #{@robot.player_id} #{selected}" %>'
+  style='<%= "grid-row: #{row}; grid-column: #{col};" %>'
+  phx-click="select_robot"
+  phx-value-robot-id="<%= @robot.id %>">
   <div class="health"><%= @robot.hp %></div>
 </div>

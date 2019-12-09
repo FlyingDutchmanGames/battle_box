@@ -1,3 +1,4 @@
+<script>window.useLiveView = true</script>
 <% {rows, cols} = Game.dimensions(@game) %>
 
 <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>
@@ -5,6 +6,6 @@
     <%= render("terrain.html", terrain: terrain_type, location: location) %>
   <% end %>
   <%= for robot <- @game.robots do %>
-    <%= render("robot.html", robot: robot) %>
+    <%= render("robot.html", robot: robot, selected: @selected) %>
   <% end %>
 </div>

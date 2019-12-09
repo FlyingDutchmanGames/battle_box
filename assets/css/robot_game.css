@@ -30,18 +30,23 @@
 }
 
 .robot-game-board .robot {
+  color: black;
   display: flex;
   width: 30px;
   height: 30px;
   border-radius: 10px;
-  background-color: green;
   border-style: solid;
-  border-color: purple;
   border-width: 2px;
+  box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
 }
 
 .robot-game-board .robot.selected {
-  
+  color: black;
+  box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22), 0 0 10px 1px black;
+}
+
+.robot-game-board .robot.non-selected {
+  color: gray;
 }
 
 .robot-game-board .robot.player_1 {
@@ -56,7 +61,6 @@
 
 .robot-game-board .robot .health {
   font-size: 0.8em;
-  color: black;
   user-select: none;
   margin: auto;
 }
