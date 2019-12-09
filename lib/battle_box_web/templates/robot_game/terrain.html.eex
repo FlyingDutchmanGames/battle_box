@@ -7,6 +7,9 @@
   end
 %>
 
-<div class='<%= "terrain #{@terrain}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
+<div
+  class='<%= "terrain #{@terrain}" %>'
+  style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'
+  phx-click="terrain-click">
   <div class="number"><%= number %></div>
 </div>

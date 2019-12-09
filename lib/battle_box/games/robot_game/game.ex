@@ -68,6 +68,11 @@ defmodule BattleBox.Games.RobotGame.Game do
   def remove_robot(game, id),
     do: update_in(game.robots, &Enum.reject(&1, fn robot -> robot.id == id end))
 
+  def available_adjacent_locations(game, location) do
+    adjacent_locations(location)
+    |> Enum.filter(fn location -> game.terrain[location] in [:normal, :spawn] end)
+  end
+
   def adjacent_locations({row, col}),
     do: [
       {row + 1, col},

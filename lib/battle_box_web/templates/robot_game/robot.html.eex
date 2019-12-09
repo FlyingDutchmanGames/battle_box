@@ -8,10 +8,55 @@ selected =
     _ -> "non-selected"
   end
 %>
-<div
-  class='<%= "robot #{@robot.player_id} #{selected}" %>'
-  style='<%= "grid-row: #{row}; grid-column: #{col};" %>'
-  phx-click="select_robot"
-  phx-value-robot-id="<%= @robot.id %>">
-  <div class="health"><%= @robot.hp %></div>
-</div>
+
+<%= if selected != "selected" do %>
+  <div
+    class='<%= "robot #{@robot.player_id} #{selected}" %>'
+    style='<%= "grid-row: #{row}; grid-column: #{col};" %>'
+    phx-click="select-robot"
+    phx-value-robot-id="<%= @robot.id %>">
+    <div class="health"><%= @robot.hp %></div>
+    <div class="move-icon"><%= move_icon(@move) %></div>
+  </div>
+<% else %>
+  <div
+    class='<%= "robot #{@robot.player_id} #{selected}" %>'
+    style='<%= "grid-row: #{row}; grid-column: #{col};" %>'
+    phx-click="select-robot"
+    phx-value-robot-id="<%= @robot.id %>">
+  </div>
+  <div class='<%= "move-option #{@robot.player_id}" %>' style='<%= "grid-row: #{row}; grid-column: #{col};" %>'>
+    <div
+       class="move-icon"
+       phx-click="create-move"
+       phx-value-type="guard"
+       phx-value-robot-id="<%= @robot.id %>"
+       phx-value-target-row="<%= row %>"
+       phx-value-target-col="<%= col %>">🐢</div>
+    <div
+       class="move-icon"
+       phx-click="create-move"
+       phx-value-type="suicide"
+       phx-value-robot-id="<%= @robot.id %>"
+       phx-value-target-row="<%= row %>"
+       phx-value-target-col="<%= col %>">💣</div>
+  </div>
+  <%= for {row, col} <- Game.available_adjacent_locations(@game, @robot.location) do %>
+    <div class='<%= "move-option #{@robot.player_id}" %>' style='<%= "grid-row: #{row}; grid-column: #{col};" %>'>
+      <div
+         class="move-icon"
+         phx-click="create-move"
+         phx-value-type="attack"
+         phx-value-robot-id="<%= @robot.id %>"
+         phx-value-target-row="<%= row %>"
+         phx-value-target-col="<%= col %>">🔪</div>
+       <div
+         class="move-icon"
+         phx-click="create-move"
+         phx-value-type="move"
+         phx-value-robot-id="<%= @robot.id %>"
+         phx-value-target-row="<%= row %>"
+         phx-value-target-col="<%= col %>">➡️</div>
+    </div>
+  <% end %>
+<% end %>

@@ -6,6 +6,6 @@
     <%= render("terrain.html", terrain: terrain_type, location: location) %>
   <% end %>
   <%= for robot <- @game.robots do %>
-    <%= render("robot.html", robot: robot, selected: @selected) %>
+    <%= render("robot.html", game: @game, robot: robot, move: @moves[robot.id], selected: @selected) %>
   <% end %>
 </div>

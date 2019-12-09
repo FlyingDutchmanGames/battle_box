@@ -3,8 +3,9 @@
   font-family: 'Ruda', sans-serif;
 }
 
+/* TERRAIN */
 .robot-game-board .terrain {
-  width: 30px;
+  width: 40px;
   height: 30px;
   border: 1px solid gray;
   display: flex;
@@ -29,15 +30,32 @@
   background-color: brown;
 }
 
+/* ROBOT */
 .robot-game-board .robot {
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
   color: black;
-  display: flex;
-  width: 30px;
+  width: 40px;
   height: 30px;
   border-radius: 10px;
   border-style: solid;
   border-width: 2px;
   box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+}
+
+.robot-game-board .robot .health {
+  font-size: 0.7em;
+  user-select: none;
+  margin: auto;
+  grid-row: 1;
+  grid-column: 3;
+}
+
+.robot-game-board .robot .move-icon {
+  font-size: 0.7em;
+  user-select: none;
+  grid-row: 2;
+  grid-column: 2;
 }
 
 .robot-game-board .robot.selected {
@@ -59,8 +77,24 @@
   border-color: #0059b3;
 }
 
-.robot-game-board .robot .health {
-  font-size: 0.8em;
+/* MOVE OPTION */
+.robot-game-board .move-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
   user-select: none;
-  margin: auto;
+  flex-flow: column nowrap;
+  opacity: 0.5;
+}
+
+.robot-game-board .move-option .move-icon {
+  font-size: .5em;
+}
+
+.robot-game-board .move-option.player_1 {
+  background-color: red;
+}
+
+.robot-game-board .move-option.player_2 {
+  background-color: green;
 }
