@@ -1,11 +1,12 @@
 .robot-game-board {
   display: grid;
+  font-family: 'Ruda', sans-serif;
 }
 
 .robot-game-board .terrain {
   width: 30px;
   height: 30px;
-  border: 1px solid black;
+  border: 1px solid gray;
   display: flex;
 }
 
@@ -37,6 +38,10 @@
   border-style: solid;
   border-color: purple;
   border-width: 2px;
+}
+
+.robot-game-board .robot.selected {
+  
 }
 
 .robot-game-board .robot.player_1 {
