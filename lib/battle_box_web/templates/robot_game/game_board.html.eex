@@ -9,3 +9,4 @@
     <%= render("robot.html", game: @game, robot: robot, move: @moves[robot.id], selected: @selected) %>
   <% end %>
 </div>
+<button phx-click="run-move">Run Move</button>
