@@ -16,7 +16,7 @@ defmodule BattleBoxWeb.RobotGame.PlayLive do
     {:noreply, assign(socket, selected: nil)}
   end
 
-  def handle_event("run-move", params, socket) do
+  def handle_event("run-move", _params, socket) do
     moves = Map.values(socket.assigns.moves)
     game = Logic.calculate_turn(socket.assigns.game, moves)
     {:noreply, assign(socket, game: game, selected: nil, moves: %{})}
@@ -52,12 +52,5 @@ defmodule BattleBoxWeb.RobotGame.PlayLive do
   def initialize(socket) do
     game = Game.new()
     assign(socket, selected: nil, game: game, moves: %{})
-  end
-
-  defp enrich_moves(game, moves) do
-    Enum.map(moves, fn move ->
-      robot = Game.get_robot(game, move.robot_id)
-      Map.merge(move, %{robot_location: robot.location})
-    end)
   end
 end

@@ -14,7 +14,18 @@ defmodule BattleBox.Games.RobotGame.Terrain do
       |> Map.keys()
       |> Enum.unzip()
 
-    {Enum.max(row_nums), Enum.max(col_nums)}
+    case {row_nums, col_nums} do
+      {[], []} ->
+        nil
+
+      _ ->
+        %{
+          row_min: Enum.min(row_nums),
+          row_max: Enum.max(row_nums),
+          col_min: Enum.min(col_nums),
+          col_max: Enum.max(col_nums)
+        }
+    end
   end
 
   defp get_type(terrain, type), do: for({loc, ^type} <- terrain, do: loc)

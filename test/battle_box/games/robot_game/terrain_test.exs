@@ -1,6 +1,7 @@
 defmodule BattleBox.Games.RobotGame.TerrainTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.Terrain
+  import BattleBox.Games.RobotGame.Terrain.Helpers
 
   @test_terrain %{
     {0, 0} => :normal,
@@ -35,6 +36,39 @@ defmodule BattleBox.Games.RobotGame.TerrainTest do
       assert Terrain.spawn(@test_terrain) == [{2, 2}, {3, 3}]
       assert Terrain.obstacle(@test_terrain) == [{4, 4}, {5, 5}]
       assert Terrain.invalid(@test_terrain) == [{6, 6}, {7, 7}]
+    end
+  end
+
+  describe "dimensions" do
+    test "the dimensions of an empty map are nil" do
+      assert nil == Terrain.dimensions(%{})
+    end
+
+    test "the dimensions of a one square map are 0s" do
+      assert %{
+               row_min: 0,
+               row_max: 0,
+               col_min: 0,
+               col_max: 0
+             } == Terrain.dimensions(~t/1/)
+    end
+
+    test "you can get the dimensions of one-d map" do
+      assert %{
+               row_min: 0,
+               row_max: 0,
+               col_min: 0,
+               col_max: 10
+             } == Terrain.dimensions(~t/11111111111/)
+    end
+
+    test "you can get the dimensions of a full terrain" do
+      assert %{
+               row_min: 0,
+               row_max: 18,
+               col_min: 0,
+               col_max: 18
+             } == Terrain.dimensions(Terrain.default())
     end
   end
 end
