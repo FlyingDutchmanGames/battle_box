@@ -1,6 +1,7 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Terrain, Robot}
+  import BattleBox.Games.RobotGame.Terrain.Helpers
 
   describe "new/1" do
     test "it has the correct defaults" do
@@ -223,6 +224,33 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "adjacent_locations/1" do
     test "it provides the adjacent locations" do
       assert [{1, 0}, {-1, 0}, {0, 1}, {0, -1}] = Game.adjacent_locations({0, 0})
+    end
+  end
+
+  describe "available_adjacent_locations/2" do
+    test "provides up down left and right when all are available" do
+      terrain = ~t/111
+                   111
+                   111/
+
+      game = Game.new(terrain: terrain)
+      assert Enum.sort([{0,1}, {2, 1}, {1, 0}, {1, 2}]) == Enum.sort(Game.available_adjacent_locations(game, {1,1}))
+    end
+
+    test "doesn't provide spaces outside the map" do
+      terrain = ~t/1/
+
+      game = Game.new(terrain: terrain)
+      assert [] == Game.available_adjacent_locations(game, {0,0})
+    end
+
+    test "doesn't provide spaces that are inaccesible" do
+      terrain = ~t/000
+                   010
+                   000/
+
+      game = Game.new(terrain: terrain)
+      assert [] == Game.available_adjacent_locations(game, {1,1})
     end
   end
 end
