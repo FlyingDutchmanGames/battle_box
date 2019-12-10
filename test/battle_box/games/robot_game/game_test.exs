@@ -234,14 +234,16 @@ defmodule BattleBox.Games.RobotGame.GameTest do
                    111/
 
       game = Game.new(terrain: terrain)
-      assert Enum.sort([{0,1}, {2, 1}, {1, 0}, {1, 2}]) == Enum.sort(Game.available_adjacent_locations(game, {1,1}))
+
+      assert Enum.sort([{0, 1}, {2, 1}, {1, 0}, {1, 2}]) ==
+               Enum.sort(Game.available_adjacent_locations(game, {1, 1}))
     end
 
     test "doesn't provide spaces outside the map" do
       terrain = ~t/1/
 
       game = Game.new(terrain: terrain)
-      assert [] == Game.available_adjacent_locations(game, {0,0})
+      assert [] == Game.available_adjacent_locations(game, {0, 0})
     end
 
     test "doesn't provide spaces that are inaccesible" do
@@ -250,7 +252,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
                    000/
 
       game = Game.new(terrain: terrain)
-      assert [] == Game.available_adjacent_locations(game, {1,1})
+      assert [] == Game.available_adjacent_locations(game, {1, 1})
     end
   end
 end

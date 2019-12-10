@@ -9,6 +9,7 @@ defmodule BattleBox.Games.RobotGame.Terrain do
   def obstacle(terrain), do: get_type(terrain, :obstacle)
 
   def dimensions(terrain) when terrain == %{}, do: nil
+
   def dimensions(terrain) do
     {row_nums, col_nums} =
       terrain

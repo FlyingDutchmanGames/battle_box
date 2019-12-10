@@ -8,9 +8,17 @@ defmodule BattleBoxWeb.RobotGameView do
     case move.type do
       :attack -> "🔪"
       :guard -> "🐢"
-      :move -> "➡️"
+      :move -> "🏃"
       :suicide -> "💣"
       _ -> ""
+    end
+  end
+
+  def terrain_number(location) do
+    case location do
+      {0, col} -> col
+      {row, 0} -> row
+      _ -> nil
     end
   end
 end
