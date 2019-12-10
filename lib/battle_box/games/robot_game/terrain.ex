@@ -8,24 +8,19 @@ defmodule BattleBox.Games.RobotGame.Terrain do
   def invalid(terrain), do: get_type(terrain, :invalid)
   def obstacle(terrain), do: get_type(terrain, :obstacle)
 
+  def dimensions(terrain) when terrain == %{}, do: nil
   def dimensions(terrain) do
     {row_nums, col_nums} =
       terrain
       |> Map.keys()
       |> Enum.unzip()
 
-    case {row_nums, col_nums} do
-      {[], []} ->
-        nil
-
-      _ ->
-        %{
-          row_min: Enum.min(row_nums),
-          row_max: Enum.max(row_nums),
-          col_min: Enum.min(col_nums),
-          col_max: Enum.max(col_nums)
-        }
-    end
+    %{
+      row_min: Enum.min(row_nums),
+      row_max: Enum.max(row_nums),
+      col_min: Enum.min(col_nums),
+      col_max: Enum.max(col_nums)
+    }
   end
 
   defp get_type(terrain, type), do: for({loc, ^type} <- terrain, do: loc)
