@@ -6,10 +6,7 @@
     <%= render("terrain.html", terrain: terrain_type, location: location) %>
   <% end %>
   <%= for robot <- @game.robots do %>
-    <%= if @selected != robot.id do %>
-      <%= render("robot.html", game: @game, robot: robot, move: @moves[robot.id]) %>
-    <% else %>
-    <% end %>
+    <%= render("robot.html", game: @game, robot: robot, move: @moves[robot.id], selected: @selected == robot.id) %>
   <% end %>
 </div>
 <button phx-click="run-move">Run Move</button>
