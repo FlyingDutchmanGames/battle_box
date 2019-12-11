@@ -36,6 +36,7 @@
   padding: 4px 20px;
   margin: 10px 4px;
   border-radius: 10px;
+  box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
 }
 
 .robot-game .game-header .score .player-name {
@@ -67,7 +68,7 @@
 
 /* TERRAIN */
 .robot-game-board .terrain {
-  width: 40px;
+  width: 35px;
   height: 30px;
   border: 1px solid gray;
   display: flex;
@@ -95,7 +96,7 @@
 /* ROBOT */
 .robot-game-board .robot {
   color: black;
-  width: 40px;
+  width: 35px;
   height: 30px;
   border-radius: 10px;
   border-style: solid;
