@@ -42,16 +42,17 @@
 }
 
 .robot-game-board .robot-health {
-  width: 100%;
-  height: 100%;
-  color: black;
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
+
+  width: 100%;
+  height: 100%;
+  padding: 1px;
+
+  color: black;
   font-size: 0.8em;
   user-select: none;
-  margin: auto;
-  padding: 1px;
 }
 
 .robot-game-board .robot-move {
@@ -65,15 +66,6 @@
   margin: auto;
 }
 
-.robot-game-board .robot.selected {
-  color: black;
-  box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22), 0 0 10px 1px black;
-}
-
-.robot-game-board .robot.non-selected {
-  color: gray;
-}
-
 .robot-game-board .robot.player_1 {
   background-color: #ffcccc;
   border-color: #990000;
@@ -82,26 +74,4 @@
 .robot-game-board .robot.player_2 {
   background-color: #cce6ff;
   border-color: #0059b3;
-}
-
-/* MOVE OPTION */
-.robot-game-board .move-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  user-select: none;
-  flex-flow: column nowrap;
-  opacity: 0.5;
-}
-
-.robot-game-board .move-option .move-icon {
-  font-size: .5em;
-}
-
-.robot-game-board .move-option.player_1 {
-  background-color: red;
-}
-
-.robot-game-board .move-option.player_2 {
-  background-color: green;
 }
