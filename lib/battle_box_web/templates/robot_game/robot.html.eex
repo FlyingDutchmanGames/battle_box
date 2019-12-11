@@ -1,62 +1,14 @@
 <% {row, col} = @robot.location %>
-<%
-id = @robot.id
-selected =
-  case @selected do
-    nil -> ""
-    ^id -> "selected"
-    _ -> "non-selected"
-  end
-%>
-
-<%= if selected != "selected" do %>
-  <div
-    class='<%= "robot #{@robot.player_id} #{selected}" %>'
-    style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'
-    phx-click="select-robot"
-    phx-value-robot-id="<%= @robot.id %>">
-    <div class="health"><%= @robot.hp %></div>
-    <div class="move-icon"><%= move_icon(@move) %></div>
+<% grid_location = "grid-row: #{row + 1}; grid-column: #{col + 1};" %>
+<div
+  class='<%= "robot #{@robot.player_id}" %>'
+  style='<%= grid_location %>'
+  phx-click="select-robot"
+  phx-value-robot-id="<%= @robot.id %>">
+</div>
+<%= if @move do %>
+  <div id='<%= "robot-#{@robot.id}-move" %>' class="robot-move" style="<%= grid_location %>">
+    <div class="icon"><%= move_icon(@move, @robot.location) %></div>
   </div>
-<% else %>
-  <div
-    class='<%= "robot #{@robot.player_id} #{selected}" %>'
-    style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'
-    phx-click="select-robot"
-    phx-value-robot-id="<%= @robot.id %>">
-  </div>
-  <div class='<%= "move-option #{@robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
-    <div
-       class="move-icon"
-       phx-click="create-move"
-       phx-value-type="guard"
-       phx-value-robot-id="<%= @robot.id %>"
-       phx-value-target-row="<%= row %>"
-       phx-value-target-col="<%= col %>">🐢</div>
-    <div
-       class="move-icon"
-       phx-click="create-move"
-       phx-value-type="suicide"
-       phx-value-robot-id="<%= @robot.id %>"
-       phx-value-target-row="<%= row %>"
-       phx-value-target-col="<%= col %>">💣</div>
-  </div>
-  <%= for {row, col} <- Game.available_adjacent_locations(@game, @robot.location) do %>
-    <div class='<%= "move-option #{@robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
-      <div
-         class="move-icon"
-         phx-click="create-move"
-         phx-value-type="attack"
-         phx-value-robot-id="<%= @robot.id %>"
-         phx-value-target-row="<%= row %>"
-         phx-value-target-col="<%= col %>">🔪</div>
-       <div
-         class="move-icon"
-         phx-click="create-move"
-         phx-value-type="move"
-         phx-value-robot-id="<%= @robot.id %>"
-         phx-value-target-row="<%= row %>"
-         phx-value-target-col="<%= col %>">➡️</div>
-    </div>
-  <% end %>
 <% end %>
+<div id='<%= "robot-#{@robot.id}-health" %>' class="robot-health" style="<%= grid_location %>"><%= @robot.hp %></div>
