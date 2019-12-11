@@ -9,7 +9,10 @@
     <div class="player-name"><%= player_1 %></div>
   </div>
 
-  <div class="title">Robot Game</div>
+  <div class="title-section">
+    <div class="title">Robot Game</div>
+    <div class="turns"><%= "TURN: #{@game.turn} / #{@game.max_turns}" %></div>
+  </div>
 
   <div class="score <%= player_2 %>">
     <div class="number"><%= Game.score(@game, player_2) %></div>

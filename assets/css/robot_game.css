@@ -1,7 +1,6 @@
 .robot-game {
   display: grid;
   grid-template: max-content max-content max-content / max-content;
-  border: 1px solid red;
   font-family: 'Ruda', sans-serif;
 }
 
@@ -13,6 +12,13 @@
   justify-content: space-around;
   color: #6a6666;
   background-color: #a7a5a5;
+}
+
+.robot-game .game-header .title-section {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
 }
 
 .robot-game .game-header .title {
@@ -51,7 +57,6 @@
 /* GAME CONTROLS */
 
 .robot-game .game-controls {
-  border: 1px solid purple;
 }
 
 /* GAME BOARD */
