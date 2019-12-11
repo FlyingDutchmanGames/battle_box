@@ -1,0 +1,18 @@
+<%
+  player_1 = "player_1"
+  player_2 = "player_2"
+%>
+
+<div class="game-header">
+  <div class="score <%= player_1 %>">
+    <div class="number"><%= Game.score(@game, player_1) %></div>
+    <div class="player-name"><%= player_1 %></div>
+  </div>
+
+  <div class="title">Robot Game</div>
+
+  <div class="score <%= player_2 %>">
+    <div class="number"><%= Game.score(@game, player_2) %></div>
+    <div class="player-name"><%= player_2 %></div>
+  </div>
+</div>

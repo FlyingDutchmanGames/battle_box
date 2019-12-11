@@ -1,6 +1,63 @@
+.robot-game {
+  display: grid;
+  grid-template: max-content max-content max-content / max-content;
+  border: 1px solid red;
+  font-family: 'Ruda', sans-serif;
+}
+
+/* GAME HEADER */
+.robot-game .game-header {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-around;
+  color: #6a6666;
+  background-color: #a7a5a5;
+}
+
+.robot-game .game-header .title {
+  font-size: 3em;
+  user-select: none;
+  padding: 3px;
+}
+
+.robot-game .game-header .score {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 4px 20px;
+  margin: 10px 4px;
+  border-radius: 10px;
+}
+
+.robot-game .game-header .score .player-name {
+  font-size: 0.5em;
+}
+
+.robot-game .game-header .score .number {
+  font-size: 2em;
+}
+
+.robot-game .game-header .score.player_1 {
+  background-color: #c10c06;
+}
+
+.robot-game .game-header .score.player_2 {
+  background-color: #016dd6;
+}
+
+/* GAME CONTROLS */
+
+.robot-game .game-controls {
+  border: 1px solid purple;
+}
+
+/* GAME BOARD */
+
 .robot-game-board {
   display: grid;
-  font-family: 'Ruda', sans-serif;
 }
 
 /* TERRAIN */
@@ -39,6 +96,10 @@
   border-style: solid;
   border-width: 2px;
   box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+}
+
+.robot-game-board .robot.selected {
+  box-shadow: 10px 10px red;
 }
 
 .robot-game-board .robot-health {

@@ -19,6 +19,13 @@ defmodule BattleBox.Games.RobotGame.Game do
     Map.merge(%__MODULE__{}, opts)
   end
 
+  def score(game, player_id) do
+    game
+    |> robots
+    |> Enum.filter(fn robot -> robot.player_id == player_id end)
+    |> length
+  end
+
   def dimensions(game), do: Terrain.dimensions(game.terrain)
 
   def spawns(game), do: Terrain.spawn(game.terrain)

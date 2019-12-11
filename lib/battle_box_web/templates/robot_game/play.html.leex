@@ -1,1 +1,7 @@
-<%= render("game_board.html", assigns) %>
+<script>window.useLiveView = true</script>
+<div class="robot-game">
+  <%= render("game_header.html", assigns) %>
+  <%= render("game_board.html", assigns) %>
+  <%= render("game_controls.html", assigns) %>
+</div>
+<button phx-click="run-move">Run Move</button>

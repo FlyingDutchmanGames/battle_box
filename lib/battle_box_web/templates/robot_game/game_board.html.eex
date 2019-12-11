@@ -1,6 +1,4 @@
-<script>window.useLiveView = true</script>
 <% %{row_max: rows, row_min: 0, col_max: cols, col_min: 0} = Game.dimensions(@game) %>
-
 <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>
   <%= for {location, terrain_type} <- @game.terrain do %>
     <%= render("terrain.html", terrain: terrain_type, location: location) %>
@@ -9,4 +7,3 @@
     <%= render("robot.html", game: @game, robot: robot, move: @moves[robot.id], selected: @selected == robot.id) %>
   <% end %>
 </div>
-<button phx-click="run-move">Run Move</button>
