@@ -4,8 +4,8 @@ defmodule BattleBoxWeb.RobotGameView do
 
   def move_direction({from_row, from_col}, {to_row, to_col}) do
     case {from_row - to_row, from_col - to_col} do
-      {-1, 0} -> :up
-      {1, 0} -> :down
+      {1, 0} -> :up
+      {-1, 0} -> :down
       {0, -1} -> :right
       {0, 1} -> :left
     end

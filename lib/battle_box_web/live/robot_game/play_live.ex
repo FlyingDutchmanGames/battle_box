@@ -24,7 +24,7 @@ defmodule BattleBoxWeb.RobotGame.PlayLive do
       Game.robots(game)
       |> Map.new(fn robot ->
         {row, col} = robot.location
-        {robot.id, %{type: :attack, target: {row - 1, col}, robot_id: robot.id}}
+        {robot.id, %{type: :move, target: {row + 1, col}, robot_id: robot.id}}
       end)
 
     {:noreply, assign(socket, game: game, selected: nil, moves: temp_new_moves)}
