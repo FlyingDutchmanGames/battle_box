@@ -1,6 +1,7 @@
 defmodule BattleBoxWeb.RobotGameViewTest do
   use BattleBoxWeb.ConnCase, async: true
   alias BattleBoxWeb.RobotGameView
+  alias BattleBox.Games.RobotGame.Game
   import Phoenix.View
 
   describe "terrain_number/1" do
@@ -110,6 +111,38 @@ defmodule BattleBoxWeb.RobotGameViewTest do
 
         assert [move_html] = Floki.find(html, "#robot-#{robot.id}-move")
         assert RobotGameView.move_icon(move, robot.location) == Floki.text(move_html)
+      end)
+    end
+  end
+
+  describe "rendering the game header" do
+    test "you can render the score board" do
+      game = Game.new()
+      html = render_to_string(RobotGameView, "game_header.html", game: game)
+      assert "TURN: 0 / 100" == Floki.find(html, ".turns") |> Floki.text()
+
+      Enum.each(Floki.find(html, ".score .number"), fn score ->
+        assert Floki.text(score) == "0"
+      end)
+    end
+
+    test "it displays the correct turn" do
+      game = Game.new(turn: 42, max_turns: 420)
+      assert render_to_string(RobotGameView, "game_header.html", game: game) =~ "TURN: 42 / 420"
+    end
+
+    test "it displays the correct score" do
+      game =
+        Game.new()
+        |> Game.add_robots([
+          %{player_id: "player_1", location: {0, 0}},
+          %{player_id: "player_2", location: {0, 0}}
+        ])
+
+      html = render_to_string(RobotGameView, "game_header.html", game: game)
+
+      Enum.each(Floki.find(html, ".score .number"), fn score ->
+        assert Floki.text(score) == "1"
       end)
     end
   end

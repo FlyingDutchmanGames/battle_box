@@ -20,14 +20,7 @@ defmodule BattleBoxWeb.RobotGame.PlayLive do
     moves = Map.values(socket.assigns.moves)
     game = Logic.calculate_turn(socket.assigns.game, moves)
 
-    temp_new_moves =
-      Game.robots(game)
-      |> Map.new(fn robot ->
-        {row, col} = robot.location
-        {robot.id, %{type: :move, target: {row + 1, col}, robot_id: robot.id}}
-      end)
-
-    {:noreply, assign(socket, game: game, selected: nil, moves: temp_new_moves)}
+    {:noreply, assign(socket, game: game, selected: nil, moves: %{})}
   end
 
   def handle_event("create-move", params, socket) do
