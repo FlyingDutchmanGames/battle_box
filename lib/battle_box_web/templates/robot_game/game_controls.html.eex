@@ -1,9 +1,0 @@
-<% robot = Game.get_robot(@game, @selected) %>
-<% move = @moves[@selected] %>
-<div class="game-controls">
-  <div class="current-move">
-    <%= if @selected && move do %>
-      <%= move_icon(move, robot.location) %>
-    <% end %>
-  </div>
-</div>
