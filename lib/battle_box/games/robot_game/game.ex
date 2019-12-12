@@ -4,7 +4,8 @@ defmodule BattleBox.Games.RobotGame.Game do
   defstruct terrain: Terrain.default(),
             robots: [],
             turn: 0,
-            players: ["player_1", "player_2"],
+            player_1: nil,
+            player_2: nil,
             spawn?: true,
             spawn_every: 10,
             spawn_per_player: 5,
@@ -19,14 +20,15 @@ defmodule BattleBox.Games.RobotGame.Game do
     Map.merge(%__MODULE__{}, opts)
   end
 
-  def score(game, player_id) do
+  def score(game, player_id) when player_id in [:player_1, :player_2] do
     game
     |> robots
     |> Enum.filter(fn robot -> robot.player_id == player_id end)
     |> length
   end
 
-  def user(_game, player_id), do: "#{player_id}"
+  def user(game, :player_1), do: to_string(game.player_1 || "Player 1")
+  def user(game, :player_2), do: to_string(game.player_2 || "Player 2")
 
   def dimensions(game), do: Terrain.dimensions(game.terrain)
 
@@ -65,7 +67,8 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def add_robots(game, robots), do: Enum.reduce(robots, game, &add_robot(&2, &1))
 
-  def add_robot(game, %{player_id: _, location: _} = opts) do
+  def add_robot(game, %{player_id: pl_id, location: _} = opts)
+      when pl_id in [:player_1, :player_2] do
     update_in(game.robots, fn robots ->
       [Robot.new(Map.merge(%{hp: game.robot_hp}, opts)) | robots]
     end)

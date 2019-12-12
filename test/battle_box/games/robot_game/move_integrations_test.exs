@@ -9,7 +9,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
     game =
       Game.new(terrain: terrain, spawn?: false)
-      |> Game.add_robot(%{id: "A", player_id: "A", location: {0, 0}})
+      |> Game.add_robot(%{id: "A", player_id: :player_1, location: {0, 0}})
 
     assert %{location: {0, 0}} =
              game
@@ -76,7 +76,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
     robots =
       graph_with_indexes
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
-      |> Enum.map(fn {loc, _} -> %{id: robot_id(loc), player_id: "P1", location: loc} end)
+      |> Enum.map(fn {loc, _} -> %{id: robot_id(loc), player_id: :player_1, location: loc} end)
 
     initial_game =
       Game.new(terrain: terrain, spawn?: false)
