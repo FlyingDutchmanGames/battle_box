@@ -1,2 +1,15 @@
 @import "../../deps/phoenix_live_view/assets/css/live_view.css";
 
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.alert:empty {
+  display: none;
+}

@@ -19,6 +19,17 @@ defmodule BattleBox.Games.RobotGame.Game do
     Map.merge(%__MODULE__{}, opts)
   end
 
+  def score(game, player_id) do
+    game
+    |> robots
+    |> Enum.filter(fn robot -> robot.player_id == player_id end)
+    |> length
+  end
+
+  def user(_game, player_id), do: "#{player_id}"
+
+  def dimensions(game), do: Terrain.dimensions(game.terrain)
+
   def spawns(game), do: Terrain.spawn(game.terrain)
 
   def robots(game), do: game.robots
@@ -65,6 +76,10 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def remove_robot(game, id),
     do: update_in(game.robots, &Enum.reject(&1, fn robot -> robot.id == id end))
+
+  def available_adjacent_locations(game, location) do
+    Enum.filter(adjacent_locations(location), &(game.terrain[&1] in [:normal, :spawn]))
+  end
 
   def adjacent_locations({row, col}),
     do: [

@@ -1,4 +1,5 @@
 import css from "../css/app.css"
+import robot_game_css from "../css/robot_game.css"
 
 import {Socket as PhxSocket} from "phoenix"
 import LiveSocket from "phoenix_live_view"
