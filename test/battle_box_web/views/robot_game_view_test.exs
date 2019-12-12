@@ -135,8 +135,8 @@ defmodule BattleBoxWeb.RobotGameViewTest do
       game =
         Game.new()
         |> Game.add_robots([
-          %{player_id: "player_1", location: {0, 0}},
-          %{player_id: "player_2", location: {0, 0}}
+          %{player_id: :player_1, location: {0, 0}},
+          %{player_id: :player_2, location: {0, 0}}
         ])
 
       html = render_to_string(RobotGameView, "game_header.html", game: game)

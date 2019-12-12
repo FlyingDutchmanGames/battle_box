@@ -26,6 +26,8 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> length
   end
 
+  def user(_game, player_id), do: "#{player_id}"
+
   def dimensions(game), do: Terrain.dimensions(game.terrain)
 
   def spawns(game), do: Terrain.spawn(game.terrain)
