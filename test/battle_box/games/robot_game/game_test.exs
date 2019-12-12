@@ -64,6 +64,21 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "score" do
+    test "the score for a non existant player is 0" do
+      assert 0 = Game.score(Game.new(), :doesnt_exist)
+    end
+
+    test "A player with robots is the the number of robots" do
+      game =
+        Game.new()
+        |> Game.add_robot(%{player_id: :player_1, location: {0, 0}})
+
+      assert 1 == Game.score(game, :player_1)
+      assert 0 == Game.score(game, :player_2)
+    end
+  end
+
   describe "get_robot_at_location/2" do
     test "it gives nil if there isn't a robot at that location" do
       assert nil == Game.get_robot_at_location(Game.new(), {0, 0})
