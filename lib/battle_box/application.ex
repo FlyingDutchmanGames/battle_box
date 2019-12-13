@@ -6,7 +6,8 @@ defmodule BattleBox.Application do
   def start(_type, _args) do
     children = [
       BattleBox.Repo,
-      BattleBoxWeb.Endpoint
+      BattleBoxWeb.Endpoint,
+      BattleBoxWeb.Presence
     ]
 
     opts = [strategy: :one_for_one, name: BattleBox.Supervisor]
