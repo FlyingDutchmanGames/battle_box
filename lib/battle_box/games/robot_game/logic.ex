@@ -162,11 +162,11 @@ defmodule BattleBox.Games.RobotGame.Logic do
     spawn_locations =
       spawns(game)
       |> Enum.shuffle()
-      |> Enum.take(game.spawn_per_player * length(game.players))
+      |> Enum.take(game.spawn_per_player * 2)
 
     spawned_robots =
       spawn_locations
-      |> Enum.zip(Stream.cycle(game.players))
+      |> Enum.zip(Stream.cycle([:player_1, :player_2]))
       |> Enum.map(fn {spawn_location, player} ->
         %{
           player_id: player,

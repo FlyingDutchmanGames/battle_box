@@ -21,8 +21,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
   test "If you attack a square a robot is in it takes damage", %{game: game} do
     robots = [
-      %{id: "A", player_id: "A", location: {0, 0}},
-      %{id: "B", player_id: "B", location: {0, 1}}
+      %{id: "A", player_id: :player_1, location: {0, 0}},
+      %{id: "B", player_id: :player_2, location: {0, 1}}
     ]
 
     moves = [
@@ -41,8 +41,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
   test "If you attack a robot that moves out of a square it takes not damage", %{game: game} do
     robots = [
-      %{id: "A", player_id: "A", location: {0, 0}},
-      %{id: "B", player_id: "B", location: {0, 1}}
+      %{id: "A", player_id: :player_1, location: {0, 0}},
+      %{id: "B", player_id: :player_2, location: {0, 1}}
     ]
 
     moves = [
@@ -61,8 +61,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
   test "If you move into a square being attacked you take damage", %{game: game} do
     robots = [
-      %{id: "A", player_id: "A", location: {0, 0}},
-      %{id: "B", player_id: "B", location: {1, 1}}
+      %{id: "A", player_id: :player_1, location: {0, 0}},
+      %{id: "B", player_id: :player_2, location: {1, 1}}
     ]
 
     moves = [
@@ -81,9 +81,9 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
   test "A robot can suffer multiple attacks", %{game: game} do
     robots = [
-      %{id: "A", player_id: "A", location: {0, 0}},
-      %{id: "B", player_id: "B", location: {1, 0}},
-      %{id: "C", player_id: "C", location: {0, 1}}
+      %{id: "A", player_id: :player_1, location: {0, 0}},
+      %{id: "B", player_id: :player_2, location: {1, 0}},
+      %{id: "C", player_id: :player_2, location: {0, 1}}
     ]
 
     moves = [
@@ -99,8 +99,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
   test "Trying to attack a non adjacent square does not work", %{game: game} do
     robots = [
-      %{id: "A", player_id: "A", location: {0, 0}},
-      %{id: "B", player_id: "B", location: {1, 1}}
+      %{id: "A", player_id: :player_1, location: {0, 0}},
+      %{id: "B", player_id: :player_2, location: {1, 1}}
     ]
 
     moves = [
@@ -115,7 +115,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
   test "you can't attack yourself I guess? ¯\_(ツ)_/¯", %{game: game} do
     robots = [
-      %{id: "A", player_id: "A", location: {0, 0}}
+      %{id: "A", player_id: :player_1, location: {0, 0}}
     ]
 
     moves = [
@@ -130,10 +130,10 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
   test "suicide removes the robot and damages adjacent squares", %{game: game} do
     robots = [
-      %{id: "A", player_id: "A", location: {0, 0}},
-      %{id: "B", player_id: "B", location: {1, 0}},
-      %{id: "C", player_id: "C", location: {0, 1}},
-      %{id: "D", player_id: "D", location: {1, 1}}
+      %{id: "A", player_id: :player_1, location: {0, 0}},
+      %{id: "B", player_id: :player_2, location: {1, 0}},
+      %{id: "C", player_id: :player_2, location: {0, 1}},
+      %{id: "D", player_id: :player_2, location: {1, 1}}
     ]
 
     moves = [
@@ -151,8 +151,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
   test "You can't move into the square of a suiciding robot", %{game: game} do
     robots = [
-      %{id: "A", player_id: "A", location: {0, 0}},
-      %{id: "B", player_id: "B", location: {1, 0}}
+      %{id: "A", player_id: :player_1, location: {0, 0}},
+      %{id: "B", player_id: :player_1, location: {1, 0}}
     ]
 
     moves = [
