@@ -1,8 +1,8 @@
 defmodule BattleBox.Games.RobotGame.LogicTest do
   use ExUnit.Case, async: true
-  alias BattleBox.Games.RobotGame.Game
-  import BattleBox.Games.RobotGame.Logic
+  alias BattleBox.Games.RobotGame.{Game, Logic}
   import BattleBox.Games.RobotGame.Terrain.Helpers
+  import BattleBox.Games.RobotGameTest.Helpers
 
   describe "spawning" do
     test "it will create robots" do
@@ -12,7 +12,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       game = Game.new(terrain: test_terrain, spawn_per_player: 1)
 
       assert length(Game.robots(game)) == 0
-      game = calculate_turn(game, [])
+      game = Logic.calculate_turn(game, [])
       assert length(Game.robots(game)) == 2
 
       assert [{0, 0}, {1, 1}] ==
@@ -28,19 +28,17 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       test_terrain = ~t/2 1
                         1 2/
 
-      robots = [
-        %{player_id: :player_1, id: "DESTROY_ME_1", location: {0, 0}},
-        %{player_id: :player_2, id: "DESTROY_ME_2", location: {1, 1}}
-      ]
+      test_robots_spawn = ~g/1 0
+                             0 2/
 
       robots =
         Game.new(terrain: test_terrain, spawn_per_player: 1)
-        |> Game.add_robots(robots)
-        |> calculate_turn([])
+        |> Game.apply_events(test_robots_spawn)
+        |> Logic.calculate_turn([])
         |> Game.robots()
 
       assert length(robots) == 2
-      Enum.each(robots, fn robot -> refute robot.id in ["DESTROY_ME_1", "DESTROY_ME_2"] end)
+      Enum.each(robots, fn robot -> refute robot.id in [1, 2] end)
     end
   end
 end

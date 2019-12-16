@@ -134,9 +134,9 @@ defmodule BattleBoxWeb.RobotGameViewTest do
     test "it displays the correct score" do
       game =
         Game.new()
-        |> Game.add_robots([
-          %{player_id: :player_1, location: {0, 0}},
-          %{player_id: :player_2, location: {0, 0}}
+        |> Game.apply_events([
+          {:create_robot, :player_1, {0, 0}},
+          {:create_robot, :player_2, {0, 0}}
         ])
 
       html = render_to_string(RobotGameView, "game_header.html", game: game)

@@ -34,6 +34,9 @@ defmodule BattleBox.Games.RobotGame.Game do
       {:guard, _robot_id} ->
         game
 
+      {:create_robot, player_id, location} ->
+        add_robot(game, player_id, location, %{})
+
       {:create_robot, player_id, location, opts} ->
         add_robot(game, player_id, location, opts)
 
@@ -86,7 +89,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     )
   end
 
-  def move_robot(game, id, location) do
+  defp move_robot(game, id, location) do
     update_in(
       game.robots,
       &Enum.map(&1, fn
@@ -96,23 +99,15 @@ defmodule BattleBox.Games.RobotGame.Game do
     )
   end
 
-  def add_robots(game, robots), do: Enum.reduce(robots, game, &add_robot(&2, &1))
+  defp add_robot(game, player_id, location, opts) when player_id in [:player_1, :player_2] do
+    opts = Map.merge(opts, %{player_id: player_id, location: location})
 
-  def add_robot(game, player_id, location, opts) do
-    add_robot(game, Map.merge(opts, %{player_id: player_id, location: location}))
-  end
-
-  def add_robot(game, %{player_id: pl_id, location: _} = opts)
-      when pl_id in [:player_1, :player_2] do
     update_in(game.robots, fn robots ->
       [Robot.new(Map.merge(%{hp: game.robot_hp}, opts)) | robots]
     end)
   end
 
-  def remove_robots(game, robot_ids), do: Enum.reduce(robot_ids, game, &remove_robot(&2, &1))
-  def remove_robot(game, %{id: id}), do: remove_robot(game, id)
-
-  def remove_robot(game, id),
+  defp remove_robot(game, id),
     do: update_in(game.robots, &Enum.reject(&1, fn robot -> robot.id == id end))
 
   def available_adjacent_locations(game, location) do
