@@ -13,7 +13,38 @@ defmodule BattleBox.Games.RobotGame.Game do
             attack_damage: %{min: 8, max: 10},
             collision_damage: 5,
             suicide_damage: 15,
-            max_turns: 100
+            max_turns: 100,
+            event_log: []
+
+  def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))
+
+  def apply_event(game, event) do
+    game = log(game, event)
+    Enum.reduce(event.effects, game, &apply_effect(&2, &1))
+  end
+
+  def apply_effect(game, effect) do
+    case effect do
+      {:move, robot_id, location} ->
+        move_robot(game, robot_id, location)
+
+      {:damage, robot_id, amount} ->
+        apply_damage_to_robot(game, robot_id, amount)
+
+      {:guard, _robot_id} ->
+        game
+
+      {:create_robot, player_id, location, opts} ->
+        add_robot(game, player_id, location, opts)
+
+      {:remove_robot, robot_id} ->
+        remove_robot(game, robot_id)
+    end
+  end
+
+  defp log(game, event) do
+    update_in(game.event_log, fn log -> [event | log] end)
+  end
 
   def new(opts \\ []) do
     opts = Enum.into(opts, %{})
@@ -66,6 +97,10 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 
   def add_robots(game, robots), do: Enum.reduce(robots, game, &add_robot(&2, &1))
+
+  def add_robot(game, player_id, location, opts) do
+    add_robot(game, Map.merge(opts, %{player_id: player_id, location: location}))
+  end
 
   def add_robot(game, %{player_id: pl_id, location: _} = opts)
       when pl_id in [:player_1, :player_2] do

@@ -4,7 +4,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
   import BattleBox.Games.RobotGame.Logic
   import BattleBox.Games.RobotGame.Terrain.Helpers
 
-  describe "apply_spawn/1" do
+  describe "spawning" do
     test "it will create robots" do
       test_terrain = ~t/2 1
                         1 2/
@@ -12,7 +12,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       game = Game.new(terrain: test_terrain, spawn_per_player: 1)
 
       assert length(Game.robots(game)) == 0
-      game = apply_spawn(game)
+      game = calculate_turn(game, [])
       assert length(Game.robots(game)) == 2
 
       assert [{0, 0}, {1, 1}] ==
@@ -36,7 +36,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       robots =
         Game.new(terrain: test_terrain, spawn_per_player: 1)
         |> Game.add_robots(robots)
-        |> apply_spawn()
+        |> calculate_turn([])
         |> Game.robots()
 
       assert length(robots) == 2
