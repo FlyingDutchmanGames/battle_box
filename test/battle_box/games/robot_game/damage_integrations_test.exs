@@ -142,6 +142,6 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     inital_game = Game.apply_events(game, robot_spawns)
     after_turn = Logic.calculate_turn(inital_game, moves)
 
-    assert %{location: {1, 0}} = Game.get_robot(after_turn, "B")
+    assert %{location: {0, 1}} = Game.get_robot(after_turn, 2)
   end
 end

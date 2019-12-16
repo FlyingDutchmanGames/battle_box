@@ -1,7 +1,8 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
   use ExUnit.Case, async: true
-  alias BattleBox.Games.RobotGame.{Game, Terrain, Robot}
+  alias BattleBox.Games.RobotGame.{Game, Robot}
   import BattleBox.Games.RobotGame.Terrain.Helpers
+  import BattleBox.Games.RobotGameTest.Helpers
 
   describe "new/1" do
     test "you can override any top level key" do
@@ -60,9 +61,11 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "A player with robots is the the number of robots" do
+      robot_spawns = ~g/1/
+
       game =
         Game.new()
-        |> Game.add_robot(%{player_id: :player_1, location: {0, 0}})
+        |> Game.apply_events(robot_spawns)
 
       assert 1 == Game.score(game, :player_1)
       assert 0 == Game.score(game, :player_2)
@@ -75,28 +78,29 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "it can give back a robot if there is one at a location" do
-      robot = %{player_id: :player_1, id: "TEST", location: {0, 0}, hp: 42}
+      robot_spawns = ~g/1/
+      robot = %{player_id: :player_1, id: 1, location: {0, 0}, hp: 50}
 
       assert Robot.new(robot) ==
-               Game.add_robot(Game.new(), robot)
+               Game.apply_events(Game.new(), robot_spawns)
                |> Game.get_robot_at_location({0, 0})
     end
   end
 
-  describe "move_robot/3" do
-    test "trying to move a robot that doesn't exist is a noop" do
-      game = Game.new()
-      assert ^game = Game.move_robot(game, "DOES_NOT_EXIST", {42, 42})
-    end
+  # describe "move_robot/3" do
+  #   test "trying to move a robot that doesn't exist is a noop" do
+  #     game = Game.new()
+  #     assert ^game = Game.move_robot(game, "DOES_NOT_EXIST", {42, 42})
+  #   end
 
-    test "you can move a robot" do
-      assert [%{location: {42, 42}}] =
-               Game.new()
-               |> Game.add_robot(%{player_id: :player_1, id: "TEST", location: {0, 0}})
-               |> Game.move_robot("TEST", {42, 42})
-               |> Game.robots()
-    end
-  end
+  #   test "you can move a robot" do
+  #     assert [%{location: {42, 42}}] =
+  #              Game.new()
+  #              |> Game.add_robot(%{player_id: :player_1, id: "TEST", location: {0, 0}})
+  #              |> Game.move_robot("TEST", {42, 42})
+  #              |> Game.robots()
+  #   end
+  # end
 
   # describe "add_robot/2" do
   #   test "add_robot will add a robot and append hp and robot id" do
@@ -144,44 +148,45 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   #   end
   # end
 
-  describe "remove_robot" do
-    test "you can remove a robot" do
-      robot = %{player_id: :player_1, location: {1, 1}, id: "TEST_ROBOT_ID"}
+  # describe "remove_robot" do
+  #   test "you can remove a robot" do
+  #     robot = %{player_id: :player_1, location: {1, 1}, id: "TEST_ROBOT_ID"}
 
-      game = Game.add_robot(Game.new(), robot)
-      assert length(Game.robots(game)) == 1
-      game = Game.remove_robot(game, robot)
-      assert length(Game.robots(game)) == 0
-    end
+  #     game = Game.add_robot(Game.new(), robot)
+  #     assert length(Game.robots(game)) == 1
+  #     game = Game.remove_robot(game, robot)
+  #     assert length(Game.robots(game)) == 0
+  #   end
 
-    test "you can remove a robot by an id" do
-      robot = %{player_id: :player_1, location: {1, 1}, id: "TEST_ROBOT_ID"}
+  #   test "you can remove a robot by an id" do
+  #     robot = %{player_id: :player_1, location: {1, 1}, id: "TEST_ROBOT_ID"}
 
-      game = Game.add_robot(Game.new(), robot)
-      assert length(Game.robots(game)) == 1
-      game = Game.remove_robot(game, "TEST_ROBOT_ID")
-      assert length(Game.robots(game)) == 0
-    end
+  #     game = Game.add_robot(Game.new(), robot)
+  #     assert length(Game.robots(game)) == 1
+  #     game = Game.remove_robot(game, "TEST_ROBOT_ID")
+  #     assert length(Game.robots(game)) == 0
+  #   end
 
-    test "you can multiple robots" do
-      robots = [
-        %{player_id: :player_1, location: {1, 1}},
-        %{player_id: :player_2, location: {2, 2}}
-      ]
+  #   test "you can multiple robots" do
+  #     robots = [
+  #       %{player_id: :player_1, location: {1, 1}},
+  #       %{player_id: :player_2, location: {2, 2}}
+  #     ]
 
-      game = Game.add_robots(Game.new(), robots)
-      assert length(Game.robots(game)) == 2
-      game = Game.remove_robots(game, Game.robots(game))
-      assert length(Game.robots(game)) == 0
-    end
-  end
+  #     game = Game.add_robots(Game.new(), robots)
+  #     assert length(Game.robots(game)) == 2
+  #     game = Game.remove_robots(game, Game.robots(game))
+  #     assert length(Game.robots(game)) == 0
+  #   end
+  # end
 
   describe "get_robot/2" do
     test "you can get a robot by id" do
-      robot = %{player_id: :player_2, location: {1, 1}, id: "TEST_ROBOT_ID", hp: 50}
+      robot_spawns = ~g/1/
+      robot = %{player_id: :player_1, location: {0, 0}, id: 1, hp: 50}
 
-      game = Game.add_robot(Game.new(), robot)
-      assert Robot.new(robot) == Game.get_robot(game, "TEST_ROBOT_ID")
+      game = Game.apply_events(Game.new(), robot_spawns)
+      assert Robot.new(robot) == Game.get_robot(game, 1)
     end
 
     test "trying to get a robot by id that doesn't exist gives `nil`" do
