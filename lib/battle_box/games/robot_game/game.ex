@@ -45,11 +45,6 @@ defmodule BattleBox.Games.RobotGame.Game do
     end
   end
 
-  defp log(game, event) do
-    event = Map.put(event, :turn, game.turn)
-    update_in(game.event_log, fn log -> [event | log] end)
-  end
-
   def new(opts \\ []) do
     opts = Enum.into(opts, %{})
     Map.merge(%__MODULE__{}, opts)
@@ -80,7 +75,12 @@ defmodule BattleBox.Games.RobotGame.Game do
   def get_robot_at_location(game, location),
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
 
-  def apply_damage_to_robot(game, id, damage) do
+  defp log(game, event) do
+    event = Map.put(event, :turn, game.turn)
+    update_in(game.event_log, fn log -> [event | log] end)
+  end
+
+  defp apply_damage_to_robot(game, id, damage) do
     update_in(
       game.robots,
       &Enum.map(&1, fn
