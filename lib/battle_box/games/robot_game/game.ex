@@ -46,6 +46,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 
   defp log(game, event) do
+    event = Map.put(event, :turn, game.turn)
     update_in(game.event_log, fn log -> [event | log] end)
   end
 
