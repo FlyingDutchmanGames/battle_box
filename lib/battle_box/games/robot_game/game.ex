@@ -13,7 +13,37 @@ defmodule BattleBox.Games.RobotGame.Game do
             attack_damage: %{min: 8, max: 10},
             collision_damage: 5,
             suicide_damage: 15,
-            max_turns: 100
+            max_turns: 100,
+            event_log: []
+
+  def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))
+
+  def apply_event(game, event) do
+    game = log(game, event)
+    Enum.reduce(event.effects, game, &apply_effect(&2, &1))
+  end
+
+  def apply_effect(game, effect) do
+    case effect do
+      {:move, robot_id, location} ->
+        move_robot(game, robot_id, location)
+
+      {:damage, robot_id, amount} ->
+        apply_damage_to_robot(game, robot_id, amount)
+
+      {:guard, _robot_id} ->
+        game
+
+      {:create_robot, player_id, location} ->
+        add_robot(game, player_id, location, %{})
+
+      {:create_robot, player_id, location, opts} ->
+        add_robot(game, player_id, location, opts)
+
+      {:remove_robot, robot_id} ->
+        remove_robot(game, robot_id)
+    end
+  end
 
   def new(opts \\ []) do
     opts = Enum.into(opts, %{})
@@ -45,7 +75,12 @@ defmodule BattleBox.Games.RobotGame.Game do
   def get_robot_at_location(game, location),
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
 
-  def apply_damage_to_robot(game, id, damage) do
+  defp log(game, event) do
+    event = Map.put(event, :turn, game.turn)
+    update_in(game.event_log, fn log -> [event | log] end)
+  end
+
+  defp apply_damage_to_robot(game, id, damage) do
     update_in(
       game.robots,
       &Enum.map(&1, fn
@@ -55,7 +90,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     )
   end
 
-  def move_robot(game, id, location) do
+  defp move_robot(game, id, location) do
     update_in(
       game.robots,
       &Enum.map(&1, fn
@@ -65,19 +100,15 @@ defmodule BattleBox.Games.RobotGame.Game do
     )
   end
 
-  def add_robots(game, robots), do: Enum.reduce(robots, game, &add_robot(&2, &1))
+  defp add_robot(game, player_id, location, opts) when player_id in [:player_1, :player_2] do
+    opts = Map.merge(opts, %{player_id: player_id, location: location})
 
-  def add_robot(game, %{player_id: pl_id, location: _} = opts)
-      when pl_id in [:player_1, :player_2] do
     update_in(game.robots, fn robots ->
       [Robot.new(Map.merge(%{hp: game.robot_hp}, opts)) | robots]
     end)
   end
 
-  def remove_robots(game, robot_ids), do: Enum.reduce(robot_ids, game, &remove_robot(&2, &1))
-  def remove_robot(game, %{id: id}), do: remove_robot(game, id)
-
-  def remove_robot(game, id),
+  defp remove_robot(game, id),
     do: update_in(game.robots, &Enum.reject(&1, fn robot -> robot.id == id end))
 
   def available_adjacent_locations(game, location) do

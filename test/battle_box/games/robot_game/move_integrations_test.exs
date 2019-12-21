@@ -2,19 +2,23 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Logic}
   import BattleBox.Games.RobotGame.Terrain.Helpers
+  import BattleBox.Games.RobotGameTest.Helpers
 
   test "you can't move to a location that is not adjacent" do
     terrain = ~t/1 1
                  1 1/
 
+    robot_spawns = ~g/1 0
+                      0 0/
+
     game =
       Game.new(terrain: terrain, spawn?: false)
-      |> Game.add_robot(%{id: "A", player_id: :player_1, location: {0, 0}})
+      |> Game.apply_events(robot_spawns)
 
     assert %{location: {0, 0}} =
              game
-             |> Logic.calculate_turn([%{type: :move, target: {1, 1}, robot_id: "A"}])
-             |> Game.get_robot("A")
+             |> Logic.calculate_turn([%{type: :move, target: {1, 1}, robot_id: 1}])
+             |> Game.get_robot(1)
   end
 
   # 0 - Invalid
@@ -73,14 +77,15 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
     terrain = Map.new(graph_with_indexes, fn {loc, val} -> {loc, terrain_val(val)} end)
 
-    robots =
+    robot_spawns =
       graph_with_indexes
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
-      |> Enum.map(fn {loc, _} -> %{id: robot_id(loc), player_id: :player_1, location: loc} end)
+      |> Enum.map(fn {loc, _} -> {:create_robot, :player_1, loc, %{id: robot_id(loc)}} end)
+      |> Enum.map(fn effect -> %{move: :test_setup, effects: [effect]} end)
 
     initial_game =
       Game.new(terrain: terrain, spawn?: false)
-      |> Game.add_robots(robots)
+      |> Game.apply_events(robot_spawns)
 
     moves =
       graph_with_indexes

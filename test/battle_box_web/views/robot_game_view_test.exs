@@ -3,6 +3,7 @@ defmodule BattleBoxWeb.RobotGameViewTest do
   alias BattleBoxWeb.RobotGameView
   alias BattleBox.Games.RobotGame.Game
   import Phoenix.View
+  import BattleBox.Games.RobotGameTest.Helpers
 
   describe "terrain_number/1" do
     test "the terrain numbering of a starting column is displayed" do
@@ -132,12 +133,11 @@ defmodule BattleBoxWeb.RobotGameViewTest do
     end
 
     test "it displays the correct score" do
+      robot_spawns = ~g/1 2/
+
       game =
         Game.new()
-        |> Game.add_robots([
-          %{player_id: :player_1, location: {0, 0}},
-          %{player_id: :player_2, location: {0, 0}}
-        ])
+        |> Game.apply_events(robot_spawns)
 
       html = render_to_string(RobotGameView, "game_header.html", game: game)
 
