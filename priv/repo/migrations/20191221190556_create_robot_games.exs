@@ -6,8 +6,11 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
       add :player_1, :uuid, null: false
       add :player_2, :uuid, null: false
       add :robot_hp, :integer, null: false
+      add :spawn_every, :integer, null: false
+      add :spawn_per_player, :integer, null: false
       add :attack_damage, :jsonb, null: false
       add :collision_damage, :jsonb, null: false
+      add :suicide_damage, :jsonb, null: false
       add :max_turns, :integer, null: false
 
       timestamps()
