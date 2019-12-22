@@ -185,8 +185,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new()
       damage = Game.attack_damage(game)
 
-      assert damage >= game.attack_damage.min &&
-               damage <= game.attack_damage.max
+      assert damage >= game.attack_damage["min"] &&
+               damage <= game.attack_damage["max"]
     end
 
     test "guarded attack damage is 50% of regular damage rounding down to the integer" do
@@ -198,7 +198,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "it works if the the min and max attack are the same" do
-      game = Game.new(attack_damage: %{min: 50, max: 50})
+      game = Game.new(attack_damage: %{"min" => 50, "max" => 50})
       assert 50 == Game.attack_damage(game)
     end
   end

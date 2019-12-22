@@ -10,7 +10,7 @@ defmodule BattleBox.Games.RobotGame.Game do
             spawn_every: 10,
             spawn_per_player: 5,
             robot_hp: 50,
-            attack_damage: %{min: 8, max: 10},
+            attack_damage: %{"min" => 8, "max" => 10},
             collision_damage: 5,
             suicide_damage: 15,
             max_turns: 100,
@@ -134,10 +134,10 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   defp calc_damage(damage) do
     case damage do
-      %{max: value, min: value} ->
+      %{"max" => value, "min" => value} ->
         value
 
-      %{max: max, min: min} ->
+      %{"max" => max, "min" => min} ->
         min + :rand.uniform(max - min)
 
       value when is_integer(value) ->
