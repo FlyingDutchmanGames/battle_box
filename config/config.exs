@@ -1,7 +1,10 @@
 use Mix.Config
 
 config :battle_box,
-  ecto_repos: [BattleBox.Repo]
+  ecto_repos: [BattleBox.Repo],
+  generators: [binary_id: true]
+
+config :battle_box, BattleBox.Repo, migration_primary_key: [name: :id, type: :binary_id]
 
 config :battle_box, BattleBoxWeb.Endpoint,
   url: [host: "localhost"],
