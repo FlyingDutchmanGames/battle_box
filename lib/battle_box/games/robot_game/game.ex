@@ -1,20 +1,44 @@
 defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Games.RobotGame.{Terrain, Robot}
+  use Ecto.Schema
 
-  defstruct terrain: Terrain.default(),
-            robots: [],
-            turn: 0,
-            player_1: nil,
-            player_2: nil,
-            spawn?: true,
-            spawn_every: 10,
-            spawn_per_player: 5,
-            robot_hp: 50,
-            attack_damage: %{"min" => 8, "max" => 10},
-            collision_damage: 5,
-            suicide_damage: 15,
-            max_turns: 100,
-            event_log: []
+  defmodule DamageModifier do
+    use Ecto.Type
+    def type, do: :map
+
+    def cast(%{min: min, max: max}), do: {:ok, %{"min" => min, "max" => max}}
+    def cast(damage) when is_integer(damage), do: {:ok, %{"always" => damage}}
+    def cast(_), do: :error
+
+    def load(%{"min" => min, "max" => max}), do: {:ok, %{min: min, max: max}}
+    def load(%{"always" => damage}), do: {:ok, damage}
+    def load(_), do: :error
+
+    def dump(%{min: min, max: max}), do: {:ok, %{"min" => min, "max" => max}}
+    def dump(damage) when is_integer(damage), do: {:ok, %{"always" => damage}}
+    def dump(_), do: :error
+  end
+
+  @primary_key {:id, :binary_id, autogenerate: true}
+
+  schema "robot_games" do
+    field :player_1, :binary_id
+    field :player_2, :binary_id
+    field :spawn?, :boolean, default: true, virtual: true
+    field :spawn_every, :integer, default: 10
+    field :spawn_per_player, :integer, default: 5
+    field :robot_hp, :integer, default: 50
+    field :max_turns, :integer, default: 100
+    field :attack_damage, DamageModifier, default: %{min: 8, max: 10}
+    field :collision_damage, DamageModifier, default: 5
+    field :suicide_damage, DamageModifier, default: 15
+
+    field :robots, :any, default: [], virtual: true
+    field :turn, :any, default: 0, virtual: true
+    field :event_log, :any, default: [], virtual: true
+
+    timestamps()
+  end
 
   def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))
 
@@ -134,10 +158,10 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   defp calc_damage(damage) do
     case damage do
-      %{"max" => value, "min" => value} ->
+      %{max: value, min: value} ->
         value
 
-      %{"max" => max, "min" => min} ->
+      %{max: max, min: min} ->
         min + :rand.uniform(max - min)
 
       value when is_integer(value) ->
