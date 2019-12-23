@@ -1,25 +1,10 @@
 defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Games.RobotGame.{Terrain, Robot}
+  alias __MODULE__.{Turn, DamageModifier}
   use Ecto.Schema
 
-  defmodule DamageModifier do
-    use Ecto.Type
-    def type, do: :map
-
-    def cast(%{min: min, max: max}), do: {:ok, %{"min" => min, "max" => max}}
-    def cast(damage) when is_integer(damage), do: {:ok, %{"always" => damage}}
-    def cast(_), do: :error
-
-    def load(%{"min" => min, "max" => max}), do: {:ok, %{min: min, max: max}}
-    def load(%{"always" => damage}), do: {:ok, damage}
-    def load(_), do: :error
-
-    def dump(%{min: min, max: max}), do: {:ok, %{"min" => min, "max" => max}}
-    def dump(damage) when is_integer(damage), do: {:ok, %{"always" => damage}}
-    def dump(_), do: :error
-  end
-
   @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
 
   schema "robot_games" do
     field :player_1, :binary_id
@@ -32,10 +17,12 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :attack_damage, DamageModifier, default: %{min: 8, max: 10}
     field :collision_damage, DamageModifier, default: 5
     field :suicide_damage, DamageModifier, default: 15
+    has_many :turns, Turn
 
     field :robots, :any, default: [], virtual: true
     field :turn, :any, default: 0, virtual: true
     field :event_log, :any, default: [], virtual: true
+    field :terrain, :any, default: Terrain.default(), virtual: true
 
     timestamps()
   end
