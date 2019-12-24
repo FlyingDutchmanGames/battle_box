@@ -1,8 +1,10 @@
 defmodule BattleBox.Games.RobotGame.Game do
+  alias BattleBox.Repo
   alias BattleBox.Games.RobotGame.{Terrain, Robot}
   alias __MODULE__.{Turn, DamageModifier}
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -10,7 +12,6 @@ defmodule BattleBox.Games.RobotGame.Game do
   schema "robot_games" do
     field :player_1, :binary_id
     field :player_2, :binary_id
-    field :spawn?, :boolean, default: true, virtual: true
     field :spawn_every, :integer, default: 10
     field :spawn_per_player, :integer, default: 5
     field :robot_hp, :integer, default: 50
@@ -20,18 +21,45 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :suicide_damage, DamageModifier, default: 15
     has_many :turns, Turn
 
+    field :terrain, :any, default: Terrain.default(), virtual: true
+    field :spawn?, :boolean, default: true, virtual: true
     field :robots, :any, default: [], virtual: true
     field :turn, :any, default: 0, virtual: true
     field :event_log, :any, default: [], virtual: true
-    field :terrain, :any, default: Terrain.default(), virtual: true
 
     timestamps()
   end
 
   def changeset(game, params \\ %{}) do
     game
-    |> cast(params, [])
-    |> cast_assoc(:turns, with: &Turn.changeset/2)
+    |> cast(params, [
+      :player_1,
+      :player_2,
+      :spawn_every,
+      :spawn_per_player,
+      :robot_hp,
+      :max_turns,
+      :attack_damage,
+      :collision_damage,
+      :suicide_damage
+    ])
+    |> cast_assoc(:turns)
+  end
+
+  def get_by_id(id) do
+    query =
+      from g in __MODULE__,
+        where: g.id == ^id,
+        select: g,
+        preload: [:turns]
+
+    Repo.one(query)
+  end
+
+  def persist!(game) do
+    game
+    |> changeset()
+    |> Repo.insert_or_update()
   end
 
   def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))

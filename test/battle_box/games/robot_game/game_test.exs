@@ -1,13 +1,41 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
-  use ExUnit.Case, async: true
+  use BattleBox.DataCase
   alias BattleBox.Games.RobotGame.{Game, Robot}
   import BattleBox.Games.RobotGame.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
+
+  @player_1 Ecto.UUID.generate()
+  @player_2 Ecto.UUID.generate()
 
   describe "new/1" do
     test "you can override any top level key" do
       assert %{turn: 42} = Game.new(turn: 42)
       assert %{suicide_damage: 15, robot_hp: 42} = Game.new(suicide_damage: 15, robot_hp: 42)
+    end
+  end
+
+  describe "persistance" do
+    test "You can persist a game" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+      assert {:ok, _} = Game.persist!(game)
+    end
+
+    test "trying to get a game that doesnt exist yields nil" do
+      assert nil == Game.get_by_id(Ecto.UUID.generate())
+    end
+
+    test "you can get a game you persisted (and it will include turns)" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+      assert {:ok, game} = Game.persist!(game)
+      expected = %{id: game.id, turns: []}
+      assert expected == Game.get_by_id(game.id) |> Map.take([:id, :turns])
+    end
+
+    test "you can persist a game twice" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+      assert {:ok, persisted_game} = Game.persist!(game)
+      persisted_game = Repo.preload(persisted_game, :turns)
+      assert {:ok, _} = Game.persist!(persisted_game)
     end
   end
 
