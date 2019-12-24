@@ -7,7 +7,12 @@ defmodule BattleBox.Games.RobotGame.Game.Move do
     def type, do: :map
 
     def cast(:spawn), do: {:ok, :spawn}
+    def cast("spawn"), do: {:ok, :spawn}
     def cast(%{type: _, robot_id: _} = cause), do: {:ok, cause}
+
+    def cast(%{"type" => type, "robot_id" => robot_id, "target" => [x, y]}) do
+      {:ok, %{type: String.to_existing_atom(type), robot_id: robot_id, target: {x, y}}}
+    end
 
     def cast(%{"type" => type, "robot_id" => robot_id}),
       do: {:ok, %{robot_id: robot_id, type: String.to_existing_atom(type)}}
