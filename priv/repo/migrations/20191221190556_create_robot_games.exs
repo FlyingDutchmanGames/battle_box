@@ -16,9 +16,9 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
       timestamps()
     end
 
-    create table("robot_game_turns") do
-      add :game_id, :uuid, null: false
-      add :turn_number, :integer, null: false
+    create table("robot_game_turns", primary_key: false) do
+      add :game_id, :uuid, null: false, primary_key: true
+      add :turn_number, :integer, null: false, primary_key: true
       add :moves, :jsonb, null: false, default: fragment("'[]'::jsonb")
 
       timestamps()
@@ -26,6 +26,6 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
 
     create index("robot_games", [:player_1])
     create index("robot_games", [:player_2])
-    create index("robot_game_turns", [:game_id, :turn_number], unique: true)
+    # create index("robot_game_turns", [:game_id, :turn_number], unique: true)
   end
 end

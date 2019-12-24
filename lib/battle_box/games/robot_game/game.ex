@@ -2,6 +2,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Games.RobotGame.{Terrain, Robot}
   alias __MODULE__.{Turn, DamageModifier}
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -25,6 +26,12 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :terrain, :any, default: Terrain.default(), virtual: true
 
     timestamps()
+  end
+
+  def changeset(game, params \\ %{}) do
+    game
+    |> cast(params, [])
+    |> cast_assoc(:turns, with: &Turn.changeset/2)
   end
 
   def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))

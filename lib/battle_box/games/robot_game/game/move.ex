@@ -1,66 +1,86 @@
 defmodule BattleBox.Games.RobotGame.Game.Move do
-  use Ecto.Type
-  def type, do: :map
+  use Ecto.Schema
+  import Ecto.Changeset
 
-  def cast(%{cause: _, effects: _} = move) do
-    {:ok, move}
-  end
+  defmodule Cause do
+    use Ecto.Type
+    def type, do: :map
 
-  def dump(%{cause: _, effects: _} = move) do
-    {:ok, as_json(move)}
-  end
+    def cast(:spawn), do: {:ok, :spawn}
+    def cast(%{type: _, robot_id: _} = cause), do: {:ok, cause}
 
-  def load(%{"cause" => cause, "effects" => effects}) do
-    {:ok,
-     %{
-       cause: decode_cause(cause),
-       effects: Enum.map(effects, &decode_effect/1)
-     }}
-  end
+    def cast(%{"type" => type, "robot_id" => robot_id}),
+      do: {:ok, %{robot_id: robot_id, type: String.to_existing_atom(type)}}
 
-  defp decode_cause(cause) do
-    case cause do
-      "spawn" ->
-        :spawn
+    def load("spawn"), do: {:ok, :spawn}
 
-      %{"type" => type, "robot_id" => robot_id, "target" => [x, y]} ->
-        %{type: String.to_existing_atom(type), robot_id: robot_id, target: {x, y}}
+    def load(%{"type" => type, "robot_id" => robot_id, "target" => [x, y]}) do
+      {:ok, %{type: String.to_existing_atom(type), robot_id: robot_id, target: {x, y}}}
+    end
 
-      %{"type" => type, "robot_id" => robot_id} ->
-        %{type: String.to_existing_atom(type), robot_id: robot_id}
+    def load(%{"type" => type, "robot_id" => robot_id}) do
+      {:ok, %{type: String.to_existing_atom(type), robot_id: robot_id}}
+    end
+
+    def dump(cause) do
+      {:ok, cause}
     end
   end
 
-  defp decode_effect(effect) do
-    case effect do
-      ["move", robot_id, [x, y]] ->
-        {:move, robot_id, {x, y}}
+  defmodule Effect do
+    use Ecto.Type
+    def type, do: :map
 
-      ["damage", robot_id, amount] ->
-        {:damage, robot_id, amount}
+    def cast({:move, _, _} = effect), do: {:ok, effect}
+    def cast({:damage, _, _} = effect), do: {:ok, effect}
+    def cast({:guard, _} = effect), do: {:ok, effect}
+    def cast({:create_robot, _, _} = effect), do: {:ok, effect}
+    def cast({:create_robot, _, _, _} = effect), do: {:ok, effect}
+    def cast({:remove_robot, _} = effect), do: {:ok, effect}
 
-      ["guard", robot_id] ->
-        {:guard, robot_id}
+    def cast(["move", robot_id, [x, y]]), do: {:ok, {:move, robot_id, {x, y}}}
+    def cast(["damage", robot_id, amount]), do: {:ok, {:damage, robot_id, amount}}
+    def cast(["guard", robot_id]), do: {:ok, {:guard, robot_id}}
+    def cast(["create_robot", player_id, [x, y]]), do: {:ok, {:create_robot, player_id, {x, y}}}
 
-      ["create_robot", player_id, [x, y]] ->
-        {:create_robot, player_id, {x, y}}
+    def cast(["create_robot", player_id, [x, y], opts]),
+      do: {:ok, {:create_robot, player_id, {x, y}, decode_opts(opts)}}
 
-      ["create_robot", player_id, [x, y], opts] ->
-        {:create_robot, player_id, {x, y}, decode_opts(opts)}
+    def cast(["remove_robot", robot_id]), do: {:ok, {:remove_robot, robot_id}}
 
-      ["remove_robot", robot_id] ->
-        {:remove_robot, robot_id}
+    def load(["move", robot_id, [x, y]]), do: {:ok, {:move, robot_id, {x, y}}}
+    def load(["damage", robot_id, amount]), do: {:ok, {:damage, robot_id, amount}}
+    def load(["guard", robot_id]), do: {:ok, {:guard, robot_id}}
+    def load(["create_robot", player_id, [x, y]]), do: {:ok, {:create_robot, player_id, {x, y}}}
+
+    def load(["create_robot", player_id, [x, y], opts]),
+      do: {:ok, {:create_robot, player_id, {x, y}, decode_opts(opts)}}
+
+    def load(["remove_robot", robot_id]), do: {:ok, {:remove_robot, robot_id}}
+
+    def dump({:guard, robot_id}), do: {:ok, ["guard", robot_id]}
+    def dump({:remove_robot, robot_id}), do: {:ok, ["remove_robot", robot_id]}
+    def dump({:move, robot_id, {x, y}}), do: {:ok, ["move", robot_id, [x, y]]}
+    def dump({:damage, robot_id, amount}), do: {:ok, ["damage", robot_id, amount]}
+    def dump({:create_robot, player_id, {x, y}}), do: {:ok, ["create_robot", player_id, [x, y]]}
+
+    def dump({:create_robot, player_id, {x, y}, opts}),
+      do: {:ok, ["create_robot", player_id, [x, y], opts]}
+
+    defp decode_opts(opts) do
+      Map.new(opts, fn {k, v} -> {String.to_existing_atom(k), v} end)
     end
   end
 
-  defp decode_opts(opts) do
-    Map.new(opts, fn {k, v} -> {String.to_existing_atom(k), v} end)
+  @primary_key false
+
+  schema "moves" do
+    field :cause, Cause
+    field :effects, {:array, Effect}
   end
 
-  defp as_json(item) do
-    # I'm so sorry...
-    item
-    |> Jason.encode!()
-    |> Jason.decode!()
+  def changeset(move, params) do
+    move
+    |> cast(params, [:cause, :effects])
   end
 end
