@@ -25,7 +25,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :spawn?, :boolean, default: true, virtual: true
     field :robots, :any, default: [], virtual: true
     field :turn, :any, default: 0, virtual: true
-    field :event_log, :any, default: [], virtual: true
+    field :unpersisted_events, :any, default: [], virtual: true
 
     timestamps()
   end
@@ -53,13 +53,41 @@ defmodule BattleBox.Games.RobotGame.Game do
         select: g,
         preload: [:turns]
 
-    Repo.one(query)
+    case Repo.one(query) do
+      nil ->
+        nil
+
+      game ->
+        project_events_into_robots(game)
+    end
   end
 
-  def persist!(game) do
-    game
-    |> changeset()
-    |> Repo.insert_or_update()
+  def persist(game) do
+    new_turns =
+      game.unpersisted_events
+      |> Enum.group_by(fn event -> event.turn end)
+      |> Enum.map(fn {turn_num, events} ->
+        events = Enum.map(events, fn event -> Map.take(event, [:cause, :effects]) end)
+        %{turn_number: turn_num, moves: events}
+      end)
+
+    result =
+      game
+      |> changeset(%{turns: new_turns})
+      |> Repo.insert_or_update()
+
+    case result do
+      {:ok, game} ->
+        game =
+          game
+          |> Map.put(:unpersisted_events, [])
+          |> Repo.preload(:turns)
+
+        {:ok, game}
+
+      error ->
+        error
+    end
   end
 
   def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))
@@ -123,7 +151,7 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   defp log(game, event) do
     event = Map.put(event, :turn, game.turn)
-    update_in(game.event_log, fn log -> [event | log] end)
+    update_in(game.unpersisted_events, fn events -> [event | events] end)
   end
 
   defp apply_damage_to_robot(game, id, damage) do
@@ -189,5 +217,17 @@ defmodule BattleBox.Games.RobotGame.Game do
       value when is_integer(value) ->
         value
     end
+  end
+
+  defp project_events_into_robots(game) do
+    effects =
+      game.turns
+      |> Enum.sort_by(fn turn -> turn.turn_number end)
+      |> Enum.flat_map(fn turn -> turn.moves end)
+      |> Enum.flat_map(fn move -> move.effects end)
+
+    Enum.reduce(effects, game, fn effect, game ->
+      apply_effect(game, effect)
+    end)
   end
 end

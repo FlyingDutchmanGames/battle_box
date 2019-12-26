@@ -46,20 +46,24 @@ defmodule BattleBox.Games.RobotGame.Game.Move do
     def cast(["move", robot_id, [x, y]]), do: {:ok, {:move, robot_id, {x, y}}}
     def cast(["damage", robot_id, amount]), do: {:ok, {:damage, robot_id, amount}}
     def cast(["guard", robot_id]), do: {:ok, {:guard, robot_id}}
-    def cast(["create_robot", player_id, [x, y]]), do: {:ok, {:create_robot, player_id, {x, y}}}
+
+    def cast(["create_robot", player_id, [x, y]]),
+      do: {:ok, {:create_robot, String.to_existing_atom(player_id), {x, y}}}
 
     def cast(["create_robot", player_id, [x, y], opts]),
-      do: {:ok, {:create_robot, player_id, {x, y}, decode_opts(opts)}}
+      do: {:ok, {:create_robot, String.to_existing_atom(player_id), {x, y}, decode_opts(opts)}}
 
     def cast(["remove_robot", robot_id]), do: {:ok, {:remove_robot, robot_id}}
 
     def load(["move", robot_id, [x, y]]), do: {:ok, {:move, robot_id, {x, y}}}
     def load(["damage", robot_id, amount]), do: {:ok, {:damage, robot_id, amount}}
     def load(["guard", robot_id]), do: {:ok, {:guard, robot_id}}
-    def load(["create_robot", player_id, [x, y]]), do: {:ok, {:create_robot, player_id, {x, y}}}
+
+    def load(["create_robot", player_id, [x, y]]),
+      do: {:ok, {:create_robot, String.to_existing_atom(player_id), {x, y}}}
 
     def load(["create_robot", player_id, [x, y], opts]),
-      do: {:ok, {:create_robot, player_id, {x, y}, decode_opts(opts)}}
+      do: {:ok, {:create_robot, String.to_existing_atom(player_id), {x, y}, decode_opts(opts)}}
 
     def load(["remove_robot", robot_id]), do: {:ok, {:remove_robot, robot_id}}
 

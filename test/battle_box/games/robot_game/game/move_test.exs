@@ -4,7 +4,6 @@ defmodule BattleBox.Games.RobotGame.Game.MoveTest do
   import Ecto.Query, only: [from: 2]
 
   @robot_id "7b875c94-8fe0-4fa3-992a-d6d9f7da1a08"
-  @player_id "800bf58b-e8d0-4e58-9ba8-956fdd7fa065"
 
   @move_move %{type: :move, robot_id: @robot_id, target: {0, 0}}
   @guard_move %{type: :guard, robot_id: @robot_id}
@@ -26,9 +25,9 @@ defmodule BattleBox.Games.RobotGame.Game.MoveTest do
       %{cause: @noop_move, effects: []},
       %{cause: @attack_move, effects: [{:damage, @robot_id, 42}]},
       # Robot creation (especially with weird opts)
-      %{cause: :spawn, effects: [{:create_robot, @player_id, {0, 0}}]},
-      %{cause: :spawn, effects: [{:create_robot, @player_id, {0, 0}, %{id: "TEST"}}]},
-      %{cause: :spawn, effects: [{:create_robot, @player_id, {0, 0}, %{id: "TEST", hp: 50}}]},
+      %{cause: :spawn, effects: [{:create_robot, :player_1, {0, 0}}]},
+      %{cause: :spawn, effects: [{:create_robot, :player_2, {0, 0}, %{id: "TEST"}}]},
+      %{cause: :spawn, effects: [{:create_robot, :player_2, {0, 0}, %{id: "TEST", hp: 50}}]},
       # Multiple Effects
       %{cause: @attack_move, effects: [{:damage, @robot_id, 42}, {:remove_robot, @robot_id}]}
     ]

@@ -26,6 +26,5 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
 
     create index("robot_games", [:player_1])
     create index("robot_games", [:player_2])
-    # create index("robot_game_turns", [:game_id, :turn_number], unique: true)
   end
 end

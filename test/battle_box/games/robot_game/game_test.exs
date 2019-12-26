@@ -17,7 +17,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "persistance" do
     test "You can persist a game" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
-      assert {:ok, _} = Game.persist!(game)
+      assert {:ok, _} = Game.persist(game)
     end
 
     test "trying to get a game that doesnt exist yields nil" do
@@ -26,16 +26,44 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "you can get a game you persisted (and it will include turns)" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
-      assert {:ok, game} = Game.persist!(game)
+      assert {:ok, game} = Game.persist(game)
       expected = %{id: game.id, turns: []}
       assert expected == Game.get_by_id(game.id) |> Map.take([:id, :turns])
     end
 
     test "you can persist a game twice" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
-      assert {:ok, persisted_game} = Game.persist!(game)
+      assert {:ok, persisted_game} = Game.persist(game)
       persisted_game = Repo.preload(persisted_game, :turns)
-      assert {:ok, _} = Game.persist!(persisted_game)
+      assert {:ok, _} = Game.persist(persisted_game)
+    end
+
+    test "when you persist a game it flushes the turns unpersisted events to disk" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+
+      game =
+        Game.apply_event(game, %{cause: :spawn, effects: [{:create_robot, :player_1, {0, 0}}]})
+
+      {:ok, game} = Game.persist(game)
+
+      reloaded_game = Game.get_by_id(game.id)
+      assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
+      assert game.robots == reloaded_game.robots
+      assert game.unpersisted_events == []
+    end
+
+    test "you can persist a new turn to a game that already has a turn" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+
+      game =
+        Game.apply_event(game, %{cause: :spawn, effects: [{:create_robot, :player_1, {0, 0}}]})
+
+      {:ok, game} = Game.persist(game)
+
+      game =
+        Game.apply_event(game, %{cause: :spawn, effects: [{:create_robot, :player_1, {1, 1}}]})
+
+      {:ok, game} = Game.persist(game)
     end
   end
 
@@ -119,14 +147,14 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "applying an event appends the turn to the log item" do
       game = Game.new(turn: 42)
       game = Game.apply_event(game, %{move: :test, effects: []})
-      assert [%{turn: 42} | _] = game.event_log
+      assert [%{turn: 42} | _] = game.unpersisted_events
     end
 
     test "you can create a guard move" do
       robot_spawns = ~g/1/
       game = Game.new() |> Game.apply_events(robot_spawns)
       game = Game.apply_event(game, %{move: %{type: :guard}, effects: [{:guard, 1}]})
-      assert [%{effects: [guard: 1], move: %{type: :guard}} | _] = game.event_log
+      assert [%{effects: [guard: 1], move: %{type: :guard}} | _] = game.unpersisted_events
     end
   end
 
@@ -278,5 +306,11 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new(terrain: terrain)
       assert [] == Game.available_adjacent_locations(game, {1, 1})
     end
+  end
+
+  defp normalize_turns(turns) do
+    Enum.map(turns, fn turn ->
+      %{turn | __meta__: nil, moves: Enum.map(turn.moves, &Map.delete(&1, :__meta__))}
+    end)
   end
 end
