@@ -17,7 +17,7 @@ defmodule BattleBox.Games.RobotGame.Game.Turn do
 
   def changeset(turn, params \\ %{}) do
     turn
-    |> cast(params, [:turn_number])
+    |> cast(params, [:turn_number, :game_id])
     |> cast_embed(:moves)
   end
 end

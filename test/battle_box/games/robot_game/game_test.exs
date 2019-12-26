@@ -60,10 +60,16 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       {:ok, game} = Game.persist(game)
 
+      game = Game.complete_turn(game)
+
       game =
         Game.apply_event(game, %{cause: :spawn, effects: [{:create_robot, :player_1, {1, 1}}]})
 
       {:ok, game} = Game.persist(game)
+      reloaded_game = Game.get_by_id(game.id)
+      assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
+      assert game.robots == reloaded_game.robots
+      assert game.unpersisted_events == []
     end
   end
 

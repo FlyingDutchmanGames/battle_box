@@ -43,7 +43,6 @@ defmodule BattleBox.Games.RobotGame.Game do
       :collision_damage,
       :suicide_damage
     ])
-    |> cast_assoc(:turns)
   end
 
   def get_by_id(id) do
@@ -63,31 +62,24 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 
   def persist(game) do
-    new_turns =
-      game.unpersisted_events
-      |> Enum.group_by(fn event -> event.turn end)
-      |> Enum.map(fn {turn_num, events} ->
-        events = Enum.map(events, fn event -> Map.take(event, [:cause, :effects]) end)
-        %{turn_number: turn_num, moves: events}
-      end)
-
-    result =
+    {:ok, game} =
       game
-      |> changeset(%{turns: new_turns})
+      |> changeset
       |> Repo.insert_or_update()
 
-    case result do
-      {:ok, game} ->
-        game =
-          game
-          |> Map.put(:unpersisted_events, [])
-          |> Repo.preload(:turns)
+    game.unpersisted_events
+    |> Enum.group_by(fn event -> event.turn end)
+    |> Enum.each(fn {turn_num, events} ->
+      events = Enum.map(events, fn event -> Map.take(event, [:cause, :effects]) end)
+      turn = Turn.changeset(%Turn{}, %{turn_number: turn_num, moves: events, game_id: game.id})
+      {:ok, _} = Repo.insert(turn)
+    end)
 
-        {:ok, game}
+    {:ok, get_by_id(game.id)}
+  end
 
-      error ->
-        error
-    end
+  def complete_turn(game) do
+    update_in(game.turn, &(&1 + 1))
   end
 
   def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))

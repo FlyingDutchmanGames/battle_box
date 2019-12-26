@@ -35,7 +35,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     game = apply_events(game, events)
 
-    update_in(game.turn, &(&1 + 1))
+    complete_turn(game)
   end
 
   defp generate_guard_event(move), do: %{cause: move, effects: [{:guard, move.robot_id}]}
