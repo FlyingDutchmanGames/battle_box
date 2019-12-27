@@ -53,11 +53,8 @@ defmodule BattleBox.Games.RobotGame.Game do
         preload: [:turns]
 
     case Repo.one(query) do
-      nil ->
-        nil
-
-      game ->
-        project_events_into_robots(game)
+      nil -> nil
+      game -> project_events_into_robots(game)
     end
   end
 
@@ -68,19 +65,22 @@ defmodule BattleBox.Games.RobotGame.Game do
       |> Repo.insert_or_update()
 
     game.unpersisted_events
-    |> Enum.group_by(fn event -> event.turn end)
+    |> Enum.group_by(& &1.turn)
     |> Enum.each(fn {turn_num, events} ->
-      events = Enum.map(events, fn event -> Map.take(event, [:cause, :effects]) end)
-      turn = Turn.changeset(%Turn{}, %{turn_number: turn_num, events: events, game_id: game.id})
-      {:ok, _} = Repo.insert(turn)
+      {:ok, _} =
+        %Turn{
+          events: Enum.map(events, &Map.take(&1, [:cause, :effects])),
+          turn_number: turn_num,
+          game_id: game.id
+        }
+        |> Turn.changeset()
+        |> Repo.insert()
     end)
 
     {:ok, get_by_id(game.id)}
   end
 
-  def complete_turn(game) do
-    update_in(game.turn, &(&1 + 1))
-  end
+  def complete_turn(game), do: update_in(game.turn, &(&1 + 1))
 
   def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))
 
@@ -139,8 +139,9 @@ defmodule BattleBox.Games.RobotGame.Game do
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
 
   defp log(game, event) do
-    event = Map.put(event, :turn, game.turn)
-    update_in(game.unpersisted_events, fn events -> [event | events] end)
+    update_in(game.unpersisted_events, fn events ->
+      [Map.put(event, :turn, game.turn) | events]
+    end)
   end
 
   defp apply_damage_to_robot(game, id, damage) do

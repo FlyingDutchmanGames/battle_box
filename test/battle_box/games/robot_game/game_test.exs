@@ -14,6 +14,22 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "complete turn" do
+    test "you can complete the turn on a new game" do
+      game = Game.new()
+      assert game.turn == 0
+      game = Game.complete_turn(game)
+      assert game.turn == 1
+    end
+
+    test "you can complete a turn on an existing game" do
+      game = Game.new(turn: 10)
+      assert game.turn == 10
+      game = Game.complete_turn(game)
+      assert game.turn == 11
+    end
+  end
+
   describe "persistance" do
     test "You can persist a game" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
@@ -27,15 +43,19 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "you can get a game you persisted (and it will include turns)" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
       assert {:ok, game} = Game.persist(game)
-      expected = %{id: game.id, turns: []}
-      assert expected == Game.get_by_id(game.id) |> Map.take([:id, :turns])
+
+      assert %{id: game.id, turns: []} ==
+               Game.get_by_id(game.id) |> Map.take([:id, :turns])
     end
 
     test "you can persist a game twice" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
-      assert {:ok, persisted_game} = Game.persist(game)
-      persisted_game = Repo.preload(persisted_game, :turns)
-      assert {:ok, _} = Game.persist(persisted_game)
+      assert {:ok, game} = Game.persist(game)
+
+      assert {:ok, _} =
+               game
+               |> Repo.preload(:turns)
+               |> Game.persist()
     end
 
     test "when you persist a game it flushes the turns unpersisted events to disk" do
@@ -199,12 +219,17 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.apply_effect(game, {:move, 1, {0, 1}})
       [%{location: {0, 1}, id: 1}] = Game.robots(game)
     end
+  end
 
-    test "trying to move a non existant robot is a no-op" do
+  describe "apply_event :damage" do
+    test "you can damage a robot" do
+      robot_spawns = ~g/1/
+      game = Game.new(robot_hp: 42) |> Game.apply_events(robot_spawns)
+      game = Game.apply_effect(game, {:damage, 1, 10})
+      [%{hp: 32, id: 1}] = Game.robots(game)
     end
   end
 
-  # describe "apply_event :damage"
   describe "apply_event :remove_robot" do
     test "you can remove a robot" do
       game = Game.new()
@@ -222,21 +247,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert 0 == game |> Game.robots() |> length
     end
   end
-
-  # describe "move_robot/3" do
-  #   test "trying to move a robot that doesn't exist is a noop" do
-  #     game = Game.new()
-  #     assert ^game = Game.move_robot(game, "DOES_NOT_EXIST", {42, 42})
-  #   end
-
-  #   test "you can move a robot" do
-  #     assert [%{location: {42, 42}}] =
-  #              Game.new()
-  #              |> Game.add_robot(%{player_id: :player_1, id: "TEST", location: {0, 0}})
-  #              |> Game.move_robot("TEST", {42, 42})
-  #              |> Game.robots()
-  #   end
-  # end
 
   describe "get_robot/2" do
     test "you can get a robot by id" do
