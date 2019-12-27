@@ -100,11 +100,8 @@ defmodule BattleBox.Games.RobotGame.Game do
       {:guard, _robot_id} ->
         game
 
-      {:create_robot, player_id, location} ->
-        add_robot(game, player_id, location, %{})
-
-      {:create_robot, player_id, location, opts} ->
-        add_robot(game, player_id, location, opts)
+      {:create_robot, player_id, robot_id, location, opts} ->
+        add_robot(game, player_id, robot_id, location, opts)
 
       {:remove_robot, robot_id} ->
         remove_robot(game, robot_id)
@@ -166,8 +163,9 @@ defmodule BattleBox.Games.RobotGame.Game do
     )
   end
 
-  defp add_robot(game, player_id, location, opts) when player_id in [:player_1, :player_2] do
-    opts = Map.merge(opts, %{player_id: player_id, location: location})
+  defp add_robot(game, player_id, robot_id, location, opts)
+       when player_id in [:player_1, :player_2] do
+    opts = Map.merge(opts, %{player_id: player_id, location: location, id: robot_id})
 
     update_in(game.robots, fn robots ->
       [Robot.new(Map.merge(%{hp: game.robot_hp}, opts)) | robots]

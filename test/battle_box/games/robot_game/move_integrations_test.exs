@@ -80,7 +80,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
     robot_spawns =
       graph_with_indexes
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
-      |> Enum.map(fn {loc, _} -> {:create_robot, :player_1, loc, %{id: robot_id(loc)}} end)
+      |> Enum.map(fn {loc, _} -> {:create_robot, :player_1, robot_id(loc), loc, %{}} end)
       |> Enum.map(fn effect -> %{move: :test_setup, effects: [effect]} end)
 
     initial_game =

@@ -25,9 +25,9 @@ defmodule BattleBox.Games.RobotGame.Game.MoveTest do
       %{cause: @noop_move, effects: []},
       %{cause: @attack_move, effects: [{:damage, @robot_id, 42}]},
       # Robot creation (especially with weird opts)
-      %{cause: :spawn, effects: [{:create_robot, :player_1, {0, 0}}]},
-      %{cause: :spawn, effects: [{:create_robot, :player_2, {0, 0}, %{id: "TEST"}}]},
-      %{cause: :spawn, effects: [{:create_robot, :player_2, {0, 0}, %{id: "TEST", hp: 50}}]},
+      %{cause: :spawn, effects: [{:create_robot, :player_1, @robot_id, {0, 0}, %{}}]},
+      %{cause: :spawn, effects: [{:create_robot, :player_2, @robot_id, {0, 0}, %{foo: "bar"}}]},
+      %{cause: :spawn, effects: [{:create_robot, :player_2, @robot_id, {0, 0}, %{hp: 50}}]},
       # Multiple Effects
       %{cause: @attack_move, effects: [{:damage, @robot_id, 42}, {:remove_robot, @robot_id}]}
     ]

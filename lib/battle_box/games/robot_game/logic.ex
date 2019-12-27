@@ -1,5 +1,6 @@
 defmodule BattleBox.Games.RobotGame.Logic do
   import BattleBox.Games.RobotGame.Game
+  alias Ecto.UUID
 
   def calculate_turn(game, moves) do
     game =
@@ -131,7 +132,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
       |> Enum.map(fn {spawn_location, player_id} ->
         %{
           cause: :spawn,
-          effects: [{:create_robot, player_id, spawn_location, %{}}]
+          effects: [{:create_robot, player_id, UUID.generate(), spawn_location, %{}}]
         }
       end)
 

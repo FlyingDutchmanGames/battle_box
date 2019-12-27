@@ -42,7 +42,10 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new(player_1: @player_1, player_2: @player_2)
 
       game =
-        Game.apply_event(game, %{cause: :spawn, effects: [{:create_robot, :player_1, {0, 0}}]})
+        Game.apply_event(game, %{
+          cause: :spawn,
+          effects: [{:create_robot, :player_1, uuid(), {0, 0}, %{}}]
+        })
 
       {:ok, game} = Game.persist(game)
 
@@ -56,14 +59,20 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new(player_1: @player_1, player_2: @player_2)
 
       game =
-        Game.apply_event(game, %{cause: :spawn, effects: [{:create_robot, :player_1, {0, 0}}]})
+        Game.apply_event(game, %{
+          cause: :spawn,
+          effects: [{:create_robot, :player_1, uuid(), {0, 0}, %{}}]
+        })
 
       {:ok, game} = Game.persist(game)
 
       game = Game.complete_turn(game)
 
       game =
-        Game.apply_event(game, %{cause: :spawn, effects: [{:create_robot, :player_1, {1, 1}}]})
+        Game.apply_event(game, %{
+          cause: :spawn,
+          effects: [{:create_robot, :player_1, uuid(), {1, 1}, %{}}]
+        })
 
       {:ok, game} = Game.persist(game)
       reloaded_game = Game.get_by_id(game.id)
@@ -167,18 +176,19 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "apply_events (:create_robot)" do
     test "you can create a robot" do
       game = Game.new()
-      effect = {:create_robot, :player_1, {42, 42}}
+      id = uuid()
+      effect = {:create_robot, :player_1, id, {42, 42}, %{}}
       game = Game.apply_event(game, %{move: :test, effects: [effect]})
 
-      assert [%{id: <<_::size(288)>>, player_id: :player_1, location: {42, 42}, hp: 50}] =
-               game.robots
+      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 50}] = game.robots
     end
 
     test "you can create a robot with special characteristics" do
+      id = uuid()
       game = Game.new()
-      effect = {:create_robot, :player_1, {42, 42}, %{hp: 42, id: "TEST"}}
+      effect = {:create_robot, :player_1, id, {42, 42}, %{hp: 42}}
       game = Game.apply_event(game, %{move: :test, effects: [effect]})
-      assert [%{id: "TEST", player_id: :player_1, location: {42, 42}, hp: 42}] = game.robots
+      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 42}] = game.robots
     end
   end
 
@@ -319,4 +329,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       %{turn | __meta__: nil, moves: Enum.map(turn.moves, &Map.delete(&1, :__meta__))}
     end)
   end
+
+  defp uuid(), do: Ecto.UUID.generate()
 end

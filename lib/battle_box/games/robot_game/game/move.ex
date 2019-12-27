@@ -11,25 +11,27 @@ defmodule BattleBox.Games.RobotGame.Game.Move do
     def cast(%{type: _, robot_id: _} = cause), do: {:ok, cause}
 
     def cast(%{"type" => type, "robot_id" => robot_id, "target" => [x, y]}) do
-      {:ok, %{type: String.to_existing_atom(type), robot_id: robot_id, target: {x, y}}}
+      {:ok, %{type: stea(type), robot_id: robot_id, target: {x, y}}}
     end
 
     def cast(%{"type" => type, "robot_id" => robot_id}),
-      do: {:ok, %{robot_id: robot_id, type: String.to_existing_atom(type)}}
+      do: {:ok, %{robot_id: robot_id, type: stea(type)}}
 
     def load("spawn"), do: {:ok, :spawn}
 
     def load(%{"type" => type, "robot_id" => robot_id, "target" => [x, y]}) do
-      {:ok, %{type: String.to_existing_atom(type), robot_id: robot_id, target: {x, y}}}
+      {:ok, %{type: stea(type), robot_id: robot_id, target: {x, y}}}
     end
 
     def load(%{"type" => type, "robot_id" => robot_id}) do
-      {:ok, %{type: String.to_existing_atom(type), robot_id: robot_id}}
+      {:ok, %{type: stea(type), robot_id: robot_id}}
     end
 
     def dump(cause) do
       {:ok, cause}
     end
+
+    defp stea(string), do: String.to_existing_atom(string)
   end
 
   defmodule Effect do
@@ -39,19 +41,15 @@ defmodule BattleBox.Games.RobotGame.Game.Move do
     def cast({:move, _, _} = effect), do: {:ok, effect}
     def cast({:damage, _, _} = effect), do: {:ok, effect}
     def cast({:guard, _} = effect), do: {:ok, effect}
-    def cast({:create_robot, _, _} = effect), do: {:ok, effect}
-    def cast({:create_robot, _, _, _} = effect), do: {:ok, effect}
+    def cast({:create_robot, _, _, _, _} = effect), do: {:ok, effect}
     def cast({:remove_robot, _} = effect), do: {:ok, effect}
 
     def cast(["move", robot_id, [x, y]]), do: {:ok, {:move, robot_id, {x, y}}}
     def cast(["damage", robot_id, amount]), do: {:ok, {:damage, robot_id, amount}}
     def cast(["guard", robot_id]), do: {:ok, {:guard, robot_id}}
 
-    def cast(["create_robot", player_id, [x, y]]),
-      do: {:ok, {:create_robot, String.to_existing_atom(player_id), {x, y}}}
-
-    def cast(["create_robot", player_id, [x, y], opts]),
-      do: {:ok, {:create_robot, String.to_existing_atom(player_id), {x, y}, decode_opts(opts)}}
+    def cast(["create_robot", player_id, robot_id, [x, y], opts]),
+      do: {:ok, {:create_robot, stea(player_id), robot_id, {x, y}, decode_opts(opts)}}
 
     def cast(["remove_robot", robot_id]), do: {:ok, {:remove_robot, robot_id}}
 
@@ -60,10 +58,10 @@ defmodule BattleBox.Games.RobotGame.Game.Move do
     def load(["guard", robot_id]), do: {:ok, {:guard, robot_id}}
 
     def load(["create_robot", player_id, [x, y]]),
-      do: {:ok, {:create_robot, String.to_existing_atom(player_id), {x, y}}}
+      do: {:ok, {:create_robot, stea(player_id), {x, y}}}
 
-    def load(["create_robot", player_id, [x, y], opts]),
-      do: {:ok, {:create_robot, String.to_existing_atom(player_id), {x, y}, decode_opts(opts)}}
+    def load(["create_robot", player_id, robot_id, [x, y], opts]),
+      do: {:ok, {:create_robot, stea(player_id), robot_id, {x, y}, decode_opts(opts)}}
 
     def load(["remove_robot", robot_id]), do: {:ok, {:remove_robot, robot_id}}
 
@@ -73,12 +71,14 @@ defmodule BattleBox.Games.RobotGame.Game.Move do
     def dump({:damage, robot_id, amount}), do: {:ok, ["damage", robot_id, amount]}
     def dump({:create_robot, player_id, {x, y}}), do: {:ok, ["create_robot", player_id, [x, y]]}
 
-    def dump({:create_robot, player_id, {x, y}, opts}),
-      do: {:ok, ["create_robot", player_id, [x, y], opts]}
+    def dump({:create_robot, player_id, robot_id, {x, y}, opts}),
+      do: {:ok, ["create_robot", player_id, robot_id, [x, y], opts]}
 
     defp decode_opts(opts) do
-      Map.new(opts, fn {k, v} -> {String.to_existing_atom(k), v} end)
+      Map.new(opts, fn {k, v} -> {stea(k), v} end)
     end
+
+    defp stea(string), do: String.to_existing_atom(string)
   end
 
   @primary_key false
