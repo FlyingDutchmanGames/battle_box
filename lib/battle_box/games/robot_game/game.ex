@@ -1,20 +1,86 @@
 defmodule BattleBox.Games.RobotGame.Game do
+  alias BattleBox.Repo
   alias BattleBox.Games.RobotGame.{Terrain, Robot}
+  alias __MODULE__.{Turn, DamageModifier}
+  use Ecto.Schema
+  import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
 
-  defstruct terrain: Terrain.default(),
-            robots: [],
-            turn: 0,
-            player_1: nil,
-            player_2: nil,
-            spawn?: true,
-            spawn_every: 10,
-            spawn_per_player: 5,
-            robot_hp: 50,
-            attack_damage: %{min: 8, max: 10},
-            collision_damage: 5,
-            suicide_damage: 15,
-            max_turns: 100,
-            event_log: []
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
+
+  schema "robot_games" do
+    field :player_1, :binary_id
+    field :player_2, :binary_id
+    field :spawn_every, :integer, default: 10
+    field :spawn_per_player, :integer, default: 5
+    field :robot_hp, :integer, default: 50
+    field :max_turns, :integer, default: 100
+    field :attack_damage, DamageModifier, default: %{min: 8, max: 10}
+    field :collision_damage, DamageModifier, default: 5
+    field :suicide_damage, DamageModifier, default: 15
+    has_many :turns, Turn
+
+    field :terrain, :any, default: Terrain.default(), virtual: true
+    field :spawn?, :boolean, default: true, virtual: true
+    field :robots, :any, default: [], virtual: true
+    field :turn, :any, default: 0, virtual: true
+    field :unpersisted_events, :any, default: [], virtual: true
+
+    timestamps()
+  end
+
+  def changeset(game, params \\ %{}) do
+    game
+    |> cast(params, [
+      :player_1,
+      :player_2,
+      :spawn_every,
+      :spawn_per_player,
+      :robot_hp,
+      :max_turns,
+      :attack_damage,
+      :collision_damage,
+      :suicide_damage
+    ])
+  end
+
+  def get_by_id(id) do
+    query =
+      from g in __MODULE__,
+        where: g.id == ^id,
+        select: g,
+        preload: [:turns]
+
+    case Repo.one(query) do
+      nil -> nil
+      game -> project_events_into_robots(game)
+    end
+  end
+
+  def persist(game) do
+    {:ok, game} =
+      game
+      |> changeset
+      |> Repo.insert_or_update()
+
+    game.unpersisted_events
+    |> Enum.group_by(& &1.turn)
+    |> Enum.each(fn {turn_num, events} ->
+      {:ok, _} =
+        %Turn{
+          events: Enum.map(events, &Map.take(&1, [:cause, :effects])),
+          turn_number: turn_num,
+          game_id: game.id
+        }
+        |> Turn.changeset()
+        |> Repo.insert()
+    end)
+
+    {:ok, get_by_id(game.id)}
+  end
+
+  def complete_turn(game), do: update_in(game.turn, &(&1 + 1))
 
   def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))
 
@@ -34,11 +100,8 @@ defmodule BattleBox.Games.RobotGame.Game do
       {:guard, _robot_id} ->
         game
 
-      {:create_robot, player_id, location} ->
-        add_robot(game, player_id, location, %{})
-
-      {:create_robot, player_id, location, opts} ->
-        add_robot(game, player_id, location, opts)
+      {:create_robot, player_id, robot_id, location, opts} ->
+        add_robot(game, player_id, robot_id, location, opts)
 
       {:remove_robot, robot_id} ->
         remove_robot(game, robot_id)
@@ -76,8 +139,9 @@ defmodule BattleBox.Games.RobotGame.Game do
     do: Enum.find(game.robots, fn robot -> robot.location == location end)
 
   defp log(game, event) do
-    event = Map.put(event, :turn, game.turn)
-    update_in(game.event_log, fn log -> [event | log] end)
+    update_in(game.unpersisted_events, fn events ->
+      [Map.put(event, :turn, game.turn) | events]
+    end)
   end
 
   defp apply_damage_to_robot(game, id, damage) do
@@ -100,8 +164,9 @@ defmodule BattleBox.Games.RobotGame.Game do
     )
   end
 
-  defp add_robot(game, player_id, location, opts) when player_id in [:player_1, :player_2] do
-    opts = Map.merge(opts, %{player_id: player_id, location: location})
+  defp add_robot(game, player_id, robot_id, location, opts)
+       when player_id in [:player_1, :player_2] do
+    opts = Map.merge(opts, %{player_id: player_id, location: location, id: robot_id})
 
     update_in(game.robots, fn robots ->
       [Robot.new(Map.merge(%{hp: game.robot_hp}, opts)) | robots]
@@ -143,5 +208,17 @@ defmodule BattleBox.Games.RobotGame.Game do
       value when is_integer(value) ->
         value
     end
+  end
+
+  defp project_events_into_robots(game) do
+    effects =
+      game.turns
+      |> Enum.sort_by(fn turn -> turn.turn_number end)
+      |> Enum.flat_map(fn turn -> turn.events end)
+      |> Enum.flat_map(fn move -> move.effects end)
+
+    Enum.reduce(effects, game, fn effect, game ->
+      apply_effect(game, effect)
+    end)
   end
 end

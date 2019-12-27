@@ -1,13 +1,104 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
-  use ExUnit.Case, async: true
+  use BattleBox.DataCase
   alias BattleBox.Games.RobotGame.{Game, Robot}
   import BattleBox.Games.RobotGame.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
+
+  @player_1 Ecto.UUID.generate()
+  @player_2 Ecto.UUID.generate()
 
   describe "new/1" do
     test "you can override any top level key" do
       assert %{turn: 42} = Game.new(turn: 42)
       assert %{suicide_damage: 15, robot_hp: 42} = Game.new(suicide_damage: 15, robot_hp: 42)
+    end
+  end
+
+  describe "complete turn" do
+    test "you can complete the turn on a new game" do
+      game = Game.new()
+      assert game.turn == 0
+      game = Game.complete_turn(game)
+      assert game.turn == 1
+    end
+
+    test "you can complete a turn on an existing game" do
+      game = Game.new(turn: 10)
+      assert game.turn == 10
+      game = Game.complete_turn(game)
+      assert game.turn == 11
+    end
+  end
+
+  describe "persistance" do
+    test "You can persist a game" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+      assert {:ok, _} = Game.persist(game)
+    end
+
+    test "trying to get a game that doesnt exist yields nil" do
+      assert nil == Game.get_by_id(Ecto.UUID.generate())
+    end
+
+    test "you can get a game you persisted (and it will include turns)" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+      assert {:ok, game} = Game.persist(game)
+
+      assert %{id: game.id, turns: []} ==
+               Game.get_by_id(game.id) |> Map.take([:id, :turns])
+    end
+
+    test "you can persist a game twice" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+      assert {:ok, game} = Game.persist(game)
+
+      assert {:ok, _} =
+               game
+               |> Repo.preload(:turns)
+               |> Game.persist()
+    end
+
+    test "when you persist a game it flushes the turns unpersisted events to disk" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+
+      game =
+        Game.apply_event(game, %{
+          cause: :spawn,
+          effects: [{:create_robot, :player_1, uuid(), {0, 0}, %{}}]
+        })
+
+      {:ok, game} = Game.persist(game)
+
+      reloaded_game = Game.get_by_id(game.id)
+      assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
+      assert game.robots == reloaded_game.robots
+      assert game.unpersisted_events == []
+    end
+
+    test "you can persist a new turn to a game that already has a turn" do
+      game = Game.new(player_1: @player_1, player_2: @player_2)
+
+      game =
+        Game.apply_event(game, %{
+          cause: :spawn,
+          effects: [{:create_robot, :player_1, uuid(), {0, 0}, %{}}]
+        })
+
+      {:ok, game} = Game.persist(game)
+
+      game = Game.complete_turn(game)
+
+      game =
+        Game.apply_event(game, %{
+          cause: :spawn,
+          effects: [{:create_robot, :player_1, uuid(), {1, 1}, %{}}]
+        })
+
+      {:ok, game} = Game.persist(game)
+      reloaded_game = Game.get_by_id(game.id)
+      assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
+      assert game.robots == reloaded_game.robots
+      assert game.unpersisted_events == []
     end
   end
 
@@ -91,32 +182,33 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "applying an event appends the turn to the log item" do
       game = Game.new(turn: 42)
       game = Game.apply_event(game, %{move: :test, effects: []})
-      assert [%{turn: 42} | _] = game.event_log
+      assert [%{turn: 42} | _] = game.unpersisted_events
     end
 
     test "you can create a guard move" do
       robot_spawns = ~g/1/
       game = Game.new() |> Game.apply_events(robot_spawns)
       game = Game.apply_event(game, %{move: %{type: :guard}, effects: [{:guard, 1}]})
-      assert [%{effects: [guard: 1], move: %{type: :guard}} | _] = game.event_log
+      assert [%{effects: [guard: 1], move: %{type: :guard}} | _] = game.unpersisted_events
     end
   end
 
   describe "apply_events (:create_robot)" do
     test "you can create a robot" do
       game = Game.new()
-      effect = {:create_robot, :player_1, {42, 42}}
+      id = uuid()
+      effect = {:create_robot, :player_1, id, {42, 42}, %{}}
       game = Game.apply_event(game, %{move: :test, effects: [effect]})
 
-      assert [%{id: <<_::size(288)>>, player_id: :player_1, location: {42, 42}, hp: 50}] =
-               game.robots
+      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 50}] = game.robots
     end
 
     test "you can create a robot with special characteristics" do
+      id = uuid()
       game = Game.new()
-      effect = {:create_robot, :player_1, {42, 42}, %{hp: 42, id: "TEST"}}
+      effect = {:create_robot, :player_1, id, {42, 42}, %{hp: 42}}
       game = Game.apply_event(game, %{move: :test, effects: [effect]})
-      assert [%{id: "TEST", player_id: :player_1, location: {42, 42}, hp: 42}] = game.robots
+      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 42}] = game.robots
     end
   end
 
@@ -127,12 +219,17 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.apply_effect(game, {:move, 1, {0, 1}})
       [%{location: {0, 1}, id: 1}] = Game.robots(game)
     end
+  end
 
-    test "trying to move a non existant robot is a no-op" do
+  describe "apply_event :damage" do
+    test "you can damage a robot" do
+      robot_spawns = ~g/1/
+      game = Game.new(robot_hp: 42) |> Game.apply_events(robot_spawns)
+      game = Game.apply_effect(game, {:damage, 1, 10})
+      [%{hp: 32, id: 1}] = Game.robots(game)
     end
   end
 
-  # describe "apply_event :damage"
   describe "apply_event :remove_robot" do
     test "you can remove a robot" do
       game = Game.new()
@@ -150,21 +247,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert 0 == game |> Game.robots() |> length
     end
   end
-
-  # describe "move_robot/3" do
-  #   test "trying to move a robot that doesn't exist is a noop" do
-  #     game = Game.new()
-  #     assert ^game = Game.move_robot(game, "DOES_NOT_EXIST", {42, 42})
-  #   end
-
-  #   test "you can move a robot" do
-  #     assert [%{location: {42, 42}}] =
-  #              Game.new()
-  #              |> Game.add_robot(%{player_id: :player_1, id: "TEST", location: {0, 0}})
-  #              |> Game.move_robot("TEST", {42, 42})
-  #              |> Game.robots()
-  #   end
-  # end
 
   describe "get_robot/2" do
     test "you can get a robot by id" do
@@ -251,4 +333,12 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert [] == Game.available_adjacent_locations(game, {1, 1})
     end
   end
+
+  defp normalize_turns(turns) do
+    Enum.map(turns, fn turn ->
+      %{turn | __meta__: nil, events: Enum.map(turn.events, &Map.delete(&1, :__meta__))}
+    end)
+  end
+
+  defp uuid(), do: Ecto.UUID.generate()
 end

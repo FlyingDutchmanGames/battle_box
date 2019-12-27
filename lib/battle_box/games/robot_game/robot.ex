@@ -1,10 +1,10 @@
 defmodule BattleBox.Games.RobotGame.Robot do
   defstruct [:hp, :id, :player_id, :location]
 
-  def new(%{hp: hp, player_id: player_id, location: location} = opts) do
+  def new(%{hp: hp, player_id: player_id, location: location, id: id} = opts) do
     %__MODULE__{
       hp: hp,
-      id: opts[:id] || Ecto.UUID.generate(),
+      id: id,
       player_id: player_id,
       location: location
     }
