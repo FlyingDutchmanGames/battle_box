@@ -40,6 +40,10 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert nil == Game.get_by_id(Ecto.UUID.generate())
     end
 
+    test "asking for a non uuid like value yields nil" do
+      assert nil == Game.get_by_id("!@#$%")
+    end
+
     test "you can get a game you persisted (and it will include turns)" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
       assert {:ok, game} = Game.persist(game)

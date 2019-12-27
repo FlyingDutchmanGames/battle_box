@@ -45,7 +45,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     ])
   end
 
-  def get_by_id(id) do
+  def get_by_id(<<_::288>> = id) do
     query =
       from g in __MODULE__,
         where: g.id == ^id,
@@ -57,6 +57,8 @@ defmodule BattleBox.Games.RobotGame.Game do
       game -> project_events_into_robots(game)
     end
   end
+
+  def get_by_id(_), do: nil
 
   def persist(game) do
     {:ok, game} =

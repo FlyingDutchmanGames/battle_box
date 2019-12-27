@@ -20,7 +20,7 @@ defmodule BattleBoxWeb.Router do
     get "/", PageController, :index
 
     scope "/robot_game", RobotGame do
-      live("/play", PlayLive)
+      get "/games/:game_id", GameController, :watch
     end
 
     scope "/test" do
