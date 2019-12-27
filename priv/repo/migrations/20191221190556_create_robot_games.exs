@@ -19,7 +19,7 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
     create table("robot_game_turns", primary_key: false) do
       add :game_id, :uuid, null: false, primary_key: true
       add :turn_number, :integer, null: false, primary_key: true
-      add :moves, :jsonb, null: false, default: fragment("'[]'::jsonb")
+      add :events, :jsonb, null: false, default: fragment("'[]'::jsonb")
 
       timestamps()
     end

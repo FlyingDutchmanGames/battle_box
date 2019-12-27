@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.Game.MoveTest do
+defmodule BattleBox.Games.RobotGame.Game.EventTest do
   alias BattleBox.Games.RobotGame.Game.Turn
   use BattleBox.DataCase
   import Ecto.Query, only: [from: 2]
@@ -31,18 +31,18 @@ defmodule BattleBox.Games.RobotGame.Game.MoveTest do
       # Multiple Effects
       %{cause: @attack_move, effects: [{:damage, @robot_id, 42}, {:remove_robot, @robot_id}]}
     ]
-    |> Enum.each(fn move ->
+    |> Enum.each(fn event ->
       game_id = Ecto.UUID.generate()
-      turn = %Turn{game_id: game_id, moves: [move], turn_number: 0}
+      turn = %Turn{game_id: game_id, events: [event], turn_number: 0}
       Repo.insert!(turn)
 
       retrieved_turn =
         Repo.one!(from t in Turn, where: t.game_id == ^game_id and t.turn_number == 0, select: t)
 
-      expected = [move]
+      expected = [event]
 
       assert ^expected =
-               Enum.map(retrieved_turn.moves, fn move -> Map.take(move, [:cause, :effects]) end)
+               Enum.map(retrieved_turn.events, fn event -> Map.take(event, [:cause, :effects]) end)
     end)
   end
 end

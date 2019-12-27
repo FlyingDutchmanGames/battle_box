@@ -1,6 +1,6 @@
 defmodule BattleBox.Games.RobotGame.Game.Turn do
   alias BattleBox.Games.RobotGame.Game
-  alias BattleBox.Games.RobotGame.Game.Move
+  alias BattleBox.Games.RobotGame.Game.Event
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -10,7 +10,7 @@ defmodule BattleBox.Games.RobotGame.Game.Turn do
   schema "robot_game_turns" do
     belongs_to :game, Game, primary_key: true
     field :turn_number, :integer, primary_key: true
-    embeds_many :moves, Move
+    embeds_many :events, Event
 
     timestamps()
   end
@@ -18,6 +18,6 @@ defmodule BattleBox.Games.RobotGame.Game.Turn do
   def changeset(turn, params \\ %{}) do
     turn
     |> cast(params, [:turn_number, :game_id])
-    |> cast_embed(:moves)
+    |> cast_embed(:events)
   end
 end

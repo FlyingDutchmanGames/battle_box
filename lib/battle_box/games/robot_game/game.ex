@@ -71,7 +71,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> Enum.group_by(fn event -> event.turn end)
     |> Enum.each(fn {turn_num, events} ->
       events = Enum.map(events, fn event -> Map.take(event, [:cause, :effects]) end)
-      turn = Turn.changeset(%Turn{}, %{turn_number: turn_num, moves: events, game_id: game.id})
+      turn = Turn.changeset(%Turn{}, %{turn_number: turn_num, events: events, game_id: game.id})
       {:ok, _} = Repo.insert(turn)
     end)
 
@@ -213,7 +213,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     effects =
       game.turns
       |> Enum.sort_by(fn turn -> turn.turn_number end)
-      |> Enum.flat_map(fn turn -> turn.moves end)
+      |> Enum.flat_map(fn turn -> turn.events end)
       |> Enum.flat_map(fn move -> move.effects end)
 
     Enum.reduce(effects, game, fn effect, game ->

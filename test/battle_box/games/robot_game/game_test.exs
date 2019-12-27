@@ -326,7 +326,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   defp normalize_turns(turns) do
     Enum.map(turns, fn turn ->
-      %{turn | __meta__: nil, moves: Enum.map(turn.moves, &Map.delete(&1, :__meta__))}
+      %{turn | __meta__: nil, events: Enum.map(turn.events, &Map.delete(&1, :__meta__))}
     end)
   end
 

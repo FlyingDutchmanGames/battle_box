@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.Game.Move do
+defmodule BattleBox.Games.RobotGame.Game.Event do
   use Ecto.Schema
   import Ecto.Changeset
 
