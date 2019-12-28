@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.Logic do
+defmodule BattleBox.Games.RobotGame.Game.Logic do
   import BattleBox.Games.RobotGame.Game
   alias Ecto.UUID
 
