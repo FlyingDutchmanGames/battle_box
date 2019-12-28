@@ -1,7 +1,7 @@
-defmodule BattleBox.Games.RobotGame.TerrainTest do
+defmodule BattleBox.Games.RobotGame.Game.TerrainTest do
   use ExUnit.Case, async: true
-  alias BattleBox.Games.RobotGame.Terrain
-  import BattleBox.Games.RobotGame.Terrain.Helpers
+  alias BattleBox.Games.RobotGame.Game.Terrain
+  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
 
   @test_terrain %{
     {0, 0} => :normal,

@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.Terrain.Helpers do
+defmodule BattleBox.Games.RobotGame.Game.Terrain.Helpers do
   def sigil_t(map, _modifiers) do
     graphs =
       map

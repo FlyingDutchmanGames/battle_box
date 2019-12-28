@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Logic}
-  import BattleBox.Games.RobotGame.Terrain.Helpers
+  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   @terrain ~t/1 1
