@@ -71,7 +71,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       reloaded_game = Game.get_by_id(game.id)
       assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
-      assert game.robots == reloaded_game.robots
+      assert Game.robots(game) == Game.robots(reloaded_game)
       assert game.unpersisted_events == []
     end
 
@@ -97,7 +97,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       {:ok, game} = Game.persist(game)
       reloaded_game = Game.get_by_id(game.id)
       assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
-      assert game.robots == reloaded_game.robots
+      assert Game.robots(game) == Game.robots(reloaded_game)
       assert game.unpersisted_events == []
     end
   end
@@ -200,7 +200,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       effect = {:create_robot, :player_1, id, 42, {42, 42}}
       game = Game.apply_event(game, %{move: :test, effects: [effect]})
 
-      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 42}] = game.robots
+      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 42}] = Game.robots(game)
     end
   end
 
@@ -208,8 +208,9 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "you can move a robot" do
       robot_spawns = ~g/1/
       game = Game.new() |> Game.apply_events(robot_spawns)
-      game = Game.apply_effect(game, {:move, 1, {0, 1}})
-      [%{location: {0, 1}, id: 1}] = Game.robots(game)
+      robots = Game.robots(game)
+      robots = Game.apply_effect(robots, {:move, 1, {0, 1}})
+      assert [%{location: {0, 1}, id: 1}] = robots
     end
   end
 
@@ -217,8 +218,9 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "you can damage a robot" do
       robot_spawns = ~g/1/
       game = Game.new() |> Game.apply_events(robot_spawns)
-      game = Game.apply_effect(game, {:damage, 1, 10})
-      [%{hp: 40, id: 1}] = Game.robots(game)
+      robots = Game.robots(game)
+      robots = Game.apply_effect(robots, {:damage, 1, 10})
+      assert [%{hp: 40, id: 1}] = robots
     end
   end
 
@@ -227,16 +229,17 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new()
       robot_spawns = ~g/1/
       game = Game.apply_events(game, robot_spawns)
-      assert 1 == game |> Game.robots() |> length
-      game = Game.apply_effect(game, {:remove_robot, 1})
-      assert 0 == game |> Game.robots() |> length
+      robots = Game.robots(game)
+
+      assert 1 == length(robots)
+      robots = Game.apply_effect(robots, {:remove_robot, 1})
+      assert 0 == length(robots)
     end
 
     test "trying to remove a robot that doesn't exist doesn't raise an error" do
-      game = Game.new()
-      assert 0 == game |> Game.robots() |> length
-      game = Game.apply_effect(game, {:remove_robot, "DOESN'T EXIST"})
-      assert 0 == game |> Game.robots() |> length
+      robots = []
+      robots = Game.apply_effect(robots, {:remove_robot, "DOESN'T EXIST"})
+      assert robots == []
     end
   end
 

@@ -23,7 +23,6 @@ defmodule BattleBox.Games.RobotGame.Game do
 
     field :terrain, :any, default: Terrain.default(), virtual: true
     field :spawn?, :boolean, default: true, virtual: true
-    field :robots, :any, default: [], virtual: true
     field :turn, :any, default: 0, virtual: true
     field :unpersisted_events, :any, default: [], virtual: true
 
@@ -46,16 +45,12 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 
   def get_by_id(id) do
-    query =
+    Repo.one(
       from g in __MODULE__,
         where: g.id == ^id,
         select: g,
         preload: [:turns]
-
-    case Repo.one(query) do
-      nil -> nil
-      game -> project_events_into_robots(game)
-    end
+    )
   end
 
   def persist(game) do
@@ -80,37 +75,57 @@ defmodule BattleBox.Games.RobotGame.Game do
     {:ok, get_by_id(game.id)}
   end
 
-  def complete_turn(game), do: update_in(game.turn, &(&1 + 1))
+  def complete_turn(game),
+    do: update_in(game.turn, &(&1 + 1))
 
-  def apply_events(game, events), do: Enum.reduce(events, game, &apply_event(&2, &1))
+  def apply_events(game, events),
+    do: Enum.reduce(events, game, &apply_event(&2, &1))
 
   def apply_event(game, event) do
-    game = log(game, event)
-    Enum.reduce(event.effects, game, &apply_effect(&2, &1))
+    update_in(game.unpersisted_events, fn events ->
+      [Map.put(event, :turn, game.turn) | events]
+    end)
   end
 
-  def apply_effect(game, effect) do
+  def apply_effect(robots, effect) do
     case effect do
       {:move, robot_id, location} ->
-        move_robot(game, robot_id, location)
+        Enum.map(robots, fn
+          %{id: ^robot_id} = robot -> put_in(robot.location, location)
+          robot -> robot
+        end)
 
       {:damage, robot_id, amount} ->
-        apply_damage_to_robot(game, robot_id, amount)
+        Enum.map(robots, fn
+          %{id: ^robot_id} = robot -> Robot.apply_damage(robot, amount)
+          robot -> robot
+        end)
 
       {:guard, _robot_id} ->
-        game
+        robots
 
       {:create_robot, player_id, robot_id, hp, location} ->
-        add_robot(game, player_id, robot_id, hp, location)
+        [
+          Robot.new(%{
+            player_id: player_id,
+            location: location,
+            id: robot_id,
+            hp: hp
+          })
+          | robots
+        ]
 
       {:remove_robot, robot_id} ->
-        remove_robot(game, robot_id)
+        Enum.reject(robots, fn robot -> robot.id == robot_id end)
     end
   end
 
   def new(opts \\ []) do
     opts = Enum.into(opts, %{})
-    Map.merge(%__MODULE__{}, opts)
+
+    %__MODULE__{}
+    |> Map.merge(opts)
+    |> Repo.preload(:turns)
   end
 
   def score(game, player_id) when player_id in [:player_1, :player_2] do
@@ -127,54 +142,39 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def spawns(game), do: Terrain.spawn(game.terrain)
 
-  def robots(game), do: game.robots
+  def robots(game), do: robots_at_turn(game, game.turn)
+
+  def robots_at_turn(game, turn) do
+    unpersisted_events =
+      game.unpersisted_events
+      |> Enum.reverse()
+      |> Enum.filter(fn event -> event.turn <= turn end)
+      |> Enum.flat_map(fn event -> event.effects end)
+
+    turn_events =
+      game.turns
+      |> Enum.filter(fn turn -> turn.turn_number <= turn end)
+      |> Enum.flat_map(fn turn -> turn.events end)
+      |> Enum.flat_map(fn event -> event.effects end)
+
+    Enum.reduce(unpersisted_events ++ turn_events, [], fn event, robots ->
+      apply_effect(robots, event)
+    end)
+  end
 
   def spawning_round?(game),
     do: game.spawn? && rem(game.turn, game.spawn_every) == 0
 
-  def get_robot(game, id),
-    do: Enum.find(game.robots, fn robot -> robot.id == id end)
+  def get_robot(%__MODULE__{} = game, id), do: get_robot(robots(game), id)
 
-  def get_robot_at_location(game, location),
-    do: Enum.find(game.robots, fn robot -> robot.location == location end)
+  def get_robot(robots, id) when is_list(robots),
+    do: Enum.find(robots, fn robot -> robot.id == id end)
 
-  defp log(game, event) do
-    update_in(game.unpersisted_events, fn events ->
-      [Map.put(event, :turn, game.turn) | events]
-    end)
-  end
+  def get_robot_at_location(%__MODULE__{} = game, location),
+    do: get_robot_at_location(robots(game), location)
 
-  defp apply_damage_to_robot(game, id, damage) do
-    update_in(
-      game.robots,
-      &Enum.map(&1, fn
-        %{id: ^id} = robot -> Robot.apply_damage(robot, damage)
-        robot -> robot
-      end)
-    )
-  end
-
-  defp move_robot(game, id, location) do
-    update_in(
-      game.robots,
-      &Enum.map(&1, fn
-        %{id: ^id} = robot -> put_in(robot.location, location)
-        robot -> robot
-      end)
-    )
-  end
-
-  defp add_robot(game, player_id, robot_id, hp, location)
-       when player_id in [:player_1, :player_2] and is_integer(hp) do
-    opts = %{player_id: player_id, location: location, id: robot_id, hp: hp}
-
-    update_in(game.robots, fn robots ->
-      [Robot.new(opts) | robots]
-    end)
-  end
-
-  defp remove_robot(game, id),
-    do: update_in(game.robots, &Enum.reject(&1, fn robot -> robot.id == id end))
+  def get_robot_at_location(robots, location) when is_list(robots),
+    do: Enum.find(robots, fn robot -> robot.location == location end)
 
   def available_adjacent_locations(game, location) do
     Enum.filter(adjacent_locations(location), &(game.terrain[&1] in [:normal, :spawn]))
@@ -189,36 +189,11 @@ defmodule BattleBox.Games.RobotGame.Game do
     ]
 
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
-  def attack_damage(game), do: calc_damage(game.attack_damage)
+  def attack_damage(game), do: DamageModifier.calc_damage(game.attack_damage)
 
   def guarded_suicide_damage(game), do: Integer.floor_div(suicide_damage(game), 2)
-  def suicide_damage(%{suicide_damage: damage}), do: damage
+  def suicide_damage(game), do: DamageModifier.calc_damage(game.suicide_damage)
 
   def guarded_collision_damage(_game), do: 0
-  def collision_damage(game), do: calc_damage(game.collision_damage)
-
-  defp calc_damage(damage) do
-    case damage do
-      %{max: value, min: value} ->
-        value
-
-      %{max: max, min: min} ->
-        min + :rand.uniform(max - min)
-
-      value when is_integer(value) ->
-        value
-    end
-  end
-
-  defp project_events_into_robots(game) do
-    effects =
-      game.turns
-      |> Enum.sort_by(fn turn -> turn.turn_number end)
-      |> Enum.flat_map(fn turn -> turn.events end)
-      |> Enum.flat_map(fn move -> move.effects end)
-
-    Enum.reduce(effects, game, fn effect, game ->
-      apply_effect(game, effect)
-    end)
-  end
+  def collision_damage(game), do: DamageModifier.calc_damage(game.collision_damage)
 end

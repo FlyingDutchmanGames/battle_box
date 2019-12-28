@@ -13,4 +13,17 @@ defmodule BattleBox.Games.RobotGame.Game.DamageModifier do
   def dump(%{min: min, max: max}), do: {:ok, %{"min" => min, "max" => max}}
   def dump(damage) when is_integer(damage), do: {:ok, %{"always" => damage}}
   def dump(_), do: :error
+
+  def calc_damage(damage) do
+    case damage do
+      %{max: value, min: value} ->
+        value
+
+      %{max: max, min: min} ->
+        min + :rand.uniform(max - min)
+
+      value when is_integer(value) ->
+        value
+    end
+  end
 end

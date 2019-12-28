@@ -21,7 +21,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
                |> Enum.sort()
 
       assert [:player_1, :player_2] ==
-               Enum.map(game.robots, &Map.get(&1, :player_id)) |> Enum.sort()
+               Enum.map(Game.robots(game), &Map.get(&1, :player_id)) |> Enum.sort()
     end
 
     test "it will destroy an existing robot on a spawn point" do
