@@ -64,7 +64,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game =
         Game.apply_event(game, %{
           cause: :spawn,
-          effects: [{:create_robot, :player_1, uuid(), {0, 0}, %{}}]
+          effects: [{:create_robot, :player_1, uuid(), 50, {0, 0}}]
         })
 
       {:ok, game} = Game.persist(game)
@@ -81,7 +81,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game =
         Game.apply_event(game, %{
           cause: :spawn,
-          effects: [{:create_robot, :player_1, uuid(), {0, 0}, %{}}]
+          effects: [{:create_robot, :player_1, uuid(), 50, {0, 0}}]
         })
 
       {:ok, game} = Game.persist(game)
@@ -91,7 +91,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game =
         Game.apply_event(game, %{
           cause: :spawn,
-          effects: [{:create_robot, :player_1, uuid(), {1, 1}, %{}}]
+          effects: [{:create_robot, :player_1, uuid(), 50, {1, 1}}]
         })
 
       {:ok, game} = Game.persist(game)
@@ -197,17 +197,9 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "you can create a robot" do
       game = Game.new()
       id = uuid()
-      effect = {:create_robot, :player_1, id, {42, 42}, %{}}
+      effect = {:create_robot, :player_1, id, 42, {42, 42}}
       game = Game.apply_event(game, %{move: :test, effects: [effect]})
 
-      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 50}] = game.robots
-    end
-
-    test "you can create a robot with special characteristics" do
-      id = uuid()
-      game = Game.new()
-      effect = {:create_robot, :player_1, id, {42, 42}, %{hp: 42}}
-      game = Game.apply_event(game, %{move: :test, effects: [effect]})
       assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 42}] = game.robots
     end
   end
@@ -224,9 +216,9 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "apply_event :damage" do
     test "you can damage a robot" do
       robot_spawns = ~g/1/
-      game = Game.new(robot_hp: 42) |> Game.apply_events(robot_spawns)
+      game = Game.new() |> Game.apply_events(robot_spawns)
       game = Game.apply_effect(game, {:damage, 1, 10})
-      [%{hp: 32, id: 1}] = Game.robots(game)
+      [%{hp: 40, id: 1}] = Game.robots(game)
     end
   end
 

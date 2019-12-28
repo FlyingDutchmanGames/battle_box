@@ -48,8 +48,8 @@ defmodule BattleBox.Games.RobotGame.Game.Event do
     def cast(["damage", robot_id, amount]), do: {:ok, {:damage, robot_id, amount}}
     def cast(["guard", robot_id]), do: {:ok, {:guard, robot_id}}
 
-    def cast(["create_robot", player_id, robot_id, [x, y], opts]),
-      do: {:ok, {:create_robot, stea(player_id), robot_id, {x, y}, decode_opts(opts)}}
+    def cast(["create_robot", player_id, robot_id, hp, [x, y]]),
+      do: {:ok, {:create_robot, stea(player_id), robot_id, hp, {x, y}}}
 
     def cast(["remove_robot", robot_id]), do: {:ok, {:remove_robot, robot_id}}
 
@@ -57,11 +57,8 @@ defmodule BattleBox.Games.RobotGame.Game.Event do
     def load(["damage", robot_id, amount]), do: {:ok, {:damage, robot_id, amount}}
     def load(["guard", robot_id]), do: {:ok, {:guard, robot_id}}
 
-    def load(["create_robot", player_id, [x, y]]),
-      do: {:ok, {:create_robot, stea(player_id), {x, y}}}
-
-    def load(["create_robot", player_id, robot_id, [x, y], opts]),
-      do: {:ok, {:create_robot, stea(player_id), robot_id, {x, y}, decode_opts(opts)}}
+    def load(["create_robot", player_id, robot_id, hp, [x, y]]),
+      do: {:ok, {:create_robot, stea(player_id), robot_id, hp, {x, y}}}
 
     def load(["remove_robot", robot_id]), do: {:ok, {:remove_robot, robot_id}}
 
@@ -69,14 +66,9 @@ defmodule BattleBox.Games.RobotGame.Game.Event do
     def dump({:remove_robot, robot_id}), do: {:ok, ["remove_robot", robot_id]}
     def dump({:move, robot_id, {x, y}}), do: {:ok, ["move", robot_id, [x, y]]}
     def dump({:damage, robot_id, amount}), do: {:ok, ["damage", robot_id, amount]}
-    def dump({:create_robot, player_id, {x, y}}), do: {:ok, ["create_robot", player_id, [x, y]]}
 
-    def dump({:create_robot, player_id, robot_id, {x, y}, opts}),
-      do: {:ok, ["create_robot", player_id, robot_id, [x, y], opts]}
-
-    defp decode_opts(opts) do
-      Map.new(opts, fn {k, v} -> {stea(k), v} end)
-    end
+    def dump({:create_robot, player_id, robot_id, hp, {x, y}}),
+      do: {:ok, ["create_robot", player_id, robot_id, hp, [x, y]]}
 
     defp stea(string), do: String.to_existing_atom(string)
   end

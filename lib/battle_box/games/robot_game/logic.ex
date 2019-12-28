@@ -132,7 +132,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
       |> Enum.map(fn {spawn_location, player_id} ->
         %{
           cause: :spawn,
-          effects: [{:create_robot, player_id, UUID.generate(), spawn_location, %{}}]
+          effects: [{:create_robot, player_id, UUID.generate(), game.robot_hp, spawn_location}]
         }
       end)
 

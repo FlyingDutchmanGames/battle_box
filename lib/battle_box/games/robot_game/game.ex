@@ -100,8 +100,8 @@ defmodule BattleBox.Games.RobotGame.Game do
       {:guard, _robot_id} ->
         game
 
-      {:create_robot, player_id, robot_id, location, opts} ->
-        add_robot(game, player_id, robot_id, location, opts)
+      {:create_robot, player_id, robot_id, hp, location} ->
+        add_robot(game, player_id, robot_id, hp, location)
 
       {:remove_robot, robot_id} ->
         remove_robot(game, robot_id)
@@ -164,12 +164,12 @@ defmodule BattleBox.Games.RobotGame.Game do
     )
   end
 
-  defp add_robot(game, player_id, robot_id, location, opts)
-       when player_id in [:player_1, :player_2] do
-    opts = Map.merge(opts, %{player_id: player_id, location: location, id: robot_id})
+  defp add_robot(game, player_id, robot_id, hp, location)
+       when player_id in [:player_1, :player_2] and is_integer(hp) do
+    opts = %{player_id: player_id, location: location, id: robot_id, hp: hp}
 
     update_in(game.robots, fn robots ->
-      [Robot.new(Map.merge(%{hp: game.robot_hp}, opts)) | robots]
+      [Robot.new(opts) | robots]
     end)
   end
 
