@@ -33,7 +33,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
 
       robots =
         Game.new(terrain: test_terrain, spawn_per_player: 1)
-        |> Game.apply_events(test_robots_spawn)
+        |> Game.put_events(test_robots_spawn)
         |> Logic.calculate_turn([])
         |> Game.robots()
 

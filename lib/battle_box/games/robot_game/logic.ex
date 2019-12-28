@@ -5,7 +5,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
   def calculate_turn(game, moves) do
     game =
       if spawning_round?(game),
-        do: apply_events(game, generate_spawn_events(game)),
+        do: put_events(game, generate_spawn_events(game)),
         else: game
 
     movements =
@@ -23,7 +23,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
       for movement <- movements,
           do: generate_movement_event(game, movement, movements, guard_locations)
 
-    game = apply_events(game, movement_events)
+    game = put_events(game, movement_events)
 
     events =
       moves
@@ -34,7 +34,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
         %{type: :guard} = move -> generate_guard_event(move)
       end)
 
-    game = apply_events(game, events)
+    game = put_events(game, events)
 
     complete_turn(game)
   end

@@ -78,16 +78,19 @@ defmodule BattleBox.Games.RobotGame.Game do
   def complete_turn(game),
     do: update_in(game.turn, &(&1 + 1))
 
-  def apply_events(game, events),
-    do: Enum.reduce(events, game, &apply_event(&2, &1))
+  def put_events(game, events),
+    do: Enum.reduce(events, game, &put_event(&2, &1))
 
-  def apply_event(game, event) do
+  def put_event(game, event) do
     update_in(game.unpersisted_events, fn events ->
       [Map.put(event, :turn, game.turn) | events]
     end)
   end
 
-  def apply_effect(robots, effect) do
+  def apply_effects_to_robots(robots, effects),
+    do: Enum.reduce(effects, robots, &apply_effect_to_robots(&2, &1))
+
+  def apply_effect_to_robots(robots, effect) do
     case effect do
       {:move, robot_id, location} ->
         Enum.map(robots, fn
@@ -157,9 +160,7 @@ defmodule BattleBox.Games.RobotGame.Game do
       |> Enum.flat_map(fn turn -> turn.events end)
       |> Enum.flat_map(fn event -> event.effects end)
 
-    Enum.reduce(unpersisted_events ++ turn_events, [], fn event, robots ->
-      apply_effect(robots, event)
-    end)
+    apply_effects_to_robots([], unpersisted_events ++ turn_events)
   end
 
   def spawning_round?(game),
