@@ -137,7 +137,7 @@ defmodule BattleBoxWeb.RobotGameViewTest do
 
       game =
         Game.new()
-        |> Game.apply_events(robot_spawns)
+        |> Game.put_events(robot_spawns)
 
       html = render_to_string(RobotGameView, "game_header.html", game: game)
 

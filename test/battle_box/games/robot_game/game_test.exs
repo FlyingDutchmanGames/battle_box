@@ -62,7 +62,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new(player_1: @player_1, player_2: @player_2)
 
       game =
-        Game.apply_event(game, %{
+        Game.put_event(game, %{
           cause: :spawn,
           effects: [{:create_robot, :player_1, uuid(), 50, {0, 0}}]
         })
@@ -71,7 +71,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       reloaded_game = Game.get_by_id(game.id)
       assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
-      assert game.robots == reloaded_game.robots
+      assert Game.robots(game) == Game.robots(reloaded_game)
       assert game.unpersisted_events == []
     end
 
@@ -79,7 +79,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new(player_1: @player_1, player_2: @player_2)
 
       game =
-        Game.apply_event(game, %{
+        Game.put_event(game, %{
           cause: :spawn,
           effects: [{:create_robot, :player_1, uuid(), 50, {0, 0}}]
         })
@@ -89,7 +89,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.complete_turn(game)
 
       game =
-        Game.apply_event(game, %{
+        Game.put_event(game, %{
           cause: :spawn,
           effects: [{:create_robot, :player_1, uuid(), 50, {1, 1}}]
         })
@@ -97,7 +97,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       {:ok, game} = Game.persist(game)
       reloaded_game = Game.get_by_id(game.id)
       assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
-      assert game.robots == reloaded_game.robots
+      assert Game.robots(game) == Game.robots(reloaded_game)
       assert game.unpersisted_events == []
     end
   end
@@ -156,7 +156,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       game =
         Game.new()
-        |> Game.apply_events(robot_spawns)
+        |> Game.put_events(robot_spawns)
 
       assert 1 == Game.score(game, :player_1)
       assert 0 == Game.score(game, :player_2)
@@ -173,70 +173,73 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot = %{player_id: :player_1, id: 1, location: {0, 0}, hp: 50}
 
       assert Robot.new(robot) ==
-               Game.apply_events(Game.new(), robot_spawns)
+               Game.put_events(Game.new(), robot_spawns)
                |> Game.get_robot_at_location({0, 0})
     end
   end
 
-  describe "apply_events" do
+  describe "put_events" do
     test "applying an event appends the turn to the log item" do
       game = Game.new(turn: 42)
-      game = Game.apply_event(game, %{move: :test, effects: []})
+      game = Game.put_event(game, %{move: :test, effects: []})
       assert [%{turn: 42} | _] = game.unpersisted_events
     end
 
     test "you can create a guard move" do
       robot_spawns = ~g/1/
-      game = Game.new() |> Game.apply_events(robot_spawns)
-      game = Game.apply_event(game, %{move: %{type: :guard}, effects: [{:guard, 1}]})
+      game = Game.new() |> Game.put_events(robot_spawns)
+      game = Game.put_event(game, %{move: %{type: :guard}, effects: [{:guard, 1}]})
       assert [%{effects: [guard: 1], move: %{type: :guard}} | _] = game.unpersisted_events
     end
   end
 
-  describe "apply_events (:create_robot)" do
+  describe "put_events (:create_robot)" do
     test "you can create a robot" do
       game = Game.new()
       id = uuid()
       effect = {:create_robot, :player_1, id, 42, {42, 42}}
-      game = Game.apply_event(game, %{move: :test, effects: [effect]})
+      game = Game.put_event(game, %{move: :test, effects: [effect]})
 
-      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 42}] = game.robots
+      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 42}] = Game.robots(game)
     end
   end
 
-  describe "apply_event :move" do
+  describe "put_event :move" do
     test "you can move a robot" do
       robot_spawns = ~g/1/
-      game = Game.new() |> Game.apply_events(robot_spawns)
-      game = Game.apply_effect(game, {:move, 1, {0, 1}})
-      [%{location: {0, 1}, id: 1}] = Game.robots(game)
+      game = Game.new() |> Game.put_events(robot_spawns)
+      robots = Game.robots(game)
+      robots = Game.apply_effect_to_robots(robots, {:move, 1, {0, 1}})
+      assert [%{location: {0, 1}, id: 1}] = robots
     end
   end
 
-  describe "apply_event :damage" do
+  describe "put_event :damage" do
     test "you can damage a robot" do
       robot_spawns = ~g/1/
-      game = Game.new() |> Game.apply_events(robot_spawns)
-      game = Game.apply_effect(game, {:damage, 1, 10})
-      [%{hp: 40, id: 1}] = Game.robots(game)
+      game = Game.new() |> Game.put_events(robot_spawns)
+      robots = Game.robots(game)
+      robots = Game.apply_effect_to_robots(robots, {:damage, 1, 10})
+      assert [%{hp: 40, id: 1}] = robots
     end
   end
 
-  describe "apply_event :remove_robot" do
+  describe "put_event :remove_robot" do
     test "you can remove a robot" do
       game = Game.new()
       robot_spawns = ~g/1/
-      game = Game.apply_events(game, robot_spawns)
-      assert 1 == game |> Game.robots() |> length
-      game = Game.apply_effect(game, {:remove_robot, 1})
-      assert 0 == game |> Game.robots() |> length
+      game = Game.put_events(game, robot_spawns)
+      robots = Game.robots(game)
+
+      assert 1 == length(robots)
+      robots = Game.apply_effect_to_robots(robots, {:remove_robot, 1})
+      assert 0 == length(robots)
     end
 
     test "trying to remove a robot that doesn't exist doesn't raise an error" do
-      game = Game.new()
-      assert 0 == game |> Game.robots() |> length
-      game = Game.apply_effect(game, {:remove_robot, "DOESN'T EXIST"})
-      assert 0 == game |> Game.robots() |> length
+      robots = []
+      robots = Game.apply_effect_to_robots(robots, {:remove_robot, "DOESN'T EXIST"})
+      assert robots == []
     end
   end
 
@@ -245,7 +248,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/1/
       robot = %{player_id: :player_1, location: {0, 0}, id: 1, hp: 50}
 
-      game = Game.apply_events(Game.new(), robot_spawns)
+      game = Game.put_events(Game.new(), robot_spawns)
       assert Robot.new(robot) == Game.get_robot(game, 1)
     end
 

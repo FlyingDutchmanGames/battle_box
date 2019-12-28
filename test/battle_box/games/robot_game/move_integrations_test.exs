@@ -13,7 +13,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
     game =
       Game.new(terrain: terrain, spawn?: false)
-      |> Game.apply_events(robot_spawns)
+      |> Game.put_events(robot_spawns)
 
     assert %{location: {0, 0}} =
              game
@@ -85,7 +85,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
     initial_game =
       Game.new(terrain: terrain, spawn?: false)
-      |> Game.apply_events(robot_spawns)
+      |> Game.put_events(robot_spawns)
 
     moves =
       graph_with_indexes
