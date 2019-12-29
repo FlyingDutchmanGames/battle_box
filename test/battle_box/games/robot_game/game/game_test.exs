@@ -137,8 +137,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       end)
     end
 
-    test "spawn?: false is never a spawning round" do
-      refute Game.spawning_round?(Game.new(spawn?: false, spawn_every: 10, turn: 10))
+    test "spawn_enabled: false is never a spawning round" do
+      refute Game.spawning_round?(Game.new(spawn_enabled: false, spawn_every: 10, turn: 10))
     end
   end
 

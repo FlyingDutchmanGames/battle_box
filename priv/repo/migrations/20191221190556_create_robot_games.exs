@@ -8,6 +8,7 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
       add :robot_hp, :integer, null: false
       add :events, :jsonb, null: false, default: fragment("'[]'::jsonb")
       add :turn, :integer, null: false
+      add :spawn_enabled, :boolean, null: false, default: true
       add :spawn_every, :integer, null: false
       add :spawn_per_player, :integer, null: false
       add :attack_damage, :jsonb, null: false

@@ -16,6 +16,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :spawn_per_player, :integer, default: 5
     field :robot_hp, :integer, default: 50
     field :turn, :integer, default: 0
+    field :spawn_enabled, :boolean, default: true
     field :max_turns, :integer, default: 100
     field :attack_damage, DamageModifier, default: %{min: 8, max: 10}
     field :collision_damage, DamageModifier, default: 5
@@ -23,7 +24,6 @@ defmodule BattleBox.Games.RobotGame.Game do
     embeds_many :events, Event, on_replace: :delete
 
     field :terrain, :any, default: Terrain.default(), virtual: true
-    field :spawn?, :boolean, default: true, virtual: true
 
     timestamps()
   end
@@ -149,7 +149,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 
   def spawning_round?(game),
-    do: game.spawn? && rem(game.turn, game.spawn_every) == 0
+    do: game.spawn_enabled && rem(game.turn, game.spawn_every) == 0
 
   def get_robot(%__MODULE__{} = game, id), do: get_robot(robots(game), id)
 
