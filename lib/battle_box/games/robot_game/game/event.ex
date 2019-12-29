@@ -77,12 +77,15 @@ defmodule BattleBox.Games.RobotGame.Game.Event do
   @primary_key false
 
   schema "moves" do
+    field :turn, :integer
+    field :seq_num, :integer
     field :cause, Cause
     field :effects, {:array, Effect}
   end
 
   def changeset(move, params) do
     move
-    |> cast(params, [:cause, :effects])
+    |> cast(params, [:turn, :seq_num, :cause, :effects])
+    |> validate_required([:turn, :seq_num, :cause, :effects])
   end
 end
