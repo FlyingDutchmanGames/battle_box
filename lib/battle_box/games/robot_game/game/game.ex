@@ -25,6 +25,9 @@ defmodule BattleBox.Games.RobotGame.Game do
 
     field :terrain, :any, default: Terrain.default(), virtual: true
 
+    field :game_acceptance_timeout_ms, :integer, virtual: true, default: 5000
+    field :move_timeout_ms, :integer, virtual: true, default: 5000
+
     timestamps()
   end
 
