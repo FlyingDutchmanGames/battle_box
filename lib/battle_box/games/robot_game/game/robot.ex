@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Game.Robot do
   defstruct [:hp, :id, :player_id, :location]
 
-  def new(%{hp: hp, player_id: player_id, location: location, id: id} = opts) do
+  def new(%{hp: hp, player_id: player_id, location: location, id: id}) do
     %__MODULE__{
       hp: hp,
       id: id,
