@@ -51,6 +51,10 @@ defmodule BattleBox.Games.RobotGame.Game do
         where: g.id == ^id,
         select: g
     )
+    |> case do
+      nil -> nil
+      game -> put_in(game.turn, highes_event_turn_number(game) + 1)
+    end
   end
 
   def persist(game) do
@@ -144,7 +148,7 @@ defmodule BattleBox.Games.RobotGame.Game do
 
     events =
       game.events
-      |> Enum.filter(fn event -> event.turn_num <= turn end)
+      |> Enum.filter(fn event -> event.turn <= turn end)
       |> Enum.flat_map(fn event -> event.effects end)
 
     apply_effects_to_robots([], unpersisted_events ++ events)
@@ -187,13 +191,19 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   defp events(game) do
     (game.events ++ game.unpersisted_events)
-    |> Enum.map(fn event -> Map.take(event, [:turn_num, :seq_num, :cause, :effects]) end)
+    |> Enum.map(fn event -> Map.take(event, [:turn, :seq_num, :cause, :effects]) end)
     |> Enum.sort_by(fn event -> event.seq_num end)
   end
 
   defp highest_event_seq_num(game) do
     (game.events ++ game.unpersisted_events)
     |> Enum.map(fn event -> event.seq_num end)
+    |> Enum.max(fn -> 0 end)
+  end
+
+  defp highes_event_turn_number(game) do
+    (game.events ++ game.unpersisted_events)
+    |> Enum.map(fn event -> event.turn end)
     |> Enum.max(fn -> 0 end)
   end
 end

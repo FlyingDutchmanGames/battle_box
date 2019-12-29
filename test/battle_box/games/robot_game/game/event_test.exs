@@ -15,36 +15,36 @@ defmodule BattleBox.Games.RobotGame.Game.EventTest do
   test "You get out what you get in" do
     [
       # Bare Basics
-      %{turn_num: 1, seq_num: 1, cause: :spawn, effects: []},
+      %{turn: 1, seq_num: 1, cause: :spawn, effects: []},
       %{
-        turn_num: 1,
+        turn: 1,
         seq_num: 1,
         cause: %{type: :move, target: {0, 0}, robot_id: @robot_id},
         effects: []
       },
       %{
-        turn_num: 1,
+        turn: 1,
         seq_num: 1,
         cause: %{type: :attack, target: {0, 0}, robot_id: @robot_id},
         effects: []
       },
-      %{turn_num: 1, seq_num: 1, cause: %{type: :guard, robot_id: @robot_id}, effects: []},
+      %{turn: 1, seq_num: 1, cause: %{type: :guard, robot_id: @robot_id}, effects: []},
       # A little more realistic
-      %{turn_num: 1, seq_num: 1, cause: @move_move, effects: [{:move, @robot_id, {0, 0}}]},
-      %{turn_num: 1, seq_num: 1, cause: @guard_move, effects: [{:guard, @robot_id}]},
-      %{turn_num: 1, seq_num: 1, cause: @suicide_move, effects: [{:remove_robot, @robot_id}]},
-      %{turn_num: 1, seq_num: 1, cause: @noop_move, effects: []},
-      %{turn_num: 1, seq_num: 1, cause: @attack_move, effects: [{:damage, @robot_id, 42}]},
+      %{turn: 1, seq_num: 1, cause: @move_move, effects: [{:move, @robot_id, {0, 0}}]},
+      %{turn: 1, seq_num: 1, cause: @guard_move, effects: [{:guard, @robot_id}]},
+      %{turn: 1, seq_num: 1, cause: @suicide_move, effects: [{:remove_robot, @robot_id}]},
+      %{turn: 1, seq_num: 1, cause: @noop_move, effects: []},
+      %{turn: 1, seq_num: 1, cause: @attack_move, effects: [{:damage, @robot_id, 42}]},
       # Robot creation
       %{
-        turn_num: 1,
+        turn: 1,
         seq_num: 1,
         cause: :spawn,
         effects: [{:create_robot, :player_1, @robot_id, 50, {0, 0}}]
       },
       # Multiple Effects
       %{
-        turn_num: 1,
+        turn: 1,
         seq_num: 1,
         cause: @attack_move,
         effects: [{:damage, @robot_id, 42}, {:remove_robot, @robot_id}]
@@ -60,7 +60,7 @@ defmodule BattleBox.Games.RobotGame.Game.EventTest do
 
       assert [^event] =
                Enum.map(retrieved_game.events, fn event ->
-                 Map.take(event, [:cause, :effects, :seq_num, :turn_num])
+                 Map.take(event, [:cause, :effects, :seq_num, :turn])
                end)
     end)
   end

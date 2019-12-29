@@ -50,7 +50,19 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "persisting a game does not remove the turn number" do
       game = Game.new(player_1: @player_1, player_2: @player_2, turn: 42)
       assert game.turn == 42
+      game =
+        Game.put_event(game, %{
+          cause: :spawn,
+          effects: [{:create_robot, :player_1, uuid(), 50, {0, 0}}]
+        })
+
       assert {:ok, game} = Game.persist(game)
+      reloaded_game = Game.get_by_id(game.id)
+      assert reloaded_game.turn == 43
+    end
+
+    test "loading a game will set the turn the greatest persisted turn + 1" do
+      game = Game.new(player_1: @player_1, player_2: @player_2, turn: 42)
       assert game.turn == 42
     end
 
