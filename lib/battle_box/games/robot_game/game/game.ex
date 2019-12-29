@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Repo
   alias BattleBox.Games.RobotGame.Game.{Terrain, Robot}
-  alias __MODULE__.{Turn, DamageModifier}
+  alias __MODULE__.{Event, DamageModifier}
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query, only: [from: 2]
@@ -19,7 +19,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :attack_damage, DamageModifier, default: %{min: 8, max: 10}
     field :collision_damage, DamageModifier, default: 5
     field :suicide_damage, DamageModifier, default: 15
-    has_many :turns, Turn
+    embeds_many :events, Event, on_replace: :delete
 
     field :terrain, :any, default: Terrain.default(), virtual: true
     field :spawn?, :boolean, default: true, virtual: true
@@ -42,37 +42,26 @@ defmodule BattleBox.Games.RobotGame.Game do
       :collision_damage,
       :suicide_damage
     ])
+    |> cast_embed(:events)
   end
 
   def get_by_id(id) do
     Repo.one(
       from g in __MODULE__,
         where: g.id == ^id,
-        select: g,
-        preload: [:turns]
+        select: g
     )
   end
 
   def persist(game) do
     {:ok, game} =
       game
-      |> changeset
+      |> changeset(%{events: events(game)})
       |> Repo.insert_or_update()
 
-    game.unpersisted_events
-    |> Enum.group_by(& &1.turn)
-    |> Enum.each(fn {turn_num, events} ->
-      {:ok, _} =
-        %Turn{
-          events: Enum.map(events, &Map.take(&1, [:cause, :effects])),
-          turn_number: turn_num,
-          game_id: game.id
-        }
-        |> Turn.changeset()
-        |> Repo.insert()
-    end)
+    game = Map.put(game, :unpersisted_events, [])
 
-    {:ok, get_by_id(game.id)}
+    {:ok, game}
   end
 
   def complete_turn(game),
@@ -82,9 +71,9 @@ defmodule BattleBox.Games.RobotGame.Game do
     do: Enum.reduce(events, game, &put_event(&2, &1))
 
   def put_event(game, event) do
-    update_in(game.unpersisted_events, fn events ->
-      [Map.put(event, :turn, game.turn) | events]
-    end)
+    seq_num = highest_event_seq_num(game) + 1
+    event = Map.merge(%{turn: game.turn, seq_num: seq_num}, event)
+    update_in(game.unpersisted_events, &[event | &1])
   end
 
   def apply_effects_to_robots(robots, effects),
@@ -128,7 +117,6 @@ defmodule BattleBox.Games.RobotGame.Game do
 
     %__MODULE__{}
     |> Map.merge(opts)
-    |> Repo.preload(:turns)
   end
 
   def score(game, player_id) when player_id in [:player_1, :player_2] do
@@ -154,13 +142,12 @@ defmodule BattleBox.Games.RobotGame.Game do
       |> Enum.filter(fn event -> event.turn <= turn end)
       |> Enum.flat_map(fn event -> event.effects end)
 
-    turn_events =
-      game.turns
-      |> Enum.filter(fn turn -> turn.turn_number <= turn end)
-      |> Enum.flat_map(fn turn -> turn.events end)
+    events =
+      game.events
+      |> Enum.filter(fn event -> event.turn_num <= turn end)
       |> Enum.flat_map(fn event -> event.effects end)
 
-    apply_effects_to_robots([], unpersisted_events ++ turn_events)
+    apply_effects_to_robots([], unpersisted_events ++ events)
   end
 
   def spawning_round?(game),
@@ -197,4 +184,16 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def guarded_collision_damage(_game), do: 0
   def collision_damage(game), do: DamageModifier.calc_damage(game.collision_damage)
+
+  defp events(game) do
+    (game.events ++ game.unpersisted_events)
+    |> Enum.map(fn event -> Map.take(event, [:turn_num, :seq_num, :cause, :effects]) end)
+    |> Enum.sort_by(fn event -> event.seq_num end)
+  end
+
+  defp highest_event_seq_num(game) do
+    (game.events ++ game.unpersisted_events)
+    |> Enum.map(fn event -> event.seq_num end)
+    |> Enum.max(fn -> 0 end)
+  end
 end

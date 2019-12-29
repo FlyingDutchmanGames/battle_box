@@ -41,25 +41,20 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert nil == Game.get_by_id(Ecto.UUID.generate())
     end
 
-    test "you can get a game you persisted (and it will include turns)" do
-      game = Game.new(player_1: @player_1, player_2: @player_2)
-      assert {:ok, game} = Game.persist(game)
-
-      assert %{id: game.id, turns: []} ==
-               Game.get_by_id(game.id) |> Map.take([:id, :turns])
-    end
-
     test "you can persist a game twice" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
       assert {:ok, game} = Game.persist(game)
-
-      assert {:ok, _} =
-               game
-               |> Repo.preload(:turns)
-               |> Game.persist()
+      assert {:ok, _} = Game.persist(game)
     end
 
-    test "when you persist a game it flushes the turns unpersisted events to disk" do
+    test "persisting a game does not remove the turn number" do
+      game = Game.new(player_1: @player_1, player_2: @player_2, turn: 42)
+      assert game.turn == 42
+      assert {:ok, game} = Game.persist(game)
+      assert game.turn == 42
+    end
+
+    test "when you persist a game it flushes the unpersisted events to disk" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
 
       game =
@@ -68,10 +63,16 @@ defmodule BattleBox.Games.RobotGame.GameTest do
           effects: [{:create_robot, :player_1, uuid(), 50, {0, 0}}]
         })
 
+      assert length(game.events) == 0
+      assert length(game.unpersisted_events) == 1
+
       {:ok, game} = Game.persist(game)
 
+      assert length(game.events) == 1
+      assert length(game.unpersisted_events) == 0
+
       reloaded_game = Game.get_by_id(game.id)
-      assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
+      assert normalize_events(game.events) == normalize_events(reloaded_game.events)
       assert Game.robots(game) == Game.robots(reloaded_game)
       assert game.unpersisted_events == []
     end
@@ -97,7 +98,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       {:ok, game} = Game.persist(game)
       reloaded_game = Game.get_by_id(game.id)
-      assert normalize_turns(game.turns) == normalize_turns(reloaded_game.turns)
+      assert normalize_events(game.events) == normalize_events(reloaded_game.events)
       assert Game.robots(game) == Game.robots(reloaded_game)
       assert game.unpersisted_events == []
     end
@@ -330,10 +331,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
-  defp normalize_turns(turns) do
-    Enum.map(turns, fn turn ->
-      %{turn | __meta__: nil, events: Enum.map(turn.events, &Map.delete(&1, :__meta__))}
-    end)
+  defp normalize_events(events) do
+    Enum.map(events, &Map.delete(&1, :__meta__))
   end
 
   defp uuid(), do: Ecto.UUID.generate()
