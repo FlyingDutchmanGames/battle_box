@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.Terrain do
+defmodule BattleBox.Games.RobotGame.Game.Terrain do
   alias __MODULE__.Default
 
   defdelegate default, to: Default

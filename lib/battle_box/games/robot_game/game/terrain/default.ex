@@ -1,5 +1,5 @@
-defmodule BattleBox.Games.RobotGame.Terrain.Default do
-  import BattleBox.Games.RobotGame.Terrain.Helpers
+defmodule BattleBox.Games.RobotGame.Game.Terrain.Default do
+  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
 
   @default ~t/0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
               0 0 0 0 0 0 0 2 2 2 2 2 0 0 0 0 0 0 0

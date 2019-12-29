@@ -1,7 +1,8 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
   use BattleBox.DataCase
-  alias BattleBox.Games.RobotGame.{Game, Robot}
-  import BattleBox.Games.RobotGame.Terrain.Helpers
+  alias BattleBox.Games.RobotGame.Game
+  alias BattleBox.Games.RobotGame.Game.Robot
+  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   @player_1 Ecto.UUID.generate()

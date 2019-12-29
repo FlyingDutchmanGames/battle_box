@@ -1,6 +1,6 @@
 defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Repo
-  alias BattleBox.Games.RobotGame.{Terrain, Robot}
+  alias BattleBox.Games.RobotGame.Game.{Terrain, Robot}
   alias __MODULE__.{Turn, DamageModifier}
   use Ecto.Schema
   import Ecto.Changeset

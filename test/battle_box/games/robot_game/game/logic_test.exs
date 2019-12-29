@@ -1,7 +1,7 @@
-defmodule BattleBox.Games.RobotGame.LogicTest do
+defmodule BattleBox.Games.RobotGame.Game.LogicTest do
   use ExUnit.Case, async: true
-  alias BattleBox.Games.RobotGame.{Game, Logic}
-  import BattleBox.Games.RobotGame.Terrain.Helpers
+  alias BattleBox.Games.RobotGame.{Game, Game.Logic}
+  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   describe "spawning" do
