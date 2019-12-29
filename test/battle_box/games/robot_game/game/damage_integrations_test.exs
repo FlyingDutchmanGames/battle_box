@@ -12,7 +12,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       game:
         Game.new(
           terrain: @terrain,
-          spawn?: false,
+          spawn_enabled: false,
           attack_damage: 1,
           robot_hp: 50,
           suicide_damage: 5

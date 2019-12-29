@@ -12,7 +12,7 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
                       0 0/
 
     game =
-      Game.new(terrain: terrain, spawn?: false)
+      Game.new(terrain: terrain, spawn_enabled: false)
       |> Game.put_events(robot_spawns)
 
     assert %{location: {0, 0}} =
@@ -84,7 +84,7 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
       |> Enum.map(fn effect -> %{move: :test_setup, effects: [effect]} end)
 
     initial_game =
-      Game.new(terrain: terrain, spawn?: false)
+      Game.new(terrain: terrain, spawn_enabled: false)
       |> Game.put_events(robot_spawns)
 
     moves =
