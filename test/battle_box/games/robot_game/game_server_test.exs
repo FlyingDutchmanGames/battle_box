@@ -48,12 +48,47 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
     assert_receive ^expected_p2
   end
 
-  # describe "failure to accept game" do
-  #   test "if player 1 doesn't ack and player 2 does, then player 2 wins and the game server stops"
-  #   test "if player 1 acks and player 2 doesn't, then player 1 wins and the game server stops"
-  #   test "if neither player acks, the game is a push and an error is logged and the game server stops"
-  # end
-  #
+  describe "failure to accept game" do
+    test "if one player doesn't ack the game is cancelled and the game server dies" do
+      game = Game.new(player_1: @player_1, player_2: @player_2, game_acceptance_timeout_ms: 20)
+
+      {:ok, pid} =
+        GameServer.start_link(%{
+          player_1: self(),
+          player_2: self(),
+          game: game
+        })
+
+      assert :ok = GameServer.accept_game(pid, :player_1)
+      ref = Process.monitor(pid)
+
+      game_id = game.id
+
+      assert_receive {:game_cancelled, ^game_id}
+      assert_receive {:game_cancelled, ^game_id}
+      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+    end
+
+    test "if neither player acks, the game is cancelled and the game server dies" do
+      game = Game.new(player_1: @player_1, player_2: @player_2, game_acceptance_timeout_ms: 1)
+
+      {:ok, pid} =
+        GameServer.start_link(%{
+          player_1: self(),
+          player_2: self(),
+          game: game
+        })
+
+      ref = Process.monitor(pid)
+
+      game_id = game.id
+
+      assert_receive {:game_cancelled, ^game_id}
+      assert_receive {:game_cancelled, ^game_id}
+      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+    end
+  end
+
   test "When you accept a game it asks you for moves" do
     game = Game.new(player_1: @player_1, player_2: @player_2)
     test_pid = self()

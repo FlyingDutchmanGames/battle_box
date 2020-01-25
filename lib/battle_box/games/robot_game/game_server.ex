@@ -36,7 +36,11 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     {:next_state, :moves, data, [{:reply, from, :ok}]}
   end
 
-  def game_acceptance(:state_timeout, :game_acceptace_timeout, _data) do
+  def game_acceptance(:state_timeout, :game_acceptance_timeout, data) do
+    cancellation = {:game_cancelled, data.game.id}
+    send(data.player_1, cancellation)
+    send(data.player_2, cancellation)
+
     {:stop, :normal}
   end
 
