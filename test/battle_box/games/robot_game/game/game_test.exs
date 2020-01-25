@@ -31,6 +31,23 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "over?" do
+    test "is over if the game turn is equal to max turn" do
+      game = Game.new(turn: 10, max_turns: 10)
+      assert Game.over?(game)
+    end
+
+    test "is over if the game turn is more than the max turn" do
+      game = Game.new(turn: 11, max_turns: 10)
+      assert Game.over?(game)
+    end
+
+    test "is not over if the game turn is less than the max turn" do
+      game = Game.new(turn: 9, max_turns: 10)
+      refute Game.over?(game)
+    end
+  end
+
   describe "persistance" do
     test "You can persist a game" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
