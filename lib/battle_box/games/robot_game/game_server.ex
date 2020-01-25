@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.GameServer do
-  alias BattleBox.Games.RobotGame.Game
+  alias BattleBox.Games.RobotGame.{Game, Game.Logic}
   use GenStateMachine, callback_mode: [:state_functions, :state_enter]
 
   def accept_game(game_server, player) do
@@ -48,13 +48,41 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     send(data.player_1, moves_request(data.game, :player_1))
     send(data.player_2, moves_request(data.game, :player_2))
 
-    data = %{data | first_moves: nil}
+    data = Map.merge(data, %{first_moves: nil})
 
     {:keep_state, data, [{:state_timeout, data.game.move_timeout_ms, :move_timeout}]}
   end
 
   def moves({:call, from}, {:moves, player, moves}, %{first_moves: nil} = data) do
     {:keep_state, %{data | first_moves: {player, moves}}, [{:reply, from, :ok}]}
+  end
+
+  def moves({:call, from}, {:moves, _, moves_1}, %{first_moves: {_, moves_2}} = data) do
+    game = Logic.calculate_turn(data, Enum.concat(moves_1, moves_2))
+    data = %{data | game: game}
+    reply = {:reply, from, :ok}
+
+    if Game.over?(game),
+      do: {:next_state, :finalize, data, [reply]},
+      else: {:next_state, :moves, data, [reply]}
+  end
+
+  def moves(:state_timeout, :move_timeout, data) do
+    move_timeout_player =
+      %{
+        player_1: :player_2,
+        player_2: :player_1,
+        nil: :both
+      }[data.first_moves]
+
+    data = Map.merge(data, %{move_timeout_player: move_timeout_player})
+
+    {:next_state, :finalize, data, []}
+  end
+
+  def finalize(:enter, :moves, %{game: game} = data) do
+    IO.inspect("FINALIZEEEEEEEEEEEEEEEEEE")
+    {:stop, :normal}
   end
 
   defp moves_request(game, player) do

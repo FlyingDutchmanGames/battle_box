@@ -95,16 +95,12 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
 
     helper_1 =
       spawn_link(fn ->
-        receive do
-          {:moves_request, %{}} -> send(test_pid, :success_1)
-        end
+        receive do: ({:moves_request, %{}} -> send(test_pid, :success_1))
       end)
 
     helper_2 =
       spawn_link(fn ->
-        receive do
-          {:moves_request, %{}} -> send(test_pid, :success_2)
-        end
+        receive do: ({:moves_request, %{}} -> send(test_pid, :success_2))
       end)
 
     {:ok, pid} =
@@ -121,7 +117,7 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
   end
 
   test "you can play a game!" do
-    game = Game.new(player_1: @player_1, player_2: @player_2)
+    game = Game.new(player_1: @player_1, player_2: @player_2, max_turns: 10)
 
     {:ok, pid} =
       GameServer.start_link(%{
@@ -135,5 +131,12 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
 
     assert :ok = GameServer.accept_game(pid, :player_1)
     assert :ok = GameServer.accept_game(pid, :player_2)
+
+    Enum.each(1..10, fn _ ->
+      receive do: ({:moves_request, %{}} -> GameServer.submit_moves(pid, :player_1, []))
+      receive do: ({:moves_request, %{}} -> GameServer.submit_moves(pid, :player_2, []))
+    end)
+
+    assert false
   end
 end
