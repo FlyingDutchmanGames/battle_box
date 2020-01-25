@@ -10,15 +10,11 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     GenStateMachine.call(game_server, {:submit_moves, player, moves})
   end
 
-  # Callbacks
-
   def start_link(%{player_1: _, player_2: _, game: _} = data) do
     GenStateMachine.start_link(__MODULE__, data)
   end
 
   def init(data) do
-    data = Map.merge(data, %{first_acceptance: nil})
-
     {:ok, :game_acceptance, data, []}
   end
 
@@ -26,7 +22,10 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     send(data.player_1, init_message(data.game, :player_1))
     send(data.player_2, init_message(data.game, :player_2))
 
-    {:keep_state, [{:state_timeout, game.game_acceptance_timeout_ms, :game_acceptance_timeout}]}
+    data = Map.merge(data, %{first_acceptance: nil})
+
+    {:keep_state, data,
+     [{:state_timeout, game.game_acceptance_timeout_ms, :game_acceptance_timeout}]}
   end
 
   def game_acceptance({:call, from}, {:accept_game, player}, %{first_acceptance: nil} = data) do
@@ -42,14 +41,12 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   end
 
   def moves(:enter, :game_acceptance, data) do
-    IO.inspect(data, label: "DATA????")
-    game = %{}
-    send(data.player_1, moves_request(game, :player_1))
-    send(data.player_2, moves_request(game, :player_2))
+    send(data.player_1, moves_request(data.game, :player_1))
+    send(data.player_2, moves_request(data.game, :player_2))
 
     data = %{data | first_moves: nil}
 
-    {:keep_state, data, [{:state_timeout, game.move_timeout_ms, :move_timeout}]}
+    {:keep_state, data, [{:state_timeout, data.game.move_timeout_ms, :move_timeout}]}
   end
 
   def moves({:call, from}, {:moves, player, moves}, %{first_moves: nil} = data) do
@@ -57,28 +54,30 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   end
 
   defp moves_request(game, player) do
-    %{
-      robots: Game.robots(game),
-      turn: game.turn,
-      player: player
-    }
+    {:moves_request,
+     %{
+       robots: Game.robots(game),
+       turn: game.turn,
+       player: player
+     }}
   end
 
   defp init_message(game, player) do
-    %{
-      game_server: self(),
-      player: player,
-      settings:
-        Map.take(game, [
-          :spawn_every,
-          :spawn_per_player,
-          :robot_hp,
-          :attack_damage,
-          :collision_damage,
-          :terrain,
-          :game_acceptance_timeout_ms,
-          :move_timeout_ms
-        ])
-    }
+    {:game_request,
+     %{
+       game_server: self(),
+       player: player,
+       settings:
+         Map.take(game, [
+           :spawn_every,
+           :spawn_per_player,
+           :robot_hp,
+           :attack_damage,
+           :collision_damage,
+           :terrain,
+           :game_acceptance_timeout_ms,
+           :move_timeout_ms
+         ])
+     }}
   end
 end
