@@ -94,14 +94,10 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
     test_pid = self()
 
     helper_1 =
-      spawn_link(fn ->
-        receive do: ({:moves_request, %{}} -> send(test_pid, :success_1))
-      end)
+      spawn_link(fn -> receive do: ({:moves_request, %{}} -> send(test_pid, :success_1)) end)
 
     helper_2 =
-      spawn_link(fn ->
-        receive do: ({:moves_request, %{}} -> send(test_pid, :success_2))
-      end)
+      spawn_link(fn -> receive do: ({:moves_request, %{}} -> send(test_pid, :success_2)) end)
 
     {:ok, pid} =
       GameServer.start_link(%{
