@@ -132,7 +132,5 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
       receive do: ({:moves_request, %{}} -> GameServer.submit_moves(pid, :player_1, []))
       receive do: ({:moves_request, %{}} -> GameServer.submit_moves(pid, :player_2, []))
     end)
-
-    assert false
   end
 end

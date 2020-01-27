@@ -7,7 +7,7 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   end
 
   def submit_moves(game_server, player, moves) do
-    GenStateMachine.call(game_server, {:submit_moves, player, moves})
+    GenStateMachine.call(game_server, {:moves, player, moves})
   end
 
   def start_link(%{player_1: _, player_2: _, game: _} = data) do
@@ -44,11 +44,11 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     {:stop, :normal}
   end
 
-  def moves(:enter, :game_acceptance, data) do
+  def moves(:enter, _old_state, data) do
     send(data.player_1, moves_request(data.game, :player_1))
     send(data.player_2, moves_request(data.game, :player_2))
 
-    data = Map.merge(data, %{first_moves: nil})
+    data = Map.put(data, :first_moves, nil)
 
     {:keep_state, data, [{:state_timeout, data.game.move_timeout_ms, :move_timeout}]}
   end
@@ -58,30 +58,26 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   end
 
   def moves({:call, from}, {:moves, _, moves_1}, %{first_moves: {_, moves_2}} = data) do
-    game = Logic.calculate_turn(data, Enum.concat(moves_1, moves_2))
-    data = %{data | game: game}
-    reply = {:reply, from, :ok}
+    moves = Enum.concat(moves_1, moves_2)
+    data = update_in(data.game, &Logic.calculate_turn(&1, moves))
 
-    if Game.over?(game),
-      do: {:next_state, :finalize, data, [reply]},
-      else: {:next_state, :moves, data, [reply]}
+    if Game.over?(data.game),
+      do: {:next_state, :finalize, data, [{:reply, from, :ok}]},
+      else: {:repeat_state, data, [{:reply, from, :ok}]}
   end
 
   def moves(:state_timeout, :move_timeout, data) do
-    move_timeout_player =
-      %{
-        player_1: :player_2,
-        player_2: :player_1,
-        nil: :both
-      }[data.first_moves]
+    IO.inspect("MOVES STATE TIMEOUT")
 
-    data = Map.merge(data, %{move_timeout_player: move_timeout_player})
+    move_timeout_player =
+      %{player_1: :player_2, player_2: :player_1, nil: :both}[data.first_moves]
+
+    data = Map.put(data, :move_timeout_player, move_timeout_player)
 
     {:next_state, :finalize, data, []}
   end
 
   def finalize(:enter, :moves, %{game: game} = data) do
-    IO.inspect("FINALIZEEEEEEEEEEEEEEEEEE")
     {:stop, :normal}
   end
 
