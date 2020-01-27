@@ -22,7 +22,7 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     send(data.player_1, init_message(data.game, :player_1))
     send(data.player_2, init_message(data.game, :player_2))
 
-    data = Map.merge(data, %{first_acceptance: nil})
+    data = Map.put(data, :first_acceptance, nil)
 
     {:keep_state, data,
      [{:state_timeout, game.game_acceptance_timeout_ms, :game_acceptance_timeout}]}
@@ -37,9 +37,8 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   end
 
   def game_acceptance(:state_timeout, :game_acceptance_timeout, data) do
-    cancellation = {:game_cancelled, data.game.id}
-    send(data.player_1, cancellation)
-    send(data.player_2, cancellation)
+    send(data.player_1, {:game_cancelled, data.game.id})
+    send(data.player_2, {:game_cancelled, data.game.id})
 
     {:stop, :normal}
   end
@@ -67,8 +66,6 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   end
 
   def moves(:state_timeout, :move_timeout, data) do
-    IO.inspect("MOVES STATE TIMEOUT")
-
     move_timeout_player =
       %{player_1: :player_2, player_2: :player_1, nil: :both}[data.first_moves]
 
@@ -84,6 +81,7 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   defp moves_request(game, player) do
     {:moves_request,
      %{
+       game_id: game.id,
        robots: Game.robots(game),
        turn: game.turn,
        player: player
@@ -94,6 +92,7 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     {:game_request,
      %{
        game_server: self(),
+       game_id: game.id,
        player: player,
        settings:
          Map.take(game, [

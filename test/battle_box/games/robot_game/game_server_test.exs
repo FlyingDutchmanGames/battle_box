@@ -28,7 +28,7 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
 
     expected = %{
       game_server: pid,
-      player: nil,
+      game_id: game.id,
       settings: %{
         spawn_every: game.spawn_every,
         spawn_per_player: game.spawn_per_player,
@@ -41,8 +41,8 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
       }
     }
 
-    expected_p1 = {:game_request, %{expected | player: :player_1}}
-    expected_p2 = {:game_request, %{expected | player: :player_2}}
+    expected_p1 = {:game_request, Map.put(expected, :player, :player_1)}
+    expected_p2 = {:game_request, Map.put(expected, :player, :player_2)}
 
     assert_receive ^expected_p1
     assert_receive ^expected_p2
@@ -91,13 +91,22 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
 
   test "When you accept a game it asks you for moves" do
     game = Game.new(player_1: @player_1, player_2: @player_2)
+    game_id = game.id
     test_pid = self()
 
     helper_1 =
-      spawn_link(fn -> receive do: ({:moves_request, %{}} -> send(test_pid, :success_1)) end)
+      spawn_link(fn ->
+        receive do:
+                  ({:moves_request, %{game_id: ^game_id, turn: 0, robots: _, player: :player_1}} ->
+                     send(test_pid, :success_1))
+      end)
 
     helper_2 =
-      spawn_link(fn -> receive do: ({:moves_request, %{}} -> send(test_pid, :success_2)) end)
+      spawn_link(fn ->
+        receive do:
+                  ({:moves_request, %{game_id: ^game_id, turn: 0, robots: _, player: :player_2}} ->
+                     send(test_pid, :success_2))
+      end)
 
     {:ok, pid} =
       GameServer.start_link(%{
