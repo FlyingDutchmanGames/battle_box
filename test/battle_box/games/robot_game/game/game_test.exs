@@ -63,6 +63,12 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert nil == Game.get_by_id(Ecto.UUID.generate())
     end
 
+    test "trying to perist a game that has persistent?: false is a noop" do
+      game = Game.new(player_1: @player_1, player_2: @player_2, persistent?: false)
+      assert {:ok, game} = Game.persist(game)
+      assert game.id == nil
+    end
+
     test "you can persist a game twice" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
       assert {:ok, game} = Game.persist(game)
