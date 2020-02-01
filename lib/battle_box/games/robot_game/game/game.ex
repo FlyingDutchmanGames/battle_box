@@ -25,6 +25,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     embeds_many :events, Event, on_replace: :delete
 
     field :terrain, :any, default: Terrain.default(), virtual: true
+    field :persistent?, :boolean, default: true, virtual: true
 
     timestamps()
   end
@@ -53,6 +54,8 @@ defmodule BattleBox.Games.RobotGame.Game do
         select: g
     )
   end
+
+  def persist(%{persistent?: false} = game), do: {:ok, game}
 
   def persist(game) do
     events = Enum.map(game.events, &Map.take(&1, [:turn, :seq_num, :cause, :effects]))
