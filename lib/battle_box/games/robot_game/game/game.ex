@@ -12,6 +12,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   schema "robot_games" do
     field :player_1, :binary_id
     field :player_2, :binary_id
+    field :winner, :binary_id
     field :spawn_every, :integer, default: 10
     field :spawn_per_player, :integer, default: 5
     field :robot_hp, :integer, default: 50
