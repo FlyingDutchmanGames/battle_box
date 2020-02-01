@@ -12,6 +12,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   schema "robot_games" do
     field :player_1, :binary_id
     field :player_2, :binary_id
+    field :winner, :binary_id
     field :spawn_every, :integer, default: 10
     field :spawn_per_player, :integer, default: 5
     field :robot_hp, :integer, default: 50
@@ -63,6 +64,17 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> Map.put(:events, events)
     |> changeset()
     |> Repo.insert(on_conflict: :replace_all, conflict_target: :id)
+  end
+
+  def calculate_winner(game) do
+    winner =
+      case {score(game, :player_1), score(game, :player_2)} do
+        {p1, p2} when p1 == p2 -> nil
+        {p1, p2} when p1 > p2 -> game.player_1
+        {p1, p2} when p1 < p2 -> game.player_2
+      end
+
+    if over?(game), do: %{game | winner: winner}, else: game
   end
 
   def complete_turn(game),
@@ -125,7 +137,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> Map.merge(opts)
   end
 
-  def over?(game), do: game.turn >= game.max_turns
+  def over?(game), do: game.winner || game.turn >= game.max_turns
 
   def score(game, player_id) when player_id in [:player_1, :player_2] do
     game

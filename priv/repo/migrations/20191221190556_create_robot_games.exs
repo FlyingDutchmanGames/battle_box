@@ -5,6 +5,7 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
     create table("robot_games") do
       add :player_1, :uuid, null: false
       add :player_2, :uuid, null: false
+      add :winner, :uuid, null: true
       add :robot_hp, :integer, null: false
       add :events, :jsonb, null: false, default: fragment("'[]'::jsonb")
       add :turn, :integer, null: false
