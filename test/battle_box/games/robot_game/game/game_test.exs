@@ -63,6 +63,12 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert nil == Game.get_by_id(Ecto.UUID.generate())
     end
 
+    test "trying to perist a game that has persistent?: false is a noop" do
+      game = Game.new(player_1: @player_1, player_2: @player_2, persistent?: false)
+      assert {:ok, game} = Game.persist(game)
+      assert game.id == nil
+    end
+
     test "you can persist a game twice" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
       assert {:ok, game} = Game.persist(game)
@@ -344,6 +350,17 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       game = Game.new(terrain: terrain)
       assert [] == Game.available_adjacent_locations(game, {1, 1})
+    end
+  end
+
+  describe "disqualify/3" do
+    test "disqualifying a game for a player sets the other player as the winner" do
+      {p1, p2} = {uuid(), uuid()}
+      game = Game.new(player_1: p1, player_2: p2)
+
+      assert game.winner == nil
+      assert Game.disqualify(game, :player_1).winner == p2
+      assert Game.disqualify(game, :player_2).winner == p1
     end
   end
 

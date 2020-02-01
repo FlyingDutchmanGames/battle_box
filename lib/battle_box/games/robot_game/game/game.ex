@@ -25,6 +25,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     embeds_many :events, Event, on_replace: :delete
 
     field :terrain, :any, default: Terrain.default(), virtual: true
+    field :persistent?, :boolean, default: true, virtual: true
 
     field :game_acceptance_timeout_ms, :integer, virtual: true, default: 5000
     field :move_timeout_ms, :integer, virtual: true, default: 5000
@@ -56,6 +57,14 @@ defmodule BattleBox.Games.RobotGame.Game do
         select: g
     )
   end
+
+  def disqualify(game, player) do
+    winner = %{player_1: :player_2, player_2: :player_1}[player]
+    winner = Map.get(game, winner)
+    Map.put(game, :winner, winner)
+  end
+
+  def persist(%{persistent?: false} = game), do: {:ok, game}
 
   def persist(game) do
     events = Enum.map(game.events, &Map.take(&1, [:turn, :seq_num, :cause, :effects]))
