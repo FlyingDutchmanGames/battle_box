@@ -347,6 +347,45 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "calculate_winner/1" do
+    test "calculate winner when its not at max turns yet doesn't set the winner" do
+      robot_spawns = ~g/1/
+
+      game =
+        Game.new()
+        |> Game.put_events(robot_spawns)
+
+      refute Game.over?(game)
+      assert Game.calculate_winner(game).winner == nil
+    end
+
+    test "will set the winner if the game is over to the player with the most robots" do
+      robot_spawns = ~g/121/
+
+      id = uuid()
+
+      game =
+        Game.new(turn: 20, max_turns: 20, player_1: id)
+        |> Game.put_events(robot_spawns)
+
+      assert Game.over?(game)
+      assert Game.calculate_winner(game).winner == id
+    end
+
+    test "will be nil if its a tie" do
+      robot_spawns = ~g/1212/
+
+      id = uuid()
+
+      game =
+        Game.new(turn: 20, max_turns: 20, player_1: id)
+        |> Game.put_events(robot_spawns)
+
+      assert Game.over?(game)
+      assert Game.calculate_winner(game).winner == nil
+    end
+  end
+
   defp normalize_events(events) do
     Enum.map(events, &Map.drop(&1, [:__meta__, :__struct__]))
   end

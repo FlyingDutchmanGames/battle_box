@@ -36,6 +36,11 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
 
     game = put_events(game, events)
 
+    game =
+      if over?(game),
+        do: calculate_winner(game),
+        else: game
+
     complete_turn(game)
   end
 

@@ -63,6 +63,17 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> Repo.insert(on_conflict: :replace_all, conflict_target: :id)
   end
 
+  def calculate_winner(game) do
+    winner =
+      case {score(game, :player_1), score(game, :player_2)} do
+        {p1, p2} when p1 == p2 -> nil
+        {p1, p2} when p1 > p2 -> game.player_1
+        {p1, p2} when p1 < p2 -> game.player_2
+      end
+
+    if over?(game), do: %{game | winner: winner}, else: game
+  end
+
   def complete_turn(game),
     do: update_in(game.turn, &(&1 + 1))
 
