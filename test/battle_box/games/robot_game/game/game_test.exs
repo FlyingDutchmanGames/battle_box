@@ -31,6 +31,28 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "over?" do
+    test "the game is over if there is a winner" do
+      game = Game.new(winner: uuid())
+      assert Game.over?(game)
+    end
+
+    test "is over if the game turn is equal to max turn" do
+      game = Game.new(turn: 10, max_turns: 10)
+      assert Game.over?(game)
+    end
+
+    test "is over if the game turn is more than the max turn" do
+      game = Game.new(turn: 11, max_turns: 10)
+      assert Game.over?(game)
+    end
+
+    test "is not over if the game turn is less than the max turn" do
+      game = Game.new(turn: 9, max_turns: 10)
+      refute Game.over?(game)
+    end
+  end
+
   describe "persistance" do
     test "You can persist a game" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
@@ -299,8 +321,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "available_adjacent_locations/2" do
     test "provides up down left and right when all are available" do
       terrain = ~t/111
-                   111
-                   111/
+      111
+      111/
 
       game = Game.new(terrain: terrain)
 
@@ -317,8 +339,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "doesn't provide spaces that are inaccesible" do
       terrain = ~t/000
-                   010
-                   000/
+      010
+      000/
 
       game = Game.new(terrain: terrain)
       assert [] == Game.available_adjacent_locations(game, {1, 1})

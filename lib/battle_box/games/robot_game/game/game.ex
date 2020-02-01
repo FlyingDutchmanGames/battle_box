@@ -123,6 +123,8 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> Map.merge(opts)
   end
 
+  def over?(game), do: game.winner || game.turn >= game.max_turns
+
   def score(game, player_id) when player_id in [:player_1, :player_2] do
     game
     |> robots
