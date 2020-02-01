@@ -44,7 +44,8 @@ defmodule BattleBox.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:phoenix_live_view, "~> 0.4.0"},
-      {:floki, ">= 0.0.0", only: :test}
+      {:floki, ">= 0.0.0", only: :test},
+      {:gen_state_machine, "~> 2.0"}
     ]
   end
 

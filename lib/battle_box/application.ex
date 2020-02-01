@@ -1,5 +1,6 @@
 defmodule BattleBox.Application do
   @moduledoc false
+  alias BattleBox.Games.RobotGame.RobotGameSupervisor
 
   use Application
 
@@ -7,7 +8,8 @@ defmodule BattleBox.Application do
     children = [
       BattleBox.Repo,
       BattleBoxWeb.Endpoint,
-      BattleBoxWeb.Presence
+      BattleBoxWeb.Presence,
+      RobotGameSupervisor
     ]
 
     opts = [strategy: :one_for_one, name: BattleBox.Supervisor]
