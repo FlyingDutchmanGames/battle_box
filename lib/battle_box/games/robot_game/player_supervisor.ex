@@ -6,7 +6,6 @@ defmodule BattleBox.Games.RobotGame.PlayerSupervisor do
     DynamicSupervisor.start_link(__MODULE__, opts, name: name)
   end
 
-  @impl true
   def init(_opts) do
     DynamicSupervisor.init(strategy: :one_for_one)
   end

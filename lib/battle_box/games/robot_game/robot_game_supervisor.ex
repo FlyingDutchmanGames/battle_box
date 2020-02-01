@@ -10,7 +10,6 @@ defmodule BattleBox.Games.RobotGame.RobotGameSupervisor do
     Supervisor.start_link(__MODULE__, %{name: name}, name: name)
   end
 
-  @impl true
   def init(%{name: name}) do
     children = [
       {GameSup, name: game_supervisor_name(name)},
