@@ -31,6 +31,28 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "over?" do
+    test "the game is over if there is a winner" do
+      game = Game.new(winner: uuid())
+      assert Game.over?(game)
+    end
+
+    test "is over if the game turn is equal to max turn" do
+      game = Game.new(turn: 10, max_turns: 10)
+      assert Game.over?(game)
+    end
+
+    test "is over if the game turn is more than the max turn" do
+      game = Game.new(turn: 11, max_turns: 10)
+      assert Game.over?(game)
+    end
+
+    test "is not over if the game turn is less than the max turn" do
+      game = Game.new(turn: 9, max_turns: 10)
+      refute Game.over?(game)
+    end
+  end
+
   describe "persistance" do
     test "You can persist a game" do
       game = Game.new(player_1: @player_1, player_2: @player_2)
@@ -299,8 +321,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "available_adjacent_locations/2" do
     test "provides up down left and right when all are available" do
       terrain = ~t/111
-                   111
-                   111/
+      111
+      111/
 
       game = Game.new(terrain: terrain)
 
@@ -317,11 +339,50 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "doesn't provide spaces that are inaccesible" do
       terrain = ~t/000
-                   010
-                   000/
+      010
+      000/
 
       game = Game.new(terrain: terrain)
       assert [] == Game.available_adjacent_locations(game, {1, 1})
+    end
+  end
+
+  describe "calculate_winner/1" do
+    test "calculate winner when its not at max turns yet doesn't set the winner" do
+      robot_spawns = ~g/1/
+
+      game =
+        Game.new()
+        |> Game.put_events(robot_spawns)
+
+      refute Game.over?(game)
+      assert Game.calculate_winner(game).winner == nil
+    end
+
+    test "will set the winner if the game is over to the player with the most robots" do
+      robot_spawns = ~g/121/
+
+      id = uuid()
+
+      game =
+        Game.new(turn: 20, max_turns: 20, player_1: id)
+        |> Game.put_events(robot_spawns)
+
+      assert Game.over?(game)
+      assert Game.calculate_winner(game).winner == id
+    end
+
+    test "will be nil if its a tie" do
+      robot_spawns = ~g/1212/
+
+      id = uuid()
+
+      game =
+        Game.new(turn: 20, max_turns: 20, player_1: id)
+        |> Game.put_events(robot_spawns)
+
+      assert Game.over?(game)
+      assert Game.calculate_winner(game).winner == nil
     end
   end
 
