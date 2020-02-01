@@ -6,6 +6,10 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     GenStateMachine.call(game_server, {:accept_game, player})
   end
 
+  def reject_game(game_server, player) do
+    GenStateMachine.call(game_server, {:reject_game, player})
+  end
+
   def submit_moves(game_server, player, moves) do
     GenStateMachine.call(game_server, {:moves, player, moves})
   end
@@ -22,56 +26,50 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     send(data.player_1, init_message(data.game, :player_1))
     send(data.player_2, init_message(data.game, :player_2))
 
-    data = Map.put(data, :first_acceptance, nil)
+    data = Map.put(data, :acceptances, [])
 
-    {:keep_state, data,
-     [{:state_timeout, game.game_acceptance_timeout_ms, :game_acceptance_timeout}]}
-  end
-
-  def game_acceptance({:call, from}, {:accept_game, player}, %{first_acceptance: nil} = data) do
-    {:keep_state, %{data | first_acceptance: player}, [{:reply, from, :ok}]}
+    {:keep_state, data}
   end
 
   def game_acceptance({:call, from}, {:accept_game, player}, data) do
-    {:next_state, :moves, data, [{:reply, from, :ok}]}
+    reply = {:reply, from, :ok}
+
+    case data.acceptances do
+      [] -> {:keep_state, put_in(data.acceptances, [player]), [reply]}
+      [_first_acceptance] -> {:next_state, :moves, data, [reply]}
+    end
   end
 
-  def game_acceptance(:state_timeout, :game_acceptance_timeout, data) do
-    send(data.player_1, {:game_cancelled, data.game.id})
-    send(data.player_2, {:game_cancelled, data.game.id})
+  def game_acceptance({:call, from}, {:reject_game, player}, data) do
+    for p <- [:player_1, :player_2], p != player, do: send(p, {:game_cancelled, data.game.id})
 
-    {:stop, :normal}
+    {:stop, :normal, [{:reply, from, {:game_cancelled, data.game.id}}]}
   end
 
   def moves(:enter, _old_state, data) do
     send(data.player_1, moves_request(data.game, :player_1))
     send(data.player_2, moves_request(data.game, :player_2))
 
-    data = Map.put(data, :first_moves, nil)
+    data = Map.put(data, :moves, [])
 
-    {:keep_state, data, [{:state_timeout, data.game.move_timeout_ms, :move_timeout}]}
+    {:keep_state, data}
   end
 
-  def moves({:call, from}, {:moves, player, moves}, %{first_moves: nil} = data) do
-    {:keep_state, %{data | first_moves: {player, moves}}, [{:reply, from, :ok}]}
-  end
+  def moves({:call, from}, {:moves, player, moves}, data) do
+    reply = {:reply, from, :ok}
 
-  def moves({:call, from}, {:moves, _, moves_1}, %{first_moves: {_, moves_2}} = data) do
-    moves = Enum.concat(moves_1, moves_2)
-    data = update_in(data.game, &Logic.calculate_turn(&1, moves))
+    case data.moves do
+      [] ->
+        {:keep_state, put_in(data.moves, [{player, moves}]), [reply]}
 
-    if Game.over?(data.game),
-      do: {:next_state, :finalize, data, [{:reply, from, :ok}]},
-      else: {:repeat_state, data, [{:reply, from, :ok}]}
-  end
+      [{other_player, other_moves}] when other_player != player ->
+        moves = Enum.concat(moves, other_moves)
+        data = update_in(data.game, &Logic.calculate_turn(&1, moves))
 
-  def moves(:state_timeout, :move_timeout, data) do
-    move_timeout_player =
-      %{player_1: :player_2, player_2: :player_1, nil: :both}[data.first_moves]
-
-    data = Map.put(data, :move_timeout_player, move_timeout_player)
-
-    {:next_state, :finalize, data, []}
+        if Game.over?(data.game),
+          do: {:next_state, :finalize, data, [reply]},
+          else: {:repeat_state, data, [reply]}
+    end
   end
 
   def finalize(:enter, :moves, %{game: game} = data) do
