@@ -38,6 +38,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> cast(params, [
       :player_1,
       :player_2,
+      :winner,
       :spawn_every,
       :spawn_per_player,
       :robot_hp,

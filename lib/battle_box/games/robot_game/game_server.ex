@@ -26,7 +26,7 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     {:ok, :game_acceptance, data, []}
   end
 
-  def game_acceptance(:enter, _old_state, %{game: game} = data) do
+  def game_acceptance(:enter, _old_state, data) do
     for player <- [:player_1, :player_2] do
       send(data[player], init_message(data.game, player))
     end
@@ -41,7 +41,7 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     end
   end
 
-  def game_acceptance(:cast, {:reject_game, player}, data) do
+  def game_acceptance(:cast, {:reject_game, _player}, data) do
     for player <- [:player_1, :player_2] do
       send(data[player], {:game_cancelled, data.game.id})
     end

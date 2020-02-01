@@ -1,6 +1,6 @@
 defmodule BattleBox.Games.RobotGame.GameServerTest do
   alias BattleBox.Games.RobotGame.{Game, GameServer}
-  use ExUnit.Case, async: true
+  use BattleBox.DataCase
 
   @player_1 Ecto.UUID.generate()
   @player_2 Ecto.UUID.generate()
@@ -93,8 +93,8 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
                     {:moves_request, %{game_id: ^game_id, turn: 0, robots: [], player: :player_2}}}
   end
 
-  test "you can play a game!" do
-    game = Game.new(player_1: @player_1, player_2: @player_2, max_turns: 10, persistent?: false)
+  test "if you forefit, you get a game over message and the other player is set as the winner" do
+    game = Game.new(player_1: @player_1, player_2: @player_2)
 
     {:ok, pid} =
       GameServer.start_link(%{
@@ -102,6 +102,26 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
         player_2: named_proxy(:player_2),
         game: game
       })
+
+    :ok = GameServer.accept_game(pid, :player_1)
+    :ok = GameServer.accept_game(pid, :player_2)
+    :ok = GameServer.forfeit_game(pid, :player_1)
+
+    assert_receive {:player_1, {:game_over, %{game: %{winner: @player_2}}}}
+    assert_receive {:player_2, {:game_over, %{game: %{winner: @player_2}}}}
+  end
+
+  test "you can play a game! (and it persists it to the db when you're done)" do
+    game = Game.new(player_1: @player_1, player_2: @player_2, max_turns: 10)
+
+    {:ok, pid} =
+      GameServer.start_link(%{
+        player_1: named_proxy(:player_1),
+        player_2: named_proxy(:player_2),
+        game: game
+      })
+
+    ref = Process.monitor(pid)
 
     assert_receive {:player_1, {:game_request, %{game_server: ^pid, player: :player_1}}}
     assert_receive {:player_2, {:game_request, %{game_server: ^pid, player: :player_2}}}
@@ -119,8 +139,12 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
                    GameServer.submit_moves(pid, :player_2, turn, []))
     end)
 
-    assert_receive {:player_1, {:game_over, %{}}}
-    assert_receive {:player_2, {:game_over, %{}}}
+    assert_receive {:player_1, {:game_over, %{game: game}}}
+    assert_receive {:player_2, {:game_over, %{game: ^game}}}
+    assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+
+    loaded_game = Game.get_by_id(game.id)
+    assert Enum.map(loaded_game.events, & &1.effects) == Enum.map(game.events, & &1.effects)
   end
 
   defp named_proxy(name) do
