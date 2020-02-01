@@ -23,13 +23,18 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   test "If you attack a square a robot is in it takes damage", %{game: game} do
     robot_spawns = ~g/1 2/
 
-    moves = [
-      %{type: :noop, robot_id: 1},
+    player_1_moves = [
+      %{type: :noop, robot_id: 1}
+    ]
+
+    player_2_moves = [
       %{type: :attack, target: {0, 0}, robot_id: 2}
     ]
 
     inital_game = Game.put_events(game, robot_spawns)
-    after_turn = Logic.calculate_turn(inital_game, moves)
+
+    after_turn =
+      Logic.calculate_turn(inital_game, %{player_1: player_1_moves, player_2: player_2_moves})
 
     assert %{
              location: {0, 0},
@@ -40,13 +45,21 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   test "If you attack a robot that moves out of a square it takes not damage", %{game: game} do
     robot_spawns = ~g/1 2/
 
-    moves = [
-      %{type: :move, target: {1, 0}, robot_id: 1},
+    player_1_moves = [
+      %{type: :move, target: {1, 0}, robot_id: 1}
+    ]
+
+    player_2_moves = [
       %{type: :attack, target: {0, 0}, robot_id: 2}
     ]
 
     inital_game = Game.put_events(game, robot_spawns)
-    after_turn = Logic.calculate_turn(inital_game, moves)
+
+    after_turn =
+      Logic.calculate_turn(inital_game, %{
+        player_1: player_1_moves,
+        player_2: player_2_moves
+      })
 
     assert %{
              location: {1, 0},
@@ -58,13 +71,18 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     robot_spawns = ~g/1 0
                       0 2/
 
-    moves = [
-      %{type: :attack, target: {1, 0}, robot_id: 1},
+    player_1_moves = [
+      %{type: :attack, target: {1, 0}, robot_id: 1}
+    ]
+
+    player_2_moves = [
       %{type: :move, target: {1, 0}, robot_id: 2}
     ]
 
     inital_game = Game.put_events(game, robot_spawns)
-    after_turn = Logic.calculate_turn(inital_game, moves)
+
+    after_turn =
+      Logic.calculate_turn(inital_game, %{player_1: player_1_moves, player_2: player_2_moves})
 
     assert %{
              location: {1, 0},
@@ -76,13 +94,13 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     robot_spawns = ~g/1 2
                       4 0/
 
-    moves = [
+    player_2_moves = [
       %{type: :attack, target: {0, 0}, robot_id: 2},
       %{type: :attack, target: {0, 0}, robot_id: 4}
     ]
 
     inital_game = Game.put_events(game, robot_spawns)
-    after_turn = Logic.calculate_turn(inital_game, moves)
+    after_turn = Logic.calculate_turn(inital_game, %{player_1: [], player_2: player_2_moves})
 
     assert %{hp: 48} = Game.get_robot(after_turn, 1)
   end
@@ -91,12 +109,12 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     robot_spawns = ~g/1 0
                       0 2/
 
-    moves = [
+    player_2_moves = [
       %{type: :attack, target: {0, 0}, robot_id: 2}
     ]
 
     inital_game = Game.put_events(game, robot_spawns)
-    after_turn = Logic.calculate_turn(inital_game, moves)
+    after_turn = Logic.calculate_turn(inital_game, %{player_1: [], player_2: player_2_moves})
 
     assert %{hp: 50} = Game.get_robot(after_turn, 1)
   end
@@ -104,12 +122,12 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   test "you can't attack yourself I guess? ¯\_(ツ)_/¯", %{game: game} do
     robot_spawns = ~g/1/
 
-    moves = [
+    player_1_moves = [
       %{type: :attack, target: {0, 0}, robot_id: 1}
     ]
 
     inital_game = Game.put_events(game, robot_spawns)
-    after_turn = Logic.calculate_turn(inital_game, moves)
+    after_turn = Logic.calculate_turn(inital_game, %{player_1: player_1_moves, player_2: []})
 
     assert %{hp: 50} = Game.get_robot(after_turn, 1)
   end
@@ -118,12 +136,12 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     robot_spawns = ~g/1 2
                       4 6/
 
-    moves = [
+    player_1_moves = [
       %{type: :suicide, robot_id: 1}
     ]
 
     inital_game = Game.put_events(game, robot_spawns)
-    after_turn = Logic.calculate_turn(inital_game, moves)
+    after_turn = Logic.calculate_turn(inital_game, %{player_1: player_1_moves, player_2: []})
 
     assert nil == Game.get_robot(after_turn, 1)
     assert %{hp: 45} = Game.get_robot(after_turn, 2)
@@ -134,13 +152,18 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   test "You can't move into the square of a suiciding robot", %{game: game} do
     robot_spawns = ~g/1 2/
 
-    moves = [
-      %{type: :suicide, robot_id: 1},
+    player_1_moves = [
+      %{type: :suicide, robot_id: 1}
+    ]
+
+    player_2_moves = [
       %{type: :move, target: {0, 0}, robot_id: 2}
     ]
 
     inital_game = Game.put_events(game, robot_spawns)
-    after_turn = Logic.calculate_turn(inital_game, moves)
+
+    after_turn =
+      Logic.calculate_turn(inital_game, %{player_1: player_1_moves, player_2: player_2_moves})
 
     assert %{location: {0, 1}} = Game.get_robot(after_turn, 2)
   end

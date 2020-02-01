@@ -2,7 +2,9 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
   import BattleBox.Games.RobotGame.Game
   alias Ecto.UUID
 
-  def calculate_turn(game, moves) do
+  def calculate_turn(game, %{player_1: player_1_moves, player_2: player_2_moves}) do
+    moves = Enum.concat(player_1_moves, player_2_moves)
+
     game =
       if spawning_round?(game),
         do: put_events(game, generate_spawn_events(game)),

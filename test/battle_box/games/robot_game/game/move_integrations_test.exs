@@ -17,7 +17,10 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
 
     assert %{location: {0, 0}} =
              game
-             |> Logic.calculate_turn([%{type: :move, target: {1, 1}, robot_id: 1}])
+             |> Logic.calculate_turn(%{
+               player_1: [%{type: :move, target: {1, 1}, robot_id: 1}],
+               player_2: []
+             })
              |> Game.get_robot(1)
   end
 
@@ -92,7 +95,7 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
       |> Enum.map(fn {location, type} -> robot_move(location, type) end)
 
-    after_turn = Logic.calculate_turn(initial_game, moves)
+    after_turn = Logic.calculate_turn(initial_game, %{player_1: moves, player_2: []})
 
     graph_with_indexes
     |> Enum.filter(fn {_, val} -> is_robot?(val) end)
