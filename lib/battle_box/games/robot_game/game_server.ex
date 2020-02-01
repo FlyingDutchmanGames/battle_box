@@ -3,15 +3,19 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   use GenStateMachine, callback_mode: [:state_functions, :state_enter]
 
   def accept_game(game_server, player) do
-    GenStateMachine.call(game_server, {:accept_game, player})
+    GenStateMachine.cast(game_server, {:accept_game, player})
   end
 
   def reject_game(game_server, player) do
-    GenStateMachine.call(game_server, {:reject_game, player})
+    GenStateMachine.cast(game_server, {:reject_game, player})
   end
 
-  def submit_moves(game_server, player, moves) do
-    GenStateMachine.call(game_server, {:moves, player, moves})
+  def forfeit_game(game_server, player) do
+    GenStateMachine.cast(game_server, {:forfeit_game, player})
+  end
+
+  def submit_moves(game_server, player, turn, moves) do
+    GenStateMachine.cast(game_server, {:moves, player, turn, moves})
   end
 
   def start_link(%{player_1: _, player_2: _, game: _} = data) do
@@ -23,56 +27,62 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   end
 
   def game_acceptance(:enter, _old_state, %{game: game} = data) do
-    send(data.player_1, init_message(data.game, :player_1))
-    send(data.player_2, init_message(data.game, :player_2))
+    for player <- [:player_1, :player_2] do
+      send(data[player], init_message(data.game, player))
+    end
 
-    data = Map.put(data, :acceptances, [])
-
-    {:keep_state, data}
+    {:keep_state, Map.put(data, :acceptances, [])}
   end
 
-  def game_acceptance({:call, from}, {:accept_game, player}, data) do
-    reply = {:reply, from, :ok}
-
+  def game_acceptance(:cast, {:accept_game, player}, data) do
     case data.acceptances do
-      [] -> {:keep_state, put_in(data.acceptances, [player]), [reply]}
-      [_first_acceptance] -> {:next_state, :moves, data, [reply]}
+      [] -> {:keep_state, put_in(data.acceptances, [player])}
+      [_first_acceptance] -> {:next_state, :moves, data}
     end
   end
 
-  def game_acceptance({:call, from}, {:reject_game, player}, data) do
-    for p <- [:player_1, :player_2], p != player, do: send(p, {:game_cancelled, data.game.id})
+  def game_acceptance(:cast, {:reject_game, player}, data) do
+    for player <- [:player_1, :player_2] do
+      send(data[player], {:game_cancelled, data.game.id})
+    end
 
-    {:stop, :normal, [{:reply, from, {:game_cancelled, data.game.id}}]}
+    {:stop, :normal}
   end
 
   def moves(:enter, _old_state, data) do
-    send(data.player_1, moves_request(data.game, :player_1))
-    send(data.player_2, moves_request(data.game, :player_2))
+    for player <- [:player_1, :player_2] do
+      send(data[player], moves_request(data.game, player))
+    end
 
-    data = Map.put(data, :moves, [])
-
-    {:keep_state, data}
+    {:keep_state, Map.put(data, :moves, [])}
   end
 
-  def moves({:call, from}, {:moves, player, moves}, data) do
-    reply = {:reply, from, :ok}
-
+  def moves(:cast, {:moves, player, _turn, moves}, data) do
     case data.moves do
       [] ->
-        {:keep_state, put_in(data.moves, [{player, moves}]), [reply]}
+        {:keep_state, put_in(data.moves, [{player, moves}])}
 
       [{other_player, other_moves}] when other_player != player ->
         moves = Enum.concat(moves, other_moves)
         data = update_in(data.game, &Logic.calculate_turn(&1, moves))
 
         if Game.over?(data.game),
-          do: {:next_state, :finalize, data, [reply]},
-          else: {:repeat_state, data, [reply]}
+          do: {:next_state, :finalize, data},
+          else: {:repeat_state, data}
     end
   end
 
+  def moves(:cast, {:forfeit_game, player}, data) do
+    {:next_state, :finalize, update_in(data.game, &Game.disqualify(&1, player))}
+  end
+
   def finalize(:enter, :moves, %{game: game} = data) do
+    {:ok, game} = Game.persist(game)
+
+    for player <- [:player_1, :player_2] do
+      send(data[player], game_over_message(game))
+    end
+
     {:stop, :normal}
   end
 
@@ -104,5 +114,9 @@ defmodule BattleBox.Games.RobotGame.GameServer do
            :move_timeout_ms
          ])
      }}
+  end
+
+  def game_over_message(game) do
+    {:game_over, %{game: game}}
   end
 end
