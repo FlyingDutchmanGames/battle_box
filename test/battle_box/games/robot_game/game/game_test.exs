@@ -353,6 +353,17 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "disqualify/3" do
+    test "disqualifying a game for a player sets the other player as the winner" do
+      {p1, p2} = {uuid(), uuid()}
+      game = Game.new(player_1: p1, player_2: p2)
+
+      assert game.winner == nil
+      assert Game.disqualify(game, :player_1).winner == p2
+      assert Game.disqualify(game, :player_2).winner == p1
+    end
+  end
+
   describe "calculate_winner/1" do
     test "calculate winner when its not at max turns yet doesn't set the winner" do
       robot_spawns = ~g/1/
