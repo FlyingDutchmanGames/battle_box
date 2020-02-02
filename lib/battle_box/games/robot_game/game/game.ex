@@ -76,6 +76,12 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> Repo.insert(on_conflict: :replace_all, conflict_target: :id)
   end
 
+  def validate_moves(game, moves, player) do
+    moves
+    |> Enum.uniq_by(fn move -> move.robot_id end)
+    |> Enum.filter(fn move -> match?(%{player_id: ^player}, get_robot(game, move.robot_id)) end)
+  end
+
   def calculate_winner(game) do
     winner =
       case {score(game, :player_1), score(game, :player_2)} do
