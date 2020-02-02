@@ -18,7 +18,7 @@ defmodule BattleBoxWeb.RobotGame.PlayLive do
 
   def handle_event("run-move", _params, socket) do
     moves = Map.values(socket.assigns.moves)
-    game = Logic.calculate_turn(socket.assigns.game, moves)
+    game = Logic.calculate_turn(socket.assigns.game, %{player_1: moves, player_2: []})
 
     {:noreply, assign(socket, game: game, selected: nil, moves: %{})}
   end

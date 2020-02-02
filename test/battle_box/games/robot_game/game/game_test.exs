@@ -31,6 +31,39 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
+  describe "validate_moves" do
+    test "it will remove moves that are duplicates for a robot" do
+      robot_spawns = ~g/1/
+
+      game =
+        Game.new()
+        |> Game.put_events(robot_spawns)
+
+      assert [
+               %{type: :move, robot_id: 1, target: {1, 0}}
+             ] ==
+               Game.validate_moves(
+                 game,
+                 [
+                   %{type: :move, robot_id: 1, target: {1, 0}},
+                   %{type: :move, robot_id: 1, target: {0, 1}}
+                 ],
+                 :player_1
+               )
+    end
+
+    test "it will remove moves that are not for the player" do
+      robot_spawns = ~g/1/
+
+      game =
+        Game.new()
+        |> Game.put_events(robot_spawns)
+
+      assert [] ==
+               Game.validate_moves(game, [%{type: :move, robot_id: 1, target: {1, 0}}], :player_2)
+    end
+  end
+
   describe "over?" do
     test "the game is over if there is a winner" do
       game = Game.new(winner: uuid())

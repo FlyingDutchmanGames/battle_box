@@ -62,8 +62,8 @@ defmodule BattleBox.Games.RobotGame.GameServer do
       [] ->
         {:keep_state, put_in(data.moves, [{player, moves}])}
 
-      [{other_player, other_moves}] when other_player != player ->
-        moves = Enum.concat(moves, other_moves)
+      [{other_player, _}] when other_player != player ->
+        moves = Map.new([{player, moves} | data.moves])
         data = update_in(data.game, &Logic.calculate_turn(&1, moves))
 
         if Game.over?(data.game),
