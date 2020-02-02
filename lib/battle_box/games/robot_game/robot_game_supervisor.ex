@@ -12,6 +12,7 @@ defmodule BattleBox.Games.RobotGame.RobotGameSupervisor do
 
   def init(%{name: name}) do
     children = [
+      {BattleBox.MatchMaker, name: matchmaker_name(name)},
       {GameSup, name: game_supervisor_name(name)},
       {PlayerSup, name: player_supervisor_name(name)}
     ]
@@ -21,4 +22,5 @@ defmodule BattleBox.Games.RobotGame.RobotGameSupervisor do
 
   def game_supervisor_name(name), do: Module.concat(name, GameSupervisor)
   def player_supervisor_name(name), do: Module.concat(name, PlayerSupervisor)
+  def matchmaker_name(name), do: Module.concat(name, MatchMaker)
 end
