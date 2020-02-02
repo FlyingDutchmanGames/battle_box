@@ -1,6 +1,7 @@
 defmodule BattleBox.Games.RobotGame.RobotGameSupervisor do
   alias BattleBox.Games.RobotGame.GameSupervisor, as: GameSup
   alias BattleBox.Games.RobotGame.PlayerSupervisor, as: PlayerSup
+  alias BattleBox.Games.RobotGame.PlayerServer
   use Supervisor
 
   @default_name RobotGame
@@ -13,11 +14,15 @@ defmodule BattleBox.Games.RobotGame.RobotGameSupervisor do
   def init(%{name: name}) do
     children = [
       {BattleBox.MatchMaker, name: matchmaker_name(name)},
-      {GameSup, name: game_supervisor_name(name)},
-      {PlayerSup, name: player_supervisor_name(name)}
+      {PlayerSup, name: player_supervisor_name(name), matchmaker: matchmaker_name(name)},
+      {GameSup, name: game_supervisor_name(name)}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
+  end
+
+  def start_player_server(%{connection: _} = data, name \\ @default_name) do
+    DynamicSupervisor.start_child(player_supervisor_name(name), {PlayerServer, data})
   end
 
   def game_supervisor_name(name), do: Module.concat(name, GameSupervisor)

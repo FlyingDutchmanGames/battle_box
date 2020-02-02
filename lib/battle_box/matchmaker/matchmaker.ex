@@ -1,15 +1,11 @@
 defmodule BattleBox.MatchMaker do
-  use GenStateMachine, callback_mode: [:state_functions, :state_enter]
+  use GenServer
 
   def start_link(options) do
-    GenStateMachine.start_link(__MODULE__, options, name: options[:name])
+    GenServer.start_link(__MODULE__, options, name: options[:name])
   end
 
   def init(data) do
-    {:ok, :matching, data}
-  end
-
-  def matching(:enter, _old_state, data) do
-    {:keep_state, data}
+    {:ok, data}
   end
 end

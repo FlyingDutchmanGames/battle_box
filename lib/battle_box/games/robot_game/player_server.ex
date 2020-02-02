@@ -5,9 +5,14 @@ defmodule BattleBox.Games.RobotGame.PlayerServer do
     GenStateMachine.call(server, :matchmake)
   end
 
-  def start_link(%{connection: conn} = data) when is_pid(conn) do
+  def start_link(config, %{connection: conn} = data) when is_pid(conn) do
     server_id = Ecto.UUID.generate()
-    data = Map.put(data, :server_id, server_id)
+
+    data =
+      data
+      |> Map.put(:server_id, server_id)
+      |> Map.merge(config)
+
     GenStateMachine.start_link(__MODULE__, data)
   end
 
