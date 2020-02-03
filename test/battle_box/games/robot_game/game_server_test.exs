@@ -1,5 +1,6 @@
 defmodule BattleBox.Games.RobotGame.GameServerTest do
   alias BattleBox.Games.RobotGame.{Game, GameServer}
+  import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
   @player_1 Ecto.UUID.generate()
@@ -145,18 +146,5 @@ defmodule BattleBox.Games.RobotGame.GameServerTest do
 
     loaded_game = Game.get_by_id(game.id)
     assert Enum.map(loaded_game.events, & &1.effects) == Enum.map(game.events, & &1.effects)
-  end
-
-  defp named_proxy(name) do
-    me = self()
-
-    spawn_link(fn ->
-      Stream.repeatedly(fn -> nil end)
-      |> Enum.each(fn _ ->
-        receive do
-          x -> send(me, {name, x})
-        end
-      end)
-    end)
   end
 end
