@@ -26,6 +26,7 @@ defmodule BattleBox.MatchMaker do
       ) do
     game =
       Game.new(
+        id: Ecto.UUID.generate(),
         player_1: player_1_id,
         player_2: player_2_id
       )
