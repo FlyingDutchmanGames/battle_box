@@ -4,22 +4,32 @@ defmodule BattleBox.MatchMaker do
 
   @default_name MatchMaker
 
-  def start_link(init_arg) do
-    Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+  def join_queue(lobby, player_id, matchmaker \\ @default_name) do
+    {:ok, _registry} =
+      Registry.register(registry_name(matchmaker), lobby, %{player_id: player_id})
+
+    :ok
   end
 
-    @impl true
-  def init(opts) do
-    name = opts[:name] || @default_name
+  def dequeue_self(lobby, matchmaker \\ @default_name) do
+    :ok = Registry.unregister(registry_name(matchmaker), lobby)
+  end
 
+  def start_link(opts) do
+    opts = Keyword.put_new(opts, :name, @default_name)
+    Supervisor.start_link(__MODULE__, opts, name: opts[:name])
+  end
+
+  @impl true
+  def init(opts) do
     children = [
-      {MatchMakerServer, name: match_maker_server_name(name)},
-      {Registry, keys: :duplicate, name: match_maker_registry_name(name)} 
+      {MatchMakerServer, name: server_name(opts[:name])},
+      {Registry, keys: :duplicate, name: registry_name(opts[:name])}
     ]
 
     Supervisor.init(children, strategy: :one_for_all)
   end
 
-  defp match_maker_server_name(name), do: Module.concat(name, Server)
-  defp match_maker_registry_name(name), do: Module.concat(name, Registry)
+  def server_name(name), do: Module.concat(name, Server)
+  def registry_name(name), do: Module.concat(name, Registry)
 end
