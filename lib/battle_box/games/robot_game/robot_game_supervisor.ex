@@ -15,7 +15,6 @@ defmodule BattleBox.Games.RobotGame.RobotGameSupervisor do
     children = [
       {BattleBox.MatchMaker,
        %{name: matchmaker_name(name), game_server_supervisor: game_supervisor_name(name)}},
-      {GameSup, name: game_supervisor_name(name)},
       {PlayerSup, name: player_supervisor_name(name)}
     ]
 
