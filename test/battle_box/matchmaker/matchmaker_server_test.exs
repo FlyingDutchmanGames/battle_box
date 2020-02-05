@@ -1,6 +1,6 @@
-defmodule BattleBox.MatchMakerTest do
+defmodule BattleBox.MatchMakerServerTest do
   use ExUnit.Case, async: true
-  alias BattleBox.MatchMaker
+  alias BattleBox.MatchMakerServer
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @matchmaker_init %{
@@ -8,16 +8,16 @@ defmodule BattleBox.MatchMakerTest do
   }
 
   test "you can start it" do
-    {:ok, pid} = MatchMaker.start_link(@matchmaker_init)
+    {:ok, pid} = MatchMakerServer.start_link(@matchmaker_init)
     assert Process.alive?(pid)
   end
 
   test "you can ask to be matchmade" do
-    {:ok, pid} = MatchMaker.start_link(@matchmaker_init)
+    {:ok, pid} = MatchMakerServer.start_link(@matchmaker_init)
     p1 = uuid()
     p2 = uuid()
-    :ok = MatchMaker.join_matchmaker_queue(p1, named_proxy(:player_1), pid)
-    :ok = MatchMaker.join_matchmaker_queue(p2, named_proxy(:player_2), pid)
+    :ok = MatchMakerServer.join_matchmaker_queue(p1, named_proxy(:player_1), pid)
+    :ok = MatchMakerServer.join_matchmaker_queue(p2, named_proxy(:player_2), pid)
 
     assert_receive {:player_1,
                     {:game_request,
