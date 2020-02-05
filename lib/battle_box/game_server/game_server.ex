@@ -1,6 +1,6 @@
-defmodule BattleBox.Games.RobotGame.GameServer do
-  alias BattleBox.Games.RobotGame.{Game, Game.Logic}
+defmodule BattleBox.GameServer do
   use GenStateMachine, callback_mode: [:state_functions, :state_enter]
+  alias BattleBoxGame, as: Game
 
   def accept_game(game_server, player) do
     GenStateMachine.cast(game_server, {:accept_game, player})
@@ -43,7 +43,7 @@ defmodule BattleBox.Games.RobotGame.GameServer do
 
   def game_acceptance(:cast, {:reject_game, _player}, data) do
     for player <- [:player_1, :player_2] do
-      send(data[player], {:game_cancelled, data.game.id})
+      send(data[player], {:game_cancelled, Game.id(data.game)})
     end
 
     {:stop, :normal}
@@ -64,7 +64,7 @@ defmodule BattleBox.Games.RobotGame.GameServer do
 
       [{other_player, _}] when other_player != player ->
         moves = Map.new([{player, moves} | data.moves])
-        data = update_in(data.game, &Logic.calculate_turn(&1, moves))
+        data = update_in(data.game, &Game.calculate_turn(&1, moves))
 
         if Game.over?(data.game),
           do: {:next_state, :finalize, data},
@@ -89,9 +89,9 @@ defmodule BattleBox.Games.RobotGame.GameServer do
   defp moves_request(game, player) do
     {:moves_request,
      %{
-       game_id: game.id,
-       robots: Game.robots(game),
-       turn: game.turn,
+       game_id: Game.id(game),
+       game_state: Game.moves_request(game),
+       turn: Game.turn(game),
        player: player
      }}
   end
@@ -100,19 +100,9 @@ defmodule BattleBox.Games.RobotGame.GameServer do
     {:game_request,
      %{
        game_server: self(),
-       game_id: game.id,
+       game_id: Game.id(game),
        player: player,
-       settings:
-         Map.take(game, [
-           :spawn_every,
-           :spawn_per_player,
-           :robot_hp,
-           :attack_damage,
-           :collision_damage,
-           :terrain,
-           :game_acceptance_timeout_ms,
-           :move_timeout_ms
-         ])
+       settings: Game.settings(game)
      }}
   end
 

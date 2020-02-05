@@ -13,7 +13,6 @@ defmodule BattleBox.Games.RobotGame.RobotGameSupervisor do
 
   def init(%{name: name}) do
     children = [
-      {GameSup, name: game_supervisor_name(name)},
       {PlayerSup, name: player_supervisor_name(name)}
     ]
 

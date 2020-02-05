@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.GameSupervisor do
+defmodule BattleBox.GameServer.GameSupervisor do
   use DynamicSupervisor
 
   def start_link(opts) do
