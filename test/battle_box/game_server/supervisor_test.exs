@@ -1,5 +1,5 @@
-defmodule BattleBox.Games.RobotGame.GameSupervisorTest do
-  alias BattleBox.Games.RobotGame.GameSupervisor
+defmodule BattleBox.GameSever.GameSupervisorTest do
+  alias BattleBox.GameServer.GameSupervisor
   use ExUnit.Case, async: true
 
   test "you can start the supervisor server" do

@@ -215,4 +215,33 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def guarded_collision_damage(_game), do: 0
   def collision_damage(game), do: DamageModifier.calc_damage(game.collision_damage)
+
+  def moves_request(game) do
+    %{robots: robots(game)}
+  end
+
+  def settings(game) do
+    Map.take(game, [
+      :spawn_every,
+      :spawn_per_player,
+      :robot_hp,
+      :attack_damage,
+      :collision_damage,
+      :terrain,
+      :game_acceptance_timeout_ms,
+      :move_timeout_ms
+    ])
+  end
+end
+
+defimpl BattleBoxGame, for: BattleBox.Games.RobotGame.Game do
+  alias BattleBox.Games.RobotGame.Game
+  def id(game), do: game.id
+  def turn(game), do: game.turn
+  def disqualify(game, player), do: Game.disqualify(game, player)
+  def over?(game), do: Game.over?(game)
+  def persist(game), do: Game.persist(game)
+  def settings(game), do: Game.settings(game)
+  def moves_request(game), do: Game.moves_request(game)
+  def calculate_turn(game, moves), do: Game.Logic.calculate_turn(game, moves)
 end
