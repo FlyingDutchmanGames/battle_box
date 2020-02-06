@@ -1,7 +1,7 @@
 defmodule BattleBox.MatchMakerServer do
   use GenServer
   alias BattleBox.GameServer.GameSupervisor
-  alias BattleBox.Games.RobotGame.Game
+  alias BattleBox.MatchMaker.MatchMakerLogic
 
   @matchmake_delay_ms 100
 
@@ -23,22 +23,9 @@ defmodule BattleBox.MatchMakerServer do
     |> Enum.uniq()
     |> Enum.each(fn lobby ->
       Registry.lookup(registry, lobby)
-      |> Enum.chunk_every(2)
-      |> Enum.each(fn
-        [{_, %{player_id: player_1_id, pid: pid_1}}, {_, %{player_id: player_2_id, pid: pid_2}}] ->
-          game_start_options = %{
-            game: Game.new(player_1: player_1_id, player_2: player_2_id),
-            player_1: pid_1,
-            player_2: pid_2
-          }
-
-          {:ok, _} = GameSupervisor.start_game(game_sup, game_start_options)
-
-          :ok
-
-        _ ->
-          :ok
-      end)
+      |> Enum.map(fn {_pid, player_info} -> player_info end)
+      |> MatchMakerLogic.make_matches(lobby)
+      |> Enum.each(fn match_settings -> GameSupervisor.start_game(game_sup, match_settings) end)
     end)
 
     schedule_matchmake()

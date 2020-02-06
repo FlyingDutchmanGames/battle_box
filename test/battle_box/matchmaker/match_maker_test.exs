@@ -1,17 +1,23 @@
 defmodule BattleBox.MatchMakerTest do
   use ExUnit.Case, async: true
   alias BattleBox.MatchMaker
-  alias BattleBox.GameServer.GameSupervisor
+  alias BattleBox.GameEngine
 
   setup %{test: name} do
-    game_supervisor_name = Module.concat(name, GameSupervisor)
-    {:ok, _} = GameSupervisor.start_link(%{name: game_supervisor_name})
-    {:ok, pid} = MatchMaker.start_link(%{name: name, game_supervisor: game_supervisor_name})
-    {:ok, %{pid: pid, matchmaker: name, registry: MatchMaker.registry_name(name)}}
+    {:ok, _} = GameEngine.start_link(name: name)
+
+    {:ok,
+     %{
+       game_engine: name,
+       matchmaker: GameEngine.matchmaker_name(name),
+       registry: GameEngine.matchmaker_registry_name(name)
+     }}
   end
 
-  test "you can start it", %{pid: pid} do
-    assert Process.alive?(pid)
+  test "you can start it", %{matchmaker: matchmaker} do
+    assert matchmaker
+           |> Process.whereis()
+           |> Process.alive?()
   end
 
   test "you can enqueue yourself", %{matchmaker: matchmaker, registry: registry} do
