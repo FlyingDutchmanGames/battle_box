@@ -23,7 +23,7 @@ defmodule BattleBox.MatchMaker do
   @impl true
   def init(opts) do
     children = [
-      {MatchMakerServer, name: server_name(opts[:name])},
+      {MatchMakerServer, name: server_name(opts[:name]), registry: registry_name(opts[:name])},
       {Registry, keys: :duplicate, name: registry_name(opts[:name])}
     ]
 
