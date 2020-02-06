@@ -7,11 +7,20 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   @player_1 Ecto.UUID.generate()
   @player_2 Ecto.UUID.generate()
+  @game_id Ecto.UUID.generate()
 
   describe "new/1" do
     test "you can override any top level key" do
       assert %{turn: 42} = Game.new(turn: 42)
       assert %{suicide_damage: 15, robot_hp: 42} = Game.new(suicide_damage: 15, robot_hp: 42)
+    end
+
+    test "it will auto generate an id if one isn't provided" do
+      assert <<_::288>> = Game.new().id
+    end
+
+    test "it will not override a passed id" do
+      assert Game.new(id: @game_id).id == @game_id
     end
   end
 
@@ -99,7 +108,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "trying to perist a game that has persistent?: false is a noop" do
       game = Game.new(player_1: @player_1, player_2: @player_2, persistent?: false)
       assert {:ok, game} = Game.persist(game)
-      assert game.id == nil
+      refute is_nil(game.id)
+      assert nil == Game.get_by_id(game.id)
     end
 
     test "you can persist a game twice" do

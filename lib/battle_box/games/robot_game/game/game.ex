@@ -148,6 +148,7 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def new(opts \\ []) do
     opts = Enum.into(opts, %{})
+    opts = Map.put_new(opts, :id, Ecto.UUID.generate())
 
     %__MODULE__{}
     |> Map.merge(opts)

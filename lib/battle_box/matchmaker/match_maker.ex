@@ -17,7 +17,6 @@ defmodule BattleBox.MatchMaker do
     Supervisor.start_link(__MODULE__, opts, name: name)
   end
 
-  @impl true
   def init(%{name: name, game_supervisor: game_supervisor}) do
     children = [
       {MatchMakerServer,
