@@ -2,14 +2,22 @@ defmodule BattleBox.MatchMaker do
   use Supervisor
   alias BattleBox.MatchMakerServer
 
-  def join_queue(lobby, player_id, matchmaker) do
+  @doc """
+  Joining a queue in a lobby
+
+  Potential Gotchas:
+  The registry will keep track of the registering pid, but the game will be matched to the
+  pid passed as the last arg. This was done to allow a proxy to wait in line for you, and
+  to make it easier to test
+  """
+  def join_queue(matchmaker, lobby, player_id, pid \\ self()) when is_atom(matchmaker) do
     {:ok, _registry} =
-      Registry.register(registry_name(matchmaker), lobby, %{player_id: player_id})
+      Registry.register(registry_name(matchmaker), lobby, %{player_id: player_id, pid: pid})
 
     :ok
   end
 
-  def dequeue_self(lobby, matchmaker) do
+  def dequeue_self(matchmaker, lobby) when is_atom(matchmaker) do
     :ok = Registry.unregister(registry_name(matchmaker), lobby)
   end
 

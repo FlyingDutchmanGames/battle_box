@@ -18,17 +18,22 @@ defmodule BattleBox.MatchMakerTest do
     me = self()
 
     assert [] == get_all_in_registry(registry)
-    :ok = MatchMaker.join_queue("TEST LOBBY", "PLAYER_ID", matchmaker)
-    assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID"}}] == get_all_in_registry(registry)
+    :ok = MatchMaker.join_queue(matchmaker, "TEST LOBBY", "PLAYER_ID")
+
+    assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID", pid: self()}}] ==
+             get_all_in_registry(registry)
   end
 
   test "you can dequeue yourself", %{matchmaker: matchmaker, registry: registry} do
     me = self()
 
     assert [] == get_all_in_registry(registry)
-    :ok = MatchMaker.join_queue("TEST LOBBY", "PLAYER_ID", matchmaker)
-    assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID"}}] == get_all_in_registry(registry)
-    :ok = MatchMaker.dequeue_self("TEST LOBBY", matchmaker)
+    :ok = MatchMaker.join_queue(matchmaker, "TEST LOBBY", "PLAYER_ID")
+
+    assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID", pid: self()}}] ==
+             get_all_in_registry(registry)
+
+    :ok = MatchMaker.dequeue_self(matchmaker, "TEST LOBBY")
     assert [] == get_all_in_registry(registry)
   end
 

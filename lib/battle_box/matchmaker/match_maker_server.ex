@@ -25,7 +25,7 @@ defmodule BattleBox.MatchMakerServer do
       Registry.lookup(registry, lobby)
       |> Enum.chunk_every(2)
       |> Enum.each(fn
-        [{pid_1, %{player_id: player_1_id}}, {pid_2, %{player_id: player_2_id}}] ->
+        [{_, %{player_id: player_1_id, pid: pid_1}}, {_, %{player_id: player_2_id, pid: pid_2}}] ->
           game_start_options = %{
             game: Game.new(player_1: player_1_id, player_2: player_2_id),
             player_1: pid_1,
