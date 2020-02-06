@@ -14,29 +14,22 @@ defmodule BattleBox.MatchMakerTest do
   test "you can enqueue yourself", %{matchmaker: matchmaker, registry: registry} do
     me = self()
 
-    assert [] ==
-             Registry.select(registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
-
+    assert [] == get_all_in_registry(registry)
     :ok = MatchMaker.join_queue("TEST LOBBY", "PLAYER_ID", matchmaker)
-
-    assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID"}}] ==
-             Registry.select(registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
+    assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID"}}] == get_all_in_registry(registry)
   end
 
   test "you can dequeue yourself", %{matchmaker: matchmaker, registry: registry} do
     me = self()
 
-    assert [] ==
-             Registry.select(registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
-
+    assert [] == get_all_in_registry(registry)
     :ok = MatchMaker.join_queue("TEST LOBBY", "PLAYER_ID", matchmaker)
-
-    assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID"}}] ==
-             Registry.select(registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
-
+    assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID"}}] == get_all_in_registry(registry)
     :ok = MatchMaker.dequeue_self("TEST LOBBY", matchmaker)
+    assert [] == get_all_in_registry(registry)
+  end
 
-    assert [] ==
-             Registry.select(registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
+  defp get_all_in_registry(registry) do
+    Registry.select(registry, [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}])
   end
 end
