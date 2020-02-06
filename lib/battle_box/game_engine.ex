@@ -27,5 +27,7 @@ defmodule BattleBox.GameEngine do
   def default_name(), do: @default_name
 
   defp matchmaker_name(name), do: Module.concat(name, :"Elixir.MatchMaker")
+  defp matchmaker_server_name(name), do: MatchMaker.server_name(matchmaker_name(name))
+  defp matchmaker_registry_name(name), do: MatchMaker.registry_name(matchmaker_name(name))
   defp game_supervisor_name(name), do: Module.concat(name, :"Elixir.GameSupervisor")
 end

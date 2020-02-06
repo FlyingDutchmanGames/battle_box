@@ -4,7 +4,7 @@ defmodule BattleBox.MatchMakerTest do
   alias BattleBox.GameServer.GameSupervisor
 
   setup %{test: name} do
-    game_supervisor_name = Module.concat(name, GameSupervisorRegistry)
+    game_supervisor_name = Module.concat(name, GameSupervisor)
     {:ok, _} = GameSupervisor.start_link(%{name: game_supervisor_name})
     {:ok, pid} = MatchMaker.start_link(%{name: name, game_supervisor: game_supervisor_name})
     {:ok, %{pid: pid, matchmaker: name, registry: MatchMaker.registry_name(name)}}
