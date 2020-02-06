@@ -4,7 +4,6 @@ defmodule BattleBox.Games.RobotGame.Game do
   alias __MODULE__.{Event, DamageModifier}
   use Ecto.Schema
   import Ecto.Changeset
-  import Ecto.Query, only: [from: 2]
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -51,12 +50,10 @@ defmodule BattleBox.Games.RobotGame.Game do
     |> cast_embed(:events)
   end
 
+  def db_name, do: "robot_game"
+
   def get_by_id(id) do
-    Repo.one(
-      from g in __MODULE__,
-        where: g.id == ^id,
-        select: g
-    )
+    Repo.get_by(__MODULE__, id: id)
   end
 
   def disqualify(game, player) do
