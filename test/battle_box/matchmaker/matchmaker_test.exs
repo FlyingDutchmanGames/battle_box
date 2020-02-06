@@ -1,9 +1,12 @@
 defmodule BattleBox.MatchMakerTest do
   use ExUnit.Case, async: true
   alias BattleBox.MatchMaker
+  alias BattleBox.GameServer.GameSupervisor
 
   setup %{test: name} do
-    {:ok, pid} = MatchMaker.start_link(name: name)
+    game_supervisor_name = Module.concat(name, GameSupervisorRegistry)
+    {:ok, _} = GameSupervisor.start_link(%{name: game_supervisor_name})
+    {:ok, pid} = MatchMaker.start_link(%{name: name, game_supervisor: game_supervisor_name})
     {:ok, %{pid: pid, matchmaker: name, registry: MatchMaker.registry_name(name)}}
   end
 

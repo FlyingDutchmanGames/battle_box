@@ -13,15 +13,20 @@ defmodule BattleBox.MatchMaker do
     :ok = Registry.unregister(registry_name(matchmaker), lobby)
   end
 
-  def start_link(opts) do
-    Supervisor.start_link(__MODULE__, opts, name: opts[:name])
+  def start_link(%{name: name, game_supervisor: _} = opts) do
+    Supervisor.start_link(__MODULE__, opts, name: name)
   end
 
   @impl true
-  def init(opts) do
+  def init(%{name: name, game_supervisor: game_supervisor}) do
     children = [
-      {MatchMakerServer, name: server_name(opts[:name]), registry: registry_name(opts[:name])},
-      {Registry, keys: :duplicate, name: registry_name(opts[:name])}
+      {MatchMakerServer,
+       %{
+         name: server_name(name),
+         registry: registry_name(name),
+         game_supervisor: game_supervisor
+       }},
+      {Registry, keys: :duplicate, name: registry_name(name)}
     ]
 
     Supervisor.init(children, strategy: :one_for_all)

@@ -3,12 +3,8 @@ defmodule BattleBox.MatchMakerServer do
 
   @matchmake_delay_ms 100
 
-  def start_link(options) do
-    initial = %{
-      registry: Keyword.fetch!(options, :registry)
-    }
-
-    GenServer.start_link(__MODULE__, initial, name: options[:name])
+  def start_link(%{name: _, registry: _, game_supervisor: _} = options) do
+    GenServer.start_link(__MODULE__, options, name: options[:name])
   end
 
   def init(data) do

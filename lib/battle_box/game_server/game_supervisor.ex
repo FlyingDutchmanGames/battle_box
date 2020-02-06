@@ -1,11 +1,8 @@
 defmodule BattleBox.GameServer.GameSupervisor do
   use DynamicSupervisor
 
-  @default_name GameSupervisor
-
-  def start_link(opts) do
-    opts = Keyword.put_new(opts, :name, @default_name)
-    DynamicSupervisor.start_link(__MODULE__, opts, name: opts[:name])
+  def start_link(%{name: name} = opts) do
+    DynamicSupervisor.start_link(__MODULE__, opts, name: name)
   end
 
   def init(_opts) do

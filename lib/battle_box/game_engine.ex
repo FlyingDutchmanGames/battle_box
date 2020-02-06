@@ -13,11 +13,11 @@ defmodule BattleBox.GameEngine do
     children = [
       {
         MatchMaker,
-        name: matchmaker_name(opts[:name]), game_supervisor: game_supervisor_name(opts[:name])
+        %{name: matchmaker_name(opts[:name]), game_supervisor: game_supervisor_name(opts[:name])}
       },
       {
         GameSupervisor,
-        name: game_supervisor_name(opts[:name])
+        %{name: game_supervisor_name(opts[:name])}
       }
     ]
 
