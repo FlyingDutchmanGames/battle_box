@@ -1,5 +1,5 @@
 defmodule BattleBox.GameServer do
-  use GenStateMachine, callback_mode: [:state_functions, :state_enter]
+  use GenStateMachine, callback_mode: [:state_functions, :state_enter], restart: :temporary
   alias BattleBoxGame, as: Game
 
   def accept_game(game_server, player) do

@@ -19,22 +19,21 @@ defmodule BattleBox.MatchMakerServer do
   def handle_info(:matchmake, %{registry: registry} = state) do
     get_all_lobbies(registry)
     |> Enum.uniq()
-    # TODO: Task.async_stream with some concurrency limit?
     |> Enum.each(fn lobby ->
-      :ok = match_players(Registry.lookup(registry, lobby))
+      lobby = Lobby.get_by_name(lobby)
+      :ok = match_players(lobby.game_type, Registry.lookup(registry, lobby))
     end)
 
     schedule_matchmake()
     {:noreply, state}
   end
 
-  defp match_players([_player_1, _player_2 | rest]) do
-    # TODO: actually match players
-    match_players(rest)
+  defp match_players(game_module, [_player_1, _player_2 | rest]) do
+    match_players(game_module, rest)
   end
 
-  defp match_players([_only_one_player]), do: :ok
-  defp match_players([]), do: :ok
+  defp match_players(_, [_only_one_player]), do: :ok
+  defp match_players(_, []), do: :ok
 
   defp get_all_lobbies(registry) do
     Registry.select(registry, [{{:"$1", :_, :_}, [], [:"$1"]}])

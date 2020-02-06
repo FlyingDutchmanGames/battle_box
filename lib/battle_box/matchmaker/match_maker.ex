@@ -2,21 +2,18 @@ defmodule BattleBox.MatchMaker do
   use Supervisor
   alias BattleBox.MatchMakerServer
 
-  @default_name MatchMaker
-
-  def join_queue(lobby, player_id, matchmaker \\ @default_name) do
+  def join_queue(lobby, player_id, matchmaker) do
     {:ok, _registry} =
       Registry.register(registry_name(matchmaker), lobby, %{player_id: player_id})
 
     :ok
   end
 
-  def dequeue_self(lobby, matchmaker \\ @default_name) do
+  def dequeue_self(lobby, matchmaker) do
     :ok = Registry.unregister(registry_name(matchmaker), lobby)
   end
 
   def start_link(opts) do
-    opts = Keyword.put_new(opts, :name, @default_name)
     Supervisor.start_link(__MODULE__, opts, name: opts[:name])
   end
 

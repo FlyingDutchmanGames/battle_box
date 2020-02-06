@@ -9,12 +9,23 @@ defmodule BattleBox.GameEngine do
     Supervisor.start_link(__MODULE__, opts, name: opts[:name])
   end
 
-  def init(_opts) do
+  def init(opts) do
     children = [
-      MatchMaker,
-      GameSupervisor
+      {
+        MatchMaker,
+        name: matchmaker_name(opts[:name]), game_supervisor: game_supervisor_name(opts[:name])
+      },
+      {
+        GameSupervisor,
+        name: game_supervisor_name(opts[:name])
+      }
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
   end
+
+  def default_name(), do: @default_name
+
+  defp matchmaker_name(name), do: Module.concat(name, :"Elixir.MatchMaker")
+  defp game_supervisor_name(name), do: Module.concat(name, :"Elixir.GameSupervisor")
 end
