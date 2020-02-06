@@ -62,10 +62,12 @@ defmodule BattleBox.GameServer.GameServerTest do
     game_id = game.id
 
     assert_receive {:player_1,
-                    {:moves_request, %{game_id: ^game_id, turn: 0, game_state: %{robots: []}, player: :player_1}}}
+                    {:moves_request,
+                     %{game_id: ^game_id, turn: 0, game_state: %{robots: []}, player: :player_1}}}
 
     assert_receive {:player_2,
-                    {:moves_request, %{game_id: ^game_id, turn: 0, game_state: %{robots: []}, player: :player_2}}}
+                    {:moves_request,
+                     %{game_id: ^game_id, turn: 0, game_state: %{robots: []}, player: :player_2}}}
   end
 
   test "if you forefit, you get a game over message and the other player is set as the winner" do
@@ -110,7 +112,8 @@ defmodule BattleBox.GameServer.GameServerTest do
   end
 
   defp start_game_server(game \\ Game.new(player_1: @player_1, player_2: @player_2)) do
-    {:ok, pid} = GameServer.start_link(%{
+    {:ok, pid} =
+      GameServer.start_link(%{
         player_1: named_proxy(:player_1),
         player_2: named_proxy(:player_2),
         game: game,
