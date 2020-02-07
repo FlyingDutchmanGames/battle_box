@@ -22,7 +22,8 @@ defmodule BattleBox.GameServer do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
   end
 
-  def init(data) do
+  def init(%{names: names, game: game} = data) do
+    Registry.register(names.game_registry, Game.id(game), %{})
     {:ok, :game_acceptance, data, []}
   end
 
