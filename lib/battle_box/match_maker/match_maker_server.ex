@@ -27,7 +27,7 @@ defmodule BattleBox.MatchMakerServer do
       |> Enum.map(fn {_pid, player_info} -> player_info end)
       |> MatchMakerLogic.make_matches(lobby)
       |> Enum.each(fn match_settings ->
-        GameSupervisor.start_game(names.game_supervisor, match_settings)
+        {:ok, pid} = GameSupervisor.start_game(names.game_supervisor, match_settings)
       end)
     end)
 

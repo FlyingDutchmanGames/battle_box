@@ -8,7 +8,15 @@ defmodule BattleBox.MatchMakerServerTest do
 
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
-    {:ok, GameEngine.names(name)}
+
+    names = GameEngine.names(name)
+
+    true =
+      names.match_maker_server
+      |> Process.whereis()
+      |> Process.link()
+
+    {:ok, names}
   end
 
   test "you can start it", names do

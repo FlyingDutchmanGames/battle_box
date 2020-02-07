@@ -18,8 +18,8 @@ defmodule BattleBox.GameServer do
     GenStateMachine.cast(game_server, {:moves, player, turn, moves})
   end
 
-  def start_link(%{player_1: _, player_2: _, game: _} = data) do
-    GenStateMachine.start_link(__MODULE__, data)
+  def start_link(config, %{player_1: _, player_2: _, game: _} = data) do
+    GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
   end
 
   def init(data) do
