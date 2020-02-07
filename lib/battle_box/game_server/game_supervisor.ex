@@ -2,8 +2,8 @@ defmodule BattleBox.GameServer.GameSupervisor do
   use DynamicSupervisor
   alias BattleBox.GameServer
 
-  def start_link(%{name: name} = opts) do
-    DynamicSupervisor.start_link(__MODULE__, opts, name: name)
+  def start_link(%{names: names} = opts) do
+    DynamicSupervisor.start_link(__MODULE__, opts, name: names.game_supervisor)
   end
 
   def init(_opts) do

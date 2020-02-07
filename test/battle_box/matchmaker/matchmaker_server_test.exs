@@ -22,8 +22,8 @@ defmodule BattleBox.MatchMakerServerTest do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
 
-    :ok = MatchMaker.join_queue(names.matchmaker, lobby_id, @player_1_id, player_1_pid)
-    :ok = MatchMaker.join_queue(names.matchmaker, lobby_id, @player_2_id, player_2_pid)
+    :ok = MatchMaker.join_queue(names.game_engine, lobby_id, @player_1_id, player_1_pid)
+    :ok = MatchMaker.join_queue(names.game_engine, lobby_id, @player_2_id, player_2_pid)
     :ok = MatchMakerServer.force_matchmake(names.matchmaker_server)
 
     assert_receive {:player_1,
@@ -40,10 +40,10 @@ defmodule BattleBox.MatchMakerServerTest do
     player_2_pid = named_proxy(:player_2)
 
     :ok =
-      MatchMaker.join_queue(names.matchmaker, Ecto.UUID.generate(), @player_1_id, player_1_pid)
+      MatchMaker.join_queue(names.game_engine, Ecto.UUID.generate(), @player_1_id, player_1_pid)
 
     :ok =
-      MatchMaker.join_queue(names.matchmaker, Ecto.UUID.generate(), @player_2_id, player_2_pid)
+      MatchMaker.join_queue(names.game_engine, Ecto.UUID.generate(), @player_2_id, player_2_pid)
 
     :ok = MatchMakerServer.force_matchmake(names.matchmaker_server)
 
