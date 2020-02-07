@@ -5,13 +5,7 @@ defmodule BattleBox.MatchMakerTest do
 
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
-
-    {:ok,
-     %{
-       game_engine: name,
-       matchmaker: GameEngine.matchmaker_name(name),
-       registry: GameEngine.matchmaker_registry_name(name)
-     }}
+    {:ok, GameEngine.names(name)}
   end
 
   test "you can start it", %{matchmaker: matchmaker} do
@@ -20,26 +14,26 @@ defmodule BattleBox.MatchMakerTest do
            |> Process.alive?()
   end
 
-  test "you can enqueue yourself", %{matchmaker: matchmaker, registry: registry} do
+  test "you can enqueue yourself", %{game_engine: game_engine, matchmaker_registry: registry} do
     me = self()
 
     assert [] == get_all_in_registry(registry)
-    :ok = MatchMaker.join_queue(matchmaker, "TEST LOBBY", "PLAYER_ID")
+    :ok = MatchMaker.join_queue(game_engine, "TEST LOBBY", "PLAYER_ID")
 
     assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID", pid: self()}}] ==
              get_all_in_registry(registry)
   end
 
-  test "you can dequeue yourself", %{matchmaker: matchmaker, registry: registry} do
+  test "you can dequeue yourself", %{game_engine: game_engine, matchmaker_registry: registry} do
     me = self()
 
     assert [] == get_all_in_registry(registry)
-    :ok = MatchMaker.join_queue(matchmaker, "TEST LOBBY", "PLAYER_ID")
+    :ok = MatchMaker.join_queue(game_engine, "TEST LOBBY", "PLAYER_ID")
 
     assert [{"TEST LOBBY", me, %{player_id: "PLAYER_ID", pid: self()}}] ==
              get_all_in_registry(registry)
 
-    :ok = MatchMaker.dequeue_self(matchmaker, "TEST LOBBY")
+    :ok = MatchMaker.dequeue_self(game_engine, "TEST LOBBY")
     assert [] == get_all_in_registry(registry)
   end
 

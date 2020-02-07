@@ -10,8 +10,8 @@ defmodule BattleBox.MatchMakerServer do
     :ok
   end
 
-  def start_link(%{name: _, registry: _, game_supervisor: _} = options) do
-    GenServer.start_link(__MODULE__, options, name: options[:name])
+  def start_link(%{names: names} = options) do
+    GenServer.start_link(__MODULE__, options, name: names.matchmaker_server)
   end
 
   def init(data) do
@@ -19,14 +19,16 @@ defmodule BattleBox.MatchMakerServer do
     {:ok, data}
   end
 
-  def handle_info(:matchmake, %{registry: registry, game_supervisor: game_sup} = state) do
-    get_all_lobbies(registry)
+  def handle_info(:matchmake, %{names: names} = state) do
+    get_all_lobbies(names.matchmaker_registry)
     |> Enum.uniq()
     |> Enum.each(fn lobby ->
-      Registry.lookup(registry, lobby)
+      Registry.lookup(names.matchmaker_registry, lobby)
       |> Enum.map(fn {_pid, player_info} -> player_info end)
       |> MatchMakerLogic.make_matches(lobby)
-      |> Enum.each(fn match_settings -> GameSupervisor.start_game(game_sup, match_settings) end)
+      |> Enum.each(fn match_settings ->
+        GameSupervisor.start_game(names.game_supervisor, match_settings)
+      end)
     end)
 
     schedule_matchmake()
