@@ -7,6 +7,7 @@ defmodule BattleBox.MatchMakerServer do
 
   def force_matchmake(match_maker_server) do
     send(match_maker_server, :matchmake)
+    :ok
   end
 
   def start_link(%{name: _, registry: _, game_supervisor: _} = options) do
