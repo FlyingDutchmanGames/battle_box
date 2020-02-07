@@ -4,6 +4,7 @@ defmodule BattleBox.PlayerServerTest do
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @player_id Ecto.UUID.generate()
+  @player_server_id Ecto.UUID.generate()
 
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
@@ -11,10 +12,16 @@ defmodule BattleBox.PlayerServerTest do
   end
 
   setup do
-    %{init_opts: %{player_id: @player_id, connection: named_proxy(:connection)}}
+    %{
+      init_opts: %{
+        player_id: @player_id,
+        player_server_id: @player_server_id,
+        connection: named_proxy(:connection)
+      }
+    }
   end
 
-  test "you can start the game server", context do
+  test "you can start the player server", context do
     {:ok, pid} = GameEngine.start_player(context.game_engine, context.init_opts)
     assert Process.alive?(pid)
   end
@@ -23,6 +30,14 @@ defmodule BattleBox.PlayerServerTest do
     assert Registry.count(context.player_registry) == 0
     {:ok, pid} = GameEngine.start_player(context.game_engine, context.init_opts)
     assert Registry.count(context.player_registry) == 1
-    assert [{pid, %{}}] == Registry.lookup(context.player_registry, context.init_opts.player_id)
+
+    assert [
+             {^pid,
+              %{
+                player_id: @player_id,
+                connection_status: :connected,
+                status: :options
+              }}
+           ] = Registry.lookup(context.player_registry, context.init_opts.player_server_id)
   end
 end

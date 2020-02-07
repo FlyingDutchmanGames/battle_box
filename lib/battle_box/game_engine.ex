@@ -14,7 +14,7 @@ defmodule BattleBox.GameEngine do
     name = Keyword.fetch!(opts, :name)
 
     children = [
-      {Registry, keys: :duplicate, name: player_registry_name(name)},
+      {Registry, keys: :unique, name: player_registry_name(name)},
       {Registry, keys: :unique, name: game_registry_name(name)},
       {BattleBox.MatchMaker, %{names: names(name)}},
       {GameSup, %{names: names(name)}},
