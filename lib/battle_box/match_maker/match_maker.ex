@@ -13,7 +13,7 @@ defmodule BattleBox.MatchMaker do
   """
   def join_queue(game_engine, lobby, player_id, pid \\ self()) when is_atom(game_engine) do
     {:ok, _registry} =
-      Registry.register(matchmaker_registry_name(game_engine), lobby, %{
+      Registry.register(match_maker_registry_name(game_engine), lobby, %{
         player_id: player_id,
         pid: pid
       })
@@ -22,23 +22,23 @@ defmodule BattleBox.MatchMaker do
   end
 
   def dequeue_self(game_engine, lobby) when is_atom(game_engine) do
-    :ok = Registry.unregister(matchmaker_registry_name(game_engine), lobby)
+    :ok = Registry.unregister(match_maker_registry_name(game_engine), lobby)
   end
 
   def start_link(%{names: names} = opts) do
-    Supervisor.start_link(__MODULE__, opts, name: names.matchmaker)
+    Supervisor.start_link(__MODULE__, opts, name: names.match_maker)
   end
 
   def init(%{names: names}) do
     children = [
       {MatchMakerServer, %{names: names}},
-      {Registry, keys: :duplicate, name: names.matchmaker_registry}
+      {Registry, keys: :duplicate, name: names.match_maker_registry}
     ]
 
     Supervisor.init(children, strategy: :one_for_all)
   end
 
-  defp matchmaker_registry_name(game_engine) do
-    GameEngine.names(game_engine).matchmaker_registry
+  defp match_maker_registry_name(game_engine) do
+    GameEngine.names(game_engine).match_maker_registry
   end
 end

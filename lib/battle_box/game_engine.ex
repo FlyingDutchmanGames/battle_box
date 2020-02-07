@@ -23,15 +23,15 @@ defmodule BattleBox.GameEngine do
   def names(name) do
     %{
       game_engine: name,
-      matchmaker: matchmaker_name(name),
-      matchmaker_server: matchmaker_server_name(name),
-      matchmaker_registry: matchmaker_registry_name(name),
-      game_supervisor: game_supervisor_name(name)
+      game_supervisor: game_supervisor_name(name),
+      match_maker: match_maker_name(name),
+      match_maker_server: match_maker_server_name(name),
+      match_maker_registry: match_maker_registry_name(name),
     }
   end
 
-  defp matchmaker_name(name), do: Module.concat(name, MatchMaker)
-  defp matchmaker_server_name(name), do: Module.concat(name, MatchMaker.MatchMakerServer)
-  defp matchmaker_registry_name(name), do: Module.concat(name, MatchMaker.Registry)
+  defp match_maker_name(name), do: Module.concat(name, MatchMaker)
+  defp match_maker_server_name(name), do: Module.concat(name, MatchMaker.MatchMakerServer)
+  defp match_maker_registry_name(name), do: Module.concat(name, MatchMaker.Registry)
   defp game_supervisor_name(name), do: Module.concat(name, GameSupervisor)
 end
