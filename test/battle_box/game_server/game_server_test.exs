@@ -1,4 +1,4 @@
-defmodule BattleBox.GameServer.GameServerTest do
+defmodule BattleBox.GameServerTest do
   alias BattleBox.{GameEngine, GameServer}
   alias BattleBox.Games.RobotGame.Game
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
