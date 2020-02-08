@@ -3,6 +3,20 @@ defmodule BattleBox.LobbyTest do
   alias BattleBox.{Lobby, Repo}
   alias BattleBox.Games.RobotGame.Game
 
+  describe "game acceptance timeout" do
+    test "the default game acceptance timeout is 2 seconds" do
+      lobby = %Lobby{name: "Grant's Test", game_type: Game}
+      assert lobby.game_acceptance_timeout_ms == 2000
+    end
+
+    test "you can set a custom game acceptance timeout" do
+      lobby = %Lobby{name: "Grant's Test", game_type: Game, game_acceptance_timeout_ms: 42024}
+      {:ok, _} = Repo.insert(Lobby.changeset(lobby))
+      retrieved_lobby = Lobby.get_by_name("Grant's Test")
+      assert retrieved_lobby.game_acceptance_timeout_ms == 42024
+    end
+  end
+
   describe "validations" do
     test "Name must be greater than 3" do
       changeset = Lobby.changeset(%Lobby{}, %{name: "AA", game_type: Game})
