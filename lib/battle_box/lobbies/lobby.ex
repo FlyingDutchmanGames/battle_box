@@ -13,6 +13,7 @@ defmodule BattleBox.Lobby do
   schema "lobbies" do
     field :name, :string
     field :game_type, GameType
+    field :game_acceptance_timeout_ms, :integer, default: 500, virtual: true
 
     timestamps()
   end
