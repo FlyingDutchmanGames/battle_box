@@ -66,7 +66,7 @@ defmodule BattleBox.PlayerServer do
         :info,
         {:accept_game, game_id},
         :game_acceptance,
-        %{game_info: %{game_id: game_id}} = data
+        %{game_info: %{game_id: game_id, game_server: game_server, player: player}} = data
       ) do
     :ok = GameServer.accept_game(game_server, player)
     {:next_state, :playing, data}
@@ -76,7 +76,7 @@ defmodule BattleBox.PlayerServer do
         :info,
         {:reject_game, game_id},
         :game_acceptance,
-        %{game_id: %{game_id: game_id}} = data
+        %{game_id: %{game_id: game_id, game_server: game_server, player: player}} = data
       ) do
     :ok = GameServer.reject_game(game_server, player)
     {:next_state, :options, data}
@@ -108,7 +108,7 @@ defmodule BattleBox.PlayerServer do
   end
 
   def handle_event(:state_timeout, :game_acceptance_timeout, :game_acceptance, data) do
-    :ok = GameServer.reject_game(game_server, player)
+    :ok = GameServer.reject_game(data.game_info.game_server, data.game_info.player)
     send(data.connection, {:game_acceptance_timeout, data.game_info.game_id})
     {:next_state, :options, data}
   end

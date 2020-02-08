@@ -75,6 +75,25 @@ defmodule BattleBox.GameServerTest do
       assert_receive {:player_2, {:game_cancelled, ^game_id}}
       assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
     end
+
+    test "if a player dies during game acceptance, the game is cancelled", context do
+      {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+      Process.flag(:trap_exit, true)
+
+      game_ref = Process.monitor(pid)
+
+      assert :ok = GameServer.accept_game(pid, :player_1)
+
+      player_2_pid = context.init_opts.player_2
+
+      Process.exit(player_2_pid, :kill)
+      assert_receive {:EXIT, ^player_2_pid, :killed}
+
+      game_id = context.init_opts.game.id
+
+      assert_receive {:player_1, {:game_cancelled, ^game_id}}
+      assert_receive {:DOWN, ^game_ref, :process, ^pid, :normal}
+    end
   end
 
   test "When you accept a game it asks you for moves", context do
@@ -103,6 +122,21 @@ defmodule BattleBox.GameServerTest do
 
     assert_receive {:player_1, {:game_over, %{game: %{winner: @player_2}}}}
     assert_receive {:player_2, {:game_over, %{game: %{winner: @player_2}}}}
+  end
+
+  test "if you die its the same as a forefit", context do
+    Process.flag(:trap_exit, true)
+    {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+
+    :ok = GameServer.accept_game(pid, :player_1)
+    :ok = GameServer.accept_game(pid, :player_2)
+
+    player_2_pid = context.init_opts.player_2
+
+    Process.exit(player_2_pid, :kill)
+    assert_receive {:EXIT, ^player_2_pid, :killed}
+
+    assert_receive {:player_1, {:game_over, %{game: %{winner: @player_1}}}}
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do

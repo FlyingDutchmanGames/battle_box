@@ -31,13 +31,7 @@ defmodule BattleBox.PlayerServerTest do
     {:ok, pid} = GameEngine.start_player(context.game_engine, context.init_opts)
     assert Registry.count(context.player_registry) == 1
 
-    assert [
-             {^pid,
-              %{
-                player_id: @player_id,
-                connection_status: :connected,
-                status: :options
-              }}
-           ] = Registry.lookup(context.player_registry, context.init_opts.player_server_id)
+    assert [{^pid, %{player_id: @player_id}}] =
+             Registry.lookup(context.player_registry, context.init_opts.player_server_id)
   end
 end
