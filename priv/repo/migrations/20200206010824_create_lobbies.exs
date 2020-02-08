@@ -5,6 +5,7 @@ defmodule BattleBox.Repo.Migrations.CreateLobbies do
     create table("lobbies") do
       add :name, :text, null: false
       add :game_type, :text, null: false
+      add :game_acceptance_timeout_ms, :integer, null: false
       timestamps()
     end
 

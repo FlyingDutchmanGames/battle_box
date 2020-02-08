@@ -49,7 +49,6 @@ defmodule BattleBox.GameServerTest do
         attack_damage: game.attack_damage,
         collision_damage: game.collision_damage,
         terrain: game.terrain,
-        game_acceptance_timeout_ms: game.game_acceptance_timeout_ms,
         move_timeout_ms: game.move_timeout_ms
       }
     }

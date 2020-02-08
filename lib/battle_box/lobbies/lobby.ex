@@ -13,7 +13,7 @@ defmodule BattleBox.Lobby do
   schema "lobbies" do
     field :name, :string
     field :game_type, GameType
-    field :game_acceptance_timeout_ms, :integer, default: 500, virtual: true
+    field :game_acceptance_timeout_ms, :integer, default: 2000
 
     timestamps()
   end
@@ -22,9 +22,10 @@ defmodule BattleBox.Lobby do
     lobby
     |> cast(params, [
       :name,
-      :game_type
+      :game_type,
+      :game_acceptance_timeout_ms
     ])
-    |> validate_required([:name, :game_type])
+    |> validate_required([:name, :game_type, :game_acceptance_timeout_ms])
     |> validate_inclusion(:game_type, @game_types)
     |> validate_length(:name, min: 3, max: 50)
     |> unique_constraint(:name)
