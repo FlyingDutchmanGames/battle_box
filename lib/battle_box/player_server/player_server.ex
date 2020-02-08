@@ -1,6 +1,10 @@
 defmodule BattleBox.PlayerServer do
-  use GenStateMachine, callback_mode: [:state_enter], restart: :temporary
+  use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   alias BattleBox.{Lobby, MatchMaker, GameServer}
+
+  def join_lobby(player_server, lobby_name, timeout \\ 5000) do
+    GenStateMachine.call(player_server, {:join_lobby, %{lobby_name: lobby_name}}, timeout)
+  end
 
   def start_link(%{names: _} = config, %{connection: _, player_id: _} = data) do
     data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
@@ -39,7 +43,9 @@ defmodule BattleBox.PlayerServer do
       nil ->
         {:keep_state, data, [{:reply, from, {:error, :lobby_not_found}}]}
     end
+  end
 
+  def handle_event(:enter, _old_state, :match_making, data) do
     :keep_state_and_data
   end
 
