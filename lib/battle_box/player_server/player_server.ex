@@ -63,6 +63,11 @@ defmodule BattleBox.PlayerServer do
     {:next_state, :game_acceptance, data}
   end
 
+  def handle_event(:info, {:game_request, game_info}, state, data) when state != :match_making do
+    :ok = GameServer.reject_game(game_info.game_server, game_info.player)
+    :keep_state_and_data
+  end
+
   def handle_event(:enter, _old_state, :game_acceptance, data) do
     {:keep_state, data,
      [{:state_timeout, data.lobby.game_acceptance_timeout_ms, :game_acceptance_timeout}]}

@@ -91,13 +91,26 @@ defmodule BattleBox.PlayerServerTest do
       assert {:error, :already_in_lobby} = PlayerServer.join_lobby(context.p1_server, "FOO")
     end
 
-    test "When a match is made it forwards the request to the connections",
-         %{p1_server: p1, p2_server: p2} = context do
-      assert :ok = PlayerServer.join_lobby(p1, context.lobby.name)
-      assert :ok = PlayerServer.join_lobby(p2, context.lobby.name)
+    test "When a match is made it forwards the request to the connections", context do
+      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      assert :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
       :ok = GameEngine.force_match_make(context.game_engine)
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
       assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
+    end
+  end
+
+  describe "game acceptance" do
+    test "players reject game requests they're not expecting", context do
+      game_id = Ecto.UUID.generate()
+      game_server = named_proxy(:game_server)
+
+      send(
+        context.p1_server,
+        {:game_request, %{game_id: game_id, game_server: game_server, player: :player_1}}
+      )
+
+      assert_receive {:game_server, {:"$gen_cast", {:reject_game, :player_1}}}
     end
   end
 end
