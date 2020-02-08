@@ -22,7 +22,11 @@ defmodule BattleBox.GameServer do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
   end
 
-  def init(%{names: names, game: game} = data) do
+  def init(%{names: names, game: game, player_1: player_1, player_2: player_2} = data) do
+    for pid <- [player_1, player_2] do
+      Process.monitor(pid)
+    end
+
     Registry.register(names.game_registry, Game.id(game), %{})
     {:ok, :game_acceptance, data, []}
   end
@@ -43,6 +47,14 @@ defmodule BattleBox.GameServer do
   end
 
   def game_acceptance(:cast, {:reject_game, _player}, data) do
+    for player <- [:player_1, :player_2] do
+      send(data[player], {:game_cancelled, Game.id(data.game)})
+    end
+
+    {:stop, :normal}
+  end
+
+  def game_acceptance(:info, {:DOWN, _, :process, _pid, _}, data) do
     for player <- [:player_1, :player_2] do
       send(data[player], {:game_cancelled, Game.id(data.game)})
     end
@@ -74,6 +86,16 @@ defmodule BattleBox.GameServer do
   end
 
   def moves(:cast, {:forfeit_game, player}, data) do
+    {:next_state, :finalize, update_in(data.game, &Game.disqualify(&1, player))}
+  end
+
+  def moves(:info, {:DOWN, _, :process, pid, _}, data) do
+    player =
+      cond do
+        pid == data.player_1 -> :player_1
+        pid == data.player_2 -> :player_2
+      end
+
     {:next_state, :finalize, update_in(data.game, &Game.disqualify(&1, player))}
   end
 
