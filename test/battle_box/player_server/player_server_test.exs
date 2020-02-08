@@ -49,6 +49,14 @@ defmodule BattleBox.PlayerServerTest do
     assert Process.alive?(context.p2_server)
   end
 
+  test "The player server dies if the connection dies", %{p1_server: p1} = context do
+    Process.flag(:trap_exit, true)
+    p1_conn = context.init_opts_p1.connection
+    Process.exit(p1_conn, :kill)
+    assert_receive {:EXIT, ^p1_conn, :killed}
+    assert_receive {:DOWN, _, _, ^p1, :normal}
+  end
+
   test "the player server registers in the player server registry",
        %{p1_server: p1, p2_server: p2} = context do
     assert Registry.count(context.player_registry) == 2
@@ -60,20 +68,36 @@ defmodule BattleBox.PlayerServerTest do
              Registry.lookup(context.player_registry, context.init_opts_p2.player_server_id)
   end
 
-  test "You can ask the game server to join a matchmaking lobby", %{p1_server: p1} = context do
-    assert [] == MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
-    assert :ok = PlayerServer.join_lobby(p1, context.lobby.name)
+  describe "Matchmaking in a lobby" do
+    test "You can ask the game server to join a matchmaking lobby", %{p1_server: p1} = context do
+      assert [] == MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
+      assert :ok = PlayerServer.join_lobby(p1, context.lobby.name)
 
-    assert [%{player_id: @player_1_id, pid: ^p1}] =
-             MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
-  end
+      assert [%{player_id: @player_1_id, pid: ^p1}] =
+               MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
+    end
 
-  test "When a match is made it forwards the request to the connections",
-       %{p1_server: p1, p2_server: p2} = context do
-    assert :ok = PlayerServer.join_lobby(p1, context.lobby.name)
-    assert :ok = PlayerServer.join_lobby(p2, context.lobby.name)
-    :ok = GameEngine.force_match_make(context.game_engine)
-    assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
-    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
+    test "its an error to ask to join a lobby that doesn't exist", context do
+      assert {:error, :lobby_not_found} =
+               PlayerServer.join_lobby(context.p1_server, "DOES NOT EXIST")
+    end
+
+    test "its an error to try to join another lobby while in one", context do
+      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+
+      assert {:error, :already_in_lobby} =
+               PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+
+      assert {:error, :already_in_lobby} = PlayerServer.join_lobby(context.p1_server, "FOO")
+    end
+
+    test "When a match is made it forwards the request to the connections",
+         %{p1_server: p1, p2_server: p2} = context do
+      assert :ok = PlayerServer.join_lobby(p1, context.lobby.name)
+      assert :ok = PlayerServer.join_lobby(p2, context.lobby.name)
+      :ok = GameEngine.force_match_make(context.game_engine)
+      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+      assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
+    end
   end
 end

@@ -30,8 +30,8 @@ defmodule BattleBox.PlayerServer do
     {:next_state, :disconnected, data}
   end
 
-  def handle_event(:enter, _, state, data) when state in [:options],
-    do: {:next_state, state, data}
+  def handle_event(:enter, _, state, data) when state in [:options, :match_making],
+    do: :keep_state_and_data
 
   def handle_event({:call, from}, {:join_lobby, %{lobby_name: lobby_name}}, :options, data) do
     case Lobby.get_by_name(lobby_name) do
@@ -45,9 +45,8 @@ defmodule BattleBox.PlayerServer do
     end
   end
 
-  def handle_event(:enter, _old_state, :match_making, _data) do
-    :keep_state_and_data
-  end
+  def handle_event({:call, from}, {:join_lobby, _}, _, data),
+    do: {:keep_state_and_data, [{:reply, from, {:error, :already_in_lobby}}]}
 
   def handle_event(:info, {:game_request, game_info} = msg, :match_making, data) do
     send(data.connection, msg)
@@ -109,8 +108,7 @@ defmodule BattleBox.PlayerServer do
     {:next_state, :options, data}
   end
 
-  def handle_event(:enter, :game_acceptance, :disconnected, data) do
-    :ok = GameServer.reject_game(data.game_info.game_server, data.game_info.player)
+  def handle_event(:enter, _, :disconnected, data) do
     {:stop, :normal}
   end
 
