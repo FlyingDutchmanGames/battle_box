@@ -45,13 +45,14 @@ defmodule BattleBox.PlayerServer do
     end
   end
 
-  def handle_event(:enter, _old_state, :match_making, data) do
+  def handle_event(:enter, _old_state, :match_making, _data) do
     :keep_state_and_data
   end
 
-  def handle_event(:info, {:game_request, game_info}, :match_making, data) do
-    game_monitor = Process.monitor(game_info.game_server)
+  def handle_event(:info, {:game_request, game_info} = msg, :match_making, data) do
+    send(data.connection, msg)
 
+    game_monitor = Process.monitor(game_info.game_server)
     :ok = MatchMaker.dequeue_self(data.names.game_engine, data.lobby.id)
 
     data =
@@ -60,7 +61,7 @@ defmodule BattleBox.PlayerServer do
         game_info: game_info
       })
 
-    {:next_state, :game_acceptance, data, []}
+    {:next_state, :game_acceptance, data}
   end
 
   def handle_event(:enter, _old_state, :game_acceptance, data) do

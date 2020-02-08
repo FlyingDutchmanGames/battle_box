@@ -32,7 +32,7 @@ defmodule BattleBox.MatchMakerServerTest do
 
     :ok = MatchMaker.join_queue(names.game_engine, lobby_id, @player_1_id, player_1_pid)
     :ok = MatchMaker.join_queue(names.game_engine, lobby_id, @player_2_id, player_2_pid)
-    :ok = MatchMakerServer.force_matchmake(names.match_maker_server)
+    :ok = MatchMakerServer.force_match_make(names.match_maker_server)
 
     assert_receive {:player_1,
                     {:game_request,
@@ -53,7 +53,7 @@ defmodule BattleBox.MatchMakerServerTest do
     :ok =
       MatchMaker.join_queue(names.game_engine, Ecto.UUID.generate(), @player_2_id, player_2_pid)
 
-    :ok = MatchMakerServer.force_matchmake(names.match_maker_server)
+    :ok = MatchMakerServer.force_match_make(names.match_maker_server)
 
     refute_receive {_, {:game_request, _}}
   end

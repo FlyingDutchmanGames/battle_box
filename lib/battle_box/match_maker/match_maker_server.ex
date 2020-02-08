@@ -3,10 +3,10 @@ defmodule BattleBox.MatchMakerServer do
   alias BattleBox.GameServer.GameSupervisor
   alias BattleBox.{MatchMaker, MatchMaker.MatchMakerLogic}
 
-  @matchmake_delay_ms 100
+  @match_make_delay_ms 100
 
-  def force_matchmake(match_maker_server) do
-    send(match_maker_server, :matchmake)
+  def force_match_make(match_maker_server) do
+    send(match_maker_server, :match_make)
     :ok
   end
 
@@ -15,11 +15,11 @@ defmodule BattleBox.MatchMakerServer do
   end
 
   def init(data) do
-    schedule_matchmake()
+    schedule_match_make()
     {:ok, data}
   end
 
-  def handle_info(:matchmake, %{names: names} = state) do
+  def handle_info(:match_make, %{names: names} = state) do
     MatchMaker.lobbies_with_queued_players(names.game_engine)
     |> Enum.each(fn lobby ->
       MatchMaker.queue_for_lobby(names.game_engine, lobby)
@@ -29,11 +29,11 @@ defmodule BattleBox.MatchMakerServer do
       end)
     end)
 
-    schedule_matchmake()
+    schedule_match_make()
     {:noreply, state}
   end
 
-  defp schedule_matchmake do
-    Process.send_after(self(), :matchmake, @matchmake_delay_ms)
+  defp schedule_match_make do
+    Process.send_after(self(), :match_make, @match_make_delay_ms)
   end
 end

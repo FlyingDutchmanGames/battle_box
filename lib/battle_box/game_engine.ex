@@ -2,6 +2,7 @@ defmodule BattleBox.GameEngine do
   use Supervisor
   alias BattleBox.GameServer.GameSupervisor, as: GameSup
   alias BattleBox.PlayerServer.PlayerSupervisor, as: PlayerSup
+  alias BattleBox.MatchMakerServer
 
   @default_name GameEngine
 
@@ -29,6 +30,9 @@ defmodule BattleBox.GameEngine do
 
   def start_player(game_engine, opts),
     do: PlayerSup.start_player(player_supervisor_name(game_engine), opts)
+
+  def force_match_make(game_engine),
+    do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
 
   def names(name) do
     %{
