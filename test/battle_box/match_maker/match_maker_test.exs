@@ -24,6 +24,25 @@ defmodule BattleBox.MatchMakerTest do
              get_all_in_registry(names.match_maker_registry)
   end
 
+  test "you can get all the players in a lobby", names do
+    assert [] == MatchMaker.queue_for_lobby(names.game_engine, "FOO")
+    :ok = MatchMaker.join_queue(names.game_engine, "FOO", "PLAYER_ID")
+
+    assert [%{player_id: "PLAYER_ID", pid: self(), enqueuer_pid: self()}] ==
+             MatchMaker.queue_for_lobby(names.game_engine, "FOO")
+  end
+
+  test "you can get all the lobbies with queued players", names do
+    assert [] == MatchMaker.lobbies_with_queued_players(names.game_engine)
+    :ok = MatchMaker.join_queue(names.game_engine, "FOO", "PLAYER_ID")
+    :ok = MatchMaker.join_queue(names.game_engine, "BAR", "PLAYER_ID")
+    :ok = MatchMaker.join_queue(names.game_engine, "BAR", "PLAYER_ID")
+    :ok = MatchMaker.join_queue(names.game_engine, "BAZ", "PLAYER_ID")
+
+    assert Enum.sort(["BAR", "BAZ", "FOO"]) ==
+             Enum.sort(MatchMaker.lobbies_with_queued_players(names.game_engine))
+  end
+
   test "you can dequeue yourself", names do
     me = self()
 

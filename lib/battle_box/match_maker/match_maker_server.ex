@@ -1,7 +1,7 @@
 defmodule BattleBox.MatchMakerServer do
   use GenServer
   alias BattleBox.GameServer.GameSupervisor
-  alias BattleBox.MatchMaker.MatchMakerLogic
+  alias BattleBox.{MatchMaker, MatchMaker.MatchMakerLogic}
 
   @matchmake_delay_ms 100
 
@@ -20,11 +20,9 @@ defmodule BattleBox.MatchMakerServer do
   end
 
   def handle_info(:matchmake, %{names: names} = state) do
-    get_all_lobbies(names.match_maker_registry)
-    |> Enum.uniq()
+    MatchMaker.lobbies_with_queued_players(names.game_engine)
     |> Enum.each(fn lobby ->
-      Registry.lookup(names.match_maker_registry, lobby)
-      |> Enum.map(fn {_pid, player_info} -> player_info end)
+      MatchMaker.queue_for_lobby(names.game_engine, lobby)
       |> MatchMakerLogic.make_matches(lobby)
       |> Enum.each(fn match_settings ->
         {:ok, pid} = GameSupervisor.start_game(names.game_supervisor, match_settings)
@@ -33,10 +31,6 @@ defmodule BattleBox.MatchMakerServer do
 
     schedule_matchmake()
     {:noreply, state}
-  end
-
-  defp get_all_lobbies(registry) do
-    Registry.select(registry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   defp schedule_matchmake do

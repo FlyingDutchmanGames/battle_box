@@ -21,6 +21,18 @@ defmodule BattleBox.MatchMaker do
     :ok
   end
 
+  def queue_for_lobby(game_engine, lobby) do
+    Registry.lookup(match_maker_registry_name(game_engine), lobby)
+    |> Enum.map(fn {enqueuer_pid, match_details} ->
+      Map.put(match_details, :enqueuer_pid, enqueuer_pid)
+    end)
+  end
+
+  def lobbies_with_queued_players(game_engine) do
+    Registry.select(match_maker_registry_name(game_engine), [{{:"$1", :_, :_}, [], [:"$1"]}])
+    |> Enum.uniq()
+  end
+
   def dequeue_self(game_engine, lobby) when is_atom(game_engine) do
     :ok = Registry.unregister(match_maker_registry_name(game_engine), lobby)
   end
