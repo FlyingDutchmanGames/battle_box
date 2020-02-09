@@ -18,6 +18,10 @@ defmodule BattleBox.PlayerServer do
     GenStateMachine.call(player_server, :match_make, timeout)
   end
 
+  def submit_moves(player_server, move_id, moves, timeout \\ 5000) do
+    GenStateMachine.call(player_server, {:submit_moves, move_id, moves}, timeout)
+  end
+
   def start_link(%{names: _} = config, %{connection: _, player_id: _} = data) do
     data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
@@ -89,7 +93,7 @@ defmodule BattleBox.PlayerServer do
     case response do
       :accept_game ->
         :ok = GameServer.accept_game(game_info.game_server, game_info.player)
-        {:next_state, :game_starting, data, {:reply, from, :ok}}
+        {:next_state, :playing, data, {:reply, from, :ok}}
 
       :reject_game ->
         :ok = GameServer.reject_game(game_info.game_server, game_info.player)
@@ -107,7 +111,7 @@ defmodule BattleBox.PlayerServer do
   def handle_event(
         :info,
         {:DOWN, _, _, pid, _},
-        :game_acceptance,
+        _state,
         %{game_info: %{game_server: pid}} = data
       ) do
     {:ok, data} = teardown_game(data.game_info.game_id, data)
@@ -121,18 +125,53 @@ defmodule BattleBox.PlayerServer do
 
   def handle_event(:info, {:game_cancelled, _id}, _state, _data), do: :keep_state_and_data
 
-  def handle_event(:info, {:moves_request, _}, :game_starting, data) do
-    {:next_state, :playing, data, postpone: true}
+  def handle_event(:info, {:moves_request, moves_request}, :playing, data) do
+    moves_request = Map.put_new(moves_request, :request_id, Ecto.UUID.generate())
+    data = Map.put(data, :moves_request, moves_request)
+    {:next_state, :moves_request, data}
   end
 
-  def handle_event(:info, {:moves_request, _} = msg, :playing, data) do
+  def handle_event(:enter, :playing, :moves_request, %{moves_request: moves_request} = data) do
+    send(data.connection, {:moves_request, moves_request})
+    {:keep_state, data, {:state_timeout, moves_request.time, :moves_timeout}}
+  end
+
+  def handle_event(
+        {:call, from},
+        {:submit_moves, id, moves},
+        :moves_request,
+        %{moves_request: %{request_id: id}} = data
+      ) do
+    :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, moves)
+    data = Map.drop(data, [:moves_request])
+    {:next_state, :playing, data, {:reply, from, :ok}}
+  end
+
+  def handle_event({:call, from}, {:submit_moves, _, _}, _, _),
+    do: {:keep_state_and_data, {:reply, from, {:error, :invalid_moves_submission}}}
+
+  def handle_event(:state_timemout, :moves_timeout, :moves_request, data) do
+    send(data.connection, {:moves_request_timeout, data.moves_request.request_id})
+    :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, [])
+    data = Map.drop(data, :moves_request)
+    {:next_state, :playing, data}
+  end
+
+  def handle_event(
+        :info,
+        {:game_over, %{game: %{id: game_id}}} = msg,
+        _state,
+        %{game_info: %{game_id: game_id}} = data
+      ) do
+    {:ok, data} = teardown_game(game_id, data)
     send(data.connection, msg)
-    :keep_state_and_data
+    {:next_state, :options, data}
   end
 
   def handle_event(:enter, _old_state, _state, _data), do: :keep_state_and_data
 
   defp setup_game(data, game_info) do
+    game_info = Map.put(game_info, :acceptance_time, data.lobby.game_acceptance_timeout_ms)
     game_monitor = Process.monitor(game_info.game_server)
     send(data.connection, {:game_request, game_info})
     data = Map.merge(data, %{game_info: game_info, game_monitor: game_monitor})

@@ -214,7 +214,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   def collision_damage(game), do: DamageModifier.calc_damage(game.collision_damage)
 
   def moves_request(game) do
-    %{robots: robots(game)}
+    %{robots: robots(game), turn: game.turn}
   end
 
   def settings(game) do
@@ -222,6 +222,7 @@ defmodule BattleBox.Games.RobotGame.Game do
       :spawn_every,
       :spawn_per_player,
       :robot_hp,
+      :max_turns,
       :attack_damage,
       :collision_damage,
       :terrain,
@@ -234,7 +235,6 @@ end
 defimpl BattleBoxGame, for: BattleBox.Games.RobotGame.Game do
   alias BattleBox.Games.RobotGame.Game
   def id(game), do: game.id
-  def turn(game), do: game.turn
   def disqualify(game, player), do: Game.disqualify(game, player)
   def over?(game), do: Game.over?(game)
   def persist(game), do: Game.persist(game)

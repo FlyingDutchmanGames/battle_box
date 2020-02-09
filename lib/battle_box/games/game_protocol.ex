@@ -2,9 +2,6 @@ defprotocol BattleBoxGame do
   @spec id(struct()) :: Ecto.UUID.t()
   def id(game)
 
-  @spec turn(struct()) :: non_neg_integer()
-  def turn(game)
-
   @spec disqualify(struct(), :player_1 | :player_2) :: struct()
   def disqualify(game, player)
 
