@@ -19,6 +19,11 @@ defmodule BattleBoxWeb.Router do
 
     get "/", PageController, :index
 
+    scope "/auth" do
+      get "/github/login", LoginController, :github_login
+      get "/github/callback", LoginController, :github_callback
+    end
+
     scope "/robot_game", RobotGame do
       live("/play", PlayLive)
     end
