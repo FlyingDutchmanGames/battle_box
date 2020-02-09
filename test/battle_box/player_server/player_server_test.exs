@@ -100,17 +100,66 @@ defmodule BattleBox.PlayerServerTest do
     end
   end
 
+  test "players reject game requests they're not expecting", context do
+    game_id = Ecto.UUID.generate()
+    game_server = named_proxy(:game_server)
+
+    send(
+      context.p1_server,
+      {:game_request, %{game_id: game_id, game_server: game_server, player: :player_1}}
+    )
+
+    assert_receive {:game_server, {:"$gen_cast", {:reject_game, :player_1}}}
+  end
+
   describe "game acceptance" do
-    test "players reject game requests they're not expecting", context do
-      game_id = Ecto.UUID.generate()
-      game_server = named_proxy(:game_server)
-
-      send(
-        context.p1_server,
-        {:game_request, %{game_id: game_id, game_server: game_server, player: :player_1}}
-      )
-
-      assert_receive {:game_server, {:"$gen_cast", {:reject_game, :player_1}}}
+    setup context do
+      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      assert :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = GameEngine.force_match_make(context.game_engine)
     end
+
+    test "if you accept a game and it gets cancelled you go to matchmaking", context do
+      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+      :ok = PlayerServer.accept_game(context.p1_server, game_id)
+      :ok = PlayerServer.reject_game(context.p2_server, game_id)
+      assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
+    end
+
+    test "if the other player dies you get a game cancelled", context do
+      Process.flag(:trap_exit, true)
+      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+      :ok = PlayerServer.accept_game(context.p1_server, game_id)
+      Process.exit(context.p2_server, :kill)
+      assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
+    end
+
+    test "if the game dies you both get a game cancelled", context do
+      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+      [{game_server_pid, _}] = Registry.lookup(context.game_registry, game_id)
+      Process.exit(game_server_pid, :kill)
+      assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
+      assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
+    end
+
+    test "if the game dies after you reject it you don't get a cancelled", context do
+      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+      :ok = PlayerServer.reject_game(context.p2_server, game_id)
+      [{game_server_pid, _}] = Registry.lookup(context.game_registry, game_id)
+      Process.exit(game_server_pid, :kill)
+      assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
+      refute_receive {:p2_connection, {:game_cancelled, ^game_id}}
+      p2_server = context.p2_server
+      refute_receive {:DOWN, _, _, ^p2_server, _}
+    end
+
+    # test "you can accept a game", context do
+    #  assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+    #  assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
+    #  :ok = PlayerServer.accept_game(context.p1_server, game_id)
+    #  :ok = PlayerServer.accept_game(context.p2_server, game_id)
+    #  assert_receive {:p1_connections, {:input_request, :foo}}
+    #  assert_receive {:p2_connections, {:input_request, :foo}}
+    # end
   end
 end
