@@ -23,4 +23,7 @@ defprotocol BattleBoxGame do
   @spec calculate_turn(struct(), %{optional(:player_1) => [any], optional(:player_2) => [any]}) ::
           struct()
   def calculate_turn(game, moves)
+
+  @spec move_time_ms(struct()) :: non_neg_integer()
+  def move_time_ms(game)
 end

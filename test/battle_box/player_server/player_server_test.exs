@@ -71,7 +71,9 @@ defmodule BattleBox.PlayerServerTest do
   describe "Matchmaking in a lobby" do
     test "You can ask the game server to join a matchmaking lobby", %{p1_server: p1} = context do
       assert [] == MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
-      assert :ok = PlayerServer.join_lobby(p1, context.lobby.name)
+
+      :ok = PlayerServer.join_lobby(p1, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p1_server)
 
       assert [%{player_id: @player_1_id, pid: ^p1}] =
                MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
@@ -82,8 +84,12 @@ defmodule BattleBox.PlayerServerTest do
                PlayerServer.join_lobby(context.p1_server, "DOES NOT EXIST")
     end
 
+    test "its an error to ask to match_make without being in a lobby", context do
+      assert {:error, :not_in_lobby} = PlayerServer.match_make(context.p1_server)
+    end
+
     test "its an error to try to join another lobby while in one", context do
-      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
 
       assert {:error, :already_in_lobby} =
                PlayerServer.join_lobby(context.p1_server, context.lobby.name)
@@ -92,8 +98,12 @@ defmodule BattleBox.PlayerServerTest do
     end
 
     test "When a match is made it forwards the request to the connections", context do
-      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
-      assert :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p1_server)
+
+      :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p2_server)
+
       :ok = GameEngine.force_match_make(context.game_engine)
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
       assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
@@ -114,8 +124,12 @@ defmodule BattleBox.PlayerServerTest do
 
   describe "game acceptance" do
     setup context do
-      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
-      assert :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p1_server)
+
+      :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p2_server)
+
       :ok = GameEngine.force_match_make(context.game_engine)
     end
 
@@ -134,6 +148,10 @@ defmodule BattleBox.PlayerServerTest do
       assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
     end
 
+    test "if you wait too long to accept, the game is cancelled" do
+      # TODO:// This one is a little tricky because we have to edit the lobby which is already in the p2 state
+    end
+
     test "if the game dies you both get a game cancelled", context do
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
       [{game_server_pid, _}] = Registry.lookup(context.game_registry, game_id)
@@ -142,24 +160,15 @@ defmodule BattleBox.PlayerServerTest do
       assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
     end
 
-    test "if the game dies after you reject it you don't get a cancelled", context do
+    test "you can accept a game", context do
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
-      :ok = PlayerServer.reject_game(context.p2_server, game_id)
-      [{game_server_pid, _}] = Registry.lookup(context.game_registry, game_id)
-      Process.exit(game_server_pid, :kill)
-      assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
-      refute_receive {:p2_connection, {:game_cancelled, ^game_id}}
-      p2_server = context.p2_server
-      refute_receive {:DOWN, _, _, ^p2_server, _}
-    end
+      assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
 
-    # test "you can accept a game", context do
-    #  assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
-    #  assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
-    #  :ok = PlayerServer.accept_game(context.p1_server, game_id)
-    #  :ok = PlayerServer.accept_game(context.p2_server, game_id)
-    #  assert_receive {:p1_connections, {:input_request, :foo}}
-    #  assert_receive {:p2_connections, {:input_request, :foo}}
-    # end
+      :ok = PlayerServer.accept_game(context.p1_server, game_id)
+      :ok = PlayerServer.accept_game(context.p2_server, game_id)
+
+      assert_receive {:p1_connection, {:moves_request, %{game_id: ^game_id, time: time}}}
+      assert_receive {:p2_connection, {:moves_request, %{game_id: ^game_id, time: ^time}}}
+    end
   end
 end

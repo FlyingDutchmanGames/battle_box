@@ -26,7 +26,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :terrain, :any, default: Terrain.default(), virtual: true
     field :persistent?, :boolean, default: true, virtual: true
 
-    field :move_timeout_ms, :integer, virtual: true, default: 5000
+    field :move_time_ms, :integer, virtual: true, default: 5000
 
     timestamps()
   end
@@ -226,7 +226,7 @@ defmodule BattleBox.Games.RobotGame.Game do
       :collision_damage,
       :terrain,
       :game_acceptance_timeout_ms,
-      :move_timeout_ms
+      :move_time_ms
     ])
   end
 end
@@ -241,4 +241,5 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame.Game do
   def settings(game), do: Game.settings(game)
   def moves_request(game), do: Game.moves_request(game)
   def calculate_turn(game, moves), do: Game.Logic.calculate_turn(game, moves)
+  def move_time_ms(game), do: game.move_time_ms
 end
