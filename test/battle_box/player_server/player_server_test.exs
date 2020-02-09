@@ -148,6 +148,10 @@ defmodule BattleBox.PlayerServerTest do
       assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
     end
 
+    test "if you wait too long to accept, the game is cancelled" do
+      # TODO:// This one is a little tricky because we have to edit the lobby which is already in the p2 state
+    end
+
     test "if the game dies you both get a game cancelled", context do
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
       [{game_server_pid, _}] = Registry.lookup(context.game_registry, game_id)
@@ -156,13 +160,15 @@ defmodule BattleBox.PlayerServerTest do
       assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
     end
 
-    # test "you can accept a game", context do
-    #  assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
-    #  assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
-    #  :ok = PlayerServer.accept_game(context.p1_server, game_id)
-    #  :ok = PlayerServer.accept_game(context.p2_server, game_id)
-    #  assert_receive {:p1_connections, {:input_request, :foo}}
-    #  assert_receive {:p2_connections, {:input_request, :foo}}
-    # end
+    test "you can accept a game", context do
+      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+      assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
+
+      :ok = PlayerServer.accept_game(context.p1_server, game_id)
+      :ok = PlayerServer.accept_game(context.p2_server, game_id)
+
+      assert_receive {:p1_connection, {:moves_request, %{game_id: ^game_id, time: time}}}
+      assert_receive {:p2_connection, {:moves_request, %{game_id: ^game_id, time: ^time}}}
+    end
   end
 end

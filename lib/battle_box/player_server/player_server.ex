@@ -114,22 +114,23 @@ defmodule BattleBox.PlayerServer do
     {:next_state, :options, data}
   end
 
-  def handle_event(
-        :info,
-        {:game_cancelled, game_id},
-        state,
-        %{game_info: %{game_id: game_id}} = data
-      )
-      when state in [:game_acceptance, :game_starting] do
-    {:ok, data} = teardown_game(game_id, data)
+  def handle_event(:info, {:game_cancelled, id}, _, %{game_info: %{game_id: id}} = data) do
+    {:ok, data} = teardown_game(id, data)
     {:next_state, :options, data}
   end
 
-  def handle_event(:info, {:game_cancelled, _}, _state, _data), do: :keep_state_and_data
+  def handle_event(:info, {:game_cancelled, _id}, _state, _data), do: :keep_state_and_data
 
-  def handle_event(:enter, _old_state, state, _data)
-      when state in [:options, :match_making, :game_starting, :playing],
-      do: :keep_state_and_data
+  def handle_event(:info, {:moves_request, _}, :game_starting, data) do
+    {:next_state, :playing, data, postpone: true}
+  end
+
+  def handle_event(:info, {:moves_request, _} = msg, :playing, data) do
+    send(data.connection, msg)
+    :keep_state_and_data
+  end
+
+  def handle_event(:enter, _old_state, _state, _data), do: :keep_state_and_data
 
   defp setup_game(data, game_info) do
     game_monitor = Process.monitor(game_info.game_server)
