@@ -71,7 +71,9 @@ defmodule BattleBox.PlayerServerTest do
   describe "Matchmaking in a lobby" do
     test "You can ask the game server to join a matchmaking lobby", %{p1_server: p1} = context do
       assert [] == MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
-      assert :ok = PlayerServer.join_lobby(p1, context.lobby.name)
+
+      :ok = PlayerServer.join_lobby(p1, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p1_server)
 
       assert [%{player_id: @player_1_id, pid: ^p1}] =
                MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
@@ -82,8 +84,12 @@ defmodule BattleBox.PlayerServerTest do
                PlayerServer.join_lobby(context.p1_server, "DOES NOT EXIST")
     end
 
+    test "its an error to ask to match_make without being in a lobby", context do
+      assert {:error, :not_in_lobby} = PlayerServer.match_make(context.p1_server)
+    end
+
     test "its an error to try to join another lobby while in one", context do
-      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
 
       assert {:error, :already_in_lobby} =
                PlayerServer.join_lobby(context.p1_server, context.lobby.name)
@@ -92,8 +98,12 @@ defmodule BattleBox.PlayerServerTest do
     end
 
     test "When a match is made it forwards the request to the connections", context do
-      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
-      assert :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p1_server)
+
+      :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p2_server)
+
       :ok = GameEngine.force_match_make(context.game_engine)
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
       assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
@@ -114,8 +124,12 @@ defmodule BattleBox.PlayerServerTest do
 
   describe "game acceptance" do
     setup context do
-      assert :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
-      assert :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p1_server)
+
+      :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p2_server)
+
       :ok = GameEngine.force_match_make(context.game_engine)
     end
 
