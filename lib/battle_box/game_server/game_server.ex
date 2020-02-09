@@ -115,7 +115,6 @@ defmodule BattleBox.GameServer do
        game_id: Game.id(game),
        game_state: Game.moves_request(game),
        time: Game.move_time_ms(game),
-       turn: Game.turn(game),
        player: player
      }}
   end

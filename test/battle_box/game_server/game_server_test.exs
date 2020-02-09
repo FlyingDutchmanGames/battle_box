@@ -106,11 +106,11 @@ defmodule BattleBox.GameServerTest do
 
     assert_receive {:player_1,
                     {:moves_request,
-                     %{game_id: ^game_id, turn: 0, game_state: %{robots: []}, player: :player_1}}}
+                     %{game_id: ^game_id, game_state: %{robots: [], turn: 0}, player: :player_1}}}
 
     assert_receive {:player_2,
                     {:moves_request,
-                     %{game_id: ^game_id, turn: 0, game_state: %{robots: []}, player: :player_2}}}
+                     %{game_id: ^game_id, game_state: %{robots: [], turn: 0}, player: :player_2}}}
   end
 
   test "if you forefit, you get a game over message/ the other player wins", context do
@@ -154,11 +154,11 @@ defmodule BattleBox.GameServerTest do
 
     Enum.each(0..9, fn turn ->
       receive do:
-                ({:player_1, {:moves_request, %{turn: ^turn}}} ->
+                ({:player_1, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
                    GameServer.submit_moves(pid, :player_1, turn, []))
 
       receive do:
-                ({:player_2, {:moves_request, %{turn: ^turn}}} ->
+                ({:player_2, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
                    GameServer.submit_moves(pid, :player_2, turn, []))
     end)
 
