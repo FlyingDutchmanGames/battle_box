@@ -199,6 +199,8 @@ defmodule BattleBox.PlayerServerTest do
 
       :ok = PlayerServer.accept_game(context.p1_server, game_id)
       :ok = PlayerServer.accept_game(context.p2_server, game_id)
+
+      %{game_id: game_id}
     end
 
     test "you can submit back a moves request", context do
@@ -216,6 +218,24 @@ defmodule BattleBox.PlayerServerTest do
     test "Moves timeouts submit blank moves and send an error to the connection" do
       # TODO:// not sure how to test this one yet, because the timeout comes from pretty deep in engine
       # eventually it should be derived from the lobby settings
+    end
+
+    test "game server dies => game cancelled notification", %{game_id: game_id} = context do
+      # Player 1 in the "playing" state after submitting his moves
+      # Player 2 in the moves input state, waiting on his moves
+      assert_receive {:p1_connection, {:moves_request, %{request_id: id}}}
+      :ok = PlayerServer.submit_moves(context.p1_server, id, [])
+
+      [{game_server_pid, _}] = Registry.lookup(context.game_registry, context.game_id)
+      Process.exit(game_server_pid, :kill)
+
+      assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
+      assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
+    end
+
+    test "other player dies => you get a game over notification", %{game_id: game_id} = context do
+      Process.exit(context.p1_server, :kill)
+      assert_receive {:p2_connection, {:game_over, %{game: %{id: ^game_id}}}}
     end
   end
 end

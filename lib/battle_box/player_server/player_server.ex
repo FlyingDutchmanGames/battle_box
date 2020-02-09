@@ -111,7 +111,7 @@ defmodule BattleBox.PlayerServer do
   def handle_event(
         :info,
         {:DOWN, _, _, pid, _},
-        :game_acceptance,
+        _state,
         %{game_info: %{game_server: pid}} = data
       ) do
     {:ok, data} = teardown_game(data.game_info.game_id, data)
@@ -155,6 +155,17 @@ defmodule BattleBox.PlayerServer do
     :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, [])
     data = Map.drop(data, :moves_request)
     {:next_state, :playing, data}
+  end
+
+  def handle_event(
+        :info,
+        {:game_over, %{game: %{id: game_id}}} = msg,
+        _state,
+        %{game_info: %{game_id: game_id}} = data
+      ) do
+    {:ok, data} = teardown_game(game_id, data)
+    send(data.connection, msg)
+    {:next_state, :options, data}
   end
 
   def handle_event(:enter, _old_state, _state, _data), do: :keep_state_and_data
