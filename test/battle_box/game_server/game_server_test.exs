@@ -155,11 +155,11 @@ defmodule BattleBox.GameServerTest do
     Enum.each(0..9, fn turn ->
       receive do:
                 ({:player_1, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
-                   GameServer.submit_moves(pid, :player_1, turn, []))
+                   GameServer.submit_moves(pid, :player_1, []))
 
       receive do:
                 ({:player_2, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
-                   GameServer.submit_moves(pid, :player_2, turn, []))
+                   GameServer.submit_moves(pid, :player_2, []))
     end)
 
     assert_receive {:player_1, {:game_over, %{game: game}}}

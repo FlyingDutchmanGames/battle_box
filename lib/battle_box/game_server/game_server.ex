@@ -14,8 +14,8 @@ defmodule BattleBox.GameServer do
     GenStateMachine.cast(game_server, {:forfeit_game, player})
   end
 
-  def submit_moves(game_server, player, turn, moves) do
-    GenStateMachine.cast(game_server, {:moves, player, turn, moves})
+  def submit_moves(game_server, player, moves) do
+    GenStateMachine.cast(game_server, {:moves, player, moves})
   end
 
   def start_link(config, %{player_1: _, player_2: _, game: _} = data) do
@@ -70,7 +70,7 @@ defmodule BattleBox.GameServer do
     {:keep_state, Map.put(data, :moves, [])}
   end
 
-  def moves(:cast, {:moves, player, _turn, moves}, data) do
+  def moves(:cast, {:moves, player, moves}, data) do
     case data.moves do
       [] ->
         {:keep_state, put_in(data.moves, [{player, moves}])}

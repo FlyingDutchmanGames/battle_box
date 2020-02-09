@@ -122,6 +122,23 @@ defmodule BattleBox.PlayerServerTest do
     assert_receive {:game_server, {:"$gen_cast", {:reject_game, :player_1}}}
   end
 
+  test "if you wait too long to accept, the game is cancelled", context do
+    Lobby.changeset(context.lobby, %{game_acceptance_timeout_ms: 1})
+    |> Repo.update!()
+
+    :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+    :ok = PlayerServer.match_make(context.p1_server)
+
+    :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+    :ok = PlayerServer.match_make(context.p2_server)
+
+    :ok = GameEngine.force_match_make(context.game_engine)
+    assert_receive {:p1_connection, {:game_request, %{game_id: game_id, acceptance_time: 1}}}
+    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id, acceptance_time: 1}}}
+    assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
+    assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
+  end
+
   describe "game acceptance" do
     setup context do
       :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
@@ -148,10 +165,6 @@ defmodule BattleBox.PlayerServerTest do
       assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
     end
 
-    test "if you wait too long to accept, the game is cancelled" do
-      # TODO:// This one is a little tricky because we have to edit the lobby which is already in the p2 state
-    end
-
     test "if the game dies you both get a game cancelled", context do
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
       [{game_server_pid, _}] = Registry.lookup(context.game_registry, game_id)
@@ -169,6 +182,40 @@ defmodule BattleBox.PlayerServerTest do
 
       assert_receive {:p1_connection, {:moves_request, %{game_id: ^game_id, time: time}}}
       assert_receive {:p2_connection, {:moves_request, %{game_id: ^game_id, time: ^time}}}
+    end
+  end
+
+  describe "playing a game!" do
+    setup context do
+      :ok = PlayerServer.join_lobby(context.p1_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p1_server)
+
+      :ok = PlayerServer.join_lobby(context.p2_server, context.lobby.name)
+      :ok = PlayerServer.match_make(context.p2_server)
+
+      :ok = GameEngine.force_match_make(context.game_engine)
+
+      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+
+      :ok = PlayerServer.accept_game(context.p1_server, game_id)
+      :ok = PlayerServer.accept_game(context.p2_server, game_id)
+    end
+
+    test "you can submit back a moves request", context do
+      assert_receive {:p1_connection, {:moves_request, %{request_id: id}}}
+      :ok = PlayerServer.submit_moves(context.p1_server, id, [])
+    end
+
+    test "trying to submit the wrong moves raises an error", context do
+      assert_receive {:p1_connection, {:moves_request, _}}
+
+      {:error, :invalid_moves_submission} =
+        PlayerServer.submit_moves(context.p1_server, "INVALID", [])
+    end
+
+    test "Moves timeouts submit blank moves and send an error to the connection" do
+      # TODO:// not sure how to test this one yet, because the timeout comes from pretty deep in engine
+      # eventually it should be derived from the lobby settings
     end
   end
 end
