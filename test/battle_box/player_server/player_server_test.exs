@@ -195,12 +195,12 @@ defmodule BattleBox.PlayerServerTest do
 
       :ok = GameEngine.force_match_make(context.game_engine)
 
-      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+      assert_receive {:p1_connection, {:game_request, %{game_id: game_id} = game_info}}
 
       :ok = PlayerServer.accept_game(context.p1_server, game_id)
       :ok = PlayerServer.accept_game(context.p2_server, game_id)
 
-      %{game_id: game_id}
+      %{game_id: game_id, game_info: game_info}
     end
 
     test "you can submit back a moves request", context do
@@ -235,6 +235,23 @@ defmodule BattleBox.PlayerServerTest do
 
     test "other player dies => you get a game over notification", %{game_id: game_id} = context do
       Process.exit(context.p1_server, :kill)
+      assert_receive {:p2_connection, {:game_over, %{game: %{id: ^game_id}}}}
+    end
+
+    test "you can play a full game!!!!!", %{game_id: game_id} = context do
+      Enum.each(0..(context.game_info.settings.max_turns - 1), fn turn ->
+        assert_receive {:p1_connection,
+                        {:moves_request, %{request_id: id, game_state: %{turn: ^turn}}}}
+
+        :ok = PlayerServer.submit_moves(context.p1_server, id, [])
+
+        assert_receive {:p2_connection,
+                        {:moves_request, %{request_id: id, game_state: %{turn: ^turn}}}}
+
+        :ok = PlayerServer.submit_moves(context.p2_server, id, [])
+      end)
+
+      assert_receive {:p1_connection, {:game_over, %{game: %{id: ^game_id}}}}
       assert_receive {:p2_connection, {:game_over, %{game: %{id: ^game_id}}}}
     end
   end

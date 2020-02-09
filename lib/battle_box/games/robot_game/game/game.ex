@@ -222,6 +222,7 @@ defmodule BattleBox.Games.RobotGame.Game do
       :spawn_every,
       :spawn_per_player,
       :robot_hp,
+      :max_turns,
       :attack_damage,
       :collision_damage,
       :terrain,
