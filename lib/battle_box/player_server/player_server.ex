@@ -19,9 +19,9 @@ defmodule BattleBox.PlayerServer do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
   end
 
-  def init(%{names: names} = data) do
+  def init(%{names: names, player_id: player_id} = data) do
+    Registry.register(names.player_registry, data.player_server_id, %{player_id: player_id})
     Process.monitor(data.connection)
-    Registry.register(names.player_registry, data.player_server_id, %{player_id: data.player_id})
     {:ok, :options, data}
   end
 
@@ -29,9 +29,9 @@ defmodule BattleBox.PlayerServer do
     {:next_state, :disconnected, data}
   end
 
-  def handle_event(:enter, _old_state, state, _data)
-      when state in [:options, :match_making, :game_starting, :playing],
-      do: :keep_state_and_data
+  def handle_event(:enter, _old_state, :disconnected, _data) do
+    {:stop, :normal}
+  end
 
   def handle_event({:call, from}, {:join_lobby, %{lobby_name: lobby_name}}, :options, data) do
     case Lobby.get_by_name(lobby_name) do
@@ -41,7 +41,7 @@ defmodule BattleBox.PlayerServer do
         {:next_state, :match_making, data, {:reply, from, :ok}}
 
       nil ->
-        {:keep_state, data, [{:reply, from, {:error, :lobby_not_found}}]}
+        {:keep_state, data, {:reply, from, {:error, :lobby_not_found}}}
     end
   end
 
@@ -79,10 +79,16 @@ defmodule BattleBox.PlayerServer do
         {:next_state, :game_starting, data, {:reply, from, :ok}}
 
       :reject_game ->
-        Process.demonitor(data.game_monitor, [:flush])
         :ok = GameServer.reject_game(game_info.game_server, game_info.player)
+        {:ok, data} = teardown_game(game_id, data)
         {:next_state, :options, data, {:reply, from, :ok}}
     end
+  end
+
+  def handle_event(:state_timeout, :game_acceptance_timeout, :game_acceptance, data) do
+    :ok = GameServer.reject_game(data.game_info.game_server, data.game_info.player)
+    send(data.connection, {:game_acceptance_timeout, data.game_info.game_id})
+    {:next_state, :game_teardown, data}
   end
 
   def handle_event(
@@ -91,30 +97,33 @@ defmodule BattleBox.PlayerServer do
         :game_acceptance,
         %{game_info: %{game_server: pid}} = data
       ) do
-    send(data.connection, {:game_cancelled, data.game_info.game_id})
+    {:ok, data} = teardown_game(data.game_info.game_id, data)
     {:next_state, :options, data}
   end
 
   def handle_event(
         :info,
-        {:game_cancelled, game_id} = msg,
+        {:game_cancelled, game_id},
         state,
         %{game_info: %{game_id: game_id}} = data
       )
-      when state in [:game_starting, :game_acceptance] do
-    send(data.connection, msg)
+      when state in [:game_acceptance, :game_starting] do
+    {:ok, data} = teardown_game(game_id, data)
     {:next_state, :options, data}
   end
 
   def handle_event(:info, {:game_cancelled, _}, _state, _data), do: :keep_state_and_data
 
-  def handle_event(:state_timeout, :game_acceptance_timeout, :game_acceptance, data) do
-    :ok = GameServer.reject_game(data.game_info.game_server, data.game_info.player)
-    send(data.connection, {:game_acceptance_timeout, data.game_info.game_id})
-    {:next_state, :options, data}
+  def handle_event(:enter, _old_state, state, _data)
+      when state in [:options, :match_making, :game_starting, :playing],
+      do: :keep_state_and_data
+
+  def teardown_game(game_id, %{game_info: %{game_id: game_id}} = data) do
+    Process.demonitor(data.game_monitor, [:flush])
+    send(data.connection, {:game_cancelled, game_id})
+    data = Map.drop(data, [:game_info, :game_monitor])
+    {:ok, data}
   end
 
-  def handle_event(:enter, _old_state, :disconnected, _data) do
-    {:stop, :normal}
-  end
+  def teardown_game(_game_id, data), do: {:ok, data}
 end

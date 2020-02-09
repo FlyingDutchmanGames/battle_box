@@ -142,17 +142,6 @@ defmodule BattleBox.PlayerServerTest do
       assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
     end
 
-    test "if the game dies after you reject it you don't get a cancelled", context do
-      assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
-      :ok = PlayerServer.reject_game(context.p2_server, game_id)
-      [{game_server_pid, _}] = Registry.lookup(context.game_registry, game_id)
-      Process.exit(game_server_pid, :kill)
-      assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
-      refute_receive {:p2_connection, {:game_cancelled, ^game_id}}
-      p2_server = context.p2_server
-      refute_receive {:DOWN, _, _, ^p2_server, _}
-    end
-
     # test "you can accept a game", context do
     #  assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
     #  assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
