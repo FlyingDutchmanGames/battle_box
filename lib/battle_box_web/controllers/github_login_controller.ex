@@ -2,10 +2,6 @@ defmodule BattleBoxWeb.GithubLoginController do
   use BattleBoxWeb, :controller
   alias BattleBox.User
 
-  @github_authorization_url "https://github.com/login/oauth/authorize"
-  @github_access_token_url "https://github.com/login/oauth/access_token"
-  @github_user_url "https://api.github.com/user"
-
   def github_login(conn, _params) do
     state = make_state()
 
@@ -32,7 +28,7 @@ defmodule BattleBoxWeb.GithubLoginController do
 
   defp get_user(access_token) do
     response =
-      HTTPoison.get(@github_user_url, [
+      HTTPoison.get(github_api_user_url(), [
         {"Authorization", "token #{access_token}"},
         {"Content-Type", "application/json"},
         {"Accept", "application/json"}
@@ -54,7 +50,7 @@ defmodule BattleBoxWeb.GithubLoginController do
       })
 
     response =
-      HTTPoison.post(@github_access_token_url, body, [
+      HTTPoison.post(github_access_token_url(), body, [
         {"Content-Type", "application/json"},
         {"Accept", "application/json"}
       ])
@@ -76,7 +72,7 @@ defmodule BattleBoxWeb.GithubLoginController do
         "client_id" => Keyword.fetch!(config(), :client_id)
       })
 
-    "#{@github_authorization_url}?#{params}"
+    "#{github_authorization_url()}?#{params}"
   end
 
   defp config do
@@ -88,4 +84,10 @@ defmodule BattleBoxWeb.GithubLoginController do
     |> Base.encode16()
     |> String.downcase()
   end
+
+  defp github_authorization_url, do: "#{github_base_url}/login/oauth/authorize"
+  defp github_access_token_url, do: "#{github_base_url}/login/oauth/access_token"
+  defp github_api_user_url, do: "#{github_api_base_url}/user"
+  defp github_base_url, do: Process.get(:bypass) || "https://github.com"
+  defp github_api_base_url, do: Process.get(:bypass) || "https://api.github.com"
 end
