@@ -18,6 +18,7 @@ defmodule BattleBoxWeb.GithubLoginController do
       {:ok, user} = User.upsert_from_github(user)
 
       conn
+      |> delete_session(:github_auth_state)
       |> put_session(:user_id, user.id)
       |> redirect(to: "/")
     else

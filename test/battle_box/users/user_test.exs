@@ -25,9 +25,12 @@ defmodule BattleBox.LobbyTest do
       assert {:ok, _} = User.upsert_from_github(context.user_from_github)
       user = User.get_by_github_id(context.user_from_github["id"])
       assert user.name == "Grant Powell"
-      assert {:ok, _} = User.upsert_from_github(%{context.user_from_github | "name" => "pass"})
-      user = User.get_by_github_id(context.user_from_github["id"])
-      assert user.name == "pass"
+
+      assert {:ok, user2} =
+               User.upsert_from_github(%{context.user_from_github | "name" => "pass"})
+
+      assert user2.id == user.id
+      assert user2.name == "pass"
     end
   end
 end

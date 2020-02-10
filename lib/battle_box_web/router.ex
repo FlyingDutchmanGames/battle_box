@@ -1,5 +1,6 @@
 defmodule BattleBoxWeb.Router do
   use BattleBoxWeb, :router
+  alias BattleBox.User
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -7,6 +8,7 @@ defmodule BattleBoxWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_user
     plug Phoenix.LiveView.Flash
   end
 
@@ -18,6 +20,7 @@ defmodule BattleBoxWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/logout", LogoutController, :logout
 
     scope "/auth" do
       get "/github/login", GithubLoginController, :github_login
@@ -30,6 +33,16 @@ defmodule BattleBoxWeb.Router do
 
     scope "/test" do
       live("/counter", CounterLive)
+    end
+  end
+
+  defp fetch_user(conn, _) do
+    with id when not is_nil(id) <- get_session(conn, "user_id"),
+         %User{} = user <- User.get_by_id(id) do
+      assign(conn, :user, user)
+    else
+      _ ->
+        assign(conn, :user, nil)
     end
   end
 end

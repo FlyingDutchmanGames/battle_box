@@ -1,0 +1,14 @@
+<div class="header">
+  <div class="logo">BATTLE BOX</div>
+  <div class="spacer"></div>
+  <%= if @user do %>
+    <div class="user">
+      <div class="name"><%= @user.name %></div>
+      <img src="<%= @user.github_avatar_url %>">
+    </div>
+  <% else %>
+    <div class="github-login">
+      <a href="<%= Routes.github_login_path(@conn, :github_login) %>">Login With Github</a>
+    </div>
+  <% end %>
+</div>

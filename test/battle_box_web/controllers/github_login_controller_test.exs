@@ -89,6 +89,7 @@ defmodule BattleBoxWeb.GithubLoginControllerTest do
 
       assert redirected_to(conn, 302) =~ "/"
       assert %User{} = User.get_by_github_id(1234)
+      assert get_session(conn, :github_auth_state) == nil
     end
   end
 
