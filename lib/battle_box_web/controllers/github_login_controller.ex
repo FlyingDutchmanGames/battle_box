@@ -23,7 +23,7 @@ defmodule BattleBoxWeb.GithubLoginController do
       |> redirect(to: "/")
     else
       {1, false} ->
-        raise "Invalid State"
+        raise "Invalid state param in github callback"
     end
   end
 
