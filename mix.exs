@@ -46,7 +46,8 @@ defmodule BattleBox.MixProject do
       {:phoenix_live_view, "~> 0.4.0"},
       {:floki, ">= 0.0.0", only: :test},
       {:gen_state_machine, "~> 2.0"},
-      {:httpoison, "~> 1.6"}
+      {:httpoison, "~> 1.6"},
+      {:bypass, "~> 1.0", only: :test}
     ]
   end
 
