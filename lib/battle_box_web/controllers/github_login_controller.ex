@@ -85,9 +85,9 @@ defmodule BattleBoxWeb.GithubLoginController do
     |> String.downcase()
   end
 
-  defp github_authorization_url, do: "#{github_base_url}/login/oauth/authorize"
-  defp github_access_token_url, do: "#{github_base_url}/login/oauth/access_token"
-  defp github_api_user_url, do: "#{github_api_base_url}/user"
+  defp github_authorization_url, do: "#{github_base_url()}/login/oauth/authorize"
+  defp github_access_token_url, do: "#{github_base_url()}/login/oauth/access_token"
+  defp github_api_user_url, do: "#{github_api_base_url()}/user"
   defp github_base_url, do: Process.get(:bypass) || "https://github.com"
   defp github_api_base_url, do: Process.get(:bypass) || "https://api.github.com"
 end
