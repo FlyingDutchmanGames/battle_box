@@ -1,5 +1,6 @@
 defmodule BattleBoxWeb.GithubLoginController do
   use BattleBoxWeb, :controller
+  alias BattleBox.User
 
   @github_authorization_url "https://github.com/login/oauth/authorize"
   @github_access_token_url "https://github.com/login/oauth/access_token"
@@ -17,9 +18,11 @@ defmodule BattleBoxWeb.GithubLoginController do
     with {1, true} <- {1, state == get_session(conn, :github_auth_state)},
          {2, {:ok, access_token}} <- {2, token_exchange(code, state)},
          {3, {:ok, user}} <- {3, get_user(access_token)} do
-      IO.inspect(user)
+      user = Map.put(user, "access_token", access_token)
+      {:ok, user} = User.upsert_from_github(user)
 
       conn
+      |> put_session(:user_id, user.id)
       |> redirect(to: "/")
     else
       {1, false} ->
