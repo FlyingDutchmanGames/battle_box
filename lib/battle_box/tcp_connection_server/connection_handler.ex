@@ -1,7 +1,7 @@
-defmodule BattleBox.TcpConnections.ConnectionHandler do
+defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   @behaviour :ranch_protocol
 
-  def start_link(ref, _socket, transport, _opts) do
+  def start_link(ref, _socket, transport, opts) do
     GenServer.start_link(__MODULE__, {ref, transport})
   end
 

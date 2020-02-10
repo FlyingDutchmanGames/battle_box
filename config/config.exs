@@ -22,6 +22,8 @@ config :battle_box, BattleBox.GameEngine,
     RobotGame
   ]
 
+config :battle_box, BattleBox.TcpConnectionServer, port: 4001
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]

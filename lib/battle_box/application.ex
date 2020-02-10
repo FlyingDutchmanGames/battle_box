@@ -1,14 +1,13 @@
 defmodule BattleBox.Application do
   use Application
-  alias BattleBox.TcpConnections.ConnectionHandler
 
   def start(_type, _args) do
     children = [
       BattleBox.GameEngine,
       BattleBox.Repo,
+      {BattleBox.TcpConnectionServer, port: tcp_connection_server_port()},
       BattleBoxWeb.Endpoint,
-      BattleBoxWeb.Presence,
-      :ranch.child_spec(Connection, :ranch_tcp, [port: 4001], ConnectionHandler, [])
+      BattleBoxWeb.Presence
     ]
 
     opts = [strategy: :one_for_one, name: BattleBox.Supervisor]
@@ -18,5 +17,10 @@ defmodule BattleBox.Application do
   def config_change(changed, _new, removed) do
     BattleBoxWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp tcp_connection_server_port do
+    Application.fetch_env!(:battle_box, BattleBox.TcpConnectionServer)
+    |> Keyword.fetch!(:port)
   end
 end
