@@ -52,6 +52,7 @@ defmodule BattleBox.User do
       github_access_token: token
     })
     |> Repo.insert(
+      returning: true,
       conflict_target: [:github_id],
       on_conflict:
         {:replace,
@@ -60,12 +61,17 @@ defmodule BattleBox.User do
            :github_avatar_url,
            :github_html_url,
            :github_id,
-           :github_login_name
+           :github_login_name,
+           :updated_at
          ]}
     )
   end
 
   def get_by_github_id(id) do
     Repo.get_by(__MODULE__, github_id: id)
+  end
+
+  def get_by_id(id) do
+    Repo.get_by(__MODULE__, id: id)
   end
 end
