@@ -95,7 +95,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
-    :ok = data.transport.send(data.socket, status_msg(data))
+    :ok = data.transport.send(data.socket, game_request(game_info))
     data = Map.put(data, :game_request, game_info)
     {:keep_state, data}
   end
@@ -110,7 +110,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   def handle_event(:info, {:tcp_error, _socket, _reason}, _state, _data), do: {:stop, :normal}
 
   defp game_request(game_info) do
-    Jason.encode!(game_info)
+    game_info = Map.take(game_info, [:acceptance_time, :game_id, :player])
+    Jason.encode!(%{request_type: "game_request", game_info: game_info})
   end
 
   defp status_msg(data) do

@@ -38,7 +38,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
           "bot_id" => "1234",
           "bot_token" => "5678",
           "lobby_name" => context.lobby.name
-        })
+        }),
+      start_matchmaking_request: Jason.encode!(%{"action" => "start_match_making"})
     }
   end
 
@@ -105,7 +106,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   describe "matching_making" do
     setup context do
-      for player <- [:player_1, :player_2] do
+      for player <- [:p1, :p2] do
         {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
         assert_receive {:tcp, ^socket, _connection_msg}
 
@@ -124,12 +125,33 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       |> Map.new()
     end
 
-    test "you can join a matchmaking queue", %{player_1: %{socket: socket}} do
-      start_matchmaking_msg = Jason.encode!(%{"action" => "start_match_making"})
-      :ok = :gen_tcp.send(socket, start_matchmaking_msg)
+    test "you can join a matchmaking queue", %{p1: %{socket: socket}} = context do
+      :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
       assert_receive {:tcp, ^socket, resp}
 
       %{"status" => "match_making"} = Jason.decode!(resp)
+    end
+
+    test "two players can get matched to a game",
+         %{p1: %{socket: p1}, p2: %{socket: p2}} = context do
+      :ok = :gen_tcp.send(p1, context.start_matchmaking_request)
+      assert_receive {:tcp, ^p1, _started_matchmaking}
+
+      :ok = :gen_tcp.send(p2, context.start_matchmaking_request)
+      assert_receive {:tcp, ^p2, _started_matchmaking}
+
+      :ok = GameEngine.force_match_make(context.game_engine)
+      assert_receive {:tcp, ^p1, game_request}
+      assert_receive {:tcp, ^p2, _game_request}
+
+      assert %{
+               "game_info" => %{
+                 "acceptance_time" => 2000,
+                 "game_id" => <<_::288>>,
+                 "player" => "player_" <> _
+               },
+               "request_type" => "game_request"
+             } = Jason.decode!(game_request)
     end
   end
 end
