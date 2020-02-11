@@ -71,7 +71,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                Jason.decode!(msg)
     end
 
-    test "trying to join a lobby that doesn't exist is an error", %{socket: socket} = context do
+    test "trying to join a lobby that doesn't exist is an error", %{socket: socket} do
       bot_connect_req =
         Jason.encode!(%{
           "bot_id" => "1234",

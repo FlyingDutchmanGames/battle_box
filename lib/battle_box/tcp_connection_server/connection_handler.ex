@@ -38,42 +38,38 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   def handle_event(:info, {:tcp, socket, msg}, :unauthed, %{socket: socket} = data) do
     :ok = data.transport.setopts(socket, active: :once)
 
-    case Jason.decode(msg) do
-      {:ok, %{"bot_id" => bot_id, "bot_token" => _, "lobby_name" => lobby_name}} ->
-        # Todo: // Validate Auth
-        result =
-          GameEngine.start_player(data.names.game_engine, %{
-            connection: self(),
-            player_id: bot_id,
-            lobby_name: lobby_name
-          })
+    with {1, {:ok, %{"bot_id" => bot_id, "bot_token" => _, "lobby_name" => lobby_name}}} <-
+           {1, Jason.decode(msg)},
+         {2, {:ok, player_server}} <-
+           {2,
+            GameEngine.start_player(data.names.game_engine, %{
+              connection: self(),
+              player_id: bot_id,
+              lobby_name: lobby_name
+            })} do
+      Process.monitor(player_server)
 
-        case result do
-          {:ok, player_server} ->
-            Process.monitor(player_server)
+      data =
+        Map.merge(data, %{
+          player_id: bot_id,
+          player_server: player_server,
+          lobby_name: lobby_name,
+          status: :idle
+        })
 
-            data =
-              Map.merge(data, %{
-                player_id: bot_id,
-                player_server: player_server,
-                lobby_name: lobby_name,
-                status: :idle
-              })
-
-            :ok = data.transport.send(socket, status_msg(data))
-            {:next_state, :idle, data}
-
-          {:error, :lobby_not_found} ->
-            :ok = data.transport.send(socket, @lobby_not_found_msg)
-            :keep_state_and_data
-        end
-
-      {:ok, _else} ->
+      :ok = data.transport.send(socket, status_msg(data))
+      {:next_state, :idle, data}
+    else
+      {1, {:ok, _invalid_params}} ->
         :ok = data.transport.send(socket, @invalid_msg_sent)
         :keep_state_and_data
 
-      {:error, %Jason.DecodeError{}} ->
+      {1, {:error, %Jason.DecodeError{}}} ->
         :ok = data.transport.send(socket, @invalid_json_msg)
+        :keep_state_and_data
+
+      {2, {:error, :lobby_not_found}} ->
+        :ok = data.transport.send(socket, @lobby_not_found_msg)
         :keep_state_and_data
     end
   end
@@ -87,6 +83,10 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         data = Map.put(data, :status, :match_making)
         :ok = data.transport.send(socket, status_msg(data))
         {:next_state, :match_making, data}
+
+      {:ok, _invalid_params} ->
+        :ok = data.transport.send(socket, @invalid_msg_sent)
+        :keep_state_and_data
 
       {:error, %Jason.DecodeError{}} ->
         :ok = data.transport.send(socket, @invalid_json_msg)
