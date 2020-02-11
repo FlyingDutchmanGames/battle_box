@@ -1,10 +1,11 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
-  use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
+  use GenStateMachine, callback_mode: [:handle_event_function], restart: :temporary
   alias BattleBox.{GameEngine, PlayerServer}
   @behaviour :ranch_protocol
 
   @invalid_json_msg Jason.encode!(%{error: "invalid_json"})
   @lobby_not_found Jason.encode!(%{error: "lobby_not_found"})
+  @not_in_lobby Jason.encode!(%{error: "lobby_not_found"})
   @bot_instance_failure Jason.encode!(%{error: "bot_instance_failure"})
 
   def start_link(ref, _socket, transport, data) do
@@ -74,10 +75,28 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
             {:keep_state, data}
         end
 
+      {:ok, %{"action" => "start_match_making"}} ->
+        case PlayerServer.match_make(data.player_server) do
+          :ok ->
+            data = Map.put(data, :status, :match_making)
+            :ok = data.transport.send(socket, status_msg(data))
+            {:next_state, :match_making, data}
+
+          {:error, :not_in_lobby} ->
+            :ok = data.transport.send(socket, @not_in_lobby)
+            {:keep_state, data}
+        end
+
       {:error, %Jason.DecodeError{}} ->
         :ok = data.transport.send(socket, @invalid_json_msg)
         :keep_state_and_data
     end
+  end
+
+  def handle_event(:info, {:game_request, game_info}, :match_making, data) do
+    :ok = data.transport.send(data.socket, status_msg(data))
+    data = Map.put(data, :game_request, game_info)
+    {:keep_state, data}
   end
 
   def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{player_server: pid} = data) do
@@ -89,12 +108,15 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   def handle_event(:info, {:tcp_closed, _socket}, _state, _data), do: {:stop, :normal}
   def handle_event(:info, {:tcp_error, _socket, _reason}, _state, _data), do: {:stop, :normal}
 
-  def handle_event(:enter, _old_state, _state, _data), do: :keep_state_and_data
+  defp game_request(game_info) do
+    Jason.encode!(game_info)
+  end
 
   defp status_msg(data) do
     Jason.encode!(%{
       bot_id: data[:player_id],
-      lobby_name: data[:lobby_name]
+      lobby_name: data[:lobby_name],
+      status: data[:status] || :idle
     })
   end
 

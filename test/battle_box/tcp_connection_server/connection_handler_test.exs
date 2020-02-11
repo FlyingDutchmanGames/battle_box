@@ -95,34 +95,42 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => "lobby_not_found"} = Jason.decode!(msg)
     end
+
+    test "trying to matchmake before you're in a lobby is an error",
+         %{socket: socket} = context do
+      input_msg = Jason.encode!(%{"action" => "start_match_making"})
+      :ok = :gen_tcp.send(socket, input_msg)
+      assert_receive {:tcp, ^socket, msg}
+      assert %{"error" => "lobby_not_found"} = Jason.decode!(msg)
+    end
   end
 
   describe "matching_making" do
     setup context do
-      Map.new(
-        for player <- [:player_1, :player_2] do
-          {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
-          assert_receive {:tcp, ^socket, _connection_msg}
+      for player <- [:player_1, :player_2] do
+        {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+        assert_receive {:tcp, ^socket, _connection_msg}
+        join_request = Jason.encode!(%{"bot_id" => "#{player}1234", "bot_token" => "5678"})
+        :ok = :gen_tcp.send(socket, join_request)
+        assert_receive {:tcp, ^socket, _bot_connect_msg}
 
-          :ok =
-            :gen_tcp.send(
-              socket,
-              Jason.encode!(%{"bot_id" => "#{player}1234", "bot_token" => "5678"})
-            )
+        join_lobby_msg =
+          Jason.encode!(%{"action" => "join_lobby", "lobby_name" => context.lobby.name})
 
-          assert_receive {:tcp, ^socket, _bot_connect_msg}
-
-          join_lobby_msg =
-            Jason.encode!(%{"action" => "join_lobby", "lobby_name" => context.lobby.name})
-
-          :ok = :gen_tcp.send(socket, join_lobby_msg)
-          assert_receive {:tcp, ^socket, _lobby_joined_msg}
-          {player, %{socket: socket}}
-        end
-      )
+        :ok = :gen_tcp.send(socket, join_lobby_msg)
+        assert_receive {:tcp, ^socket, _lobby_joined_msg}
+        {player, %{socket: socket}}
+      end
+      |> Map.new()
     end
 
-    test "you can join a matchmaking queue" do
+    test "you can join a matchmaking queue", %{player_1: %{socket: socket}} do
+      start_matchmaking_msg = Jason.encode!(%{"action" => "start_match_making"})
+      :ok = :gen_tcp.send(socket, start_matchmaking_msg)
+      assert_receive {:tcp, ^socket, resp}
+
+      %{"bot_id" => "player_11234", "lobby_name" => "LOBBY NAME", "status" => "match_making"} =
+        Jason.decode!(resp)
     end
   end
 end
