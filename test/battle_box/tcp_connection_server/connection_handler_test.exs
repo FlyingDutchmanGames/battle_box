@@ -18,10 +18,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
     {:ok, _} =
       Supervisor.start_link(
-        [
-          {TcpConnectionServer,
-           port: port, game_engine: game_engine, name: :"#{name}-connection-server"}
-        ],
+        [{TcpConnectionServer, port: port, game_engine: game_engine, name: :"#{name}1"}],
         strategy: :one_for_one
       )
 
@@ -36,27 +33,38 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   test "you can connect", context do
     {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
-
     assert_receive {:tcp, ^socket, msg}
-
-    assert %{
-             "connection_id" => connection_id,
-             "message" => "Welcome to BattleBox!"
-           } = Jason.decode!(msg)
+    assert %{"connection_id" => connection_id} = Jason.decode!(msg)
   end
 
   describe "joining as a bot" do
     setup context do
       {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
       assert_receive {:tcp, ^socket, connection_msg}
-      %{"connection_id" => _} = Jason.decode!(connection_msg)
-      %{socket: socket}
+      %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
+      %{socket: socket, connection_id: connection_id}
     end
 
     test "you can join as a bot", %{socket: socket} do
       :ok = :gen_tcp.send(socket, Jason.encode!(%{"bot_id" => "1234", "bot_token" => "5678"}))
       assert_receive {:tcp, ^socket, msg}
       assert %{"bot_id" => "1234", "lobby_name" => nil} = Jason.decode!(msg)
+    end
+
+    test "if the bot you joined as dies you get notified and the connection closes",
+         %{socket: socket} = context do
+      :ok = :gen_tcp.send(socket, Jason.encode!(%{"bot_id" => "1234", "bot_token" => "5678"}))
+
+      assert_receive {:tcp, ^socket, msg}
+      assert %{"bot_id" => "1234", "lobby_name" => nil} = Jason.decode!(msg)
+
+      [player_pid] = Registry.select(context.player_registry, [{{:_, :"$1", :_}, [], [:"$1"]}])
+      [{connection_pid, _}] = Registry.lookup(context.connection_registry, context.connection_id)
+      Process.monitor(connection_pid)
+      Process.exit(player_pid, :kill)
+
+      assert_receive {:tcp, ^socket, "{\"error\":\"bot_instance_failure\"}"}
+      assert_receive {:DOWN, _, _, ^connection_pid, :normal}
     end
 
     test "if you try to join as a bot that doesn't exist it fails" do
@@ -68,7 +76,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     setup context do
       {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
       assert_receive {:tcp, ^socket, connection_msg}
-      %{"connection_id" => _} = Jason.decode!(connection_msg)
       :ok = :gen_tcp.send(socket, Jason.encode!(%{"bot_id" => "1234", "bot_token" => "5678"}))
       assert_receive {:tcp, ^socket, bot_connect_msg}
       assert %{"bot_id" => "1234", "lobby_name" => nil} = Jason.decode!(bot_connect_msg)
@@ -76,24 +83,46 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     end
 
     test "you can join a lobby", %{socket: socket, lobby: %{name: lobby_name}} do
-      :ok =
-        :gen_tcp.send(
-          socket,
-          Jason.encode!(%{
-            "action" => "join_lobby",
-            "lobby_name" => lobby_name
-          })
-        )
-
+      input_msg = Jason.encode!(%{"action" => "join_lobby", "lobby_name" => lobby_name})
+      :ok = :gen_tcp.send(socket, input_msg)
       assert_receive {:tcp, ^socket, msg}
+      assert %{"bot_id" => "1234", "lobby_name" => ^lobby_name} = Jason.decode!(msg)
+    end
 
-      assert %{
-               "bot_id" => "1234",
-               "lobby_name" => ^lobby_name
-             } = Jason.decode!(msg)
+    test "trying to join a lobby that doesn't exist is an error", %{socket: socket} = context do
+      input_msg = Jason.encode!(%{"action" => "join_lobby", "lobby_name" => "FAKE"})
+      :ok = :gen_tcp.send(socket, input_msg)
+      assert_receive {:tcp, ^socket, msg}
+      assert %{"error" => "lobby_not_found"} = Jason.decode!(msg)
     end
   end
 
-  # assert [{connection_pid, %{connection_type: :tcp}}] = Registry.lookup(context.connection_registry, connection_id)
-  # Process.monitor(connection_pid)
+  describe "matching_making" do
+    setup context do
+      Map.new(
+        for player <- [:player_1, :player_2] do
+          {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+          assert_receive {:tcp, ^socket, _connection_msg}
+
+          :ok =
+            :gen_tcp.send(
+              socket,
+              Jason.encode!(%{"bot_id" => "#{player}1234", "bot_token" => "5678"})
+            )
+
+          assert_receive {:tcp, ^socket, _bot_connect_msg}
+
+          join_lobby_msg =
+            Jason.encode!(%{"action" => "join_lobby", "lobby_name" => context.lobby.name})
+
+          :ok = :gen_tcp.send(socket, join_lobby_msg)
+          assert_receive {:tcp, ^socket, _lobby_joined_msg}
+          {player, %{socket: socket}}
+        end
+      )
+    end
+
+    test "you can join a matchmaking queue" do
+    end
+  end
 end
