@@ -10,10 +10,6 @@ defmodule BattleBox.PlayerServer do
     GenStateMachine.call(player_server, {:reject_game, game_id}, timeout)
   end
 
-  def join_lobby(player_server, lobby_name, timeout \\ 5000) do
-    GenStateMachine.call(player_server, {:join_lobby, %{lobby_name: lobby_name}}, timeout)
-  end
-
   def match_make(player_server, timeout \\ 5000) do
     GenStateMachine.call(player_server, :match_make, timeout)
   end
@@ -22,18 +18,39 @@ defmodule BattleBox.PlayerServer do
     GenStateMachine.call(player_server, {:submit_moves, move_id, moves}, timeout)
   end
 
-  def start_link(%{names: _} = config, %{connection: _, player_id: _} = data) do
+  def reload_lobby(player_server) do
+    GenStateMachine.cast(player_server, :reload_lobby)
+  end
+
+  def start_link(%{names: _} = config, %{connection: _, player_id: _, lobby_name: _} = data) do
     data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
   end
 
   def init(%{names: names, player_id: player_id} = data) do
-    Registry.register(names.player_registry, data.player_server_id, %{player_id: player_id})
-    Process.monitor(data.connection)
-    {:ok, :options, data}
+    case Lobby.get_by_name(data.lobby_name) do
+      %Lobby{} = lobby ->
+        data = Map.put(data, :lobby, lobby)
+
+        Registry.register(names.player_registry, data.player_server_id, %{
+          player_id: player_id,
+          lobby_id: lobby.id
+        })
+
+        Process.monitor(data.connection)
+        {:ok, :options, data}
+
+      nil ->
+        {:stop, :lobby_not_found}
+    end
   end
 
-  def handle_event(:info, {:DOWN, _, _, conn, _}, _state, %{connection: conn} = data) do
+  def handle_event(:cast, :reload_lobby, _state, data) do
+    data = Map.put(data, :lobby, Lobby.get_by_id(data.lobby.id))
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{connection: pid} = data) do
     {:next_state, :disconnected, data}
   end
 
@@ -41,30 +58,9 @@ defmodule BattleBox.PlayerServer do
     {:stop, :normal}
   end
 
-  def handle_event({:call, from}, {:join_lobby, _}, _state, %{lobby: lobby})
-      when not is_nil(lobby),
-      do: {:keep_state_and_data, [{:reply, from, {:error, :already_in_lobby}}]}
-
-  def handle_event({:call, from}, {:join_lobby, %{lobby_name: lobby_name}}, :options, data) do
-    case Lobby.get_by_name(lobby_name) do
-      %Lobby{} = lobby ->
-        data = Map.put(data, :lobby, lobby)
-        {:keep_state, data, {:reply, from, :ok}}
-
-      nil ->
-        {:keep_state, data, {:reply, from, {:error, :lobby_not_found}}}
-    end
-  end
-
   def handle_event({:call, from}, :match_make, :options, data) do
-    case data[:lobby] do
-      %Lobby{} = lobby ->
-        :ok = MatchMaker.join_queue(data.names.game_engine, lobby.id, data.player_id)
-        {:next_state, :match_making, data, {:reply, from, :ok}}
-
-      nil ->
-        {:keep_state, data, {:reply, from, {:error, :not_in_lobby}}}
-    end
+    :ok = MatchMaker.join_queue(data.names.game_engine, data.lobby.id, data.player_id)
+    {:next_state, :match_making, data, {:reply, from, :ok}}
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
