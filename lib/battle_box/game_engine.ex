@@ -5,6 +5,7 @@ defmodule BattleBox.GameEngine do
   alias BattleBox.MatchMakerServer
 
   @default_name GameEngine
+  def default_name, do: @default_name
 
   def start_link(opts) do
     opts = Keyword.put_new(opts, :name, @default_name)
@@ -15,6 +16,7 @@ defmodule BattleBox.GameEngine do
     name = Keyword.fetch!(opts, :name)
 
     children = [
+      {Registry, keys: :unique, name: connection_registry_name(name)},
       {Registry, keys: :unique, name: player_registry_name(name)},
       {Registry, keys: :unique, name: game_registry_name(name)},
       {BattleBox.MatchMaker, %{names: names(name)}},
@@ -43,7 +45,8 @@ defmodule BattleBox.GameEngine do
       player_supervisor: player_supervisor_name(name),
       match_maker: match_maker_name(name),
       match_maker_server: match_maker_server_name(name),
-      match_maker_registry: match_maker_registry_name(name)
+      match_maker_registry: match_maker_registry_name(name),
+      connection_registry: connection_registry_name(name)
     }
   end
 
@@ -54,4 +57,5 @@ defmodule BattleBox.GameEngine do
   defp match_maker_name(name), do: Module.concat(name, MatchMaker)
   defp match_maker_server_name(name), do: Module.concat(name, MatchMaker.MatchMakerServer)
   defp match_maker_registry_name(name), do: Module.concat(name, MatchMaker.Registry)
+  defp connection_registry_name(name), do: Module.concat(name, Connection.Registry)
 end
