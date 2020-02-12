@@ -96,8 +96,14 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
     :ok = data.transport.send(data.socket, game_request(game_info))
-    data = Map.put(data, :game_request, game_info)
+    data = Map.put(data, :game_info, game_info)
     {:keep_state, data}
+  end
+
+  def handle_event(:info, {:game_cancelled, id}, _state, %{game_info: %{game_id: id}} = data) do
+    :ok = data.transport.send(data.socket, "game_cancelled")
+    data = Map.drop(data, [:game_info])
+    {:next_state, :idle, data}
   end
 
   def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{player_server: pid} = data) do

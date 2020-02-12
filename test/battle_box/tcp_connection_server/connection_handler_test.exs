@@ -49,6 +49,16 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
   end
 
+  test "closing the tcp connection causes the connection process to die", context do
+    {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+    assert_receive {:tcp, ^socket, msg}
+    assert %{"connection_id" => connection_id} = Jason.decode!(msg)
+    %{pid: pid} = GameEngine.get_connection(context.game_engine, connection_id)
+    ref = Process.monitor(pid)
+    :ok = :gen_tcp.close(socket)
+    assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+  end
+
   describe "joining a lobby as a bot" do
     setup context do
       {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
@@ -152,6 +162,41 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                },
                "request_type" => "game_request"
              } = Jason.decode!(game_request)
+    end
+  end
+
+  describe "game acceptance" do
+    setup context do
+      for player <- [:p1, :p2] do
+        {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+        assert_receive {:tcp, ^socket, connection_msg}
+        %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
+        %{pid: pid} = GameEngine.get_connection(context.game_engine, connection_id)
+
+        join_request =
+          Jason.encode!(%{
+            "bot_id" => "#{player}1234",
+            "bot_token" => "5678",
+            "lobby_name" => context.lobby.name
+          })
+
+        :ok = :gen_tcp.send(socket, join_request)
+        assert_receive {:tcp, ^socket, _bot_connect_msg}
+
+        :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
+        assert_receive {:tcp, ^socket, _started_matchmaking}
+
+        {player, %{socket: socket, connection_id: connection_id, connection_pid: pid}}
+      end
+      |> Map.new()
+    end
+
+    test "you get a game_cancelled if the other player dies",
+         %{p1: %{socket: p1}, p2: %{socket: p2}} = context do
+      Process.monitor(context.p1.connection_pid)
+      Process.monitor(context.p2.connection_pid)
+      :ok = :gen_tcp.close(p2)
+      assert_receive :foo
     end
   end
 end
