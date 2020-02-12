@@ -1,4 +1,4 @@
-defmodule BattleBox.LobbyTest do
+defmodule BattleBox.UserTest do
   use BattleBox.DataCase
   alias BattleBox.User
 
