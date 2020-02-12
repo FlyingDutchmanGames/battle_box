@@ -23,17 +23,6 @@ defmodule BattleBoxWeb do
       import BattleBoxWeb.ErrorHelpers
       import BattleBoxWeb.Gettext
       alias BattleBoxWeb.Router.Helpers, as: Routes
-
-      import Phoenix.LiveView,
-        only: [
-          live_render: 2,
-          live_render: 3,
-          live_link: 1,
-          live_link: 2,
-          live_component: 2,
-          live_component: 3,
-          live_component: 4
-        ]
     end
   end
 

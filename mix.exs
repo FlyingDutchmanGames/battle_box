@@ -43,8 +43,8 @@ defmodule BattleBox.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:phoenix_live_view, "~> 0.4.0"},
-      {:floki, ">= 0.0.0", only: :test},
+      {:phoenix_live_view, "~> 0.5.1"},
+      {:floki, ">= 0.25.0", only: :test},
       {:gen_state_machine, "~> 2.0"},
       {:httpoison, "~> 1.6"},
       {:bypass, "~> 1.0", only: :test}
