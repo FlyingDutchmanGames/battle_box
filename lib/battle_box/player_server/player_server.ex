@@ -22,7 +22,10 @@ defmodule BattleBox.PlayerServer do
     GenStateMachine.cast(player_server, :reload_lobby)
   end
 
-  def start_link(%{names: _} = config, %{connection: _, player_id: _, lobby_name: _} = data) do
+  def start_link(
+        %{names: _} = config,
+        %{connection: _, player_id: _, lobby_name: _, connection_id: _} = data
+      ) do
     data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
   end
@@ -34,7 +37,8 @@ defmodule BattleBox.PlayerServer do
 
         Registry.register(names.player_registry, data.player_server_id, %{
           player_id: player_id,
-          lobby_id: lobby.id
+          lobby_id: lobby.id,
+          connection_id: data.connection_id
         })
 
         Process.monitor(data.connection)

@@ -27,13 +27,15 @@ defmodule BattleBox.PlayerServerTest do
         player_id: @player_1_id,
         player_server_id: @player_1_server_id,
         lobby_name: lobby_name,
-        connection: named_proxy(:p1_connection)
+        connection: named_proxy(:p1_connection),
+        connection_id: Ecto.UUID.generate()
       },
       init_opts_p2: %{
         player_id: @player_2_id,
         player_server_id: @player_2_server_id,
         lobby_name: lobby_name,
-        connection: named_proxy(:p2_connection)
+        connection: named_proxy(:p2_connection),
+        connection_id: Ecto.UUID.generate()
       }
     }
   end

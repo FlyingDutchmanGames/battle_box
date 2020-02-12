@@ -43,6 +43,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
          {2, {:ok, player_server}} <-
            {2,
             GameEngine.start_player(data.names.game_engine, %{
+              connection_id: data.connection_id,
               connection: self(),
               player_id: bot_id,
               lobby_name: lobby_name
