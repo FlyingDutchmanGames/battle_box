@@ -127,6 +127,11 @@ defmodule BattleBox.PlayerServerTest do
     assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
   end
 
+  test "trying to accept or reject a game you're not currently watching yield :ok", context do
+    assert :ok = PlayerServer.accept_game(context.p1_server, Ecto.UUID.generate())
+    assert :ok = PlayerServer.reject_game(context.p1_server, Ecto.UUID.generate())
+  end
+
   describe "game acceptance" do
     setup context do
       :ok = PlayerServer.match_make(context.p1_server)

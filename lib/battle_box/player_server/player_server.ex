@@ -102,6 +102,10 @@ defmodule BattleBox.PlayerServer do
     end
   end
 
+  def handle_event({:call, from}, {response, _game_id}, _state, _data)
+      when response in [:accept_game, :reject_game],
+      do: {:keep_state_and_data, {:reply, from, :ok}}
+
   def handle_event(:state_timeout, :game_acceptance_timeout, :game_acceptance, data) do
     :ok = GameServer.reject_game(data.game_info.game_server, data.game_info.player)
     send(data.connection, {:game_acceptance_timeout, data.game_info.game_id})
