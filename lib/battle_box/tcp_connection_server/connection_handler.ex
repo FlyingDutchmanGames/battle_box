@@ -102,7 +102,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   def handle_event(:info, {:game_cancelled, id}, _state, %{game_info: %{game_id: id}} = data) do
-    :ok = data.transport.send(data.socket, "game_cancelled")
+    :ok = data.transport.send(data.socket, game_cancelled(id))
     data = Map.drop(data, [:game_info])
     {:next_state, :idle, data}
   end
@@ -119,6 +119,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   defp game_request(game_info) do
     game_info = Map.take(game_info, [:acceptance_time, :game_id, :player])
     Jason.encode!(%{request_type: "game_request", game_info: game_info})
+  end
+
+  defp game_cancelled(game_id) do
+    Jason.encode!(%{
+      info: "game_cancelled",
+      game_id: game_id
+    })
   end
 
   defp status_msg(data) do
