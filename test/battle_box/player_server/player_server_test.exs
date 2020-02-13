@@ -27,13 +27,15 @@ defmodule BattleBox.PlayerServerTest do
         player_id: @player_1_id,
         player_server_id: @player_1_server_id,
         lobby_name: lobby_name,
-        connection: named_proxy(:p1_connection)
+        connection: named_proxy(:p1_connection),
+        connection_id: Ecto.UUID.generate()
       },
       init_opts_p2: %{
         player_id: @player_2_id,
         player_server_id: @player_2_server_id,
         lobby_name: lobby_name,
-        connection: named_proxy(:p2_connection)
+        connection: named_proxy(:p2_connection),
+        connection_id: Ecto.UUID.generate()
       }
     }
   end
@@ -125,6 +127,11 @@ defmodule BattleBox.PlayerServerTest do
     assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
   end
 
+  test "trying to accept or reject a game you're not currently watching yield :ok", context do
+    assert :ok = PlayerServer.accept_game(context.p1_server, Ecto.UUID.generate())
+    assert :ok = PlayerServer.reject_game(context.p1_server, Ecto.UUID.generate())
+  end
+
   describe "game acceptance" do
     setup context do
       :ok = PlayerServer.match_make(context.p1_server)
@@ -213,7 +220,7 @@ defmodule BattleBox.PlayerServerTest do
 
     test "other player dies => you get a game over notification", %{game_id: game_id} = context do
       Process.exit(context.p1_server, :kill)
-      assert_receive {:p2_connection, {:game_over, %{game: %{id: ^game_id}}}}
+      assert_receive {:p2_connection, {:game_over, %{game_id: ^game_id}}}
     end
 
     test "you can play a full game!!!!!", %{game_id: game_id} = context do
@@ -229,8 +236,8 @@ defmodule BattleBox.PlayerServerTest do
         :ok = PlayerServer.submit_moves(context.p2_server, id, [])
       end)
 
-      assert_receive {:p1_connection, {:game_over, %{game: %{id: ^game_id}}}}
-      assert_receive {:p2_connection, {:game_over, %{game: %{id: ^game_id}}}}
+      assert_receive {:p1_connection, {:game_over, %{game_id: ^game_id}}}
+      assert_receive {:p2_connection, {:game_over, %{game_id: ^game_id}}}
     end
   end
 end

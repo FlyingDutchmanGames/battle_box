@@ -22,7 +22,10 @@ defmodule BattleBox.PlayerServer do
     GenStateMachine.cast(player_server, :reload_lobby)
   end
 
-  def start_link(%{names: _} = config, %{connection: _, player_id: _, lobby_name: _} = data) do
+  def start_link(
+        %{names: _} = config,
+        %{connection: _, player_id: _, lobby_name: _, connection_id: _} = data
+      ) do
     data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
   end
@@ -34,7 +37,8 @@ defmodule BattleBox.PlayerServer do
 
         Registry.register(names.player_registry, data.player_server_id, %{
           player_id: player_id,
-          lobby_id: lobby.id
+          lobby_id: lobby.id,
+          connection_id: data.connection_id
         })
 
         Process.monitor(data.connection)
@@ -98,10 +102,13 @@ defmodule BattleBox.PlayerServer do
     end
   end
 
+  def handle_event({:call, from}, {response, _game_id}, _state, _data)
+      when response in [:accept_game, :reject_game],
+      do: {:keep_state_and_data, {:reply, from, :ok}}
+
   def handle_event(:state_timeout, :game_acceptance_timeout, :game_acceptance, data) do
     :ok = GameServer.reject_game(data.game_info.game_server, data.game_info.player)
-    send(data.connection, {:game_acceptance_timeout, data.game_info.game_id})
-    {:next_state, :game_teardown, data}
+    {:next_state, :options, data}
   end
 
   def handle_event(
@@ -110,11 +117,13 @@ defmodule BattleBox.PlayerServer do
         _state,
         %{game_info: %{game_server: pid}} = data
       ) do
+    send(data.connection, {:game_cancelled, data.game_info.game_id})
     {:ok, data} = teardown_game(data.game_info.game_id, data)
     {:next_state, :options, data}
   end
 
-  def handle_event(:info, {:game_cancelled, id}, _, %{game_info: %{game_id: id}} = data) do
+  def handle_event(:info, {:game_cancelled, id} = msg, _, %{game_info: %{game_id: id}} = data) do
+    send(data.connection, msg)
     {:ok, data} = teardown_game(id, data)
     {:next_state, :options, data}
   end
@@ -155,7 +164,7 @@ defmodule BattleBox.PlayerServer do
 
   def handle_event(
         :info,
-        {:game_over, %{game: %{id: game_id}}} = msg,
+        {:game_over, %{game_id: game_id}} = msg,
         _state,
         %{game_info: %{game_id: game_id}} = data
       ) do
@@ -176,7 +185,6 @@ defmodule BattleBox.PlayerServer do
 
   defp teardown_game(game_id, %{game_info: %{game_id: game_id}} = data) do
     Process.demonitor(data.game_monitor, [:flush])
-    send(data.connection, {:game_cancelled, game_id})
     data = Map.drop(data, [:game_info, :game_monitor])
     {:ok, data}
   end
