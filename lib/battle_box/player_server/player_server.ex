@@ -117,11 +117,13 @@ defmodule BattleBox.PlayerServer do
         _state,
         %{game_info: %{game_server: pid}} = data
       ) do
+    send(data.connection, {:game_cancelled, data.game_info.game_id})
     {:ok, data} = teardown_game(data.game_info.game_id, data)
     {:next_state, :options, data}
   end
 
-  def handle_event(:info, {:game_cancelled, id}, _, %{game_info: %{game_id: id}} = data) do
+  def handle_event(:info, {:game_cancelled, id} = msg, _, %{game_info: %{game_id: id}} = data) do
+    send(data.connection, msg)
     {:ok, data} = teardown_game(id, data)
     {:next_state, :options, data}
   end
@@ -183,7 +185,6 @@ defmodule BattleBox.PlayerServer do
 
   defp teardown_game(game_id, %{game_info: %{game_id: game_id}} = data) do
     Process.demonitor(data.game_monitor, [:flush])
-    send(data.connection, {:game_cancelled, game_id})
     data = Map.drop(data, [:game_info, :game_monitor])
     {:ok, data}
   end
