@@ -12,18 +12,15 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   end
 
   setup %{game_engine: game_engine, test: name} do
-    # Get an open port 🤷
-    {:ok, socket} = :ranch_tcp.listen(ip: @ip, port: 0)
-    {:ok, port} = :inet.port(socket)
-    true = :erlang.port_close(socket)
+    ranch_name = :"#{name}1"
 
     {:ok, _} =
       Supervisor.start_link(
-        [{TcpConnectionServer, port: port, game_engine: game_engine, name: :"#{name}1"}],
+        [{TcpConnectionServer, port: 0, game_engine: game_engine, name: ranch_name}],
         strategy: :one_for_one
       )
 
-    %{port: port}
+    %{port: :ranch.get_port(ranch_name)}
   end
 
   setup do
@@ -311,6 +308,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   end
 
   defp connect(port) do
-    :gen_tcp.connect(@ip, port, [:binary, active: true, packet: :line])
+    :gen_tcp.connect(@ip, port, [:binary, active: true, packet: :line, recbuf: 65536])
   end
 end

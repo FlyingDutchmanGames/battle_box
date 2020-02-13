@@ -23,7 +23,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     Registry.register(data.names.connection_registry, data.connection_id, %{connection_type: :tcp})
 
     {:ok, socket} = :ranch.handshake(data.ranch_ref)
-    :ok = data.transport.setopts(socket, active: :once)
+    :ok = data.transport.setopts(socket, active: :once, packet: :line)
     :ok = data.transport.send(socket, initial_msg(data.connection_id))
 
     data = Map.put(data, :socket, socket)
