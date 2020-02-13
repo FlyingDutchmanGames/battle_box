@@ -35,64 +35,60 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:tcp, socket, msg}, :unauthed, %{socket: socket} = data) do
+  def handle_event(:info, {:tcp_closed, _socket}, _state, _data), do: {:stop, :normal}
+  def handle_event(:info, {:tcp_error, _socket, _reason}, _state, _data), do: {:stop, :normal}
+
+  def handle_event(:info, {:tcp, socket, bytes}, _state, %{socket: socket} = data) do
     :ok = data.transport.setopts(socket, active: :once)
 
-    with {1, {:ok, %{"bot_id" => bot_id, "bot_token" => _, "lobby_name" => lobby_name}}} <-
-           {1, Jason.decode(msg)},
-         {2, {:ok, player_server}} <-
-           {2,
-            GameEngine.start_player(data.names.game_engine, %{
-              connection_id: data.connection_id,
-              connection: self(),
-              player_id: bot_id,
-              lobby_name: lobby_name
-            })} do
-      Process.monitor(player_server)
-
-      data =
-        Map.merge(data, %{
-          player_id: bot_id,
-          player_server: player_server,
-          lobby_name: lobby_name,
-          status: :idle
-        })
-
-      :ok = data.transport.send(socket, status_msg(data))
-      {:next_state, :idle, data}
-    else
-      {1, {:ok, _invalid_params}} ->
-        :ok = data.transport.send(socket, @invalid_msg_sent)
-        :keep_state_and_data
-
-      {1, {:error, %Jason.DecodeError{}}} ->
-        :ok = data.transport.send(socket, @invalid_json_msg)
-        :keep_state_and_data
-
-      {2, {:error, :lobby_not_found}} ->
-        :ok = data.transport.send(socket, @lobby_not_found_msg)
-        :keep_state_and_data
-    end
-  end
-
-  def handle_event(:info, {:tcp, socket, msg}, :idle, %{socket: socket} = data) do
-    :ok = data.transport.setopts(socket, active: :once)
-
-    case Jason.decode(msg) do
-      {:ok, %{"action" => "start_match_making"}} ->
-        :ok = PlayerServer.match_make(data.player_server)
-        data = Map.put(data, :status, :match_making)
-        :ok = data.transport.send(socket, status_msg(data))
-        {:next_state, :match_making, data}
-
-      {:ok, _invalid_params} ->
-        :ok = data.transport.send(socket, @invalid_msg_sent)
-        :keep_state_and_data
+    case Jason.decode(bytes) do
+      {:ok, msg} ->
+        {:keep_state_and_data, {:next_event, :internal, msg}}
 
       {:error, %Jason.DecodeError{}} ->
         :ok = data.transport.send(socket, @invalid_json_msg)
         :keep_state_and_data
     end
+  end
+
+  def handle_event(
+        :internal,
+        %{"bot_id" => bot_id, "bot_token" => _, "lobby_name" => lobby_name},
+        :unauthed,
+        data
+      ) do
+    GameEngine.start_player(data.names.game_engine, %{
+      connection_id: data.connection_id,
+      connection: self(),
+      player_id: bot_id,
+      lobby_name: lobby_name
+    })
+    |> case do
+      {:ok, player_server} ->
+        Process.monitor(player_server)
+
+        data =
+          Map.merge(data, %{
+            player_id: bot_id,
+            player_server: player_server,
+            lobby_name: lobby_name,
+            status: :idle
+          })
+
+        :ok = data.transport.send(data.socket, status_msg(data))
+        {:next_state, :idle, data}
+
+      {:error, :lobby_not_found} ->
+        :ok = data.transport.send(data.socket, @lobby_not_found_msg)
+        :keep_state_and_data
+    end
+  end
+
+  def handle_event(:internal, %{"action" => "start_match_making"}, :idle, data) do
+    :ok = PlayerServer.match_make(data.player_server)
+    data = Map.put(data, :status, :match_making)
+    :ok = data.transport.send(data.socket, status_msg(data))
+    {:next_state, :match_making, data}
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
@@ -113,8 +109,10 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     {:stop, :normal}
   end
 
-  def handle_event(:info, {:tcp_closed, _socket}, _state, _data), do: {:stop, :normal}
-  def handle_event(:info, {:tcp_error, _socket, _reason}, _state, _data), do: {:stop, :normal}
+  def handle_event(:internal, _msg, _state, data) do
+    :ok = data.transport.send(data.socket, @invalid_msg_sent)
+    :keep_state_and_data
+  end
 
   defp game_request(game_info) do
     game_info = Map.take(game_info, [:acceptance_time, :game_id, :player])

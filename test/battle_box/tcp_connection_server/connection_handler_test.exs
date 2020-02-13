@@ -1,6 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase
-  alias BattleBox.{GameEngine, TcpConnectionServer, Lobby}
+  alias BattleBox.{GameEngine, PlayerServer.PlayerSupervisor, TcpConnectionServer, Lobby}
   alias BattleBox.Games.RobotGame.Game
 
   @ip {127, 0, 0, 1}
@@ -184,7 +184,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         assert_receive {:tcp, ^socket, _bot_connect_msg}
 
         :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
-        assert_receive {:tcp, ^socket, _started_matchmaking}
+        assert_receive {:tcp, ^socket, msg}
 
         {player, %{socket: socket, connection_id: connection_id, connection_pid: pid}}
       end
@@ -193,10 +193,18 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
     test "you get a game_cancelled if the other player dies",
          %{p1: %{socket: p1}, p2: %{socket: p2}} = context do
-      Process.monitor(context.p1.connection_pid)
-      Process.monitor(context.p2.connection_pid)
+      :ok = GameEngine.force_match_make(context.game_engine)
+
+      assert [%{pid: player_server_pid}] =
+               PlayerSupervisor.player_servers_with_connection_id(
+                 context.player_registry,
+                 context.p2.connection_id
+               )
+
+      Process.monitor(player_server_pid)
       :ok = :gen_tcp.close(p2)
-      assert_receive :foo
+      assert_receive {:tcp, ^p1, msg}
+      %{foo: :bar} = Jason.decode!(msg)
     end
   end
 end
