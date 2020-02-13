@@ -162,7 +162,7 @@ defmodule BattleBox.PlayerServer do
 
   def handle_event(
         :info,
-        {:game_over, %{game: %{id: game_id}}} = msg,
+        {:game_over, %{game_id: game_id}} = msg,
         _state,
         %{game_info: %{game_id: game_id}} = data
       ) do

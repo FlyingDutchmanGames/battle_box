@@ -8,6 +8,9 @@ defprotocol BattleBoxGame do
   @spec over?(struct()) :: boolean()
   def over?(game)
 
+  @spec winner(struct()) :: atom
+  def winner(game)
+
   @spec persist(struct()) :: {:ok, struct()}
   def persist(game)
 

@@ -130,6 +130,10 @@ defmodule BattleBox.GameServer do
   end
 
   def game_over_message(game) do
-    {:game_over, %{game: game}}
+    {:game_over,
+     %{
+       game_id: Game.id(game),
+       winner: Game.winner(game)
+     }}
   end
 end

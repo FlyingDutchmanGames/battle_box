@@ -242,4 +242,5 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame.Game do
   def moves_request(game), do: Game.moves_request(game)
   def calculate_turn(game, moves), do: Game.Logic.calculate_turn(game, moves)
   def move_time_ms(game), do: game.move_time_ms
+  def winner(game), do: game.winner
 end

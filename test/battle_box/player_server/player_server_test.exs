@@ -220,7 +220,7 @@ defmodule BattleBox.PlayerServerTest do
 
     test "other player dies => you get a game over notification", %{game_id: game_id} = context do
       Process.exit(context.p1_server, :kill)
-      assert_receive {:p2_connection, {:game_over, %{game: %{id: ^game_id}}}}
+      assert_receive {:p2_connection, {:game_over, %{game_id: ^game_id}}}
     end
 
     test "you can play a full game!!!!!", %{game_id: game_id} = context do
@@ -236,8 +236,8 @@ defmodule BattleBox.PlayerServerTest do
         :ok = PlayerServer.submit_moves(context.p2_server, id, [])
       end)
 
-      assert_receive {:p1_connection, {:game_over, %{game: %{id: ^game_id}}}}
-      assert_receive {:p2_connection, {:game_over, %{game: %{id: ^game_id}}}}
+      assert_receive {:p1_connection, {:game_over, %{game_id: ^game_id}}}
+      assert_receive {:p2_connection, {:game_over, %{game_id: ^game_id}}}
     end
   end
 end

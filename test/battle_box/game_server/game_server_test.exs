@@ -121,8 +121,8 @@ defmodule BattleBox.GameServerTest do
     :ok = GameServer.accept_game(pid, :player_2)
     :ok = GameServer.forfeit_game(pid, :player_1)
 
-    assert_receive {:player_1, {:game_over, %{game: %{winner: @player_2}}}}
-    assert_receive {:player_2, {:game_over, %{game: %{winner: @player_2}}}}
+    assert_receive {:player_1, {:game_over, %{winner: @player_2}}}
+    assert_receive {:player_2, {:game_over, %{winner: @player_2}}}
   end
 
   test "if you die its the same as a forefit", context do
@@ -137,7 +137,7 @@ defmodule BattleBox.GameServerTest do
     Process.exit(player_2_pid, :kill)
     assert_receive {:EXIT, ^player_2_pid, :killed}
 
-    assert_receive {:player_1, {:game_over, %{game: %{winner: @player_1}}}}
+    assert_receive {:player_1, {:game_over, %{winner: @player_1}}}
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
@@ -147,8 +147,11 @@ defmodule BattleBox.GameServerTest do
 
     ref = Process.monitor(pid)
 
-    assert_receive {:player_1, {:game_request, %{game_server: ^pid, player: :player_1}}}
-    assert_receive {:player_2, {:game_request, %{game_server: ^pid, player: :player_2}}}
+    assert_receive {:player_1,
+                    {:game_request, %{game_server: ^pid, player: :player_1, game_id: game_id}}}
+
+    assert_receive {:player_2,
+                    {:game_request, %{game_server: ^pid, player: :player_2, game_id: ^game_id}}}
 
     assert :ok = GameServer.accept_game(pid, :player_1)
     assert :ok = GameServer.accept_game(pid, :player_2)
@@ -163,11 +166,11 @@ defmodule BattleBox.GameServerTest do
                    GameServer.submit_moves(pid, :player_2, []))
     end)
 
-    assert_receive {:player_1, {:game_over, %{game: game}}}
-    assert_receive {:player_2, {:game_over, %{game: ^game}}}
+    assert_receive {:player_1, {:game_over, %{game_id: ^game_id}}}
+    assert_receive {:player_2, {:game_over, %{game_id: ^game_id}}}
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
 
-    loaded_game = Game.get_by_id(game.id)
-    assert Enum.map(loaded_game.events, & &1.effects) == Enum.map(game.events, & &1.effects)
+    loaded_game = Game.get_by_id(game_id)
+    refute is_nil(loaded_game)
   end
 end
