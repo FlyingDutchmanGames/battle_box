@@ -1,12 +1,8 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   use GenStateMachine, callback_mode: [:handle_event_function], restart: :temporary
   alias BattleBox.{GameEngine, PlayerServer}
+  import BattleBox.TcpConnectionServer.Message
   @behaviour :ranch_protocol
-
-  @invalid_json_msg Jason.encode!(%{error: "invalid_json"})
-  @invalid_msg_sent Jason.encode!(%{error: "invalid_msg_sent"})
-  @lobby_not_found_msg Jason.encode!(%{error: "lobby_not_found"})
-  @bot_instance_failure Jason.encode!(%{error: "bot_instance_failure"})
 
   def start_link(ref, _socket, transport, data) do
     data =
@@ -46,7 +42,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         {:keep_state_and_data, {:next_event, :internal, msg}}
 
       {:error, %Jason.DecodeError{}} ->
-        :ok = data.transport.send(socket, @invalid_json_msg)
+        :ok = data.transport.send(socket, encode_error("invalid_json"))
         :keep_state_and_data
     end
   end
@@ -79,7 +75,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         {:next_state, :idle, data}
 
       {:error, :lobby_not_found} ->
-        :ok = data.transport.send(data.socket, @lobby_not_found_msg)
+        :ok = data.transport.send(data.socket, encode_error("lobby_not_found"))
         :keep_state_and_data
     end
   end
@@ -104,35 +100,26 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{player_server: pid} = data) do
-    :ok = data.transport.send(data.socket, @bot_instance_failure)
+    :ok = data.transport.send(data.socket, encode_error("bot_instance_failure"))
     :ok = data.transport.close(data.socket)
     {:stop, :normal}
   end
 
   def handle_event(:internal, _msg, _state, data) do
-    :ok = data.transport.send(data.socket, @invalid_msg_sent)
+    :ok = data.transport.send(data.socket, encode_error("invalid_msg_sent"))
     :keep_state_and_data
   end
 
   defp game_request(game_info) do
     game_info = Map.take(game_info, [:acceptance_time, :game_id, :player])
-    Jason.encode!(%{request_type: "game_request", game_info: game_info})
+    encode(%{"game_info" => game_info, "request_type" => "game_request"})
   end
 
-  defp game_cancelled(game_id) do
-    Jason.encode!(%{
-      info: "game_cancelled",
-      game_id: game_id
-    })
-  end
+  defp game_cancelled(game_id),
+    do: encode(%{info: "game_cancelled", game_id: game_id})
 
-  defp status_msg(data) do
-    Jason.encode!(%{
-      bot_id: data.player_id,
-      lobby_name: data.lobby_name,
-      status: data.status
-    })
-  end
+  defp status_msg(data),
+    do: encode(%{bot_id: data.player_id, lobby_name: data.lobby_name, status: data.status})
 
-  defp initial_msg(connection_id), do: Jason.encode!(%{connection_id: connection_id})
+  defp initial_msg(connection_id), do: encode(%{connection_id: connection_id})
 end

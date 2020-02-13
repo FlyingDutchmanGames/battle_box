@@ -1,7 +1,8 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase
-  alias BattleBox.{GameEngine, PlayerServer.PlayerSupervisor, TcpConnectionServer, Lobby}
+  alias BattleBox.{GameEngine, TcpConnectionServer, Lobby}
   alias BattleBox.Games.RobotGame.Game
+  import BattleBox.TcpConnectionServer.Message
 
   @ip {127, 0, 0, 1}
 
@@ -34,23 +35,23 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   setup context do
     %{
       connection_request:
-        Jason.encode!(%{
+        encode(%{
           "bot_id" => "1234",
           "bot_token" => "5678",
           "lobby_name" => context.lobby.name
         }),
-      start_matchmaking_request: Jason.encode!(%{"action" => "start_match_making"})
+      start_matchmaking_request: encode(%{"action" => "start_match_making"})
     }
   end
 
   test "you can connect", context do
-    {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+    {:ok, socket} = connect(context.port)
     assert_receive {:tcp, ^socket, msg}
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
   end
 
   test "closing the tcp connection causes the connection process to die", context do
-    {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+    {:ok, socket} = connect(context.port)
     assert_receive {:tcp, ^socket, msg}
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
     %{pid: pid} = GameEngine.get_connection(context.game_engine, connection_id)
@@ -61,7 +62,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   describe "joining a lobby as a bot" do
     setup context do
-      {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+      {:ok, socket} = connect(context.port)
       assert_receive {:tcp, ^socket, connection_msg}
       %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
       %{socket: socket, connection_id: connection_id}
@@ -69,7 +70,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
     test "you can join as a bot", %{socket: socket, lobby: %{name: lobby_name}} do
       bot_connect_req =
-        Jason.encode!(%{
+        encode(%{
           "bot_id" => "1234",
           "bot_token" => "5678",
           "lobby_name" => lobby_name
@@ -84,7 +85,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
     test "trying to join a lobby that doesn't exist is an error", %{socket: socket} do
       bot_connect_req =
-        Jason.encode!(%{
+        encode(%{
           "bot_id" => "1234",
           "bot_token" => "5678",
           "lobby_name" => "FAKE"
@@ -105,7 +106,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       Process.monitor(connection_pid)
       Process.exit(player_pid, :kill)
 
-      assert_receive {:tcp, ^socket, "{\"error\":\"bot_instance_failure\"}"}
+      assert_receive {:tcp, ^socket, msg}
+      assert %{"error" => "bot_instance_failure"} = Jason.decode!(msg)
       assert_receive {:DOWN, _, _, ^connection_pid, :normal}
     end
 
@@ -117,11 +119,11 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   describe "matching_making" do
     setup context do
       for player <- [:p1, :p2] do
-        {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+        {:ok, socket} = connect(context.port)
         assert_receive {:tcp, ^socket, _connection_msg}
 
         join_request =
-          Jason.encode!(%{
+          encode(%{
             "bot_id" => "#{player}1234",
             "bot_token" => "5678",
             "lobby_name" => context.lobby.name
@@ -168,13 +170,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   describe "game acceptance" do
     setup context do
       for player <- [:p1, :p2] do
-        {:ok, socket} = :gen_tcp.connect(@ip, context.port, [:binary, active: true])
+        {:ok, socket} = connect(context.port)
         assert_receive {:tcp, ^socket, connection_msg}
         %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
         %{pid: pid} = GameEngine.get_connection(context.game_engine, connection_id)
 
         join_request =
-          Jason.encode!(%{
+          encode(%{
             "bot_id" => "#{player}1234",
             "bot_token" => "5678",
             "lobby_name" => context.lobby.name
@@ -194,17 +196,18 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     test "you get a game_cancelled if the other player dies",
          %{p1: %{socket: p1}, p2: %{socket: p2}} = context do
       :ok = GameEngine.force_match_make(context.game_engine)
-
-      assert [%{pid: player_server_pid}] =
-               PlayerSupervisor.player_servers_with_connection_id(
-                 context.player_registry,
-                 context.p2.connection_id
-               )
-
-      Process.monitor(player_server_pid)
       :ok = :gen_tcp.close(p2)
-      assert_receive {:tcp, ^p1, msg}
-      %{foo: :bar} = Jason.decode!(msg)
+      assert_receive {:tcp, ^p1, game_req}
+
+      assert %{"request_type" => "game_request", "game_info" => %{"game_id" => game_id}} =
+               Jason.decode!(game_req)
+
+      assert_receive {:tcp, ^p1, game_cancelled}
+      assert %{"game_id" => ^game_id, "info" => "game_cancelled"} = Jason.decode!(game_cancelled)
     end
+  end
+
+  defp connect(port) do
+    :gen_tcp.connect(@ip, port, [:binary, active: true, packet: :line])
   end
 end
