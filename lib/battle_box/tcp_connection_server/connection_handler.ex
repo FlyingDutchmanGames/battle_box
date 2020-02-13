@@ -107,6 +107,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
       "reject_game" ->
         :ok = PlayerServer.reject_game(data.player_server, id)
+        data.transport.send(data.socket, game_cancelled(id))
         {:next_state, :idle, data}
     end
   end
