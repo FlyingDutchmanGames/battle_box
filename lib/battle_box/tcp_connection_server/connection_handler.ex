@@ -90,6 +90,30 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
     :ok = data.transport.send(data.socket, game_request(game_info))
     data = Map.put(data, :game_info, game_info)
+    {:next_state, :game_acceptance, data}
+  end
+
+  def handle_event(
+        :internal,
+        %{"action" => action, "game_id" => id},
+        :game_acceptance,
+        %{game_info: %{game_id: id}} = data
+      )
+      when action in ["accept_game", "reject_game"] do
+    case action do
+      "accept_game" ->
+        :ok = PlayerServer.accept_game(data.player_server, id)
+        {:next_state, :playing, data}
+
+      "reject_game" ->
+        :ok = PlayerServer.reject_game(data.player_server, id)
+        {:next_state, :idle, data}
+    end
+  end
+
+  def handle_event(:info, {:moves_request, request}, :playing, data) do
+    :ok = data.transport.send(data.socket, moves_request(request))
+    data = Map.put(data, :moves_request, request)
     {:keep_state, data}
   end
 
@@ -108,6 +132,10 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   def handle_event(:internal, _msg, _state, data) do
     :ok = data.transport.send(data.socket, encode_error("invalid_msg_sent"))
     :keep_state_and_data
+  end
+
+  defp moves_request(request) do
+    encode(%{"request_type" => "moves_request", "moves_request" => request})
   end
 
   defp game_request(game_info) do

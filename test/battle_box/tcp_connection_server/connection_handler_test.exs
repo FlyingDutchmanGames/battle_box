@@ -173,7 +173,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         {:ok, socket} = connect(context.port)
         assert_receive {:tcp, ^socket, connection_msg}
         %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
-        %{pid: pid} = GameEngine.get_connection(context.game_engine, connection_id)
 
         join_request =
           encode(%{
@@ -184,11 +183,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
         :ok = :gen_tcp.send(socket, join_request)
         assert_receive {:tcp, ^socket, _bot_connect_msg}
-
         :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
         assert_receive {:tcp, ^socket, msg}
-
-        {player, %{socket: socket, connection_id: connection_id, connection_pid: pid}}
+        {player, %{socket: socket, connection_id: connection_id}}
       end
       |> Map.new()
     end
@@ -204,6 +201,54 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert_receive {:tcp, ^p1, game_cancelled}
       assert %{"game_id" => ^game_id, "info" => "game_cancelled"} = Jason.decode!(game_cancelled)
+    end
+
+    test "if one accepts and the other rejects the game is cancelled",
+         %{p1: %{socket: p1}, p2: %{socket: p2}} = context do
+      :ok = GameEngine.force_match_make(context.game_engine)
+      assert_receive {:tcp, ^p1, game_req}
+      assert_receive {:tcp, ^p2, _game_req}
+      assert %{"game_info" => %{"game_id" => game_id}} = Jason.decode!(game_req)
+      accept_game = %{"action" => "accept_game", "game_id" => game_id}
+      reject_game = %{"action" => "reject_game", "game_id" => game_id}
+      :ok = :gen_tcp.send(p1, encode(accept_game))
+      :ok = :gen_tcp.send(p2, encode(reject_game))
+      assert_receive {:tcp, ^p1, game_cancelled}
+      assert_receive {:tcp, ^p2, ^game_cancelled}
+      assert %{"game_id" => ^game_id, "info" => "game_cancelled"} = Jason.decode!(game_cancelled)
+    end
+
+    test "you can accept a game", %{p1: %{socket: p1}, p2: %{socket: p2}} = context do
+      :ok = GameEngine.force_match_make(context.game_engine)
+      assert_receive {:tcp, ^p1, game_req}
+
+      assert %{"request_type" => "game_request", "game_info" => %{"game_id" => game_id}} =
+               Jason.decode!(game_req)
+
+      assert_receive {:tcp, ^p2, game_req}
+
+      assert %{"request_type" => "game_request", "game_info" => %{"game_id" => ^game_id}} =
+               Jason.decode!(game_req)
+
+      accept_game = %{"action" => "accept_game", "game_id" => game_id}
+      :ok = :gen_tcp.send(p1, encode(accept_game))
+      :ok = :gen_tcp.send(p2, encode(accept_game))
+
+      assert_receive {:tcp, ^p1, move_req}
+
+      assert %{
+               "request_type" => "moves_request",
+               "moves_request" => %{
+                 "game_id" => ^game_id,
+                 "request_id" => <<_::288>>,
+                 "game_state" => _
+               }
+             } = Jason.decode!(move_req)
+
+      assert_receive {:tcp, ^p2, move_req}
+
+      assert %{"request_type" => "moves_request", "moves_request" => %{"game_id" => ^game_id}} =
+               Jason.decode!(move_req)
     end
   end
 
