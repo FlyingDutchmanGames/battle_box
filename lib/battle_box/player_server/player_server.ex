@@ -108,8 +108,7 @@ defmodule BattleBox.PlayerServer do
 
   def handle_event(:state_timeout, :game_acceptance_timeout, :game_acceptance, data) do
     :ok = GameServer.reject_game(data.game_info.game_server, data.game_info.player)
-    send(data.connection, {:game_acceptance_timeout, data.game_info.game_id})
-    {:next_state, :game_teardown, data}
+    {:next_state, :options, data}
   end
 
   def handle_event(
