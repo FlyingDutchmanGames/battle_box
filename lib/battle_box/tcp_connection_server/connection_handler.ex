@@ -1,6 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   use GenStateMachine, callback_mode: [:handle_event_function], restart: :temporary
-  alias BattleBox.{GameEngine, PlayerServer}
+  alias BattleBox.{Bot, GameEngine, PlayerServer}
   import BattleBox.TcpConnectionServer.Message
   @behaviour :ranch_protocol
 
@@ -47,34 +47,34 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     end
   end
 
-  def handle_event(
-        :internal,
-        %{"bot_id" => bot_id, "bot_token" => _, "lobby_name" => lobby_name},
-        :unauthed,
-        data
-      ) do
-    GameEngine.start_player(data.names.game_engine, %{
-      connection_id: data.connection_id,
-      connection: self(),
-      player_id: bot_id,
-      lobby_name: lobby_name
-    })
-    |> case do
-      {:ok, player_server} ->
-        Process.monitor(player_server)
+  def handle_event(:internal, %{"token" => token, "lobby" => lobby_name}, :unauthed, data) do
+    with {:bot, bot} when not is_nil(bot) <- {:bot, Bot.get_by_token(token)},
+         {:player, {:ok, player_server}} <-
+           {:player,
+            GameEngine.start_player(data.names.game_engine, %{
+              connection_id: data.connection_id,
+              connection: self(),
+              player_id: bot.id,
+              lobby_name: lobby_name
+            })} do
+      Process.monitor(player_server)
 
-        data =
-          Map.merge(data, %{
-            player_id: bot_id,
-            player_server: player_server,
-            lobby_name: lobby_name,
-            status: :idle
-          })
+      data =
+        Map.merge(data, %{
+          bot: bot,
+          player_server: player_server,
+          lobby_name: lobby_name,
+          status: :idle
+        })
 
-        :ok = data.transport.send(data.socket, status_msg(data))
-        {:next_state, :idle, data}
+      :ok = data.transport.send(data.socket, status_msg(data))
+      {:next_state, :idle, data}
+    else
+      {:bot, nil} ->
+        :ok = data.transport.send(data.socket, encode_error("invalid_token"))
+        :keep_state_and_data
 
-      {:error, :lobby_not_found} ->
+      {:player, {:error, :lobby_not_found}} ->
         :ok = data.transport.send(data.socket, encode_error("lobby_not_found"))
         :keep_state_and_data
     end
@@ -158,7 +158,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     :keep_state_and_data
   end
 
-  defp teardown_game(data, game_id) do
+  defp teardown_game(data, _game_id) do
     {:ok, Map.drop(data, [:game_info])}
   end
 
@@ -182,7 +182,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     do: encode(%{info: "game_cancelled", game_id: game_id})
 
   defp status_msg(data),
-    do: encode(%{bot_id: data.player_id, lobby_name: data.lobby_name, status: data.status})
+    do: encode(%{bot_id: data.bot.id, lobby: data.lobby_name, status: data.status})
 
   defp initial_msg(connection_id), do: encode(%{connection_id: connection_id})
 end
