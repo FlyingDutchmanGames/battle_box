@@ -252,6 +252,64 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     end
   end
 
+  describe "moves requests" do
+    setup context do
+      players =
+        for player <- [:p1, :p2] do
+          {:ok, socket} = connect(context.port)
+          assert_receive {:tcp, ^socket, connection_msg}
+
+          join_request =
+            encode(%{
+              "bot_id" => Ecto.UUID.generate(),
+              "bot_token" => "5678",
+              "lobby_name" => context.lobby.name
+            })
+
+          :ok = :gen_tcp.send(socket, join_request)
+          assert_receive {:tcp, ^socket, _bot_connect_msg}
+          :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
+          assert_receive {:tcp, ^socket, _info_msg}
+          {player, %{socket: socket}}
+        end
+        |> Map.new()
+
+      %{p1: %{socket: p1}, p2: %{socket: p2}} = players
+      :ok = GameEngine.force_match_make(context.game_engine)
+
+      assert_receive {:tcp, ^p1, game_req}
+      assert %{"game_info" => %{"game_id" => game_id}} = Jason.decode!(game_req)
+      assert_receive {:tcp, ^p2, game_req}
+
+      accept_game = %{"action" => "accept_game", "game_id" => game_id}
+      :ok = :gen_tcp.send(p1, encode(accept_game))
+      :ok = :gen_tcp.send(p2, encode(accept_game))
+
+      players
+    end
+
+    test "playing the game", %{p1: %{socket: p1}, p2: %{socket: p2}} do
+      Enum.each(0..99, fn _turn ->
+        assert_receive {:tcp, ^p1, moves_request}
+        IO.inspect(byte_size(moves_request))
+        assert %{"moves_request" => %{"request_id" => request_id}} = Jason.decode!(moves_request)
+        :ok = :gen_tcp.send(p1, empty_move_msg(request_id))
+
+        assert_receive {:tcp, ^p2, moves_request}
+        assert %{"moves_request" => %{"request_id" => request_id}} = Jason.decode!(moves_request)
+        :ok = :gen_tcp.send(p2, empty_move_msg(request_id))
+      end)
+    end
+  end
+
+  defp empty_move_msg(moves_request_id) do
+    encode(%{
+      "action" => "send_moves",
+      "request_id" => moves_request_id,
+      "moves" => []
+    })
+  end
+
   defp connect(port) do
     :gen_tcp.connect(@ip, port, [:binary, active: true, packet: :line])
   end

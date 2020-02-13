@@ -117,6 +117,18 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     {:keep_state, data}
   end
 
+  def handle_event(
+        :internal,
+        %{"action" => "send_moves", "request_id" => request_id, "moves" => moves},
+        :playing,
+        %{moves_request: %{request_id: request_id}} = data
+      ) do
+    # TODO:// Figure out how to parse moves
+    :ok = PlayerServer.submit_moves(data.player_server, request_id, moves)
+    data = Map.drop(data, [:moves_request])
+    {:keep_state, data}
+  end
+
   def handle_event(:info, {:game_cancelled, id}, _state, %{game_info: %{game_id: id}} = data) do
     {:ok, data} = teardown_game(data, id)
     {:next_state, :idle, data}

@@ -1,4 +1,5 @@
 defmodule BattleBox.Games.RobotGame.Game.Robot do
+  @derive Jason.Encoder
   defstruct [:hp, :id, :player_id, :location]
 
   def new(%{hp: hp, player_id: player_id, location: location, id: id}) do
