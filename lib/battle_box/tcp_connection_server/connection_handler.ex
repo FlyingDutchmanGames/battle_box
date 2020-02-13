@@ -129,7 +129,19 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     {:keep_state, data}
   end
 
+  def handle_event(
+        :info,
+        {:game_over, %{game_id: game_id} = result},
+        _,
+        data
+      ) do
+    :ok = data.transport.send(data.socket, game_over(result))
+    {:ok, data} = teardown_game(data, game_id)
+    {:next_state, :idle, data}
+  end
+
   def handle_event(:info, {:game_cancelled, id}, _state, %{game_info: %{game_id: id}} = data) do
+    :ok = data.transport.send(data.socket, game_cancelled(id))
     {:ok, data} = teardown_game(data, id)
     {:next_state, :idle, data}
   end
@@ -146,8 +158,14 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   defp teardown_game(data, game_id) do
-    :ok = data.transport.send(data.socket, game_cancelled(game_id))
     {:ok, Map.drop(data, [:game_info])}
+  end
+
+  defp game_over(result) do
+    encode(%{
+      "info" => "game_over",
+      "result" => result
+    })
   end
 
   defp moves_request(request) do

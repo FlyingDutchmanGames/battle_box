@@ -282,13 +282,12 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       :ok = :gen_tcp.send(p1, encode(accept_game))
       :ok = :gen_tcp.send(p2, encode(accept_game))
 
-      players
+      Map.merge(players, %{game_id: game_id})
     end
 
-    test "playing the game", %{p1: %{socket: p1}, p2: %{socket: p2}} do
+    test "playing the game", %{p1: %{socket: p1}, p2: %{socket: p2}, game_id: game_id} do
       Enum.each(0..99, fn _turn ->
         assert_receive {:tcp, ^p1, moves_request}
-        IO.inspect(byte_size(moves_request))
         assert %{"moves_request" => %{"request_id" => request_id}} = Jason.decode!(moves_request)
         :ok = :gen_tcp.send(p1, empty_move_msg(request_id))
 
@@ -296,6 +295,12 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         assert %{"moves_request" => %{"request_id" => request_id}} = Jason.decode!(moves_request)
         :ok = :gen_tcp.send(p2, empty_move_msg(request_id))
       end)
+
+      assert_receive {:tcp, ^p1, game_over}
+      assert_receive {:tcp, ^p2, ^game_over}
+
+      assert %{"info" => "game_over", "result" => %{"winner" => _, "game_id" => ^game_id}} =
+               Jason.decode!(game_over)
     end
   end
 
