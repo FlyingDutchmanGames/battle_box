@@ -1,6 +1,6 @@
 defmodule BattleBox.User do
   use Ecto.Schema
-  alias BattleBox.Repo
+  alias BattleBox.{Repo, Bot}
   import Ecto.Changeset
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -17,11 +17,12 @@ defmodule BattleBox.User do
 
   schema "users" do
     field :name, :string
-    field :github_id, :integer, null: false
+    field :github_id, :integer
     field :github_avatar_url, :string
     field :github_html_url, :string
     field :github_login_name, :string
     field :github_access_token, :string
+    has_many :bots, Bot
 
     timestamps()
   end
@@ -29,7 +30,7 @@ defmodule BattleBox.User do
   def changeset(user, params \\ %{}) do
     user
     |> cast(params, @params)
-    |> validate_required(@params)
+    |> validate_required([:name, :github_id])
     |> unique_constraint(:github_id)
   end
 
