@@ -52,7 +52,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
 
     assert %{
-             status: :idle,
+             status: :unauthed,
              started_at: started_at
            } = get_connection(context.game_engine, connection_id)
 
@@ -181,6 +181,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                },
                "request_type" => "game_request"
              } = Jason.decode!(game_request)
+
+      Process.sleep(10)
 
       assert %{status: :game_acceptance, game_id: ^game_id} =
                get_connection(context.game_engine, context.p1.connection_id)
