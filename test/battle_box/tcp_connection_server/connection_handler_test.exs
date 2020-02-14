@@ -1,6 +1,7 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase
   alias BattleBox.{Bot, GameEngine, TcpConnectionServer, Lobby}
+  import GameEngine, only: [get_connection: 2]
   alias BattleBox.Games.RobotGame.Game
   import BattleBox.TcpConnectionServer.Message
 
@@ -45,17 +46,24 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     }
   end
 
-  test "you can connect", context do
+  test "you can connect and the process will register", context do
     {:ok, socket} = connect(context.port)
     assert_receive {:tcp, ^socket, msg}
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
+
+    assert %{
+             status: :idle,
+             started_at: started_at
+           } = get_connection(context.game_engine, connection_id)
+
+    assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 
   test "closing the tcp connection causes the connection process to die", context do
     {:ok, socket} = connect(context.port)
     assert_receive {:tcp, ^socket, msg}
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
-    %{pid: pid} = GameEngine.get_connection(context.game_engine, connection_id)
+    %{pid: pid} = get_connection(context.game_engine, connection_id)
     ref = Process.monitor(pid)
     :ok = :gen_tcp.close(socket)
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
@@ -69,21 +77,33 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       %{socket: socket, connection_id: connection_id}
     end
 
-    test "you can join", %{socket: socket, bot: %{id: id, token: token}} do
+    test "you can join", %{socket: socket, bot: %{id: id, token: token}} = context do
       bot_connect_req = encode(%{"token" => token, "lobby" => @lobby_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
 
       assert %{"bot_id" => ^id, "lobby" => @lobby_name, "status" => "idle"} = Jason.decode!(msg)
+
+      assert %{
+               status: :idle,
+               player_id: ^id,
+               user_id: @user_id
+             } = get_connection(context.game_engine, context.connection_id)
     end
 
-    test "trying to join a lobby that doesn't exist is an error", %{socket: socket, bot: bot} do
+    test "trying to join a lobby that doesn't exist is an error",
+         %{socket: socket, bot: bot} = context do
       bot_connect_req = encode(%{"token" => bot.token, "lobby" => "FAKE"})
-
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => "lobby_not_found"} = Jason.decode!(msg)
+
+      assert %{
+               status: :unauthed,
+               player_id: nil,
+               user_id: nil
+             } = get_connection(context.game_engine, context.connection_id)
     end
 
     test "you get notified if the player server dies and the connection closes",
@@ -114,7 +134,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     setup context do
       for player <- [:p1, :p2] do
         {:ok, socket} = connect(context.port)
-        assert_receive {:tcp, ^socket, _connection_msg}
+        assert_receive {:tcp, ^socket, connection_msg}
+        %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
 
         join_request =
           encode(%{
@@ -125,7 +146,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         :ok = :gen_tcp.send(socket, join_request)
         assert_receive {:tcp, ^socket, _bot_connect_msg}
 
-        {player, %{socket: socket}}
+        {player, %{socket: socket, connection_id: connection_id}}
       end
       |> Map.new()
     end
@@ -135,6 +156,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert_receive {:tcp, ^socket, resp}
 
       %{"status" => "match_making"} = Jason.decode!(resp)
+
+      assert %{status: :match_making} =
+               get_connection(context.game_engine, context.p1.connection_id)
     end
 
     test "two players can get matched to a game",
@@ -152,11 +176,14 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert %{
                "game_info" => %{
                  "acceptance_time" => 2000,
-                 "game_id" => <<_::288>>,
+                 "game_id" => <<_::288>> = game_id,
                  "player" => "player_" <> _
                },
                "request_type" => "game_request"
              } = Jason.decode!(game_request)
+
+      assert %{status: :game_acceptance, game_id: ^game_id} =
+               get_connection(context.game_engine, context.p1.connection_id)
     end
   end
 
@@ -189,6 +216,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert_receive {:tcp, ^p1, game_cancelled}
       assert %{"game_id" => ^game_id, "info" => "game_cancelled"} = Jason.decode!(game_cancelled)
+
+      assert %{game_id: nil, status: :idle} =
+               get_connection(context.game_engine, context.p1.connection_id)
     end
 
     test "if one accepts and the other rejects the game is cancelled",
@@ -237,6 +267,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{"request_type" => "moves_request", "moves_request" => %{"game_id" => ^game_id}} =
                Jason.decode!(move_req)
+
+      assert %{game_id: ^game_id, status: :playing} =
+               get_connection(context.game_engine, context.p1.connection_id)
     end
   end
 
@@ -246,6 +279,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         for player <- [:p1, :p2] do
           {:ok, socket} = connect(context.port)
           assert_receive {:tcp, ^socket, connection_msg}
+          %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
 
           join_request = encode(%{"token" => context.bot.token, "lobby" => context.lobby.name})
 
@@ -253,7 +287,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
           assert_receive {:tcp, ^socket, _bot_connect_msg}
           :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
           assert_receive {:tcp, ^socket, _info_msg}
-          {player, %{socket: socket}}
+          {player, %{socket: socket, connection_id: connection_id}}
         end
         |> Map.new()
 
@@ -271,7 +305,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       Map.merge(players, %{game_id: game_id})
     end
 
-    test "playing the game", %{p1: %{socket: p1}, p2: %{socket: p2}, game_id: game_id} do
+    test "playing the game",
+         %{p1: %{socket: p1}, p2: %{socket: p2}, game_id: game_id} = context do
       Enum.each(0..99, fn _turn ->
         assert_receive {:tcp, ^p1, moves_request}
         assert %{"moves_request" => %{"request_id" => request_id}} = Jason.decode!(moves_request)
@@ -287,6 +322,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{"info" => "game_over", "result" => %{"winner" => _, "game_id" => ^game_id}} =
                Jason.decode!(game_over)
+
+      assert %{game_id: nil, status: :idle} =
+               get_connection(context.game_engine, context.p1.connection_id)
     end
   end
 
