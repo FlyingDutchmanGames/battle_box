@@ -22,6 +22,8 @@ defmodule BattleBoxWeb.Router do
     get "/", PageController, :index
     get "/logout", LogoutController, :logout
 
+    resources "/bots", BotController
+
     scope "/auth" do
       get "/github/login", GithubLoginController, :github_login
       get "/github/callback", GithubLoginController, :github_callback

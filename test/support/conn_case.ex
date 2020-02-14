@@ -5,7 +5,8 @@ defmodule BattleBoxWeb.ConnCase do
     quote do
       use Phoenix.ConnTest
       alias BattleBoxWeb.Router.Helpers, as: Routes
-
+      import BattleBox.Test.DataHelpers
+      alias BattleBox.Repo
       @endpoint BattleBoxWeb.Endpoint
     end
   end
