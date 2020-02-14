@@ -2,6 +2,7 @@ defmodule BattleBox.Bot do
   alias BattleBox.User
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
   alias BattleBox.Repo
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -27,6 +28,19 @@ defmodule BattleBox.Bot do
     |> validate_length(:name, min: 3, max: 50)
     |> unique_constraint(:name, name: "bots_user_id_name_index")
     |> unique_constraint(:token)
+  end
+
+  def create(params) do
+    changeset(%__MODULE__{}, params)
+    |> Repo.insert()
+  end
+
+  def with_user_id(user_id) do
+    Repo.all(
+      from bot in __MODULE__,
+        where: bot.user_id == ^user_id,
+        select: bot
+    )
   end
 
   def get_by_id(id) do
