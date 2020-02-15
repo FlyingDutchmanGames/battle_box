@@ -1,4 +1,6 @@
 defmodule BattleBoxWeb do
+  alias BattleBox.GameEngineProvider
+
   def live_view do
     quote do
       use Phoenix.LiveView, namespace: BattleBoxWeb
@@ -7,7 +9,7 @@ defmodule BattleBoxWeb do
       @game_engine_provider Application.compile_env(
                               :battle_box,
                               :game_engine_provider,
-                              BattleBox.GameEngineProvider
+                              GameEngineProvider
                             )
     end
   end
