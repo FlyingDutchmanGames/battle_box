@@ -22,6 +22,9 @@ defmodule BattleBoxWeb.Router do
     get "/", PageController, :index
     get "/logout", LogoutController, :logout
 
+    get "/connections", ConnectionsController, :index
+    live("/user/:user_id/connections", ConnectionsLive)
+
     resources "/bots", BotController
 
     scope "/auth" do
