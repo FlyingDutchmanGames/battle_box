@@ -3,7 +3,7 @@ defmodule BattleBoxWeb.RobotGame.PlayLive do
   alias BattleBox.Games.RobotGame.{Game, Game.Logic}
   use Phoenix.LiveView
 
-  def mount(_session, socket) do
+  def mount(_params, _session, socket) do
     {:ok, initialize(socket)}
   end
 

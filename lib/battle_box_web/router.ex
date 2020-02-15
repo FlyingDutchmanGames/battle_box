@@ -32,10 +32,6 @@ defmodule BattleBoxWeb.Router do
     scope "/robot_game", RobotGame do
       live("/play", PlayLive)
     end
-
-    scope "/test" do
-      live("/counter", CounterLive)
-    end
   end
 
   defp fetch_user(conn, _) do
