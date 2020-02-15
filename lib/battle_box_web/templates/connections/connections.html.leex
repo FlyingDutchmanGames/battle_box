@@ -1,0 +1,14 @@
+<script>window.useLiveView = true</script>
+<h1>Connections</h1>
+<div class="connections">
+<%= for connection <- @connections do %>
+  <div class="connection" style="border: 1px solid black; margin: 10px; padding: 10px;">
+    <div>connection_id: <%= connection.connection_id %></div>
+    <div>pid: <%= inspect(connection.pid) %></div>
+    <div>player_id: <%= connection[:player_id] %></div>
+    <div>status: <%= connection.status %></div>
+    <div>started_at: <%= connection.started_at %></div>
+    <button phx-click="kill_connection_<%= connection.connection_id %>">Kill Connection</button>
+  </div>
+<% end %>
+</div>

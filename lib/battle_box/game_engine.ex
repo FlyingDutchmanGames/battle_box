@@ -2,7 +2,7 @@ defmodule BattleBox.GameEngine do
   use Supervisor
   alias BattleBox.GameServer.GameSupervisor, as: GameSup
   alias BattleBox.PlayerServer.PlayerSupervisor, as: PlayerSup
-  alias BattleBox.MatchMakerServer
+  alias BattleBox.{MatchMakerServer, TcpConnectionServer}
 
   @default_name GameEngine
   def default_name, do: @default_name
@@ -41,10 +41,17 @@ defmodule BattleBox.GameEngine do
   def get_connection(game_engine, connection_id),
     do: get_process(connection_registry_name(game_engine), connection_id)
 
+  def get_connections_with_user_id(game_engine, user_id),
+    do:
+      TcpConnectionServer.get_connections_with_user_id(
+        connection_registry_name(game_engine),
+        user_id
+      )
+
   def get_player_server(game_engine, player_server_id),
     do: get_process(player_registry_name(game_engine), player_server_id)
 
-  def names(name) do
+  def names(name \\ @default_name) do
     %{
       game_engine: name,
       game_registry: game_registry_name(name),

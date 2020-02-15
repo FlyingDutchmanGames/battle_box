@@ -11,7 +11,10 @@ config :battle_box, BattleBoxWeb.Endpoint,
   http: [port: 4002],
   server: false
 
-config :battle_box, BattleBox.TcpConnectionServer, port: 4003
+# pick a random port
+config :battle_box, BattleBox.TcpConnectionServer, port: 0
+
+config :battle_box, game_engine_provider: BattleBox.GameEngineProvider.Mock
 
 config :battle_box, :github,
   client_id: "TEST_GITHUB_CLIENT_ID",

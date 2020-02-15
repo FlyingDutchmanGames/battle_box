@@ -72,7 +72,9 @@ defmodule BattleBox.User do
     Repo.get_by(__MODULE__, github_id: id)
   end
 
-  def get_by_id(id) do
+  def get_by_id(<<_::288>> = id) do
     Repo.get_by(__MODULE__, id: id)
   end
+
+  def get_by_id(_), do: nil
 end

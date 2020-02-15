@@ -4,11 +4,12 @@ defmodule BattleBox.Test.DataHelpers do
   import Plug.Conn
 
   def signin(conn, opts \\ %{}) do
+    user_id = opts[:user_id] || Ecto.UUID.generate()
+
     {:ok, user} =
-      User.changeset(%User{}, %{
+      User.changeset(%User{id: user_id}, %{
         github_id: 1,
-        name: "NAME",
-        opts: opts[:user_id] || Ecto.UUID.generate()
+        name: "NAME"
       })
       |> Repo.insert()
 

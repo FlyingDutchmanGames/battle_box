@@ -1,4 +1,19 @@
 defmodule BattleBoxWeb do
+  alias BattleBox.GameEngineProvider
+
+  def live_view do
+    quote do
+      use Phoenix.LiveView, namespace: BattleBoxWeb
+      alias BattleBoxWeb.Router.Helpers, as: Routes
+      @endpoint BattleBoxWeb.Endpoint
+      @game_engine_provider Application.compile_env(
+                              :battle_box,
+                              :game_engine_provider,
+                              GameEngineProvider
+                            )
+    end
+  end
+
   def controller do
     quote do
       use Phoenix.Controller, namespace: BattleBoxWeb

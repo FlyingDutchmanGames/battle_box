@@ -15,6 +15,10 @@ defmodule BattleBox.UserTest do
     }
   end
 
+  test "get_by_id with a non uuid arg is nil and not an error" do
+    assert nil == User.get_by_id("ABCDEFGHI")
+  end
+
   describe "upsert_from_github" do
     test "if there is nothing in the db it succeeds", context do
       assert {:ok, user} = User.upsert_from_github(context.user_from_github)
