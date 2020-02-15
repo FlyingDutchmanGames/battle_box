@@ -28,7 +28,7 @@ defmodule BattleBoxWeb.BotControllerTest do
       |> post("/bots", %{"bot" => %{"name" => "FOO"}})
 
     assert "/bots/" <> id = redirected_to(conn, 302)
-    assert %Bot{} = Bot.get_by_id(id)
+    assert %Bot{user_id: @user_id} = Bot.get_by_id(id)
   end
 
   test "theres a form to create a new bot", %{conn: conn} do
