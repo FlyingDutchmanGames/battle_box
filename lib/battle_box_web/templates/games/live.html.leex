@@ -4,6 +4,8 @@
   <%= for game <- @games do %>
     <div class="game" style="border: 1px solid black;">
       <div>ID: <%= game.game_id %></div>
+      <div>Started at: <%= game.started_at %></div>
+      <div>Game Type: <%= game.game_type %></div>
     </div>
   <% end %>
 </div>

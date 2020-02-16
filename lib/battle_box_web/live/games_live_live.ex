@@ -11,13 +11,11 @@ defmodule BattleBoxWeb.GamesLiveLive do
     end
 
     games = GameEngine.get_live_games(game_engine())
-    IO.inspect(games, label: "GAMES")
     {:ok, assign(socket, games: games)}
   end
 
   def handle_info(:refresh, socket) do
     games = GameEngine.get_live_games(game_engine())
-    IO.inspect(games, label: "GAMES")
     {:noreply, assign(socket, :games, games)}
   end
 
