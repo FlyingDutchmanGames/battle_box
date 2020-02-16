@@ -20,21 +20,36 @@ defmodule BattleBoxWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/login", PageController, :login
     get "/logout", LogoutController, :logout
-
-    get "/connections", ConnectionsController, :index
-    live("/users/:user_id/connections", ConnectionsLive)
-
-    resources "/bots", BotController
-    resources "/lobbies", LobbyController
 
     scope "/auth" do
       get "/github/login", GithubLoginController, :github_login
       get "/github/callback", GithubLoginController, :github_callback
     end
 
+    scope "/" do
+      pipe_through :require_logged_in
+
+      get "/connections", ConnectionsController, :index
+
+      resources "/bots", BotController, only: [:create, :new]
+      resources "/lobbies", LobbyController, only: [:create, :new]
+    end
+
+    resources "/bots", BotController, only: [:show]
+    resources "/lobbies", LobbyController, only: [:show]
+    live("/users/:user_id/connections", ConnectionsLive)
+
     scope "/robot_game", RobotGame do
       live("/play", PlayLive)
+    end
+  end
+
+  defp require_logged_in(conn, _) do
+    case conn.assigns.user do
+      %User{} -> conn
+      nil -> conn |> redirect(to: "/login") |> halt()
     end
   end
 
