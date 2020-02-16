@@ -35,6 +35,11 @@ defmodule BattleBox.Lobby do
     |> unique_constraint(:name)
   end
 
+  def create(params) do
+    changeset(%__MODULE__{}, params)
+    |> Repo.insert()
+  end
+
   def get_by_name(name) do
     Repo.get_by(__MODULE__, name: name)
   end

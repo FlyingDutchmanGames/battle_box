@@ -4,7 +4,7 @@ defmodule BattleBoxWeb.BotController do
 
   def new(conn, _params) do
     changeset = Bot.changeset(%Bot{})
-    render(conn, "new.html", user: conn.assigns.user, changeset: changeset)
+    render(conn, "new.html", changeset: changeset)
   end
 
   def create(%{assigns: %{user: user}} = conn, %{"bot" => bot}) do
