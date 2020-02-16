@@ -8,6 +8,7 @@
     <div>player_id: <%= connection[:player_id] %></div>
     <div>status: <%= connection.status %></div>
     <div>started_at: <%= connection.started_at %></div>
+    <div>game_id: <%= connection.game_id %></div>
     <button phx-click="kill_connection_<%= connection.connection_id %>">Kill Connection</button>
   </div>
 <% end %>
