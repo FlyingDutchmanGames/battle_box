@@ -18,16 +18,17 @@ defmodule BattleBox.GameServer do
     GenStateMachine.cast(game_server, {:moves, player, moves})
   end
 
-  def start_link(config, %{player_1: _, player_2: _, game: _} = data) do
-    GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
+  def start_link(config, %{player_1: _, player_2: _, game: %{id: id} = game} = data) do
+    {:ok, pid} =
+      GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
+        name: {:via, Registry, {config.names.game_registry, id, initial_metadata(game)}}
+      )
   end
 
   def init(%{names: names, game: game, player_1: player_1, player_2: player_2} = data) do
     for pid <- [player_1, player_2] do
       Process.monitor(pid)
     end
-
-    Registry.register(names.game_registry, Game.id(game), %{})
     {:ok, :game_acceptance, data, []}
   end
 
@@ -136,4 +137,10 @@ defmodule BattleBox.GameServer do
        winner: Game.winner(game)
      }}
   end
+
+  defp initial_metadata(game),
+    do: %{
+      started_at: DateTime.utc_now(),
+      game_type: game.__struct__
+    }
 end
