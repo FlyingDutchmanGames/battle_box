@@ -29,7 +29,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   setup do
     {:ok, lobby} =
-      Lobby.changeset(%Lobby{}, %{name: @lobby_name, game_type: Game})
+      Lobby.changeset(%Lobby{}, %{name: @lobby_name, game_type: Game, user_id: @user_id})
       |> Repo.insert()
 
     {:ok, bot} =

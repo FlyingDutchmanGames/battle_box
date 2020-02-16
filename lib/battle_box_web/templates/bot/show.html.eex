@@ -1,4 +1,5 @@
 <div>
   <div>Name: <%= @bot.name %></div>
   <div>Token: <code><%= @bot.token %></code></div>
+  <div>User: <%= @bot.user_id %></div>
 </div>
