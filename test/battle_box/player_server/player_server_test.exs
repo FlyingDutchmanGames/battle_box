@@ -16,7 +16,9 @@ defmodule BattleBox.PlayerServerTest do
   end
 
   setup do
-    changeset = Lobby.changeset(%Lobby{}, %{name: "LOBBY NAME", game_type: Game})
+    changeset =
+      Lobby.changeset(%Lobby{user_id: @player_1_id}, %{name: "LOBBY NAME", game_type: Game})
+
     {:ok, lobby} = Repo.insert(changeset)
     %{lobby: lobby}
   end
