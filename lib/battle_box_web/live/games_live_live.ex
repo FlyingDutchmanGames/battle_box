@@ -22,8 +22,4 @@ defmodule BattleBoxWeb.GamesLiveLive do
   def render(assigns) do
     GamesView.render("live.html", assigns)
   end
-
-  def game_engine do
-    @game_engine_provider.game_engine()
-  end
 end
