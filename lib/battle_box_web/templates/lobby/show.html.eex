@@ -1,0 +1,7 @@
+<div>
+  <div>Name: <%= @lobby.name %></div>
+  <div>User: <%= @lobby.user_id %></div>
+  <div>Game Type: <%= @lobby.game_type %></div>
+  <div>Game Acceptance Time (ms): <%= @lobby.game_acceptance_timeout_ms %></div>
+</div>
+

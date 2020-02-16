@@ -31,6 +31,17 @@ defmodule BattleBoxWeb.BotControllerTest do
     assert %Bot{user_id: @user_id} = Bot.get_by_id(id)
   end
 
+  test "trying to create a bot with a name that exists is an error", %{conn: conn} do
+    Bot.changeset(%Bot{}, %{name: "FOO", user_id: @user_id}) |> Repo.insert!()
+
+    conn =
+      conn
+      |> signin(user_id: @user_id)
+      |> post("/bots", %{"bot" => %{"name" => "FOO"}})
+
+    assert html_response(conn, 200) =~ "has already been taken"
+  end
+
   test "theres a form to create a new bot", %{conn: conn} do
     conn =
       conn
