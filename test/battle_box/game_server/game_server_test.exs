@@ -33,9 +33,10 @@ defmodule BattleBox.GameServerTest do
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
     assert Registry.count(context.game_registry) == 1
 
-    assert [{^pid, %{started_at: started_at, game_type: Game}}] =
+    assert [{^pid, %{started_at: started_at, game_type: Game, game: game}}] =
              Registry.lookup(context.game_registry, context.init_opts.game.id)
 
+    assert game == context.init_opts.game
     assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 

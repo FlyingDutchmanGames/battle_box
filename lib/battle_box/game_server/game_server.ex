@@ -109,7 +109,11 @@ defmodule BattleBox.GameServer do
     {:stop, :normal}
   end
 
-  def handle_event(:enter, _, _, _), do: :keep_state_and_data
+  def handle_event(:enter, _, new_state, %{names: names, game: game} = data) do
+    metadata = %{status: new_state, game: data.game}
+    {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
+    :keep_state_and_data
+  end
 
   defp moves_request(game, player) do
     {:moves_request,
@@ -142,6 +146,7 @@ defmodule BattleBox.GameServer do
   defp initial_metadata(game),
     do: %{
       started_at: DateTime.utc_now(),
-      game_type: game.__struct__
+      game_type: game.__struct__,
+      game: game
     }
 end
