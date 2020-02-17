@@ -1,21 +1,10 @@
 <% {row, col} = @robot.location %>
 <% grid_location = "grid-row: #{row + 1}; grid-column: #{col + 1};" %>
 <div
-     class='<%= "robot #{@robot.player_id} #{if @selected, do: "selected"}" %>'
+     class='<%= "robot #{@robot.player_id}" %>'
      style='<%= grid_location %>'
-     phx-click="select-robot"
      phx-value-robot-id="<%= @robot.id %>">
 </div>
-<%= if @move do %>
-  <div
-     id='<%= "robot-#{@robot.id}-move" %>'
-     class="robot-move"
-     style="<%= grid_location %>"
-     phx-click="select-robot"
-     phx-value-robot-id="<%= @robot.id %>">
-     <div class="icon"><%= move_icon(@move, @robot.location) %></div>
-  </div>
-<% end %>
 <div
     id='<%= "robot-#{@robot.id}-health" %>'
     class="robot-health"

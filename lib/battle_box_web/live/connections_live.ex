@@ -44,8 +44,4 @@ defmodule BattleBoxWeb.ConnectionsLive do
   def get_connections(user_id) do
     GameEngine.get_connections_with_user_id(game_engine(), user_id)
   end
-
-  def game_engine do
-    @game_engine_provider.game_engine()
-  end
 end

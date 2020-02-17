@@ -1,0 +1,11 @@
+<script>window.useLiveView = true</script>
+<h1>Live Games</h1>
+<div class="live-games">
+  <%= for game <- @games do %>
+    <div class="game" style="border: 1px solid black;">
+      <div>ID: <a href="<%= Routes.live_path(@socket, BattleBoxWeb.GameLive, game.game_id) %>"><%= game.game_id %></a></div>
+      <div>Started at: <%= game.started_at %></div>
+      <div>Game Type: <%= game.game_type %></div>
+    </div>
+  <% end %>
+</div>

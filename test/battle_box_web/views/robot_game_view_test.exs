@@ -86,48 +86,6 @@ defmodule BattleBoxWeb.RobotGameViewTest do
 
       assert [] = Floki.find(document, "#robot-#{robot.id}-move")
     end
-
-    test "a selected robot has the selected class" do
-      robot = %{id: "test", player_id: "player_1", location: {1, 1}, hp: 50}
-
-      {:ok, document} =
-        render_to_string(RobotGameView, "robot.html", robot: robot, move: nil, selected: true)
-        |> Floki.parse_document()
-
-      assert [_robot] = Floki.find(document, ".robot.selected")
-    end
-
-    test "a robot with a move renders correctly" do
-      robot = %{id: "test", player_id: "player_1", location: {1, 1}, hp: 50}
-      move = %{robot_id: "test", type: :guard}
-
-      {:ok, document} =
-        render_to_string(RobotGameView, "robot.html", robot: robot, move: move, selected: false)
-        |> Floki.parse_document()
-
-      assert [move_html] = Floki.find(document, "#robot-#{robot.id}-move")
-      assert "grid-row: 2; grid-column: 2;" in Floki.attribute(move_html, "style")
-      assert RobotGameView.move_icon(move, robot.location) == Floki.text(move_html)
-    end
-
-    test "you can render all the types of moves" do
-      robot = %{id: "test", player_id: "player_1", location: {1, 1}, hp: 50}
-
-      [
-        %{robot_id: "test", type: :guard},
-        %{robot_id: "test", type: :suicide},
-        %{robot_id: "test", type: :move, target: {1, 2}},
-        %{robot_id: "test", type: :attack, target: {1, 2}}
-      ]
-      |> Enum.each(fn move ->
-        {:ok, document} =
-          render_to_string(RobotGameView, "robot.html", robot: robot, move: move, selected: false)
-          |> Floki.parse_document()
-
-        assert [move_html] = Floki.find(document, "#robot-#{robot.id}-move")
-        assert RobotGameView.move_icon(move, robot.location) == Floki.text(move_html)
-      end)
-    end
   end
 
   describe "rendering the game header" do

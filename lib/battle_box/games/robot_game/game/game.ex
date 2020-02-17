@@ -51,9 +51,8 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def db_name, do: "robot_game"
 
-  def get_by_id(id) do
-    Repo.get_by(__MODULE__, id: id)
-  end
+  def get_by_id(<<_::288>> = id), do: Repo.get_by(__MODULE__, id: id)
+  def get_by_id(_), do: nil
 
   def disqualify(game, player) do
     winner = %{player_1: :player_2, player_2: :player_1}[player]

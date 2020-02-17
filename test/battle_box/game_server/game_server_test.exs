@@ -40,6 +40,13 @@ defmodule BattleBox.GameServerTest do
     assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 
+  test "The game server sends out game update messages", context do
+    game_id = context.init_opts.game.id
+    GameEngine.subscribe(context.game_engine, "game:#{game_id}")
+    {:ok, _pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+    assert_receive {:game_update, ^game_id}
+  end
+
   test "the starting of the game server will send init messages to p1 & p2", context do
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
     game = context.init_opts.game

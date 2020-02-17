@@ -23,6 +23,9 @@ defmodule BattleBoxWeb.Router do
     get "/login", PageController, :login
     get "/logout", LogoutController, :logout
 
+    live("/live_games", GamesLiveLive)
+    live("/games/:game_id", GameLive)
+
     scope "/auth" do
       get "/github/login", GithubLoginController, :github_login
       get "/github/callback", GithubLoginController, :github_callback
