@@ -78,13 +78,14 @@ defmodule BattleBox.GameServer do
         data = update_in(data.game, &Game.calculate_turn(&1, moves))
 
         if Game.over?(data.game),
-          do: {:next_state, :finalize, data},
+          do: {:keep_state, data, {:next_event, :internal, :finalize}},
           else: {:repeat_state, data}
     end
   end
 
   def handle_event(:cast, {:forfeit_game, player}, :moves, data) do
-    {:next_state, :finalize, update_in(data.game, &Game.disqualify(&1, player))}
+    {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
+     {:next_event, :internal, :finalize}}
   end
 
   def handle_event(:info, {:DOWN, _, :process, pid, _}, :moves, data) do
@@ -94,10 +95,11 @@ defmodule BattleBox.GameServer do
         pid == data.player_2 -> :player_2
       end
 
-    {:next_state, :finalize, update_in(data.game, &Game.disqualify(&1, player))}
+    {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
+     {:next_event, :internal, :finalize}}
   end
 
-  def handle_event(:enter, :moves, :finalize, %{game: game} = data) do
+  def handle_event(:internal, :finalize, _state, %{game: game} = data) do
     {:ok, game} = Game.persist(game)
 
     for player <- [:player_1, :player_2] do
