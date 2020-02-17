@@ -1,5 +1,5 @@
 defmodule BattleBox.GameServer do
-  use GenStateMachine, callback_mode: [:state_functions, :state_enter], restart: :temporary
+  use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   alias BattleBoxGame, as: Game
 
   def accept_game(game_server, player) do
@@ -18,35 +18,33 @@ defmodule BattleBox.GameServer do
     GenStateMachine.cast(game_server, {:moves, player, moves})
   end
 
-  def start_link(config, %{player_1: _, player_2: _, game: _} = data) do
-    GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
+  def start_link(config, %{player_1: _, player_2: _, game: %{id: id} = game} = data) do
+    GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
+      name: {:via, Registry, {config.names.game_registry, id, initial_metadata(game)}}
+    )
   end
 
-  def init(%{names: names, game: game, player_1: player_1, player_2: player_2} = data) do
-    for pid <- [player_1, player_2] do
-      Process.monitor(pid)
-    end
-
-    Registry.register(names.game_registry, Game.id(game), %{})
-    {:ok, :game_acceptance, data, []}
+  def init(data) do
+    {:ok, :game_acceptance, data, {:next_event, :internal, :setup}}
   end
 
-  def game_acceptance(:enter, _old_state, data) do
+  def handle_event(:internal, :setup, :game_acceptance, data) do
     for player <- [:player_1, :player_2] do
+      Process.monitor(data[player])
       send(data[player], init_message(data.game, player))
     end
 
     {:keep_state, Map.put(data, :acceptances, [])}
   end
 
-  def game_acceptance(:cast, {:accept_game, player}, data) do
+  def handle_event(:cast, {:accept_game, player}, :game_acceptance, data) do
     case data.acceptances do
       [] -> {:keep_state, put_in(data.acceptances, [player])}
-      [_first_acceptance] -> {:next_state, :moves, data}
+      [_first_acceptance] -> {:next_state, :moves, data, {:next_event, :internal, :collect_moves}}
     end
   end
 
-  def game_acceptance(:cast, {:reject_game, _player}, data) do
+  def handle_event(:cast, {:reject_game, _player}, :game_acceptance, data) do
     for player <- [:player_1, :player_2] do
       send(data[player], {:game_cancelled, Game.id(data.game)})
     end
@@ -54,7 +52,7 @@ defmodule BattleBox.GameServer do
     {:stop, :normal}
   end
 
-  def game_acceptance(:info, {:DOWN, _, :process, _pid, _}, data) do
+  def handle_event(:info, {:DOWN, _, :process, _pid, _}, :game_acceptance, data) do
     for player <- [:player_1, :player_2] do
       send(data[player], {:game_cancelled, Game.id(data.game)})
     end
@@ -62,7 +60,7 @@ defmodule BattleBox.GameServer do
     {:stop, :normal}
   end
 
-  def moves(:enter, _old_state, data) do
+  def handle_event(:internal, :collect_moves, :moves, data) do
     for player <- [:player_1, :player_2] do
       send(data[player], moves_request(data.game, player))
     end
@@ -70,7 +68,7 @@ defmodule BattleBox.GameServer do
     {:keep_state, Map.put(data, :moves, [])}
   end
 
-  def moves(:cast, {:moves, player, moves}, data) do
+  def handle_event(:cast, {:moves, player, moves}, :moves, data) do
     case data.moves do
       [] ->
         {:keep_state, put_in(data.moves, [{player, moves}])}
@@ -80,26 +78,28 @@ defmodule BattleBox.GameServer do
         data = update_in(data.game, &Game.calculate_turn(&1, moves))
 
         if Game.over?(data.game),
-          do: {:next_state, :finalize, data},
-          else: {:repeat_state, data}
+          do: {:keep_state, data, {:next_event, :internal, :finalize}},
+          else: {:repeat_state, data, {:next_event, :internal, :collect_moves}}
     end
   end
 
-  def moves(:cast, {:forfeit_game, player}, data) do
-    {:next_state, :finalize, update_in(data.game, &Game.disqualify(&1, player))}
+  def handle_event(:cast, {:forfeit_game, player}, :moves, data) do
+    {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
+     {:next_event, :internal, :finalize}}
   end
 
-  def moves(:info, {:DOWN, _, :process, pid, _}, data) do
+  def handle_event(:info, {:DOWN, _, :process, pid, _}, :moves, data) do
     player =
       cond do
         pid == data.player_1 -> :player_1
         pid == data.player_2 -> :player_2
       end
 
-    {:next_state, :finalize, update_in(data.game, &Game.disqualify(&1, player))}
+    {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
+     {:next_event, :internal, :finalize}}
   end
 
-  def finalize(:enter, :moves, %{game: game} = data) do
+  def handle_event(:internal, :finalize, _state, %{game: game} = data) do
     {:ok, game} = Game.persist(game)
 
     for player <- [:player_1, :player_2] do
@@ -107,6 +107,12 @@ defmodule BattleBox.GameServer do
     end
 
     {:stop, :normal}
+  end
+
+  def handle_event(:enter, _, new_state, %{names: names, game: game} = data) do
+    metadata = %{status: new_state, game: data.game}
+    {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
+    :keep_state_and_data
   end
 
   defp moves_request(game, player) do
@@ -136,4 +142,11 @@ defmodule BattleBox.GameServer do
        winner: Game.winner(game)
      }}
   end
+
+  defp initial_metadata(game),
+    do: %{
+      started_at: DateTime.utc_now(),
+      game_type: game.__struct__,
+      game: game
+    }
 end

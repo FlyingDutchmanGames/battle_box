@@ -32,7 +32,12 @@ defmodule BattleBox.GameServerTest do
     assert Registry.count(context.game_registry) == 0
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
     assert Registry.count(context.game_registry) == 1
-    assert [{pid, %{}}] == Registry.lookup(context.game_registry, context.init_opts.game.id)
+
+    assert [{^pid, %{started_at: started_at, game_type: Game, game: game}}] =
+             Registry.lookup(context.game_registry, context.init_opts.game.id)
+
+    assert game == context.init_opts.game
+    assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 
   test "the starting of the game server will send init messages to p1 & p2", context do
