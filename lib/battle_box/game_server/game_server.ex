@@ -62,7 +62,7 @@ defmodule BattleBox.GameServer do
   end
 
   def handle_event(:internal, :collect_moves, :moves, data) do
-    Process.sleep(500)
+    # Process.sleep(500) # To slow down games
 
     for player <- [:player_1, :player_2] do
       send(data[player], moves_request(data.game, player))

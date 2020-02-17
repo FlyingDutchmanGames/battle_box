@@ -12,7 +12,6 @@ defmodule BattleBox.MatchMaker.MatchMakerLogic do
             Game.new(
               player_1: player_1.player_id,
               player_2: player_2.player_id,
-              persistent?: false
             ),
           player_1: player_1.pid,
           player_2: player_2.pid

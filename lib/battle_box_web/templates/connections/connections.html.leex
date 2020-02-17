@@ -8,7 +8,9 @@
     <div>player_id: <%= connection[:player_id] %></div>
     <div>status: <%= connection.status %></div>
     <div>started_at: <%= connection.started_at %></div>
-    <div>game_id: <a href="<%= Routes.live_path(@socket, BattleBoxWeb.GameLive, connection.game_id) %>"><%= connection.game_id %></a></div>
+    <%= if connection.game_id do %>
+      <div>game_id: <a href="<%= Routes.live_path(@socket, BattleBoxWeb.GameLive, connection.game_id) %>"><%= connection.game_id %></a></div>
+    <% end %>
     <button phx-click="kill_connection_<%= connection.connection_id %>">Kill Connection</button>
   </div>
 <% end %>
