@@ -242,4 +242,5 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame.Game do
   def calculate_turn(game, moves), do: Game.Logic.calculate_turn(game, moves)
   def move_time_ms(game), do: game.move_time_ms
   def winner(game), do: game.winner
+  def score(game), do: %{player_1: Game.score(game, :player_1), player_2: Game.score(game, :player_2) }
 end

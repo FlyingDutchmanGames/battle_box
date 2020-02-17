@@ -2,10 +2,17 @@
 <h1>Live Games</h1>
 <div class="live-games">
   <%= for game <- @games do %>
-    <div class="game" style="border: 1px solid black;">
+    <div class="game" style="border: 1px solid black; margin: 10px; padding: 10px;">
       <div>ID: <a href="<%= Routes.live_path(@socket, BattleBoxWeb.GameLive, game.game_id) %>"><%= game.game_id %></a></div>
       <div>Started at: <%= game.started_at %></div>
       <div>Game Type: <%= game.game_type %></div>
+      <div>Turn: <%= game.game.turn %></div>
+      <div>
+        <div>Score</div>
+        <%= for {player, score} <- BattleBoxGame.score(game.game) do %>
+          <div style="margin-left: 10px;"><%= player %>: <%= score %></div>
+        <% end %>
+      </div>
     </div>
   <% end %>
 </div>

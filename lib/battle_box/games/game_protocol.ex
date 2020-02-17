@@ -26,4 +26,7 @@ defprotocol BattleBoxGame do
 
   @spec move_time_ms(struct()) :: non_neg_integer()
   def move_time_ms(game)
+
+  @spec score(struct()) :: %{atom => non_neg_integer()}
+  def score(game)
 end
