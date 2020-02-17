@@ -6,7 +6,7 @@ defmodule BattleBoxWeb.GameLive do
 
   def mount(%{"game_id" => game_id}, _session, socket) do
     if connected?(socket) do
-      GameEngine.subscribe(game_engine, "game:#{game_id}")
+      GameEngine.subscribe(game_engine(), "game:#{game_id}")
     end
 
     case get_game(game_id) do
@@ -23,7 +23,7 @@ defmodule BattleBoxWeb.GameLive do
   end
 
   def render(%{not_found: true}), do: PageView.render("not_found.html", message: "Game not found")
-  def render(%{game: game} = assigns), do: RobotGameView.render("play.html", assigns)
+  def render(%{game: _} = assigns), do: RobotGameView.render("play.html", assigns)
 
   defp get_game(game_id) do
     case GameEngine.get_game(game_engine(), game_id) do

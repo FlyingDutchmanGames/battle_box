@@ -43,7 +43,7 @@ defmodule BattleBox.GameServerTest do
   test "The game server sends out game update messages", context do
     game_id = context.init_opts.game.id
     GameEngine.subscribe(context.game_engine, "game:#{game_id}")
-    {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+    {:ok, _pid} = GameEngine.start_game(context.game_engine, context.init_opts)
     assert_receive {:game_update, ^game_id}
   end
 

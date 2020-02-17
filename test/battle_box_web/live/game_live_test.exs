@@ -8,7 +8,7 @@ defmodule BattleBoxWeb.GameLiveTest do
   @player_2 Ecto.UUID.generate()
   @game_id Ecto.UUID.generate()
 
-  test "it can display a game off disk", %{conn: conn} = context do
+  test "it can display a game off disk", %{conn: conn} do
     id = Ecto.UUID.generate()
 
     {:ok, _} =
@@ -54,9 +54,26 @@ defmodule BattleBoxWeb.GameLiveTest do
       assert html =~ "Not Found"
     end
 
-    test "it can display a game in progress", %{conn: conn} = context do
+    test "it can display a game in progress", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/games/#{@game_id}")
       assert html =~ "TURN: 0 / 100"
+    end
+
+    test "it will update when the game updates", %{conn: conn} = context do
+      Process.link(context.game_server)
+      GameEngine.subscribe(context.game_engine, "game:#{@game_id}")
+
+      {:ok, view, html} = live(conn, "/games/#{@game_id}")
+      Process.link(view.pid)
+      assert html =~ "TURN: 0 / 100"
+
+      Enum.each(1..9, fn _ ->
+        :ok = GameServer.submit_moves(context.game_server, :player_1, [])
+        :ok = GameServer.submit_moves(context.game_server, :player_2, [])
+      end)
+
+      Process.sleep(10)
+      assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 100/, render(view))
     end
   end
 end
