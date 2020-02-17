@@ -40,7 +40,7 @@ defmodule BattleBox.GameServer do
   def handle_event(:cast, {:accept_game, player}, :game_acceptance, data) do
     case data.acceptances do
       [] -> {:keep_state, put_in(data.acceptances, [player])}
-      [_first_acceptance] -> {:next_state, :moves, data}
+      [_first_acceptance] -> {:next_state, :moves, data, {:next_event, :internal, :collect_moves}}
     end
   end
 
@@ -60,7 +60,7 @@ defmodule BattleBox.GameServer do
     {:stop, :normal}
   end
 
-  def handle_event(:enter, _old_state, :moves, data) do
+  def handle_event(:internal, :collect_moves, :moves, data) do
     for player <- [:player_1, :player_2] do
       send(data[player], moves_request(data.game, player))
     end
@@ -79,7 +79,7 @@ defmodule BattleBox.GameServer do
 
         if Game.over?(data.game),
           do: {:keep_state, data, {:next_event, :internal, :finalize}},
-          else: {:repeat_state, data}
+          else: {:repeat_state, data, {:next_event, :internal, :collect_moves}}
     end
   end
 
