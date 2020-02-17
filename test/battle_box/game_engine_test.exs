@@ -8,4 +8,11 @@ defmodule BattleBox.GameEngineTest do
     assert Process.alive?(pid1)
     assert Process.alive?(pid2)
   end
+
+  test "you can publish and subscribe", %{test: name} do
+    {:ok, _} = GameEngine.start_link(name: name)
+    GameEngine.subscribe(name, "foo")
+    GameEngine.broadcast(name, "foo", "bar")
+    assert_receive "bar"
+  end
 end
