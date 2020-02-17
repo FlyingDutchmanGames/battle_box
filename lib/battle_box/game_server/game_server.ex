@@ -1,6 +1,7 @@
 defmodule BattleBox.GameServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   alias BattleBoxGame, as: Game
+  alias BattleBox.GameEngine
 
   def accept_game(game_server, player) do
     GenStateMachine.cast(game_server, {:accept_game, player})
@@ -114,6 +115,7 @@ defmodule BattleBox.GameServer do
   def handle_event(:enter, _, new_state, %{names: names, game: game} = data) do
     metadata = %{status: new_state, game: data.game}
     {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
+    :ok = GameEngine.broadcast(names.game_engine, "game:#{game.id}", {:game_update, game.id})
     :keep_state_and_data
   end
 

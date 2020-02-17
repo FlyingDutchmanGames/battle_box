@@ -5,6 +5,10 @@ defmodule BattleBoxWeb.GameLive do
   alias BattleBox.Games.RobotGame.Game
 
   def mount(%{"game_id" => game_id}, _session, socket) do
+    if connected?(socket) do
+      GameEngine.subscribe(game_engine, "game:#{game_id}")
+    end
+
     case get_game(game_id) do
       nil ->
         {:ok, assign(socket, :not_found, true)}
@@ -12,6 +16,10 @@ defmodule BattleBoxWeb.GameLive do
       game ->
         {:ok, assign(socket, :game, game)}
     end
+  end
+
+  def handle_info({:game_update, id}, %{assigns: %{game: %{id: id}}} = socket) do
+    {:noreply, assign(socket, :game, get_game(id))}
   end
 
   def render(%{not_found: true}), do: PageView.render("not_found.html", message: "Game not found")
