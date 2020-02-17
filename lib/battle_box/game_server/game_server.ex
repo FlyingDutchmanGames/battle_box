@@ -61,6 +61,8 @@ defmodule BattleBox.GameServer do
   end
 
   def handle_event(:internal, :collect_moves, :moves, data) do
+    Process.sleep(500)
+
     for player <- [:player_1, :player_2] do
       send(data[player], moves_request(data.game, player))
     end
