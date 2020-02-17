@@ -24,16 +24,13 @@ defmodule BattleBox.GameServer do
     )
   end
 
-  def init(%{names: _names, game: _game, player_1: player_1, player_2: player_2} = data) do
-    for pid <- [player_1, player_2] do
-      Process.monitor(pid)
-    end
-
-    {:ok, :game_acceptance, data, []}
+  def init(data) do
+    {:ok, :game_acceptance, data, {:next_event, :internal, :setup}}
   end
 
-  def handle_event(:enter, _old_state, :game_acceptance, data) do
+  def handle_event(:internal, :setup, :game_acceptance, data) do
     for player <- [:player_1, :player_2] do
+      Process.monitor(data[player])
       send(data[player], init_message(data.game, player))
     end
 
@@ -109,6 +106,8 @@ defmodule BattleBox.GameServer do
 
     {:stop, :normal}
   end
+
+  def handle_event(:enter, _, _, _), do: :keep_state_and_data
 
   defp moves_request(game, player) do
     {:moves_request,
