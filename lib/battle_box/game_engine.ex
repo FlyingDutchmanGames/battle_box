@@ -3,6 +3,8 @@ defmodule BattleBox.GameEngine do
   alias BattleBox.GameServer.GameSupervisor, as: GameSup
   alias BattleBox.PlayerServer.PlayerSupervisor, as: PlayerSup
   alias BattleBox.{MatchMakerServer, TcpConnectionServer}
+  alias Phoenix.PubSub
+  import Supervisor.Spec, only: [supervisor: 2]
 
   @default_name GameEngine
   def default_name, do: @default_name
@@ -21,11 +23,17 @@ defmodule BattleBox.GameEngine do
       {Registry, keys: :unique, name: game_registry_name(name)},
       {BattleBox.MatchMaker, %{names: names(name)}},
       {GameSup, %{names: names(name)}},
-      {PlayerSup, %{names: names(name)}}
+      {PlayerSup, %{names: names(name)}},
+      supervisor(Phoenix.PubSub.PG2, [pubsub_name(name), []])
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
   end
+
+  def broadcast(game_engine, topic, message),
+    do: PubSub.broadcast(pubsub_name(game_engine), topic, message)
+
+  def subscribe(game_engine, topic), do: PubSub.subscribe(pubsub_name(game_engine), topic)
 
   def start_game(game_engine, opts),
     do: GameSup.start_game(game_supervisor_name(game_engine), opts)
@@ -73,6 +81,7 @@ defmodule BattleBox.GameEngine do
   defp match_maker_server_name(name), do: Module.concat(name, MatchMaker.MatchMakerServer)
   defp match_maker_registry_name(name), do: Module.concat(name, MatchMaker.Registry)
   defp connection_registry_name(name), do: Module.concat(name, Connection.Registry)
+  defp pubsub_name(name), do: Module.concat(name, PubSub)
 
   defp get_process(registry, id) do
     case Registry.lookup(registry, id) do
