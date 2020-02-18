@@ -1,7 +1,6 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
   use BattleBox.DataCase
   alias BattleBox.Games.RobotGame.Game
-  alias BattleBox.Games.RobotGame.Game.Robot
   import BattleBox.Games.RobotGame.Game.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
@@ -49,15 +48,15 @@ defmodule BattleBox.Games.RobotGame.GameTest do
         |> Game.put_events(robot_spawns)
 
       assert [
-               %{type: :move, robot_id: 1, target: {1, 0}}
+               %{"type" => "move", "robot_id" => 1, "target" => [1, 0]}
              ] ==
                Game.validate_moves(
                  game,
                  [
-                   %{type: :move, robot_id: 1, target: {1, 0}},
-                   %{type: :move, robot_id: 1, target: {0, 1}}
+                   %{"type" => "move", "robot_id" => 1, "target" => [1, 0]},
+                   %{"type" => "move", "robot_id" => 1, "target" => [0, 1]}
                  ],
-                 :player_1
+                 "player_1"
                )
     end
 
@@ -69,7 +68,11 @@ defmodule BattleBox.Games.RobotGame.GameTest do
         |> Game.put_events(robot_spawns)
 
       assert [] ==
-               Game.validate_moves(game, [%{type: :move, robot_id: 1, target: {1, 0}}], :player_2)
+               Game.validate_moves(
+                 game,
+                 [%{"type" => "move", "robot_id" => 1, "target" => [1, 0]}],
+                 "player_2"
+               )
     end
   end
 
@@ -131,8 +134,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       game =
         Game.put_event(game, %{
-          cause: :spawn,
-          effects: [{:create_robot, :player_1, uuid(), 50, {0, 0}}]
+          cause: "spawn",
+          effects: [["create_robot", "player_1", uuid(), 50, [0, 0]]]
         })
 
       {:ok, game} = Game.persist(game)
@@ -147,8 +150,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       game =
         Game.put_event(game, %{
-          cause: :spawn,
-          effects: [{:create_robot, :player_1, uuid(), 50, {0, 0}}]
+          cause: "spawn",
+          effects: [["create_robot", "player_1", uuid(), 50, [0, 0]]]
         })
 
       {:ok, game} = Game.persist(game)
@@ -157,8 +160,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       game =
         Game.put_event(game, %{
-          cause: :spawn,
-          effects: [{:create_robot, :player_1, uuid(), 50, {1, 1}}]
+          cause: "spawn",
+          effects: [["create_robot", "player_1", uuid(), 50, [1, 1]]]
         })
 
       {:ok, game} = Game.persist(game)
@@ -171,10 +174,10 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "user/2" do
     test "you can get the user for a player and it defaults to `Player 1` and `Player 2`" do
-      assert "FIRST" == Game.user(Game.new(player_1: "FIRST"), :player_1)
-      assert "SECOND" == Game.user(Game.new(player_2: "SECOND"), :player_2)
-      assert "Player 1" == Game.user(Game.new(), :player_1)
-      assert "Player 2" == Game.user(Game.new(), :player_2)
+      assert "FIRST" == Game.user(Game.new(player_1: "FIRST"), "player_1")
+      assert "SECOND" == Game.user(Game.new(player_2: "SECOND"), "player_2")
+      assert "Player 1" == Game.user(Game.new(), "player_1")
+      assert "Player 2" == Game.user(Game.new(), "player_2")
     end
   end
 
@@ -215,7 +218,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "score" do
     test "the score for a non existant player is 0" do
-      assert 0 = Game.score(Game.new(), :player_1)
+      assert 0 = Game.score(Game.new(), "player_1")
     end
 
     test "A player with robots is the the number of robots" do
@@ -225,8 +228,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
         Game.new()
         |> Game.put_events(robot_spawns)
 
-      assert 1 == Game.score(game, :player_1)
-      assert 0 == Game.score(game, :player_2)
+      assert 1 == Game.score(game, "player_1")
+      assert 0 == Game.score(game, "player_2")
     end
   end
 
@@ -237,11 +240,11 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "it can give back a robot if there is one at a location" do
       robot_spawns = ~g/1/
-      robot = %{player_id: :player_1, id: 1, location: {0, 0}, hp: 50}
+      robot = %{player_id: "player_1", id: 1, location: [0, 0], hp: 50}
 
-      assert Robot.new(robot) ==
+      assert robot ==
                Game.put_events(Game.new(), robot_spawns)
-               |> Game.get_robot_at_location({0, 0})
+               |> Game.get_robot_at_location([0, 0])
     end
   end
 
@@ -260,14 +263,14 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
-  describe "put_events (:create_robot)" do
+  describe "put_events (create_robot)" do
     test "you can create a robot" do
       game = Game.new()
       id = uuid()
-      effect = {:create_robot, :player_1, id, 42, {42, 42}}
+      effect = ["create_robot", "player_1", id, 42, [42, 42]]
       game = Game.put_event(game, %{move: :test, effects: [effect]})
 
-      assert [%{id: ^id, player_id: :player_1, location: {42, 42}, hp: 42}] = Game.robots(game)
+      assert [%{id: ^id, player_id: "player_1", location: [42, 42], hp: 42}] = Game.robots(game)
     end
   end
 
@@ -276,8 +279,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/1/
       game = Game.new() |> Game.put_events(robot_spawns)
       robots = Game.robots(game)
-      robots = Game.apply_effect_to_robots(robots, {:move, 1, {0, 1}})
-      assert [%{location: {0, 1}, id: 1}] = robots
+      robots = Game.apply_effect_to_robots(robots, ["move", 1, [0, 1]])
+      assert [%{location: [0, 1], id: 1}] = robots
     end
   end
 
@@ -286,7 +289,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/1/
       game = Game.new() |> Game.put_events(robot_spawns)
       robots = Game.robots(game)
-      robots = Game.apply_effect_to_robots(robots, {:damage, 1, 10})
+      robots = Game.apply_effect_to_robots(robots, ["damage", 1, 10])
       assert [%{hp: 40, id: 1}] = robots
     end
   end
@@ -299,13 +302,13 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robots = Game.robots(game)
 
       assert 1 == length(robots)
-      robots = Game.apply_effect_to_robots(robots, {:remove_robot, 1})
+      robots = Game.apply_effect_to_robots(robots, ["remove_robot", 1])
       assert 0 == length(robots)
     end
 
     test "trying to remove a robot that doesn't exist doesn't raise an error" do
       robots = []
-      robots = Game.apply_effect_to_robots(robots, {:remove_robot, "DOESN'T EXIST"})
+      robots = Game.apply_effect_to_robots(robots, ["remove_robot", "DOESN'T EXIST"])
       assert robots == []
     end
   end
@@ -313,10 +316,10 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "get_robot/2" do
     test "you can get a robot by id" do
       robot_spawns = ~g/1/
-      robot = %{player_id: :player_1, location: {0, 0}, id: 1, hp: 50}
+      robot = %{player_id: "player_1", location: [0, 0], id: 1, hp: 50}
 
       game = Game.put_events(Game.new(), robot_spawns)
-      assert Robot.new(robot) == Game.get_robot(game, 1)
+      assert robot == Game.get_robot(game, 1)
     end
 
     test "trying to get a robot by id that doesn't exist gives `nil`" do
@@ -363,7 +366,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "adjacent_locations/1" do
     test "it provides the adjacent locations" do
-      assert [{1, 0}, {-1, 0}, {0, 1}, {0, -1}] = Game.adjacent_locations({0, 0})
+      assert [[1, 0], [-1, 0], [0, 1], [0, -1]] = Game.adjacent_locations([0, 0])
     end
   end
 
@@ -375,15 +378,15 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       game = Game.new(terrain: terrain)
 
-      assert Enum.sort([{0, 1}, {2, 1}, {1, 0}, {1, 2}]) ==
-               Enum.sort(Game.available_adjacent_locations(game, {1, 1}))
+      assert Enum.sort([[0, 1], [2, 1], [1, 0], [1, 2]]) ==
+               Enum.sort(Game.available_adjacent_locations(game, [1, 1]))
     end
 
     test "doesn't provide spaces outside the map" do
       terrain = ~t/1/
 
       game = Game.new(terrain: terrain)
-      assert [] == Game.available_adjacent_locations(game, {0, 0})
+      assert [] == Game.available_adjacent_locations(game, [0, 0])
     end
 
     test "doesn't provide spaces that are inaccesible" do
@@ -392,7 +395,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       000/
 
       game = Game.new(terrain: terrain)
-      assert [] == Game.available_adjacent_locations(game, {1, 1})
+      assert [] == Game.available_adjacent_locations(game, [1, 1])
     end
   end
 
@@ -402,8 +405,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new(player_1: p1, player_2: p2)
 
       assert game.winner == nil
-      assert Game.disqualify(game, :player_1).winner == p2
-      assert Game.disqualify(game, :player_2).winner == p1
+      assert Game.disqualify(game, "player_1").winner == p2
+      assert Game.disqualify(game, "player_2").winner == p1
     end
   end
 

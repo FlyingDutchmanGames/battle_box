@@ -10,7 +10,7 @@ defmodule BattleBox.Games.RobotGame.Game.Terrain.Helpers do
     graph_with_indexes =
       for {row, row_num} <- Enum.with_index(graphs),
           {col, col_num} <- Enum.with_index(row),
-          do: {{row_num, col_num}, col}
+          do: {[row_num, col_num], col}
 
     Map.new(graph_with_indexes, fn {loc, val} -> {loc, terrain_val(val)} end)
   end

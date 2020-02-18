@@ -7,22 +7,22 @@ defmodule BattleBoxWeb.RobotGameViewTest do
 
   describe "terrain_number/1" do
     test "the terrain numbering of a starting column is displayed" do
-      assert 10 == RobotGameView.terrain_number({0, 10})
+      assert 10 == RobotGameView.terrain_number([0, 10])
     end
 
     test "the terrain numbering of a starting row is displayed" do
-      assert 10 == RobotGameView.terrain_number({10, 0})
+      assert 10 == RobotGameView.terrain_number([10, 0])
     end
 
     test "0 is displayed at the origin" do
-      assert 0 == RobotGameView.terrain_number({0, 0})
+      assert 0 == RobotGameView.terrain_number([0, 0])
     end
   end
 
   describe "render terrain.html" do
     test "you can render terrain" do
       {:ok, document} =
-        render_to_string(RobotGameView, "terrain.html", terrain: :normal, location: {0, 0})
+        render_to_string(RobotGameView, "terrain.html", terrain: :normal, location: [0, 0])
         |> Floki.parse_document()
 
       [div] = Floki.find(document, "div.terrain.normal")
@@ -33,7 +33,7 @@ defmodule BattleBoxWeb.RobotGameViewTest do
 
     test "Terrain that is not on an edge doesn't have a number" do
       {:ok, document} =
-        render_to_string(RobotGameView, "terrain.html", terrain: :normal, location: {1, 1})
+        render_to_string(RobotGameView, "terrain.html", terrain: :normal, location: [1, 1])
         |> Floki.parse_document()
 
       [number] = Floki.find(document, "div.terrain .number")
@@ -44,7 +44,7 @@ defmodule BattleBoxWeb.RobotGameViewTest do
       [:normal, :spawn, :obstacle, :inaccesible]
       |> Enum.map(fn terrain ->
         {:ok, document} =
-          render_to_string(RobotGameView, "terrain.html", terrain: terrain, location: {1, 1})
+          render_to_string(RobotGameView, "terrain.html", terrain: terrain, location: [1, 1])
           |> Floki.parse_document()
 
         assert [_div] = Floki.find(document, ".terrain.#{terrain}")
@@ -54,7 +54,7 @@ defmodule BattleBoxWeb.RobotGameViewTest do
 
   describe "render robot.html" do
     test "you can render a robot" do
-      robot = %{id: "test", player_id: "player_1", location: {1, 1}, hp: 50}
+      robot = %{id: "test", player_id: "player_1", location: [1, 1], hp: 50}
 
       {:ok, document} =
         render_to_string(RobotGameView, "robot.html", robot: robot, move: nil, selected: false)
@@ -66,7 +66,7 @@ defmodule BattleBoxWeb.RobotGameViewTest do
     end
 
     test "a robot has a health overlay" do
-      robot = %{id: "test", player_id: "player_1", location: {1, 1}, hp: 50}
+      robot = %{id: "test", player_id: "player_1", location: [1, 1], hp: 50}
 
       {:ok, document} =
         render_to_string(RobotGameView, "robot.html", robot: robot, move: nil, selected: false)
@@ -78,7 +78,7 @@ defmodule BattleBoxWeb.RobotGameViewTest do
     end
 
     test "a robot without a move doesn't have a move div" do
-      robot = %{id: "test", player_id: "player_1", location: {1, 1}, hp: 50}
+      robot = %{id: "test", player_id: "player_1", location: [1, 1], hp: 50}
 
       {:ok, document} =
         render_to_string(RobotGameView, "robot.html", robot: robot, move: nil, selected: false)

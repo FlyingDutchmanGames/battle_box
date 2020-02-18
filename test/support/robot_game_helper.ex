@@ -10,16 +10,16 @@ defmodule BattleBox.Games.RobotGameTest.Helpers do
     graph_with_indexes =
       for {row, row_num} <- Enum.with_index(graphs),
           {col, col_num} <- Enum.with_index(row),
-          do: {{row_num, col_num}, col}
+          do: {[row_num, col_num], col}
 
     graph_with_indexes
     |> Enum.reject(fn {_, val} -> val == "0" end)
     |> Enum.map(fn {location, val} ->
       {val, ""} = Integer.parse(val)
 
-      player_id = if rem(val, 2) == 1, do: :player_1, else: :player_2
+      player_id = if rem(val, 2) == 1, do: "player_1", else: "player_2"
 
-      %{move: :test_helper, effects: [{:create_robot, player_id, val, 50, location}]}
+      %{move: "test_helper", effects: [["create_robot", player_id, val, 50, location]]}
     end)
   end
 end

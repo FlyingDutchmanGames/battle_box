@@ -42,8 +42,8 @@ defmodule BattleBoxWeb.RobotGameView do
 
   def terrain_number(location) do
     case location do
-      {0, col} -> col
-      {row, 0} -> row
+      [0, col] -> col
+      [row, 0] -> row
       _ -> nil
     end
   end

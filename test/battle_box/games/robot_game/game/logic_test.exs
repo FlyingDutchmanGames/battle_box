@@ -15,7 +15,7 @@ defmodule BattleBox.Games.RobotGame.Game.LogicTest do
       game = Logic.calculate_turn(game, %{player_1: [], player_2: []})
       assert length(Game.robots(game)) == 2
 
-      assert [{0, 0}, {1, 1}] ==
+      assert [[0, 0], [1, 1]] ==
                Game.robots(game)
                |> Enum.map(&Map.get(&1, :location))
                |> Enum.sort()
