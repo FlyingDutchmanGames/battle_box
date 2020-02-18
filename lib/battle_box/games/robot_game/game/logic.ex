@@ -42,6 +42,13 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
 
     game = put_events(game, events)
 
+    robo_deaths = %{
+      cause: :death,
+      effects: for(%{id: id, hp: hp} <- robots(game), hp <= 0, do: {:remove_robot, id})
+    }
+
+    game = put_event(game, robo_deaths)
+
     game =
       if over?(game),
         do: calculate_winner(game),

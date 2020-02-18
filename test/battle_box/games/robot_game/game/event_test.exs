@@ -48,6 +48,13 @@ defmodule BattleBox.Games.RobotGame.Game.EventTest do
         seq_num: 1,
         cause: @attack_move,
         effects: [{:damage, @robot_id, 42}, {:remove_robot, @robot_id}]
+      },
+      # Death
+      %{
+        turn: 1,
+        seq_num: 1,
+        cause: :death,
+        effects: [{:remove_robot, 1}]
       }
     ]
     |> Enum.each(fn event ->

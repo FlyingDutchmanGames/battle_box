@@ -20,6 +20,16 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     }
   end
 
+  test "If a robot goes to 0 health it disappears" do
+    robot_spawns = ~g/1 2/
+    game = Game.new(terrain: @terrain, spawn_enabled: false, attack_damage: 50, robot_hp: 50)
+    inital_game = Game.put_events(game, robot_spawns)
+    player_2_moves = [%{type: :attack, target: {0, 0}, robot_id: 2}]
+    after_turn = Logic.calculate_turn(inital_game, %{player_1: [], player_2: player_2_moves})
+
+    assert nil == Game.get_robot(after_turn, 1)
+  end
+
   test "If you attack a square a robot is in it takes damage", %{game: game} do
     robot_spawns = ~g/1 2/
 

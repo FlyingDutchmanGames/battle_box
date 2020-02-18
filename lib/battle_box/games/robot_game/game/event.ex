@@ -11,6 +11,9 @@ defmodule BattleBox.Games.RobotGame.Game.Event do
         spawn when spawn in [:spawn, "spawn"] ->
           {:ok, :spawn}
 
+        death when death in [:death, "death"] ->
+          {:ok, :death}
+
         %{type: _, robot_id: _} = cause ->
           {:ok, cause}
 
