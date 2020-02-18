@@ -5,8 +5,8 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
   def calculate_turn(game, %{player_1: player_1_moves, player_2: player_2_moves}) do
     moves =
       Enum.concat(
-        validate_moves(game, player_1_moves, :player_1),
-        validate_moves(game, player_2_moves, :player_2)
+        validate_moves(game, player_1_moves, "player_1"),
+        validate_moves(game, player_2_moves, "player_2")
       )
 
     game =
@@ -16,13 +16,13 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
 
     movements =
       for move <- moves,
-          move.type == "move",
+          move["type"] == "move",
           do: move
 
     guard_locations =
       for move <- moves,
-          move.type == "guard",
-          robot = get_robot(game, move.robot_id),
+          move["type"] == "guard",
+          robot = get_robot(game, move["robot_id"]),
           do: robot.location
 
     movement_events =
@@ -33,7 +33,7 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
 
     events =
       moves
-      |> Enum.filter(fn move -> move.type in ["suicide", "attack", "guard"] end)
+      |> Enum.filter(fn move -> move["type"] in ["suicide", "attack", "guard"] end)
       |> Enum.map(fn
         %{"type" => "suicide"} = move -> generate_suicide_event(game, move, guard_locations)
         %{"type" => "attack"} = move -> generate_attack_event(game, move, guard_locations)
@@ -57,13 +57,13 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
     complete_turn(game)
   end
 
-  defp generate_guard_event(move), do: %{cause: move, effects: [{:guard, move.robot_id}]}
+  defp generate_guard_event(move), do: %{cause: move, effects: [["guard", move["robot_id"]]]}
 
   defp generate_movement_event(game, move, movements, guard_locations) do
     effects =
       case calc_movement(game, move, movements) do
         {:move, target, robot} ->
-          [{:move, robot.id, target}]
+          [["move", robot.id, target]]
 
         {:no_move, reason, robot} ->
           case reason do
@@ -93,12 +93,12 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
   end
 
   defp generate_attack_event(game, move, guard_locations) do
-    robot = get_robot(game, move.robot_id)
+    robot = get_robot(game, move["robot_id"])
 
     attack_conditions = %{
-      attack_target_adjacent?: move.target in adjacent_locations(robot.location),
-      guarded?: move.target in guard_locations,
-      target_space_occupant: get_robot_at_location(game, move.target)
+      attack_target_adjacent?: move["target"] in adjacent_locations(robot.location),
+      guarded?: move["target"] in guard_locations,
+      target_space_occupant: get_robot_at_location(game, move["target"])
     }
 
     effects =
@@ -120,7 +120,7 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
   end
 
   defp generate_suicide_event(game, move, guard_locations) do
-    robot = get_robot(game, move.robot_id)
+    robot = get_robot(game, move["robot_id"])
 
     damage_effects =
       adjacent_locations(robot.location)
@@ -168,20 +168,20 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
   end
 
   defp calc_movement(game, move, movements, stuck_robots \\ []) do
-    robot = get_robot(game, move.robot_id)
-    robot_currently_at_location = get_robot_at_location(game, move.target)
-    moves_to_location = Enum.filter(movements, &(&1.target == move.target))
+    robot = get_robot(game, move["robot_id"])
+    robot_currently_at_location = get_robot_at_location(game, move["target"])
+    moves_to_location = Enum.filter(movements, &(&1["target"] == move["target"]))
 
     space_info = %{
-      move_target_adjacent?: move.target in adjacent_locations(robot.location),
-      valid_terrain?: game.terrain[move.target] in [:normal, :spawn],
+      move_target_adjacent?: move["target"] in adjacent_locations(robot.location),
+      valid_terrain?: game.terrain[move["target"]] in [:normal, :spawn],
       contention?: length(moves_to_location) > 1,
       current_occupant: robot_currently_at_location,
       current_occupant_in_stuck_robots?:
         if(robot_currently_at_location, do: robot_currently_at_location.id in stuck_robots),
       current_occupant_move:
         if(robot_currently_at_location,
-          do: Enum.find(movements, &(&1.robot_id == robot_currently_at_location.id))
+          do: Enum.find(movements, &(&1["robot_id"] == robot_currently_at_location.id))
         )
     }
 
@@ -199,7 +199,7 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
         {:no_move, {:collision, other_robot}, robot}
 
       %{current_occupant_in_stuck_robots?: true} ->
-        {:move, move.target, robot}
+        {:move, move["target"], robot}
 
       %{
         move_target_adjacent?: true,
@@ -207,12 +207,12 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
         contention?: false,
         current_occupant: nil
       } ->
-        {:move, move.target, robot}
+        {:move, move["target"], robot}
 
       %{current_occupant: other_robot, current_occupant_move: other_robot_move} ->
         case calc_movement(game, other_robot_move, movements, [robot.id | stuck_robots]) do
           {:move, _, _} ->
-            {:move, move.target, robot}
+            {:move, move["target"], robot}
 
           {:no_move, _, _} ->
             {:no_move, {:collision, other_robot}, robot}
