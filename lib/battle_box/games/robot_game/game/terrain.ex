@@ -14,6 +14,7 @@ defmodule BattleBox.Games.RobotGame.Game.Terrain do
     {row_nums, col_nums} =
       terrain
       |> Map.keys()
+      |> Enum.map(&List.to_tuple/1)
       |> Enum.unzip()
 
     %{
