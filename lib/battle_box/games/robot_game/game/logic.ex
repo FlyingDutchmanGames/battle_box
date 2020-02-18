@@ -16,12 +16,12 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
 
     movements =
       for move <- moves,
-          move.type == :move,
+          move.type == "move",
           do: move
 
     guard_locations =
       for move <- moves,
-          move.type == :guard,
+          move.type == "guard",
           robot = get_robot(game, move.robot_id),
           do: robot.location
 
@@ -33,18 +33,18 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
 
     events =
       moves
-      |> Enum.filter(fn move -> move.type in [:suicide, :attack, :guard] end)
+      |> Enum.filter(fn move -> move.type in ["suicide", "attack", "guard"] end)
       |> Enum.map(fn
-        %{type: :suicide} = move -> generate_suicide_event(game, move, guard_locations)
-        %{type: :attack} = move -> generate_attack_event(game, move, guard_locations)
-        %{type: :guard} = move -> generate_guard_event(move)
+        %{"type" => "suicide"} = move -> generate_suicide_event(game, move, guard_locations)
+        %{"type" => "attack"} = move -> generate_attack_event(game, move, guard_locations)
+        %{"type" => "guard"} = move -> generate_guard_event(move)
       end)
 
     game = put_events(game, events)
 
     robo_deaths = %{
-      cause: :death,
-      effects: for(%{id: id, hp: hp} <- robots(game), hp <= 0, do: {:remove_robot, id})
+      cause: "death",
+      effects: for(%{id: id, hp: hp} <- robots(game), hp <= 0, do: ["remove_robot", id])
     }
 
     game = put_event(game, robo_deaths)
@@ -71,10 +71,10 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
               []
 
             :invalid_terrain ->
-              [{:damage, robot.id, collision_damage(game)}]
+              [["damage", robot.id, collision_damage(game)]]
 
             :contention ->
-              [{:damage, robot.id, collision_damage(game)}]
+              [["damage", robot.id, collision_damage(game)]]
 
             {:collision, other_robot} ->
               other_robot_damage =
@@ -83,8 +83,8 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
                   else: collision_damage(game)
 
               [
-                {:damage, robot.id, collision_damage(game)},
-                {:damage, other_robot.id, other_robot_damage}
+                ["damage", robot.id, collision_damage(game)],
+                ["damage", other_robot.id, other_robot_damage]
               ]
           end
       end
@@ -110,10 +110,10 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
           []
 
         %{target_space_occupant: other_robot, guarded?: true} when not is_nil(other_robot) ->
-          [{:damage, other_robot.id, guarded_attack_damage(game)}]
+          [["damage", other_robot.id, guarded_attack_damage(game)]]
 
         %{target_space_occupant: other_robot, guarded?: false} when not is_nil(other_robot) ->
-          [{:damage, other_robot.id, attack_damage(game)}]
+          [["damage", other_robot.id, attack_damage(game)]]
       end
 
     %{cause: move, effects: effects}
@@ -132,10 +132,10 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
             do: guarded_suicide_damage(game),
             else: suicide_damage(game)
 
-        {:damage, affected_robot_id, damage}
+        ["damage", affected_robot_id, damage]
       end)
 
-    %{cause: move, effects: [{:remove_robot, robot.id} | damage_effects]}
+    %{cause: move, effects: [["remove_robot", robot.id] | damage_effects]}
   end
 
   defp generate_spawn_events(game) do
@@ -149,8 +149,8 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
       |> Enum.zip(Stream.cycle([:player_1, :player_2]))
       |> Enum.map(fn {spawn_location, player_id} ->
         %{
-          cause: :spawn,
-          effects: [{:create_robot, player_id, UUID.generate(), game.robot_hp, spawn_location}]
+          cause: "spawn",
+          effects: [["create_robot", player_id, UUID.generate(), game.robot_hp, spawn_location]]
         }
       end)
 
@@ -159,8 +159,8 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
       |> Enum.filter(fn robot -> robot.location in spawn_locations end)
       |> Enum.map(fn robot ->
         %{
-          cause: :spawn,
-          effects: [{:remove_robot, robot.id}]
+          cause: "spawn",
+          effects: [["remove_robot", robot.id]]
         }
       end)
 

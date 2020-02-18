@@ -1,7 +1,6 @@
 defmodule BattleBox.Games.RobotGame.Game do
   alias BattleBox.Repo
-  alias BattleBox.Games.RobotGame.Game.{Terrain, Robot}
-  alias __MODULE__.{Event, DamageModifier}
+  alias __MODULE__.{Terrain, Event, DamageModifier}
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -55,7 +54,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   def get_by_id(_), do: nil
 
   def disqualify(game, player) do
-    winner = %{player_1: :player_2, player_2: :player_1}[player]
+    winner = %{"player_1" => :player_2, "player_2" => :player_1}[player]
     winner = Map.get(game, winner)
     Map.put(game, :winner, winner)
   end
@@ -73,13 +72,13 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def validate_moves(game, moves, player) do
     moves
-    |> Enum.uniq_by(fn move -> move.robot_id end)
-    |> Enum.filter(fn move -> match?(%{player_id: ^player}, get_robot(game, move.robot_id)) end)
+    |> Enum.uniq_by(fn move -> move["robot_id"] end)
+    |> Enum.filter(fn move -> match?(%{player_id: ^player}, get_robot(game, move["robot_id"])) end)
   end
 
   def calculate_winner(game) do
     winner =
-      case {score(game, :player_1), score(game, :player_2)} do
+      case {score(game, "player_1"), score(game, "player_2")} do
         {p1, p2} when p1 == p2 -> nil
         {p1, p2} when p1 > p2 -> game.player_1
         {p1, p2} when p1 < p2 -> game.player_2
@@ -110,33 +109,25 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def apply_effect_to_robots(robots, effect) do
     case effect do
-      {:move, robot_id, location} ->
+      ["move", robot_id, location] ->
         Enum.map(robots, fn
           %{id: ^robot_id} = robot -> put_in(robot.location, location)
           robot -> robot
         end)
 
-      {:damage, robot_id, amount} ->
+      ["damage", robot_id, amount] ->
         Enum.map(robots, fn
-          %{id: ^robot_id} = robot -> Robot.apply_damage(robot, amount)
+          %{id: ^robot_id, hp: hp} = robot -> %{robot | hp: hp - amount}
           robot -> robot
         end)
 
-      {:guard, _robot_id} ->
+      ["guard", _robot_id] ->
         robots
 
-      {:create_robot, player_id, robot_id, hp, location} ->
-        [
-          Robot.new(%{
-            player_id: player_id,
-            location: location,
-            id: robot_id,
-            hp: hp
-          })
-          | robots
-        ]
+      ["create_robot", player_id, robot_id, hp, location] ->
+        [%{player_id: player_id, location: location, id: robot_id, hp: hp} | robots]
 
-      {:remove_robot, robot_id} ->
+      ["remove_robot", robot_id] ->
         Enum.reject(robots, fn robot -> robot.id == robot_id end)
     end
   end
@@ -151,15 +142,15 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def over?(game), do: game.winner || game.turn >= game.max_turns
 
-  def score(game, player_id) when player_id in [:player_1, :player_2] do
+  def score(game, player_id) when player_id in ["player_1", "player_2"] do
     game
     |> robots
     |> Enum.filter(fn robot -> robot.player_id == player_id end)
     |> length
   end
 
-  def user(game, :player_1), do: to_string(game.player_1 || "Player 1")
-  def user(game, :player_2), do: to_string(game.player_2 || "Player 2")
+  def user(game, "player_1"), do: to_string(game.player_1 || "Player 1")
+  def user(game, "player_2"), do: to_string(game.player_2 || "Player 2")
 
   def dimensions(game), do: Terrain.dimensions(game.terrain)
 
@@ -195,12 +186,12 @@ defmodule BattleBox.Games.RobotGame.Game do
     Enum.filter(adjacent_locations(location), &(game.terrain[&1] in [:normal, :spawn]))
   end
 
-  def adjacent_locations({row, col}),
+  def adjacent_locations([row, col]),
     do: [
-      {row + 1, col},
-      {row - 1, col},
-      {row, col + 1},
-      {row, col - 1}
+      [row + 1, col],
+      [row - 1, col],
+      [row, col + 1],
+      [row, col - 1]
     ]
 
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
