@@ -1,4 +1,4 @@
-<% {row, col} = @robot.location %>
+<% [row, col] = @robot.location %>
 <% grid_location = "grid-row: #{row + 1}; grid-column: #{col + 1};" %>
 <div
      class='<%= "robot #{@robot.player_id}" %>'

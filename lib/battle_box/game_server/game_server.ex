@@ -94,8 +94,8 @@ defmodule BattleBox.GameServer do
   def handle_event(:info, {:DOWN, _, :process, pid, _}, :moves, data) do
     player =
       cond do
-        pid == data.player_1 -> :player_1
-        pid == data.player_2 -> :player_2
+        pid == data.player_1 -> "player_1"
+        pid == data.player_2 -> "player_2"
       end
 
     {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),

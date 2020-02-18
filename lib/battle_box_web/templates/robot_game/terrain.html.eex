@@ -1,4 +1,4 @@
-<% {row, col} = @location %>
+<% [row, col] = @location %>
 <div
   class='<%= "terrain #{@terrain}" %>'
   style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'

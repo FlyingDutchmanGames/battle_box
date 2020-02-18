@@ -131,7 +131,7 @@ defmodule BattleBox.GameServerTest do
 
     :ok = GameServer.accept_game(pid, :player_1)
     :ok = GameServer.accept_game(pid, :player_2)
-    :ok = GameServer.forfeit_game(pid, :player_1)
+    :ok = GameServer.forfeit_game(pid, "player_1")
 
     assert_receive {:player_1, {:game_over, %{winner: @player_2}}}
     assert_receive {:player_2, {:game_over, %{winner: @player_2}}}
