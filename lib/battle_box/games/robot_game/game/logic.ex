@@ -42,8 +42,7 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
         do: put_events(game, generate_spawn_events(game)),
         else: game
 
-    deaths = 
-      for %{id: id, hp: hp} <- robots(game), hp <= 0, do: ["remove_robot", id]
+    deaths = for %{id: id, hp: hp} <- robots(game), hp <= 0, do: ["remove_robot", id]
 
     game =
       if deaths != [],
