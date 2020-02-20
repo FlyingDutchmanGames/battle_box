@@ -11,7 +11,7 @@ defmodule BattleBox.GameServer.GameSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one, extra_arguments: [init_arg])
   end
 
-  def start_game(game_supervisor, %{player_1: _, player_2: _, game: _} = opts) do
+  def start_game(game_supervisor, %{players: _, game: _} = opts) do
     DynamicSupervisor.start_child(game_supervisor, {GameServer, opts})
   end
 

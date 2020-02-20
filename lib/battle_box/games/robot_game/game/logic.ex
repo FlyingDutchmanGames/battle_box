@@ -2,7 +2,7 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
   import BattleBox.Games.RobotGame.Game
   alias Ecto.UUID
 
-  def calculate_turn(game, %{player_1: player_1_moves, player_2: player_2_moves}) do
+  def calculate_turn(game, %{"player_1" => player_1_moves, "player_2" => player_2_moves}) do
     moves =
       Enum.concat(
         validate_moves(game, player_1_moves, "player_1"),
@@ -146,7 +146,7 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
 
     spawned_robots =
       spawn_locations
-      |> Enum.zip(Stream.cycle([:player_1, :player_2]))
+      |> Enum.zip(Stream.cycle(["player_1", "player_2"]))
       |> Enum.map(fn {spawn_location, player_id} ->
         %{
           cause: "spawn",

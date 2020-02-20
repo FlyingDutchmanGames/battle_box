@@ -15,8 +15,10 @@ defmodule BattleBox.GameServerTest do
   setup do
     %{
       init_opts: %{
-        player_1: named_proxy(:player_1),
-        player_2: named_proxy(:player_2),
+        players: %{
+          "player_1" => named_proxy(:player_1),
+          "player_2" => named_proxy(:player_2)
+        },
         game: Game.new(player_1: @player_1, player_2: @player_2)
       }
     }
@@ -66,8 +68,8 @@ defmodule BattleBox.GameServerTest do
       }
     }
 
-    expected_p1 = {:player_1, {:game_request, Map.put(expected, :player, :player_1)}}
-    expected_p2 = {:player_2, {:game_request, Map.put(expected, :player, :player_2)}}
+    expected_p1 = {:player_1, {:game_request, Map.put(expected, :player, "player_1")}}
+    expected_p2 = {:player_2, {:game_request, Map.put(expected, :player, "player_2")}}
 
     assert_receive ^expected_p1
     assert_receive ^expected_p2
@@ -79,8 +81,8 @@ defmodule BattleBox.GameServerTest do
 
       ref = Process.monitor(pid)
 
-      assert :ok = GameServer.accept_game(pid, :player_1)
-      assert :ok = GameServer.reject_game(pid, :player_2)
+      assert :ok = GameServer.accept_game(pid, "player_1")
+      assert :ok = GameServer.reject_game(pid, "player_2")
 
       game_id = context.init_opts.game.id
 
@@ -95,9 +97,9 @@ defmodule BattleBox.GameServerTest do
 
       game_ref = Process.monitor(pid)
 
-      assert :ok = GameServer.accept_game(pid, :player_1)
+      assert :ok = GameServer.accept_game(pid, "player_1")
 
-      player_2_pid = context.init_opts.player_2
+      player_2_pid = context.init_opts.players["player_2"]
 
       Process.exit(player_2_pid, :kill)
       assert_receive {:EXIT, ^player_2_pid, :killed}
@@ -112,25 +114,25 @@ defmodule BattleBox.GameServerTest do
   test "When you accept a game it asks you for moves", context do
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
 
-    :ok = GameServer.accept_game(pid, :player_1)
-    :ok = GameServer.accept_game(pid, :player_2)
+    :ok = GameServer.accept_game(pid, "player_1")
+    :ok = GameServer.accept_game(pid, "player_2")
 
     game_id = context.init_opts.game.id
 
     assert_receive {:player_1,
                     {:moves_request,
-                     %{game_id: ^game_id, game_state: %{robots: [], turn: 0}, player: :player_1}}}
+                     %{game_id: ^game_id, game_state: %{robots: [], turn: 0}, player: "player_1"}}}
 
     assert_receive {:player_2,
                     {:moves_request,
-                     %{game_id: ^game_id, game_state: %{robots: [], turn: 0}, player: :player_2}}}
+                     %{game_id: ^game_id, game_state: %{robots: [], turn: 0}, player: "player_2"}}}
   end
 
   test "if you forefit, you get a game over message/ the other player wins", context do
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
 
-    :ok = GameServer.accept_game(pid, :player_1)
-    :ok = GameServer.accept_game(pid, :player_2)
+    :ok = GameServer.accept_game(pid, "player_1")
+    :ok = GameServer.accept_game(pid, "player_2")
     :ok = GameServer.forfeit_game(pid, "player_1")
 
     assert_receive {:player_1, {:game_over, %{winner: @player_2}}}
@@ -141,10 +143,10 @@ defmodule BattleBox.GameServerTest do
     Process.flag(:trap_exit, true)
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
 
-    :ok = GameServer.accept_game(pid, :player_1)
-    :ok = GameServer.accept_game(pid, :player_2)
+    :ok = GameServer.accept_game(pid, "player_1")
+    :ok = GameServer.accept_game(pid, "player_2")
 
-    player_2_pid = context.init_opts.player_2
+    player_2_pid = context.init_opts.players["player_2"]
 
     Process.exit(player_2_pid, :kill)
     assert_receive {:EXIT, ^player_2_pid, :killed}
@@ -160,22 +162,25 @@ defmodule BattleBox.GameServerTest do
     ref = Process.monitor(pid)
 
     assert_receive {:player_1,
-                    {:game_request, %{game_server: ^pid, player: :player_1, game_id: game_id}}}
+                    {:game_request, %{game_server: ^pid, player: "player_1", game_id: game_id}}}
 
     assert_receive {:player_2,
-                    {:game_request, %{game_server: ^pid, player: :player_2, game_id: ^game_id}}}
+                    {:game_request, %{game_server: ^pid, player: "player_2", game_id: ^game_id}}}
 
-    assert :ok = GameServer.accept_game(pid, :player_1)
-    assert :ok = GameServer.accept_game(pid, :player_2)
+    assert :ok = GameServer.accept_game(pid, "player_1")
+    assert :ok = GameServer.accept_game(pid, "player_2")
 
     Enum.each(0..9, fn turn ->
-      receive do:
-                ({:player_1, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
-                   GameServer.submit_moves(pid, :player_1, []))
+      receive do
+        {:player_1, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
+          GameServer.submit_moves(pid, "player_1", [])
+      after
+        100 -> raise "FAIL"
+      end
 
       receive do:
                 ({:player_2, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
-                   GameServer.submit_moves(pid, :player_2, []))
+                   GameServer.submit_moves(pid, "player_2", []))
     end)
 
     assert_receive {:player_1, {:game_over, %{game_id: ^game_id}}}

@@ -115,7 +115,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         :playing,
         %{moves_request: %{request_id: request_id}} = data
       ) do
-    # TODO:// Figure out how to parse moves
     :ok = PlayerServer.submit_moves(data.player_server, request_id, moves)
     data = Map.drop(data, [:moves_request])
     {:keep_state, data}

@@ -19,7 +19,7 @@ defmodule BattleBox.GameServer do
     GenStateMachine.cast(game_server, {:moves, player, moves})
   end
 
-  def start_link(config, %{player_1: _, player_2: _, game: %{id: id} = game} = data) do
+  def start_link(config, %{players: _, game: %{id: id} = game} = data) do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
       name: {:via, Registry, {config.names.game_registry, id, initial_metadata(game)}}
     )
@@ -30,9 +30,9 @@ defmodule BattleBox.GameServer do
   end
 
   def handle_event(:internal, :setup, :game_acceptance, data) do
-    for player <- [:player_1, :player_2] do
-      Process.monitor(data[player])
-      send(data[player], init_message(data.game, player))
+    for {player, pid} <- data.players do
+      Process.monitor(pid)
+      send(pid, init_message(data.game, player))
     end
 
     {:keep_state, Map.put(data, :acceptances, [])}
@@ -46,26 +46,24 @@ defmodule BattleBox.GameServer do
   end
 
   def handle_event(:cast, {:reject_game, _player}, :game_acceptance, data) do
-    for player <- [:player_1, :player_2] do
-      send(data[player], {:game_cancelled, Game.id(data.game)})
+    for {_player, pid} <- data.players do
+      send(pid, {:game_cancelled, Game.id(data.game)})
     end
 
     {:stop, :normal}
   end
 
   def handle_event(:info, {:DOWN, _, :process, _pid, _}, :game_acceptance, data) do
-    for player <- [:player_1, :player_2] do
-      send(data[player], {:game_cancelled, Game.id(data.game)})
+    for {_player, pid} <- data.players do
+      send(pid, {:game_cancelled, Game.id(data.game)})
     end
 
     {:stop, :normal}
   end
 
   def handle_event(:internal, :collect_moves, :moves, data) do
-    # Process.sleep(500) # To slow down games
-
-    for player <- [:player_1, :player_2] do
-      send(data[player], moves_request(data.game, player))
+    for {player, pid} <- data.players do
+      send(pid, moves_request(data.game, player))
     end
 
     {:keep_state, Map.put(data, :moves, [])}
@@ -92,11 +90,7 @@ defmodule BattleBox.GameServer do
   end
 
   def handle_event(:info, {:DOWN, _, :process, pid, _}, :moves, data) do
-    player =
-      cond do
-        pid == data.player_1 -> "player_1"
-        pid == data.player_2 -> "player_2"
-      end
+    {player, _} = Enum.find(data.players, fn {_player, player_pid} -> player_pid == pid end)
 
     {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
      {:next_event, :internal, :finalize}}
@@ -105,8 +99,8 @@ defmodule BattleBox.GameServer do
   def handle_event(:internal, :finalize, _state, %{game: game} = data) do
     {:ok, game} = Game.persist(game)
 
-    for player <- [:player_1, :player_2] do
-      send(data[player], game_over_message(game))
+    for {_player, pid} <- data.players do
+      send(pid, game_over_message(game))
     end
 
     {:stop, :normal}
