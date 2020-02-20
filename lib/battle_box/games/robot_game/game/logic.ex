@@ -14,9 +14,12 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
         do: put_events(game, generate_spawn_events(game)),
         else: game
 
+    post_spawn_robots_ids = Enum.map(robots(game), & &1.id)
+
     movements =
       for move <- moves,
           move["type"] == "move",
+          move["robot_id"] in post_spawn_robots_ids,
           do: move
 
     guard_locations =
