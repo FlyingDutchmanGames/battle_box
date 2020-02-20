@@ -9,17 +9,9 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
         validate_moves(game, player_2_moves, "player_2")
       )
 
-    game =
-      if spawning_round?(game),
-        do: put_events(game, generate_spawn_events(game)),
-        else: game
-
-    post_spawn_robots_ids = Enum.map(robots(game), & &1.id)
-
     movements =
       for move <- moves,
           move["type"] == "move",
-          move["robot_id"] in post_spawn_robots_ids,
           do: move
 
     guard_locations =
@@ -45,12 +37,18 @@ defmodule BattleBox.Games.RobotGame.Game.Logic do
 
     game = put_events(game, events)
 
-    robo_deaths = %{
-      cause: "death",
-      effects: for(%{id: id, hp: hp} <- robots(game), hp <= 0, do: ["remove_robot", id])
-    }
+    game =
+      if spawning_round?(game),
+        do: put_events(game, generate_spawn_events(game)),
+        else: game
 
-    game = put_event(game, robo_deaths)
+    deaths = 
+      for %{id: id, hp: hp} <- robots(game), hp <= 0, do: ["remove_robot", id]
+
+    game =
+      if deaths != [],
+        do: put_event(game, %{cause: "death", effects: deaths}),
+        else: game
 
     game =
       if over?(game),
