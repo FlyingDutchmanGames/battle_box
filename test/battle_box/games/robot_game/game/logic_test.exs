@@ -20,7 +20,7 @@ defmodule BattleBox.Games.RobotGame.Game.LogicTest do
                |> Enum.map(&Map.get(&1, :location))
                |> Enum.sort()
 
-      assert [:player_1, :player_2] ==
+      assert ["player_1", "player_2"] ==
                Enum.map(Game.robots(game), &Map.get(&1, :player_id)) |> Enum.sort()
     end
 

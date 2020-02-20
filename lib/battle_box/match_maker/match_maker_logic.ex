@@ -13,8 +13,10 @@ defmodule BattleBox.MatchMaker.MatchMakerLogic do
               player_1: player_1.player_id,
               player_2: player_2.player_id
             ),
-          player_1: player_1.pid,
-          player_2: player_2.pid
+          players: %{
+            "player_1" => player_1.pid,
+            "player_2" => player_2.pid
+          }
         }
     end)
   end
