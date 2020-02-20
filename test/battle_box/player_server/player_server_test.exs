@@ -108,10 +108,10 @@ defmodule BattleBox.PlayerServerTest do
 
     send(
       context.p1_server,
-      {:game_request, %{game_id: game_id, game_server: game_server, player: :player_1}}
+      {:game_request, %{game_id: game_id, game_server: game_server, player: "player_1"}}
     )
 
-    assert_receive {:game_server, {:"$gen_cast", {:reject_game, :player_1}}}
+    assert_receive {:game_server, {:"$gen_cast", {:reject_game, "player_1"}}}
   end
 
   test "if you wait too long to accept, the game is cancelled", context do

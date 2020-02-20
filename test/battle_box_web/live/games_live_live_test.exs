@@ -25,13 +25,15 @@ defmodule BattleBoxWeb.GamesLiveLiveTest do
     setup %{game_engine: game_engine} do
       {:ok, pid} =
         GameEngine.start_game(game_engine, %{
-          player_1: named_proxy(:player_1),
-          player_2: named_proxy(:player_2),
+          players: %{
+            "player_1" => named_proxy(:player_1),
+            "player_2" => named_proxy(:player_2)
+          },
           game: Game.new(player_1: @player_1, player_2: @player_2, id: @game_id)
         })
 
-      :ok = GameServer.accept_game(pid, :player_1)
-      :ok = GameServer.accept_game(pid, :player_1)
+      :ok = GameServer.accept_game(pid, "player_1")
+      :ok = GameServer.accept_game(pid, "player_2")
 
       %{game_server: pid}
     end
