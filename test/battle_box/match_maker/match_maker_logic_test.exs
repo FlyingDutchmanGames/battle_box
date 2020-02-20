@@ -30,7 +30,9 @@ defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
         "lobby"
       )
 
-    assert [%{game: game, player_1: ^player_1_pid, player_2: ^player_2_pid}] = matches
+    assert [%{game: game, players: %{"player_1" => ^player_1_pid, "player_2" => ^player_2_pid}}] =
+             matches
+
     assert game.player_1 == @player_1_id
     assert game.player_2 == @player_2_id
   end
@@ -50,7 +52,9 @@ defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
         "lobby"
       )
 
-    assert [%{game: game, player_1: ^player_1_pid, player_2: ^player_2_pid}] = matches
+    assert [%{game: game, players: %{"player_1" => ^player_1_pid, "player_2" => ^player_2_pid}}] =
+             matches
+
     assert game.player_1 == @player_1_id
     assert game.player_2 == @player_2_id
   end
