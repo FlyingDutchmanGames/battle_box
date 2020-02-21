@@ -4,7 +4,6 @@ defmodule BattleBox.Games.RobotGame.Game.EventTest do
   import Ecto.Query, only: [from: 2]
 
   @robot_id "7b875c94-8fe0-4fa3-992a-d6d9f7da1a08"
-  @player_id "7b875c94-8fe0-4fa3-992a-d6d9f7da1a08"
 
   @move_move %{"type" => "move", "robot_id" => @robot_id, "target" => [0, 0]}
   @guard_move %{"type" => "guard", "robot_id" => @robot_id}
@@ -58,8 +57,7 @@ defmodule BattleBox.Games.RobotGame.Game.EventTest do
       }
     ]
     |> Enum.each(fn event ->
-      game =
-        Game.new(player_1: @player_id, player_2: @player_id, events: [event]) |> Game.changeset()
+      game = Game.new(events: [event]) |> Game.changeset()
 
       {:ok, game} = Repo.insert(game)
 

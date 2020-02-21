@@ -8,9 +8,6 @@ defprotocol BattleBoxGame do
   @spec over?(struct()) :: boolean()
   def over?(game)
 
-  @spec winner(struct()) :: atom
-  def winner(game)
-
   @spec persist(struct()) :: {:ok, struct()}
   def persist(game)
 
@@ -26,4 +23,10 @@ defprotocol BattleBoxGame do
 
   @spec move_time_ms(struct()) :: non_neg_integer()
   def move_time_ms(game)
+
+  @spec score(struct()) :: %{binary => integer()}
+  def score(game)
+
+  @spec winner(struct()) :: binary | nil
+  def winner(game)
 end
