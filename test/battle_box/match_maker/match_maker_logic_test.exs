@@ -1,5 +1,6 @@
 defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
-  use ExUnit.Case, async: true
+  use BattleBox.DataCase, async: false
+  alias BattleBox.Lobby
   import BattleBox.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -7,17 +8,28 @@ defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
   @player_2_id Ecto.UUID.generate()
   @player_3_id Ecto.UUID.generate()
 
-  test "no players means no matches" do
-    assert [] == make_matches([], "lobby")
+  setup do
+    {:ok, lobby} =
+      Lobby.create(%{
+        name: "TEST LOBBY",
+        game_type: "robot_game",
+        user_id: Ecto.UUID.generate()
+      })
+
+    %{lobby: lobby}
   end
 
-  test "one player means no matches" do
+  test "no players means no matches", %{lobby: lobby} do
+    assert [] == make_matches([], lobby.id)
+  end
+
+  test "one player means no matches", %{lobby: lobby} do
     player_1_pid = named_proxy(:player_1)
-    matches = make_matches([%{player_id: @player_1_id, pid: player_1_pid}], "lobby")
+    matches = make_matches([%{player_id: @player_1_id, pid: player_1_pid}], lobby.id)
     assert [] = matches
   end
 
-  test "it will chunk players by twos" do
+  test "it will chunk players by twos", %{lobby: lobby} do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
 
@@ -27,14 +39,14 @@ defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
           %{player_id: @player_1_id, pid: player_1_pid},
           %{player_id: @player_2_id, pid: player_2_pid}
         ],
-        "lobby"
+        lobby.id
       )
 
     assert [%{game: game, players: %{"player_1" => ^player_1_pid, "player_2" => ^player_2_pid}}] =
              matches
   end
 
-  test "it will only make one match if there are three in the queue" do
+  test "it will only make one match if there are three in the queue", %{lobby: lobby} do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
     player_3_pid = named_proxy(:player_3)
@@ -46,7 +58,7 @@ defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
           %{player_id: @player_2_id, pid: player_2_pid},
           %{player_id: @player_3_id, pid: player_3_pid}
         ],
-        "lobby"
+        lobby.id
       )
 
     assert [%{game: game, players: %{"player_1" => ^player_1_pid, "player_2" => ^player_2_pid}}] =

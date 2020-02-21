@@ -21,9 +21,9 @@ defmodule BattleBox.MatchMakerServer do
 
   def handle_info(:match_make, %{names: names} = state) do
     MatchMaker.lobbies_with_queued_players(names.game_engine)
-    |> Enum.each(fn lobby ->
-      MatchMaker.queue_for_lobby(names.game_engine, lobby)
-      |> MatchMakerLogic.make_matches(lobby)
+    |> Enum.each(fn lobby_id ->
+      MatchMaker.queue_for_lobby(names.game_engine, lobby_id)
+      |> MatchMakerLogic.make_matches(lobby_id)
       |> Enum.each(fn match_settings ->
         {:ok, _pid} = GameSupervisor.start_game(names.game_supervisor, match_settings)
       end)

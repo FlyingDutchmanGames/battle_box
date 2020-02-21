@@ -1,7 +1,8 @@
 defmodule BattleBox.BattleBoxGame do
   use Ecto.Schema
   import Ecto.Changeset
-  alias BattleBox.{Lobby, Bot, BattleBoxGameBot}
+  alias BattleBox.{Repo, Lobby, Bot, BattleBoxGameBot}
+  alias BattleBox.Games.RobotGame.Game, as: RobotGame
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -11,6 +12,7 @@ defmodule BattleBox.BattleBoxGame do
     belongs_to :lobby, Lobby
     many_to_many :bots, Bot, join_through: "battle_box_game_players"
     has_many :battle_box_game_bots, BattleBoxGameBot
+    has_one :robot_game, RobotGame
     timestamps()
   end
 
@@ -19,8 +21,7 @@ defmodule BattleBox.BattleBoxGame do
     |> cast(params, [:lobby_id, :winner_id])
   end
 
-  def build(%{lobby: lobby, players: players}) do
-    id = Ecto.UUID.generate()
+  def create(%{lobby: lobby, players: players}) do
     game = Ecto.build_assoc(lobby, :battle_box_games, %{id: Ecto.UUID.generate()})
 
     bots =
@@ -29,5 +30,6 @@ defmodule BattleBox.BattleBoxGame do
       end
 
     change(game, battle_box_game_bots: bots)
+    |> Repo.insert(returning: true)
   end
 end

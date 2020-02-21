@@ -17,7 +17,7 @@ defmodule BattleBox.Repo.Migrations.CreateBattleBoxGames do
     end
 
     create index("battle_box_games", [:lobby_id])
-    create index("battle_box_game_bots", [:battle_box_game_id, :bot_id], unique: true)
-    create index("battle_box_game_bots", [:bot_id, :battle_box_game_id], unique: true)
+    create index("battle_box_game_bots", [:bot_id])
+    create index("battle_box_game_bots", [:battle_box_game_id, :bot_id, :player], unique: true)
   end
 end
