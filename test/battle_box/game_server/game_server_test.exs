@@ -54,14 +54,12 @@ defmodule BattleBox.GameServerTest do
       game_server: pid,
       game_id: game.id,
       settings: %{
-        spawn_every: game.spawn_every,
-        spawn_per_player: game.spawn_per_player,
-        robot_hp: game.robot_hp,
-        attack_damage: game.attack_damage,
-        collision_damage: game.collision_damage,
-        terrain: game.terrain,
-        move_time_ms: game.move_time_ms,
-        max_turns: game.max_turns
+        spawn_every: game.settings.spawn_every,
+        spawn_per_player: game.settings.spawn_per_player,
+        robot_hp: game.settings.robot_hp,
+        attack_damage: game.settings.attack_damage,
+        collision_damage: game.settings.collision_damage,
+        max_turns: game.settings.max_turns
       }
     }
 
@@ -152,7 +150,7 @@ defmodule BattleBox.GameServerTest do
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
-    game = Game.new(max_turns: 10)
+    game = Game.new(settings: %{max_turns: 10})
 
     {:ok, pid} = GameEngine.start_game(context.game_engine, %{context.init_opts | game: game})
 

@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
   use BattleBox.DataCase
   alias BattleBox.Games.RobotGame.Game
-  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
+  import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   @game_id Ecto.UUID.generate()
@@ -9,7 +9,9 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "new/1" do
     test "you can override any top level key" do
       assert %{turn: 42} = Game.new(turn: 42)
-      assert %{suicide_damage: 15, robot_hp: 42} = Game.new(suicide_damage: 15, robot_hp: 42)
+
+      assert %{settings: %{suicide_damage: 15, robot_hp: 42}} =
+               Game.new(settings: %{suicide_damage: 15, robot_hp: 42})
     end
 
     test "it will auto generate an id if one isn't provided" do
@@ -81,17 +83,17 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "is over if the game turn is equal to max turn" do
-      game = Game.new(turn: 10, max_turns: 10)
+      game = Game.new(turn: 10, settings: %{max_turns: 10})
       assert Game.over?(game)
     end
 
     test "is over if the game turn is more than the max turn" do
-      game = Game.new(turn: 11, max_turns: 10)
+      game = Game.new(turn: 11, settings: %{max_turns: 10})
       assert Game.over?(game)
     end
 
     test "is not over if the game turn is less than the max turn" do
-      game = Game.new(turn: 9, max_turns: 10)
+      game = Game.new(turn: 9, settings: %{max_turns: 10})
       refute Game.over?(game)
     end
   end
@@ -107,7 +109,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "trying to perist a game that has persistent?: false is a noop" do
-      game = Game.new(persistent?: false)
+      game = Game.new(settings: %{persistent?: false})
       assert {:ok, game} = Game.persist(game)
       refute is_nil(game.id)
       assert nil == Game.get_by_id(game.id)
@@ -120,7 +122,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "you can persist changes multiple time" do
-      game = Game.new(turn: 42, terrain: %{})
+      game = Game.new(turn: 42, settings: %{terrain: %{}})
       assert {:ok, game} = Game.persist(game)
       game = Game.complete_turn(game)
       {:ok, game} = Game.persist(game)
@@ -174,34 +176,38 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "it knows if its a spawning round based on the turn and spawn_every param" do
       should_spawn = [
         # Spawn when the turn is a multiple of the 'spawn_every' setting
-        %{turn: 10, spawn_every: 1},
-        %{turn: 10, spawn_every: 2},
-        %{turn: 10, spawn_every: 5},
-        %{turn: 10, spawn_every: 10},
-        %{turn: 20, spawn_every: 10},
+        %{turn: 10, settings: %{spawn_every: 1}},
+        %{turn: 10, settings: %{spawn_every: 2}},
+        %{turn: 10, settings: %{spawn_every: 5}},
+        %{turn: 10, settings: %{spawn_every: 10}},
+        %{turn: 20, settings: %{spawn_every: 10}},
         # Always spawn on the first (0th) turn
-        %{turn: 0, spawn_every: 1},
-        %{turn: 0, spawn_every: 2},
-        %{turn: 0, spawn_every: 12_323_123_123}
+        %{turn: 0, settings: %{spawn_every: 1}},
+        %{turn: 0, settings: %{spawn_every: 2}},
+        %{turn: 0, settings: %{spawn_every: 12_323_123_123}}
       ]
 
-      Enum.each(should_spawn, fn settings ->
-        assert Game.spawning_round?(Game.new(settings))
+      Enum.each(should_spawn, fn setup ->
+        game = Game.new(setup)
+        assert Game.spawning_round?(game)
       end)
 
       should_not_spawn = [
-        %{turn: 10, spawn_every: 3},
-        %{turn: 10, spawn_every: 14},
-        %{turn: 10, spawn_every: 20}
+        %{turn: 10, settings: %{spawn_every: 3}},
+        %{turn: 10, settings: %{spawn_every: 14}},
+        %{turn: 10, settings: %{spawn_every: 20}}
       ]
 
-      Enum.each(should_not_spawn, fn settings ->
-        refute Game.spawning_round?(Game.new(settings))
+      Enum.each(should_not_spawn, fn setup ->
+        game = Game.new(setup)
+        refute Game.spawning_round?(game)
       end)
     end
 
     test "spawn_enabled: false is never a spawning round" do
-      refute Game.spawning_round?(Game.new(spawn_enabled: false, spawn_every: 10, turn: 10))
+      refute Game.spawning_round?(
+               Game.new(settings: %{spawn_enabled: false, spawn_every: 10, turn: 10})
+             )
     end
   end
 
@@ -316,34 +322,34 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = Game.new()
       damage = Game.attack_damage(game)
 
-      assert damage >= game.attack_damage.min &&
-               damage <= game.attack_damage.max
+      assert damage >= game.settings.attack_damage.min &&
+               damage <= game.settings.attack_damage.max
     end
 
     test "guarded attack damage is 50% of regular damage rounding down to the integer" do
-      game = Game.new(attack_damage: 100)
+      game = Game.new(settings: %{attack_damage: 100})
       assert 50 == Game.guarded_attack_damage(game)
 
-      game = Game.new(attack_damage: 99)
+      game = Game.new(settings: %{attack_damage: 99})
       assert 49 == Game.guarded_attack_damage(game)
     end
 
     test "it works if the the min and max attack are the same" do
-      game = Game.new(attack_damage: %{min: 50, max: 50})
+      game = Game.new(settings: %{attack_damage: %{min: 50, max: 50}})
       assert 50 == Game.attack_damage(game)
     end
   end
 
   describe "suicide_damage" do
     test "it gets the value set in settings" do
-      assert 42 = Game.suicide_damage(Game.new(suicide_damage: 42))
+      assert 42 = Game.suicide_damage(Game.new(settings: %{suicide_damage: 42}))
     end
 
     test "guarded suicide damage is 50% of regular damage rounding down to the integer" do
-      game = Game.new(suicide_damage: 10)
+      game = Game.new(settings: %{suicide_damage: 10})
       assert 5 == Game.guarded_suicide_damage(game)
 
-      game = Game.new(suicide_damage: 9)
+      game = Game.new(settings: %{suicide_damage: 9})
       assert 4 == Game.guarded_suicide_damage(game)
     end
   end
@@ -360,7 +366,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       111
       111/
 
-      game = Game.new(terrain: terrain)
+      game = Game.new(settings: %{terrain: terrain})
 
       assert Enum.sort([[0, 1], [2, 1], [1, 0], [1, 2]]) ==
                Enum.sort(Game.available_adjacent_locations(game, [1, 1]))
@@ -369,7 +375,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "doesn't provide spaces outside the map" do
       terrain = ~t/1/
 
-      game = Game.new(terrain: terrain)
+      game = Game.new(settings: %{terrain: terrain})
       assert [] == Game.available_adjacent_locations(game, [0, 0])
     end
 
@@ -378,7 +384,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       010
       000/
 
-      game = Game.new(terrain: terrain)
+      game = Game.new(settings: %{terrain: terrain})
       assert [] == Game.available_adjacent_locations(game, [1, 1])
     end
   end
@@ -409,7 +415,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/121/
 
       game =
-        Game.new(turn: 20, max_turns: 20)
+        Game.new(turn: 20, settings: %{max_turns: 20})
         |> Game.put_events(robot_spawns)
 
       assert Game.over?(game)
@@ -420,7 +426,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/1212/
 
       game =
-        Game.new(turn: 20, max_turns: 20)
+        Game.new(turn: 20, settings: %{max_turns: 20})
         |> Game.put_events(robot_spawns)
 
       assert Game.over?(game)

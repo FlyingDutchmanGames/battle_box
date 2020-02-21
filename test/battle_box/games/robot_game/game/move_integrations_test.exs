@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Game.Logic}
-  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
+  import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   test "you can't move to a location that is not adjacent" do
@@ -12,7 +12,7 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
                       0 0/
 
     game =
-      Game.new(terrain: terrain, spawn_enabled: false)
+      Game.new(settings: %{terrain: terrain, spawn_enabled: false})
       |> Game.put_events(robot_spawns)
 
     assert %{location: [0, 0]} =
@@ -87,7 +87,7 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
       |> Enum.map(fn effect -> %{effects: [effect]} end)
 
     initial_game =
-      Game.new(terrain: terrain, spawn_enabled: false)
+      Game.new(settings: %{terrain: terrain, spawn_enabled: false})
       |> Game.put_events(robot_spawns)
 
     moves =

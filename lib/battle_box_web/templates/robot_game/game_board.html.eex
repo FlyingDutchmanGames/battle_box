@@ -3,7 +3,7 @@
 <div class="robot-game">
   <%= render("game_header.html", assigns) %>
   <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>
-    <%= for {location, terrain_type} <- @game.terrain do %>
+    <%= for {location, terrain_type} <- @game.settings.terrain do %>
       <%= render("terrain.html", terrain: terrain_type, location: location) %>
     <% end %>
 

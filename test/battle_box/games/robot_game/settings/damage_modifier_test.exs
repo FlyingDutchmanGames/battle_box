@@ -1,5 +1,5 @@
-defmodule BattleBox.Games.RobotGame.Game.DamageModifierTest do
-  import BattleBox.Games.RobotGame.Game.DamageModifier
+defmodule BattleBox.Games.RobotGame.Settings.DamageModifierTest do
+  import BattleBox.Games.RobotGame.Settings.DamageModifier
   use ExUnit.Case, async: true
 
   test "garbage in garbage out (jk you get out whatcha put in)" do
