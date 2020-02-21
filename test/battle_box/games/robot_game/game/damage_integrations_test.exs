@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Game.Logic}
-  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
+  import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   @terrain ~t/1 1
@@ -11,18 +11,25 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     %{
       game:
         Game.new(
-          terrain: @terrain,
-          spawn_enabled: false,
-          attack_damage: 1,
-          robot_hp: 50,
-          suicide_damage: 5
+          settings: %{
+            terrain: @terrain,
+            spawn_enabled: false,
+            attack_damage: 1,
+            robot_hp: 50,
+            suicide_damage: 5
+          }
         )
     }
   end
 
   test "If a robot goes to 0 health it disappears" do
     robot_spawns = ~g/1 2/
-    game = Game.new(terrain: @terrain, spawn_enabled: false, attack_damage: 50, robot_hp: 50)
+
+    game =
+      Game.new(
+        settings: %{terrain: @terrain, spawn_enabled: false, attack_damage: 50, robot_hp: 50}
+      )
+
     inital_game = Game.put_events(game, robot_spawns)
     player_2_moves = [%{"type" => "attack", "target" => [0, 0], "robot_id" => 2}]
 

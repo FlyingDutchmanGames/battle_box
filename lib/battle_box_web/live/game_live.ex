@@ -27,7 +27,7 @@ defmodule BattleBoxWeb.GameLive do
 
   defp get_game(game_id) do
     case GameEngine.get_game(game_engine(), game_id) do
-      nil -> Game.get_by_id(game_id)
+      nil -> Game.get_by_id_with_settings(game_id)
       %{game: game} -> game
     end
   end

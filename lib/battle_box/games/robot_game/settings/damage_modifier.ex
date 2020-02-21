@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.Game.DamageModifier do
+defmodule BattleBox.Games.RobotGame.Settings.DamageModifier do
   use Ecto.Type
   def type, do: :map
 

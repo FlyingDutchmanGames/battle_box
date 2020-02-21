@@ -1,6 +1,6 @@
-defmodule BattleBox.Games.RobotGame.Game.Terrain.HelpersTest do
+defmodule BattleBox.Games.RobotGame.Settings.Terrain.HelpersTest do
   use ExUnit.Case, async: true
-  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
+  import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
 
   describe "~t" do
     test "an empty sigil is an empty map" do

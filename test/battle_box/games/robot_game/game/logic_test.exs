@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Game.LogicTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Game.Logic}
-  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
+  import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   describe "spawning" do
@@ -9,7 +9,7 @@ defmodule BattleBox.Games.RobotGame.Game.LogicTest do
       test_terrain = ~t/2 1
                         1 2/
 
-      game = Game.new(terrain: test_terrain, spawn_per_player: 1)
+      game = Game.new(settings: %{terrain: test_terrain, spawn_per_player: 1})
 
       assert length(Game.robots(game)) == 0
       game = Logic.calculate_turn(game, %{"player_1" => [], "player_2" => []})
@@ -32,7 +32,7 @@ defmodule BattleBox.Games.RobotGame.Game.LogicTest do
                              0 2/
 
       robots =
-        Game.new(terrain: test_terrain, spawn_per_player: 1)
+        Game.new(settings: %{terrain: test_terrain, spawn_per_player: 1})
         |> Game.put_events(test_robots_spawn)
         |> Logic.calculate_turn(%{"player_1" => [], "player_2" => []})
         |> Game.robots()

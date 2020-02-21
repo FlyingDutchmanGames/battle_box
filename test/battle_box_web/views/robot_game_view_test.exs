@@ -104,7 +104,7 @@ defmodule BattleBoxWeb.RobotGameViewTest do
     end
 
     test "it displays the correct turn" do
-      game = Game.new(turn: 42, max_turns: 420)
+      game = Game.new(turn: 42, settings: %{max_turns: 420})
       assert render_to_string(RobotGameView, "game_header.html", game: game) =~ "TURN: 42 / 420"
     end
 
