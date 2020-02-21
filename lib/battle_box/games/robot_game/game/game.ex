@@ -8,9 +8,6 @@ defmodule BattleBox.Games.RobotGame.Game do
   @foreign_key_type :binary_id
 
   schema "robot_games" do
-    field :player_1, :binary_id
-    field :player_2, :binary_id
-    field :winner, :binary_id
     field :spawn_every, :integer, default: 10
     field :spawn_per_player, :integer, default: 5
     field :robot_hp, :integer, default: 50
@@ -24,6 +21,7 @@ defmodule BattleBox.Games.RobotGame.Game do
 
     field :terrain, :any, default: Terrain.default(), virtual: true
     field :persistent?, :boolean, default: true, virtual: true
+    field :winner, :string, virtual: true
 
     field :move_time_ms, :integer, virtual: true, default: 5000
 
@@ -33,8 +31,6 @@ defmodule BattleBox.Games.RobotGame.Game do
   def changeset(game, params \\ %{}) do
     game
     |> cast(params, [
-      :player_1,
-      :player_2,
       :winner,
       :spawn_every,
       :spawn_per_player,
@@ -54,8 +50,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   def get_by_id(_), do: nil
 
   def disqualify(game, player) do
-    winner = %{"player_1" => :player_2, "player_2" => :player_1}[player]
-    winner = Map.get(game, winner)
+    winner = %{"player_1" => "player_2", "player_2" => "player_1"}[player]
     Map.put(game, :winner, winner)
   end
 
@@ -77,14 +72,20 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 
   def calculate_winner(game) do
-    winner =
-      case {score(game, "player_1"), score(game, "player_2")} do
-        {p1, p2} when p1 == p2 -> nil
-        {p1, p2} when p1 > p2 -> game.player_1
-        {p1, p2} when p1 < p2 -> game.player_2
-      end
+    if over?(game) do
+      scores = score(game)
 
-    if over?(game), do: %{game | winner: winner}, else: game
+      winner =
+        case {scores["player_1"], scores["player_2"]} do
+          {p1, p2} when p1 == p2 -> nil
+          {p1, p2} when p1 > p2 -> "player_1"
+          {p1, p2} when p1 < p2 -> "player_2"
+        end
+
+      %{game | winner: winner}
+    else
+      game
+    end
   end
 
   def complete_turn(game),
@@ -142,15 +143,13 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def over?(game), do: game.winner || game.turn >= game.max_turns
 
-  def score(game, player_id) when player_id in ["player_1", "player_2"] do
-    game
-    |> robots
-    |> Enum.filter(fn robot -> robot.player_id == player_id end)
-    |> length
-  end
+  def score(game) do
+    robot_score =
+      robots(game)
+      |> Enum.frequencies_by(fn robot -> robot.player_id end)
 
-  def user(game, "player_1"), do: to_string(game.player_1 || "Player 1")
-  def user(game, "player_2"), do: to_string(game.player_2 || "Player 2")
+    Map.merge(%{"player_1" => 0, "player_2" => 0}, robot_score)
+  end
 
   def dimensions(game), do: Terrain.dimensions(game.terrain)
 
@@ -232,5 +231,6 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame.Game do
   def moves_request(game), do: Game.moves_request(game)
   def calculate_turn(game, moves), do: Game.Logic.calculate_turn(game, moves)
   def move_time_ms(game), do: game.move_time_ms
+  def score(game), do: Game.score(game)
   def winner(game), do: game.winner
 end

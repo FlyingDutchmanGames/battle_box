@@ -4,8 +4,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   import BattleBox.Games.RobotGame.Game.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
-  @player_1 Ecto.UUID.generate()
-  @player_2 Ecto.UUID.generate()
   @game_id Ecto.UUID.generate()
 
   describe "new/1" do
@@ -100,7 +98,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "persistance" do
     test "You can persist a game" do
-      game = Game.new(player_1: @player_1, player_2: @player_2)
+      game = Game.new()
       assert {:ok, _} = Game.persist(game)
     end
 
@@ -109,20 +107,20 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "trying to perist a game that has persistent?: false is a noop" do
-      game = Game.new(player_1: @player_1, player_2: @player_2, persistent?: false)
+      game = Game.new(persistent?: false)
       assert {:ok, game} = Game.persist(game)
       refute is_nil(game.id)
       assert nil == Game.get_by_id(game.id)
     end
 
     test "you can persist a game twice" do
-      game = Game.new(player_1: @player_1, player_2: @player_2)
+      game = Game.new()
       assert {:ok, game} = Game.persist(game)
       assert {:ok, _} = Game.persist(game)
     end
 
     test "you can persist changes multiple time" do
-      game = Game.new(player_1: @player_1, player_2: @player_2, turn: 42, terrain: %{})
+      game = Game.new(turn: 42, terrain: %{})
       assert {:ok, game} = Game.persist(game)
       game = Game.complete_turn(game)
       {:ok, game} = Game.persist(game)
@@ -130,7 +128,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "when you persist a game it flushes the unpersisted events to disk" do
-      game = Game.new(player_1: @player_1, player_2: @player_2)
+      game = Game.new()
 
       game =
         Game.put_event(game, %{
@@ -146,7 +144,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "you can persist a new turn to a game that already has a turn" do
-      game = Game.new(player_1: @player_1, player_2: @player_2)
+      game = Game.new()
 
       game =
         Game.put_event(game, %{
@@ -169,15 +167,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
       assert Game.robots(game) == Game.robots(reloaded_game)
       assert normalize_events(game.events) == normalize_events(reloaded_game.events)
-    end
-  end
-
-  describe "user/2" do
-    test "you can get the user for a player and it defaults to `Player 1` and `Player 2`" do
-      assert "FIRST" == Game.user(Game.new(player_1: "FIRST"), "player_1")
-      assert "SECOND" == Game.user(Game.new(player_2: "SECOND"), "player_2")
-      assert "Player 1" == Game.user(Game.new(), "player_1")
-      assert "Player 2" == Game.user(Game.new(), "player_2")
     end
   end
 
@@ -217,19 +206,14 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   end
 
   describe "score" do
-    test "the score for a non existant player is 0" do
-      assert 0 = Game.score(Game.new(), "player_1")
-    end
-
-    test "A player with robots is the the number of robots" do
+    test "A player with robots is the the number of robots, a player with no robots is 0" do
       robot_spawns = ~g/1/
 
       game =
         Game.new()
         |> Game.put_events(robot_spawns)
 
-      assert 1 == Game.score(game, "player_1")
-      assert 0 == Game.score(game, "player_2")
+      assert %{"player_1" => 1, "player_2" => 0} == Game.score(game)
     end
   end
 
@@ -401,12 +385,11 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
   describe "disqualify/3" do
     test "disqualifying a game for a player sets the other player as the winner" do
-      {p1, p2} = {uuid(), uuid()}
-      game = Game.new(player_1: p1, player_2: p2)
+      game = Game.new()
 
       assert game.winner == nil
-      assert Game.disqualify(game, "player_1").winner == p2
-      assert Game.disqualify(game, "player_2").winner == p1
+      assert Game.disqualify(game, "player_1").winner == "player_2"
+      assert Game.disqualify(game, "player_2").winner == "player_1"
     end
   end
 
@@ -425,23 +408,19 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "will set the winner if the game is over to the player with the most robots" do
       robot_spawns = ~g/121/
 
-      id = uuid()
-
       game =
-        Game.new(turn: 20, max_turns: 20, player_1: id)
+        Game.new(turn: 20, max_turns: 20)
         |> Game.put_events(robot_spawns)
 
       assert Game.over?(game)
-      assert Game.calculate_winner(game).winner == id
+      assert Game.calculate_winner(game).winner == "player_1"
     end
 
     test "will be nil if its a tie" do
       robot_spawns = ~g/1212/
 
-      id = uuid()
-
       game =
-        Game.new(turn: 20, max_turns: 20, player_1: id)
+        Game.new(turn: 20, max_turns: 20)
         |> Game.put_events(robot_spawns)
 
       assert Game.over?(game)

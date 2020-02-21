@@ -8,11 +8,7 @@ defmodule BattleBox.MatchMaker.MatchMakerLogic do
     |> Enum.map(fn
       [player_1, player_2] ->
         %{
-          game:
-            Game.new(
-              player_1: player_1.player_id,
-              player_2: player_2.player_id
-            ),
+          game: Game.new(),
           players: %{
             "player_1" => player_1.pid,
             "player_2" => player_2.pid

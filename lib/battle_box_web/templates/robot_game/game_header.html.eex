@@ -1,7 +1,8 @@
+<% %{"player_1" => p1_score, "player_2" => p2_score} = Game.score(@game) %>
 <div class="game-header">
   <div class="score player_1">
-    <div class="number"><%= Game.score(@game, "player_1") %></div>
-    <div class="player-name"><%= Game.user(@game, "player_1") %></div>
+    <div class="number"><%= p1_score %></div>
+    <div class="player-name">Player 1</div>
   </div>
 
   <div class="title-section">
@@ -10,7 +11,7 @@
   </div>
 
   <div class="score player_2">
-    <div class="number"><%= Game.score(@game, "player_2") %></div>
-    <div class="player-name"><%= Game.user(@game, "player_2") %></div>
+    <div class="number"><%= p2_score %></div>
+    <div class="player-name">Player 2</div>
   </div>
 </div>

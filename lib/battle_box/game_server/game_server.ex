@@ -137,6 +137,7 @@ defmodule BattleBox.GameServer do
     {:game_over,
      %{
        game_id: Game.id(game),
+       score: Game.score(game),
        winner: Game.winner(game)
      }}
   end

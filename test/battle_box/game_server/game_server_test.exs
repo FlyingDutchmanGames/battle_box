@@ -4,9 +4,6 @@ defmodule BattleBox.GameServerTest do
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
-  @player_1 Ecto.UUID.generate()
-  @player_2 Ecto.UUID.generate()
-
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
     {:ok, GameEngine.names(name)}
@@ -19,7 +16,7 @@ defmodule BattleBox.GameServerTest do
           "player_1" => named_proxy(:player_1),
           "player_2" => named_proxy(:player_2)
         },
-        game: Game.new(player_1: @player_1, player_2: @player_2)
+        game: Game.new()
       }
     }
   end
@@ -135,8 +132,8 @@ defmodule BattleBox.GameServerTest do
     :ok = GameServer.accept_game(pid, "player_2")
     :ok = GameServer.forfeit_game(pid, "player_1")
 
-    assert_receive {:player_1, {:game_over, %{winner: @player_2}}}
-    assert_receive {:player_2, {:game_over, %{winner: @player_2}}}
+    assert_receive {:player_1, {:game_over, %{winner: "player_2"}}}
+    assert_receive {:player_2, {:game_over, %{winner: "player_2"}}}
   end
 
   test "if you die its the same as a forefit", context do
@@ -151,11 +148,11 @@ defmodule BattleBox.GameServerTest do
     Process.exit(player_2_pid, :kill)
     assert_receive {:EXIT, ^player_2_pid, :killed}
 
-    assert_receive {:player_1, {:game_over, %{winner: @player_1}}}
+    assert_receive {:player_1, {:game_over, %{winner: "player_1"}}}
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
-    game = Game.new(player_1: @player_1, player_2: @player_2, max_turns: 10)
+    game = Game.new(max_turns: 10)
 
     {:ok, pid} = GameEngine.start_game(context.game_engine, %{context.init_opts | game: game})
 
