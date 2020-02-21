@@ -1,5 +1,5 @@
 defmodule BattleBox.Bot do
-  alias BattleBox.User
+  alias BattleBox.{User, BattleBoxGame}
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query, only: [from: 2]
@@ -16,6 +16,7 @@ defmodule BattleBox.Bot do
   schema "bots" do
     field :name, :string
     field :token, :string, autogenerate: {__MODULE__, :generate_token, []}
+    many_to_many :battle_box_games, BattleBoxGame, join_through: "battle_box_game_players"
     belongs_to :user, User
 
     timestamps()

@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.Game do
-  alias BattleBox.Repo
+  alias BattleBox.{Repo, BattleBoxGame}
   alias BattleBox.Games.RobotGame.{Settings, Settings.DamageModifier}
   alias __MODULE__.Event
   use Ecto.Schema
@@ -13,16 +13,21 @@ defmodule BattleBox.Games.RobotGame.Game do
     embeds_many :events, Event, on_replace: :delete
     field :winner, :string, virtual: true
     field :move_time_ms, :integer, virtual: true, default: 5000
+
     belongs_to :settings, Settings
+    belongs_to :battle_box_game, BattleBoxGame
+
     timestamps()
   end
 
   def changeset(game, params \\ %{}) do
     game
+    |> Repo.preload([:settings, :battle_box_game])
     |> cast(params, [
       :winner,
       :turn,
-      :settings_id
+      :settings_id,
+      :battle_box_game_id
     ])
     |> cast_embed(:events)
   end
