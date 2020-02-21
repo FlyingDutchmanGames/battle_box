@@ -2,6 +2,7 @@ defmodule BattleBox.Games.RobotGame.Settings do
   alias __MODULE__.{Terrain, DamageModifier}
   use Ecto.Schema
   import Ecto.Changeset
+  alias BattleBox.Repo
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -39,5 +40,9 @@ defmodule BattleBox.Games.RobotGame.Settings do
 
     %__MODULE__{}
     |> Map.merge(opts)
+  end
+
+  def get_by_id(id) do
+    Repo.get_by(__MODULE__, id: id)
   end
 end
