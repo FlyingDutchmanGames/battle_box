@@ -36,12 +36,9 @@ defmodule BattleBox.Bot do
     |> Repo.insert()
   end
 
-  def with_user_id(user_id) do
-    Repo.all(
-      from bot in __MODULE__,
-        where: bot.user_id == ^user_id,
-        select: bot
-    )
+  def with_user_id(query \\ nil, user_id) do
+    query = query || base()
+    from bot in query, where: bot.user_id == ^user_id
   end
 
   def get_by_id(id) do
@@ -56,5 +53,9 @@ defmodule BattleBox.Bot do
     :crypto.strong_rand_bytes(32)
     |> Base.encode16()
     |> String.downcase()
+  end
+
+  defp base do
+    from bot in __MODULE__, as: :bot
   end
 end
