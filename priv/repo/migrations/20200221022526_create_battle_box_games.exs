@@ -16,8 +16,8 @@ defmodule BattleBox.Repo.Migrations.CreateBattleBoxGames do
       timestamps()
     end
 
-    create index("battle_box_games", [:lobby_id])
+    create index("battle_box_games", ["lobby_id, updated_at DESC"])
     create index("battle_box_game_bots", [:bot_id])
-    create index("battle_box_game_bots", [:battle_box_game_id, :bot_id, :player], unique: true)
+    create index("battle_box_game_bots", [:battle_box_game_id, :player], unique: true)
   end
 end
