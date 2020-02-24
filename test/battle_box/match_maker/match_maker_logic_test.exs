@@ -1,6 +1,6 @@
 defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.Lobby
+  alias BattleBox.{Lobby, Repo}
   import BattleBox.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -63,5 +63,36 @@ defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
 
     assert [%{game: game, players: %{"player_1" => ^player_1_pid, "player_2" => ^player_2_pid}}] =
              matches
+  end
+
+  test "the games it makes are persistable", %{lobby: %{id: lobby_id}} do
+    player_1_pid = named_proxy(:player_1)
+    player_2_pid = named_proxy(:player_2)
+
+    [%{game: game}] =
+      make_matches(
+        [
+          %{player_id: @player_1_id, pid: player_1_pid},
+          %{player_id: @player_2_id, pid: player_2_pid}
+        ],
+        lobby_id
+      )
+
+    {:ok, game} = BattleBoxGame.persist(game)
+    game = Repo.preload(game, battle_box_game: [:battle_box_game_bots])
+    assert %{lobby_id: lobby_id} = game.battle_box_game
+
+    assert [
+             %{
+               player: "player_1",
+               bot_id: @player_1_id,
+               score: 0
+             },
+             %{
+               player: "player_2",
+               bot_id: @player_2_id,
+               score: 0
+             }
+           ] = game.battle_box_game.battle_box_game_bots
   end
 end
