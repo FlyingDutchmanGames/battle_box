@@ -19,17 +19,6 @@ defmodule BattleBox.BattleBoxGame do
   def changeset(game, params \\ %{}) do
     game
     |> cast(params, [:lobby_id, :winner_id])
-  end
-
-  def create(%{lobby: lobby, players: players}) do
-    game = Ecto.build_assoc(lobby, :battle_box_games, %{id: Ecto.UUID.generate()})
-
-    bots =
-      for {player, bot_id} <- players do
-        Ecto.build_assoc(game, :battle_box_game_bots, %{bot_id: bot_id, player: player})
-      end
-
-    change(game, battle_box_game_bots: bots)
-    |> Repo.insert(returning: true)
+    |> cast_assoc(:battle_box_game_bots)
   end
 end

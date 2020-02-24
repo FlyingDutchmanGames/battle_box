@@ -30,6 +30,7 @@ defmodule BattleBox.Games.RobotGame.Game do
       :battle_box_game_id
     ])
     |> cast_embed(:events)
+    |> cast_assoc(:battle_box_game)
   end
 
   def db_name, do: "robot_game"
