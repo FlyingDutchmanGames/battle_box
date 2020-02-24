@@ -50,7 +50,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     scores = score(game)
 
     game =
-      update_in(game.battle_box_game.game_bots, fn bots ->
+      update_in(game.battle_box_game.battle_box_game_bots, fn bots ->
         for bot <- bots, do: %{bot | score: scores[bot.player]}
       end)
 
@@ -138,9 +138,15 @@ defmodule BattleBox.Games.RobotGame.Game do
         %{} = settings -> Settings.new(settings)
       end
 
+    bbg =
+      case opts[:battle_box_game] do
+        nil -> BattleBoxGame.new()
+        %BattleBoxGame{} = bbg -> bbg
+      end
+
     opts = Enum.into(opts, %{})
     opts = Map.put_new(opts, :id, Ecto.UUID.generate())
-    opts = Map.put(opts, :settings, settings)
+    opts = Map.merge(opts, %{settings: settings, battle_box_game: bbg})
 
     %__MODULE__{}
     |> Map.merge(opts)

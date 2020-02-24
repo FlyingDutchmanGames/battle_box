@@ -20,4 +20,11 @@ defmodule BattleBox.BattleBoxGame do
     |> cast(params, [:lobby_id])
     |> cast_assoc(:battle_box_game_bots)
   end
+
+  def new(opts \\ %{}) do
+    %__MODULE__{
+      battle_box_game_bots: opts[:battle_box_game_bots] || [],
+      lobby_id: opts[:lobby_id]
+    }
+  end
 end
