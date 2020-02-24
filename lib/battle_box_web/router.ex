@@ -36,6 +36,7 @@ defmodule BattleBoxWeb.Router do
 
       get "/connections", UserRedirectController, :connections
       get "/lobbies", UserRedirectController, :lobbies
+      get "/bots", UserRedirectController, :bots
 
       resources "/bots", BotController, only: [:create, :new]
       resources "/lobbies", LobbyController, only: [:create, :new]
@@ -48,6 +49,7 @@ defmodule BattleBoxWeb.Router do
 
     resources "/users", UserController, only: [:index, :show] do
       resources "/lobbies", LobbyController, only: [:index]
+      resources "/bots", BotController, only: [:index]
     end
 
     scope "/robot_game", RobotGame do

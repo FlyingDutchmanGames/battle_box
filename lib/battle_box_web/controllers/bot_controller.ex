@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.BotController do
   use BattleBoxWeb, :controller
-  alias BattleBox.Bot
+  alias BattleBox.{Bot, Repo}
 
   def new(conn, _params) do
     changeset = Bot.changeset(%Bot{})
@@ -24,5 +24,10 @@ defmodule BattleBoxWeb.BotController do
   def show(conn, %{"id" => id}) do
     bot = Bot.get_by_id(id)
     render(conn, "show.html", bot: bot)
+  end
+
+  def index(conn, %{"user_id" => user_id}) do
+    bots = Bot.with_user_id(user_id) |> Repo.all()
+    render(conn, "index.html", bots: bots)
   end
 end

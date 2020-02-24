@@ -57,4 +57,19 @@ defmodule BattleBoxWeb.BotControllerTest do
     {:ok, document} = Floki.parse_document(html)
     assert [_form] = Floki.find(document, "form")
   end
+
+  test "you can see a user's bots", %{conn: conn} do
+    Bot.changeset(%Bot{}, %{
+      name: "TEST_NAME",
+      user_id: @user_id
+    })
+    |> Repo.insert!(returning: true)
+
+    conn =
+      conn
+      |> signin(user_id: @user_id)
+      |> get("/users/#{@user_id}/bots")
+
+    assert html_response(conn, 200) =~ "TEST_NAME"
+  end
 end
