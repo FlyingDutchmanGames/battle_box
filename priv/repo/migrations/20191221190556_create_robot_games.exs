@@ -6,6 +6,7 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
       add :events, :jsonb, null: false, default: fragment("'[]'::jsonb")
       add :turn, :integer, null: false
       add :settings_id, :uuid, null: false
+      add :battle_box_game_id, :uuid, null: true
       timestamps()
     end
 
