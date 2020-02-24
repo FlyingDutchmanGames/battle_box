@@ -4,7 +4,7 @@
 <%= for bot <- @bots do %>
   <div class="bot" style="border: 1px solid black; padding: 10px; margin: 10px;">
     <div class="name">Name: <%= bot.name %></div>
-    <div class="id">ID: <%= bot.id %></div>
+    <div class="id">ID: <a href="<%= Routes.bot_path(@conn, :show, bot.id) %>"><%= bot.id %></a></div>
   </div>
 <% end %>
 </div>
