@@ -1,5 +1,6 @@
 defmodule BattleBox.BattleBoxGameBot do
   use Ecto.Schema
+  import Ecto.Changeset
   alias BattleBox.{BattleBoxGame, Bot}
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -11,5 +12,17 @@ defmodule BattleBox.BattleBoxGameBot do
     belongs_to :bot, Bot
     belongs_to :battle_box_game, BattleBoxGame
     timestamps()
+  end
+
+  def changeset(bot, params \\ %{}) do
+    bot
+    |> cast(params, [:score, :player, :bot_id, :battle_box_game_id])
+  end
+
+  def new(opts) do
+    opts = Enum.into(opts, %{})
+
+    %__MODULE__{}
+    |> Map.merge(opts)
   end
 end
