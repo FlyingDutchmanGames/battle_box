@@ -47,6 +47,13 @@ defmodule BattleBox.Games.RobotGame.Game do
   def persist(%{settings: %{persistent?: false}} = game), do: {:ok, game}
 
   def persist(game) do
+    scores = score(game)
+
+    game =
+      update_in(game.battle_box_game.game_bots, fn bots ->
+        for bot <- bots, do: %{bot | score: scores[bot.player]}
+      end)
+
     events = Enum.map(game.events, &Map.take(&1, [:turn, :seq_num, :cause, :effects]))
 
     game

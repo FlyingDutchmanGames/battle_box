@@ -3,7 +3,6 @@ defmodule BattleBox.Repo.Migrations.CreateBattleBoxGames do
 
   def change do
     create table("battle_box_games") do
-      add :winner_id, :uuid
       add :lobby_id, :uuid, null: false
       timestamps()
     end
