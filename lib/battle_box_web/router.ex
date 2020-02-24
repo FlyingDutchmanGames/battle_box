@@ -34,7 +34,8 @@ defmodule BattleBoxWeb.Router do
     scope "/" do
       pipe_through :require_logged_in
 
-      get "/connections", ConnectionsController, :index
+      get "/connections", UserRedirectController, :connections
+      get "/lobbies", UserRedirectController, :lobbies
 
       resources "/bots", BotController, only: [:create, :new]
       resources "/lobbies", LobbyController, only: [:create, :new]
@@ -42,7 +43,12 @@ defmodule BattleBoxWeb.Router do
 
     resources "/bots", BotController, only: [:show]
     resources "/lobbies", LobbyController, only: [:show]
+
     live("/users/:user_id/connections", ConnectionsLive)
+
+    resources "/users", UserController, only: [:index, :show] do
+      resources "/lobbies", LobbyController, only: [:index]
+    end
 
     scope "/robot_game", RobotGame do
       live("/play", PlayLive)

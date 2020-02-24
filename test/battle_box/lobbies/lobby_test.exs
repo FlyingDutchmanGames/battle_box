@@ -39,6 +39,18 @@ defmodule BattleBox.LobbyTest do
     end
   end
 
+  describe "queries" do
+    test "with_user_id" do
+      lobby = %Lobby{name: "MINE", game_type: Game, user_id: @user_id}
+      {:ok, _} = Repo.insert(Lobby.changeset(lobby))
+
+      not_my_lobby = %Lobby{name: "NOT MINE", game_type: Game, user_id: Ecto.UUID.generate()}
+      {:ok, _} = Repo.insert(Lobby.changeset(not_my_lobby))
+
+      assert [%{name: "MINE"}] = Lobby.with_user_id(@user_id) |> Repo.all()
+    end
+  end
+
   describe "persistence" do
     test "You can persist a lobby and get it back out" do
       lobby = %Lobby{name: "Grant's Test", game_type: Game, user_id: @user_id}

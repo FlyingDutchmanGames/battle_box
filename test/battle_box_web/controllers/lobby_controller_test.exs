@@ -53,4 +53,27 @@ defmodule BattleBoxWeb.LobbyControllerTest do
     {:ok, document} = Floki.parse_document(html)
     assert [_form] = Floki.find(document, "form")
   end
+
+  describe "lobbies index" do
+    test "it will show a user's lobbies", %{conn: conn} do
+      for i <- [1, 2, 3] do
+        Repo.insert!(%Lobby{
+          name: "TEST_NAME#{i}",
+          user_id: @user_id,
+          game_type: BattleBox.Games.RobotGame.Game
+        })
+      end
+
+      conn =
+        conn
+        |> signin(user_id: @user_id)
+        |> get("/users/#{@user_id}/lobbies")
+
+      html = html_response(conn, 200)
+      {:ok, document} = Floki.parse_document(html)
+
+      assert ["Name: TEST_NAME1", "Name: TEST_NAME2", "Name: TEST_NAME3"] =
+               Floki.find(document, ".lobby .name") |> Enum.map(&Floki.text/1)
+    end
+  end
 end

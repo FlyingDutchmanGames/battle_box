@@ -1,6 +1,7 @@
 defmodule BattleBox.Lobby do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
   alias BattleBox.{Repo, User, BattleBoxGame}
   alias __MODULE__.GameType
 
@@ -36,9 +37,18 @@ defmodule BattleBox.Lobby do
     |> unique_constraint(:name)
   end
 
+  def base() do
+    from lobby in __MODULE__, as: :lobby
+  end
+
   def create(params) do
     changeset(%__MODULE__{}, params)
     |> Repo.insert()
+  end
+
+  def with_user_id(query \\ nil, user_id) do
+    query = query || base()
+    from lobby in query, where: lobby.user_id == ^user_id
   end
 
   def get_by_name(name) do
