@@ -1,0 +1,10 @@
+<h1>Lobbies</h1>
+<a href="<%= Routes.lobby_path(@conn, :new) %>">New Lobby</a>
+<div class="lobbies">
+<%= for lobby <- @lobbies do %>
+  <div class="lobby" style="border: 1px solid black; padding: 10px; margin: 10px;">
+    <div class="name">Name: <%= lobby.name %></div>
+    <div class="id">ID: <%= lobby.id %></div>
+  </div>
+<% end %>
+</div>

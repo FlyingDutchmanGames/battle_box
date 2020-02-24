@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.LobbyController do
   use BattleBoxWeb, :controller
-  alias BattleBox.Lobby
+  alias BattleBox.{Lobby, Repo}
 
   def new(conn, _params) do
     changeset = Lobby.changeset(%Lobby{})
@@ -10,6 +10,11 @@ defmodule BattleBoxWeb.LobbyController do
   def show(conn, %{"id" => id}) do
     lobby = Lobby.get_by_id(id)
     render(conn, "show.html", lobby: lobby)
+  end
+
+  def index(conn, %{"user_id" => user_id}) do
+    lobbies = Lobby.with_user_id(user_id) |> Repo.all()
+    render(conn, "index.html", lobbies: lobbies)
   end
 
   def create(%{assigns: %{user: user}} = conn, %{"lobby" => lobby}) do
