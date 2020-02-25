@@ -1,5 +1,7 @@
 import Config
 
+alias BattleBox.Games.RobotGame.Game, as: RobotGame
+
 envs =
   [
     host: "HOST",
