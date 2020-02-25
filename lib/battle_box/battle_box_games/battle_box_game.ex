@@ -27,4 +27,7 @@ defmodule BattleBox.BattleBoxGame do
       lobby_id: opts[:lobby_id]
     }
   end
+
+  defp base do
+  end
 end
