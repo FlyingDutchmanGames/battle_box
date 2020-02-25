@@ -1,7 +1,5 @@
 import Config
 
-alias BattleBox.Games.RobotGame.Game, as: RobotGame
-
 envs =
   [
     host: "HOST",
@@ -32,8 +30,3 @@ config :battle_box, BattleBoxWeb.Endpoint,
 config :battle_box, :github,
   client_id: envs[:github_client_id],
   client_secret: envs[:github_client_secret]
-
-config :battle_box, BattleBox.GameEngine,
-  games: [
-    RobotGame
-  ]

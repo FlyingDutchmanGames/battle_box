@@ -8,7 +8,7 @@ defmodule BattleBox.Lobby do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @game_types Application.compile_env(:battle_box, [BattleBox.GameEngine, :games]) ||
+  @game_types Application.get_env(:battle_box, BattleBox.GameEngine)[:games] ||
                 raise("Must set the :battle_box, BattleBox.GameEngine, :games config value")
 
   @params [

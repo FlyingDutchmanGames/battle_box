@@ -2,7 +2,7 @@ defmodule BattleBox.Lobby.GameType do
   use Ecto.Type
   def type, do: :string
 
-  @game_types Application.compile_env(:battle_box, [BattleBox.GameEngine, :games]) ||
+  @game_types Application.get_env(:battle_box, BattleBox.GameEngine)[:games] ||
                 raise("Must set the :battle_box, BattleBox.GameEngine, :games config value")
 
   @game_types
