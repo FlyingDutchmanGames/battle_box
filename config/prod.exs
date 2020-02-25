@@ -6,4 +6,4 @@ config :battle_box, BattleBoxWeb.Endpoint,
 
 config :logger, level: :info
 
-import_config "prod.secret.exs"
+config :battle_box, BattleBoxWeb.Endpoint, server: true
