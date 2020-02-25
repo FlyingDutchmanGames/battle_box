@@ -17,10 +17,7 @@ config :battle_box, BattleBoxWeb.Endpoint,
     signing_salt: "SECRET_SALT"
   ]
 
-config :battle_box, BattleBox.GameEngine,
-  games: [
-    RobotGame
-  ]
+config :battle_box, BattleBox.GameEngine, games: [RobotGame]
 
 config :battle_box, BattleBox.TcpConnectionServer, port: 4001
 
