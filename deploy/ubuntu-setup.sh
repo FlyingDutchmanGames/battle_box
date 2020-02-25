@@ -54,7 +54,15 @@ useradd battle_box
 mkdir /srv/battle_box
 chown battle_box:battle_box /srv/battle_box
 
-(cd /srv/battle_box && sudo -u battle_box tar -xf ../battle_box.tar.gz)
+# Build the app
+cd /root/battle_box
+git pull master
+MIX_ENV=prod mix deps.get --only prod
+MIX_ENV=prod mix compile
+npm install --prefix ./assets
+mkdir -p priv/static
+npm run deploy --prefix ./assets
+MIX_ENV=prod mix phx.digest
 
 cat > /etc/default/battle_box <<CONF
 BATTLE_BOX_SECRET_KEY_BASE=
