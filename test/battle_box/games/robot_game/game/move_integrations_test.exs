@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.RobotGame.{Game, Game.Logic}
-  import BattleBox.Games.RobotGame.Game.Terrain.Helpers
+  import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   test "you can't move to a location that is not adjacent" do
@@ -12,14 +12,14 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
                       0 0/
 
     game =
-      Game.new(terrain: terrain, spawn_enabled: false)
+      Game.new(settings: %{terrain: terrain, spawn_enabled: false})
       |> Game.put_events(robot_spawns)
 
-    assert %{location: {0, 0}} =
+    assert %{location: [0, 0]} =
              game
              |> Logic.calculate_turn(%{
-               player_1: [%{type: :move, target: {1, 1}, robot_id: 1}],
-               player_2: []
+               "player_1" => [%{"type" => "move", "target" => [1, 1], "robot_id" => 1}],
+               "player_2" => []
              })
              |> Game.get_robot(1)
   end
@@ -76,18 +76,18 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
     graph_with_indexes =
       for {row, row_num} <- Enum.with_index(graphs),
           {col, col_num} <- Enum.with_index(row),
-          do: {{row_num, col_num}, col}
+          do: {[row_num, col_num], col}
 
     terrain = Map.new(graph_with_indexes, fn {loc, val} -> {loc, terrain_val(val)} end)
 
     robot_spawns =
       graph_with_indexes
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
-      |> Enum.map(fn {loc, _} -> {:create_robot, :player_1, robot_id(loc), 50, loc} end)
-      |> Enum.map(fn effect -> %{move: :test_setup, effects: [effect]} end)
+      |> Enum.map(fn {loc, _} -> ["create_robot", "player_1", robot_id(loc), 50, loc] end)
+      |> Enum.map(fn effect -> %{effects: [effect]} end)
 
     initial_game =
-      Game.new(terrain: terrain, spawn_enabled: false)
+      Game.new(settings: %{terrain: terrain, spawn_enabled: false})
       |> Game.put_events(robot_spawns)
 
     moves =
@@ -95,7 +95,7 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
       |> Enum.map(fn {location, type} -> robot_move(location, type) end)
 
-    after_turn = Logic.calculate_turn(initial_game, %{player_1: moves, player_2: []})
+    after_turn = Logic.calculate_turn(initial_game, %{"player_1" => moves, "player_2" => []})
 
     graph_with_indexes
     |> Enum.filter(fn {_, val} -> is_robot?(val) end)
@@ -127,8 +127,8 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
   end
 
   defp validate_moved(initial_game, after_turn, robot_id, move_direction) do
-    {x1, y1} = Game.get_robot(initial_game, robot_id).location
-    {x2, y2} = Game.get_robot(after_turn, robot_id).location
+    [x1, y1] = Game.get_robot(initial_game, robot_id).location
+    [x2, y2] = Game.get_robot(after_turn, robot_id).location
     delta = {x2 - x1, y2 - y1}
 
     expected =
@@ -172,33 +172,33 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
 
   defp guard_move(location),
     do: %{
-      type: :guard,
-      robot_id: robot_id(location)
+      "type" => "guard",
+      "robot_id" => robot_id(location)
     }
 
-  defp move_move({row, col} = location, type) do
+  defp move_move([row, col] = location, type) do
     target =
       case type do
-        x when x in ["▲", "↑"] -> {row - 1, col}
-        x when x in ["▼", "↓"] -> {row + 1, col}
-        x when x in ["▶", "→"] -> {row, col + 1}
-        x when x in ["◀", "←"] -> {row, col - 1}
+        x when x in ["▲", "↑"] -> [row - 1, col]
+        x when x in ["▼", "↓"] -> [row + 1, col]
+        x when x in ["▶", "→"] -> [row, col + 1]
+        x when x in ["◀", "←"] -> [row, col - 1]
       end
 
     %{
-      type: :move,
-      target: target,
-      robot_id: robot_id(location)
+      "type" => "move",
+      "target" => target,
+      "robot_id" => robot_id(location)
     }
   end
 
   defp noop_move(location),
     do: %{
-      type: :none,
-      robot_id: robot_id(location)
+      "type" => "noop",
+      "robot_id" => robot_id(location)
     }
 
   defp is_robot?(val), do: val in ["▲", "▼", "◀", "▶", "←", "↑", "→", "↓", "🐢", "🤕"]
 
-  defp robot_id({x, y}), do: "#{x}, #{y}"
+  defp robot_id([x, y]), do: "#{x}, #{y}"
 end

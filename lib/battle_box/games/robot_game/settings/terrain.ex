@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.Game.Terrain do
+defmodule BattleBox.Games.RobotGame.Settings.Terrain do
   alias __MODULE__.Default
 
   defdelegate default, to: Default
@@ -14,6 +14,7 @@ defmodule BattleBox.Games.RobotGame.Game.Terrain do
     {row_nums, col_nums} =
       terrain
       |> Map.keys()
+      |> Enum.map(&List.to_tuple/1)
       |> Enum.unzip()
 
     %{

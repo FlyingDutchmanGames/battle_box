@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Game do
-  alias BattleBox.Repo
-  alias BattleBox.Games.RobotGame.Game.{Terrain, Robot}
-  alias __MODULE__.{Event, DamageModifier}
+  alias BattleBox.{Repo, BattleBoxGame}
+  alias BattleBox.Games.RobotGame.{Settings, Settings.DamageModifier}
+  alias __MODULE__.Event
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -9,61 +9,51 @@ defmodule BattleBox.Games.RobotGame.Game do
   @foreign_key_type :binary_id
 
   schema "robot_games" do
-    field :player_1, :binary_id
-    field :player_2, :binary_id
-    field :winner, :binary_id
-    field :spawn_every, :integer, default: 10
-    field :spawn_per_player, :integer, default: 5
-    field :robot_hp, :integer, default: 50
     field :turn, :integer, default: 0
-    field :spawn_enabled, :boolean, default: true
-    field :max_turns, :integer, default: 100
-    field :attack_damage, DamageModifier, default: %{min: 8, max: 10}
-    field :collision_damage, DamageModifier, default: 5
-    field :suicide_damage, DamageModifier, default: 15
     embeds_many :events, Event, on_replace: :delete
-
-    field :terrain, :any, default: Terrain.default(), virtual: true
-    field :persistent?, :boolean, default: true, virtual: true
-
+    field :winner, :string, virtual: true
     field :move_time_ms, :integer, virtual: true, default: 5000
+
+    belongs_to :settings, Settings
+    belongs_to :battle_box_game, BattleBoxGame
 
     timestamps()
   end
 
   def changeset(game, params \\ %{}) do
     game
+    |> Repo.preload([:settings, :battle_box_game])
     |> cast(params, [
-      :player_1,
-      :player_2,
       :winner,
-      :spawn_every,
-      :spawn_per_player,
-      :robot_hp,
-      :max_turns,
-      :attack_damage,
-      :collision_damage,
-      :suicide_damage,
-      :turn
+      :turn,
+      :settings_id,
+      :battle_box_game_id
     ])
     |> cast_embed(:events)
+    |> cast_assoc(:battle_box_game)
   end
 
   def db_name, do: "robot_game"
 
-  def get_by_id(id) do
-    Repo.get_by(__MODULE__, id: id)
-  end
+  def get_by_id_with_settings(id), do: Repo.preload(get_by_id(id), :settings)
+  def get_by_id(<<_::288>> = id), do: Repo.get_by(__MODULE__, id: id)
+  def get_by_id(_), do: nil
 
   def disqualify(game, player) do
-    winner = %{player_1: :player_2, player_2: :player_1}[player]
-    winner = Map.get(game, winner)
+    winner = %{"player_1" => "player_2", "player_2" => "player_1"}[player]
     Map.put(game, :winner, winner)
   end
 
-  def persist(%{persistent?: false} = game), do: {:ok, game}
+  def persist(%{settings: %{persistent?: false}} = game), do: {:ok, game}
 
   def persist(game) do
+    scores = score(game)
+
+    game =
+      update_in(game.battle_box_game.battle_box_game_bots, fn bots ->
+        for bot <- bots, do: %{bot | score: scores[bot.player]}
+      end)
+
     events = Enum.map(game.events, &Map.take(&1, [:turn, :seq_num, :cause, :effects]))
 
     game
@@ -74,19 +64,25 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def validate_moves(game, moves, player) do
     moves
-    |> Enum.uniq_by(fn move -> move.robot_id end)
-    |> Enum.filter(fn move -> match?(%{player_id: ^player}, get_robot(game, move.robot_id)) end)
+    |> Enum.uniq_by(fn move -> move["robot_id"] end)
+    |> Enum.filter(fn move -> match?(%{player_id: ^player}, get_robot(game, move["robot_id"])) end)
   end
 
   def calculate_winner(game) do
-    winner =
-      case {score(game, :player_1), score(game, :player_2)} do
-        {p1, p2} when p1 == p2 -> nil
-        {p1, p2} when p1 > p2 -> game.player_1
-        {p1, p2} when p1 < p2 -> game.player_2
-      end
+    if over?(game) do
+      scores = score(game)
 
-    if over?(game), do: %{game | winner: winner}, else: game
+      winner =
+        case {scores["player_1"], scores["player_2"]} do
+          {p1, p2} when p1 == p2 -> nil
+          {p1, p2} when p1 > p2 -> "player_1"
+          {p1, p2} when p1 < p2 -> "player_2"
+        end
+
+      %{game | winner: winner}
+    else
+      game
+    end
   end
 
   def complete_turn(game),
@@ -111,60 +107,64 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def apply_effect_to_robots(robots, effect) do
     case effect do
-      {:move, robot_id, location} ->
+      ["move", robot_id, location] ->
         Enum.map(robots, fn
           %{id: ^robot_id} = robot -> put_in(robot.location, location)
           robot -> robot
         end)
 
-      {:damage, robot_id, amount} ->
+      ["damage", robot_id, amount] ->
         Enum.map(robots, fn
-          %{id: ^robot_id} = robot -> Robot.apply_damage(robot, amount)
+          %{id: ^robot_id, hp: hp} = robot -> %{robot | hp: hp - amount}
           robot -> robot
         end)
 
-      {:guard, _robot_id} ->
+      ["guard", _robot_id] ->
         robots
 
-      {:create_robot, player_id, robot_id, hp, location} ->
-        [
-          Robot.new(%{
-            player_id: player_id,
-            location: location,
-            id: robot_id,
-            hp: hp
-          })
-          | robots
-        ]
+      ["create_robot", player_id, robot_id, hp, location] ->
+        [%{player_id: player_id, location: location, id: robot_id, hp: hp} | robots]
 
-      {:remove_robot, robot_id} ->
+      ["remove_robot", robot_id] ->
         Enum.reject(robots, fn robot -> robot.id == robot_id end)
     end
   end
 
   def new(opts \\ []) do
+    settings =
+      case opts[:settings] do
+        nil -> Settings.new()
+        %Settings{} = settings -> settings
+        %{} = settings -> Settings.new(settings)
+      end
+
+    bbg =
+      case opts[:battle_box_game] do
+        nil -> BattleBoxGame.new()
+        %BattleBoxGame{} = bbg -> bbg
+      end
+
     opts = Enum.into(opts, %{})
     opts = Map.put_new(opts, :id, Ecto.UUID.generate())
+    opts = Map.merge(opts, %{settings: settings, battle_box_game: bbg})
 
     %__MODULE__{}
     |> Map.merge(opts)
   end
 
-  def over?(game), do: game.winner || game.turn >= game.max_turns
+  def over?(game), do: game.winner || game.turn >= game.settings.max_turns
 
-  def score(game, player_id) when player_id in [:player_1, :player_2] do
-    game
-    |> robots
-    |> Enum.filter(fn robot -> robot.player_id == player_id end)
-    |> length
+  def score(game) do
+    robot_score =
+      robots(game)
+      |> Enum.frequencies_by(fn robot -> robot.player_id end)
+
+    Map.merge(%{"player_1" => 0, "player_2" => 0}, robot_score)
   end
 
-  def user(game, :player_1), do: to_string(game.player_1 || "Player 1")
-  def user(game, :player_2), do: to_string(game.player_2 || "Player 2")
+  def dimensions(game), do: Settings.Terrain.dimensions(game.settings.terrain)
 
-  def dimensions(game), do: Terrain.dimensions(game.terrain)
-
-  def spawns(game), do: Terrain.spawn(game.terrain)
+  def spawns(game), do: Settings.Terrain.spawn(game.settings.terrain)
 
   def robots(game), do: robots_at_turn(game, game.turn)
 
@@ -179,7 +179,7 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 
   def spawning_round?(game),
-    do: game.spawn_enabled && rem(game.turn, game.spawn_every) == 0
+    do: game.settings.spawn_enabled && rem(game.turn, game.settings.spawn_every) == 0
 
   def get_robot(%__MODULE__{} = game, id), do: get_robot(robots(game), id)
 
@@ -193,41 +193,39 @@ defmodule BattleBox.Games.RobotGame.Game do
     do: Enum.find(robots, fn robot -> robot.location == location end)
 
   def available_adjacent_locations(game, location) do
-    Enum.filter(adjacent_locations(location), &(game.terrain[&1] in [:normal, :spawn]))
+    Enum.filter(adjacent_locations(location), &(game.settings.terrain[&1] in [:normal, :spawn]))
   end
 
-  def adjacent_locations({row, col}),
+  def adjacent_locations([row, col]),
     do: [
-      {row + 1, col},
-      {row - 1, col},
-      {row, col + 1},
-      {row, col - 1}
+      [row + 1, col],
+      [row - 1, col],
+      [row, col + 1],
+      [row, col - 1]
     ]
 
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
-  def attack_damage(game), do: DamageModifier.calc_damage(game.attack_damage)
+  def attack_damage(game), do: DamageModifier.calc_damage(game.settings.attack_damage)
 
   def guarded_suicide_damage(game), do: Integer.floor_div(suicide_damage(game), 2)
-  def suicide_damage(game), do: DamageModifier.calc_damage(game.suicide_damage)
+  def suicide_damage(game), do: DamageModifier.calc_damage(game.settings.suicide_damage)
 
   def guarded_collision_damage(_game), do: 0
-  def collision_damage(game), do: DamageModifier.calc_damage(game.collision_damage)
+  def collision_damage(game), do: DamageModifier.calc_damage(game.settings.collision_damage)
 
   def moves_request(game) do
     %{robots: robots(game), turn: game.turn}
   end
 
   def settings(game) do
-    Map.take(game, [
+    Map.take(game.settings, [
       :spawn_every,
       :spawn_per_player,
       :robot_hp,
       :max_turns,
       :attack_damage,
-      :collision_damage,
-      :terrain,
-      :game_acceptance_timeout_ms,
-      :move_time_ms
+      :collision_damage
+      # :terrain,
     ])
   end
 end
@@ -242,5 +240,6 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame.Game do
   def moves_request(game), do: Game.moves_request(game)
   def calculate_turn(game, moves), do: Game.Logic.calculate_turn(game, moves)
   def move_time_ms(game), do: game.move_time_ms
+  def score(game), do: Game.score(game)
   def winner(game), do: game.winner
 end

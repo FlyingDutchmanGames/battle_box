@@ -8,25 +8,24 @@ defmodule BattleBox.Games.RobotGame.Game.Event do
 
     def cast(cause) do
       case cause do
-        spawn when spawn in [:spawn, "spawn"] ->
-          {:ok, :spawn}
+        "spawn" ->
+          {:ok, "spawn"}
 
-        %{type: _, robot_id: _} = cause ->
+        "death" ->
+          {:ok, "death"}
+
+        %{"type" => type, "robot_id" => _robot_id, "target" => [x, y]}
+        when type in ["move", "attack"] and is_integer(x) and is_integer(y) ->
           {:ok, cause}
 
-        %{"type" => type, "robot_id" => robot_id, "target" => [x, y]} ->
-          {:ok, %{type: stea(type), robot_id: robot_id, target: {x, y}}}
-
-        %{"type" => type, "robot_id" => robot_id} ->
-          {:ok, %{robot_id: robot_id, type: stea(type)}}
+        %{"type" => type, "robot_id" => _robot_id} when type in ["suicide", "guard", "noop"] ->
+          {:ok, cause}
       end
     end
 
     def load(cause), do: cast(cause)
 
     def dump(cause), do: {:ok, cause}
-
-    defp stea(string), do: String.to_existing_atom(string)
   end
 
   defmodule Effect do
@@ -35,43 +34,18 @@ defmodule BattleBox.Games.RobotGame.Game.Event do
 
     def cast(effect) do
       case effect do
-        {:move, _, _} ->
-          {:ok, effect}
-
-        ["move", robot_id, [x, y]] ->
-          {:ok, {:move, robot_id, {x, y}}}
-
-        {:damage, _, _} ->
-          {:ok, effect}
-
-        ["damage", robot_id, amount] ->
-          {:ok, {:damage, robot_id, amount}}
-
-        {:guard, _} ->
-          {:ok, effect}
-
-        ["guard", robot_id] ->
-          {:ok, {:guard, robot_id}}
-
-        {:remove_robot, _} ->
-          {:ok, effect}
-
-        ["remove_robot", robot_id] ->
-          {:ok, {:remove_robot, robot_id}}
-
-        {:create_robot, _, _, _, _} ->
-          {:ok, effect}
-
-        ["create_robot", player_id, robot_id, hp, [x, y]] ->
-          {:ok, {:create_robot, stea(player_id), robot_id, hp, {x, y}}}
+        ["move", _robot_id, [_x, _y]] -> {:ok, effect}
+        ["damage", _robot_id, _amount] -> {:ok, effect}
+        ["guard", _robot_id] -> {:ok, effect}
+        ["remove_robot", _robot_id] -> {:ok, effect}
+        ["create_robot", _player_id, _robot_id, _hp, [_x, _y]] -> {:ok, effect}
+        _ -> :error
       end
     end
 
     def load(effect), do: cast(effect)
 
     def dump(effect), do: {:ok, effect}
-
-    defp stea(string), do: String.to_existing_atom(string)
   end
 
   @primary_key false

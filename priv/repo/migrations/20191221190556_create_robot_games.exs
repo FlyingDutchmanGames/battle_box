@@ -3,24 +3,21 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
 
   def change do
     create table("robot_games") do
-      add :player_1, :uuid, null: false
-      add :player_2, :uuid, null: false
-      add :winner, :uuid, null: true
-      add :robot_hp, :integer, null: false
       add :events, :jsonb, null: false, default: fragment("'[]'::jsonb")
       add :turn, :integer, null: false
-      add :spawn_enabled, :boolean, null: false, default: true
+      add :settings_id, :uuid, null: false
+      add :battle_box_game_id, :uuid, null: true
+      timestamps()
+    end
+
+    create table("robot_game_settings") do
+      add :robot_hp, :integer, null: false
       add :spawn_every, :integer, null: false
       add :spawn_per_player, :integer, null: false
       add :attack_damage, :jsonb, null: false
       add :collision_damage, :jsonb, null: false
       add :suicide_damage, :jsonb, null: false
       add :max_turns, :integer, null: false
-
-      timestamps()
     end
-
-    create index("robot_games", [:player_1])
-    create index("robot_games", [:player_2])
   end
 end
