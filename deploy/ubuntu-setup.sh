@@ -44,6 +44,50 @@ apt update
 apt install certbot python-certbot-nginx -t stretch-backports
 certbot --nginx
 
+# Setup nginx to ssl stream tcp sockets
+cat > /etc/nginx/nginx.conf <<'CONF'
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+
+events {
+	worker_connections 768;
+}
+
+http {
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 65;
+	types_hash_max_size 2048;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
+	ssl_prefer_server_ciphers on;
+
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
+
+	gzip on;
+
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+}
+
+stream {
+  server {
+	  listen 4242 ssl;
+	  proxy_pass 127.0.0.1:4001;
+	  ssl_certificate /etc/letsencrypt/live/robotgame.grantjamespowell.com/fullchain.pem;
+	  ssl_certificate_key /etc/letsencrypt/live/robotgame.grantjamespowell.com/privkey.pem;
+  }
+}
+CONF
+
 # Install Postgres
 apt install postgresql postgresql-contrib
 sudo -u postgres createuser --echo --no-createdb --pwprompt --no-superuser battle_box
