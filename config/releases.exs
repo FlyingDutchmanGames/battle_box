@@ -23,7 +23,7 @@ config :battle_box, BattleBox.Repo,
 
 config :battle_box, BattleBoxWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],
-  url: [host: envs[:host]],
+  url: [host: envs[:host], scheme: "https", port: 443],
   secret_key_base: envs[:secret_key_base],
   live_view: [signing_salt: envs[:live_view_salt]]
 
