@@ -42,5 +42,14 @@ asdf install
 
 ## Build it on the server
 ```
-MIX_ENV=prod mix release
+export MIX_ENV=prod
+cd /root/battle_box
+git pull master
+mix deps.get --only prod
+mix compile
+npm install --prefix ./assets
+mkdir -p priv/static
+npm run deploy --prefix ./assets
+mix phx.digest
+mix release
 ```
