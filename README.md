@@ -5,6 +5,7 @@
 [x] Make the `Game.robots` function more efficent by denormalizing a `game.robots_at_turn` to be a `%{turn_num => [robot]}`
 [ ] Visualize games better (include moves and historical turns)
 [ ] A decent bot implmentation for testing
+[ ] Cinematic Move Delay to make certain lobbies more fun to watch
 [ ] historical games page
 [ ] Refactor moves requests to be able to contain multiple players
 [ ] write move timeout ms onto the robot game settings
@@ -12,7 +13,7 @@
 [ ] Bot Info Page
 [ ] Game Engine Stats Server (# Live Games, # Most Active Lobby, # Connections)?
 [ ] Tear out phoenix pubsub for game engine pubsub and use registry
-[ ] Remove GenStateMachine in favor of built in :genstatem
+[ ] Remove GenStateMachine in favor of built in :genstatem (this is annoying so maybe not)
 [ ] bot self play/user self play lobby matchmaker settings
 [ ] Github Pages landing page
 [ ] Pick a domain name and associate it
