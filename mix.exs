@@ -33,7 +33,7 @@ defmodule BattleBox.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.4.13"},
+      {:phoenix, "~> 1.4.14"},
       {:phoenix_pubsub, "~> 1.1"},
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.3"},
@@ -43,7 +43,7 @@ defmodule BattleBox.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:phoenix_live_view, "~> 0.7.1"},
+      {:phoenix_live_view, "~> 0.8.1"},
       {:floki, ">= 0.25.0", only: :test},
       {:gen_state_machine, "~> 2.0"},
       {:httpoison, "~> 1.6"},
