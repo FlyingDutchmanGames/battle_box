@@ -89,6 +89,7 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
     initial_game =
       Game.new(settings: %{terrain: terrain, spawn_enabled: false})
       |> Game.put_events(robot_spawns)
+      |> Game.complete_turn()
 
     moves =
       graph_with_indexes
