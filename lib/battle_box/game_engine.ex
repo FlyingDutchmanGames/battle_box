@@ -3,8 +3,6 @@ defmodule BattleBox.GameEngine do
   alias BattleBox.GameServer.GameSupervisor, as: GameSup
   alias BattleBox.PlayerServer.PlayerSupervisor, as: PlayerSup
   alias BattleBox.{MatchMakerServer, TcpConnectionServer}
-  alias Phoenix.PubSub
-  import Supervisor.Spec, only: [supervisor: 2]
 
   @default_name GameEngine
   def default_name, do: @default_name
@@ -18,22 +16,27 @@ defmodule BattleBox.GameEngine do
     name = Keyword.fetch!(opts, :name)
 
     children = [
+      {Registry, keys: :duplicate, name: pubsub_name(name)},
       {Registry, keys: :unique, name: connection_registry_name(name)},
       {Registry, keys: :unique, name: player_registry_name(name)},
       {Registry, keys: :unique, name: game_registry_name(name)},
       {BattleBox.MatchMaker, %{names: names(name)}},
       {GameSup, %{names: names(name)}},
       {PlayerSup, %{names: names(name)}},
-      supervisor(Phoenix.PubSub.PG2, [pubsub_name(name), []])
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  def broadcast(game_engine, topic, message),
-    do: PubSub.broadcast(pubsub_name(game_engine), topic, message)
+  def broadcast(game_engine, topic, message) do
+    Registry.dispatch(pubsub_name(game_engine), topic, fn entries ->
+      for {pid, _} <- entries, do: send(pid, message)
+    end)
+  end
 
-  def subscribe(game_engine, topic), do: PubSub.subscribe(pubsub_name(game_engine), topic)
+  def subscribe(game_engine, topic) do
+    Registry.register(pubsub_name(game_engine), topic, [])
+  end
 
   def start_game(game_engine, opts),
     do: GameSup.start_game(game_supervisor_name(game_engine), opts)
