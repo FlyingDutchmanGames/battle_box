@@ -3,6 +3,7 @@
 ## Hitlist
 
 [ ] Make the `Game.robots` function more efficent by denormalizing a `game.robots_at_turn` to be a `%{turn_num => [robot]}`
+[ ] Visualize games better (include moves and historical turns)
 [ ] A decent bot implmentation for testing
 [ ] historical games page
 [ ] live games page
