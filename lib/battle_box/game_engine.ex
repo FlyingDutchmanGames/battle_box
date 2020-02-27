@@ -22,7 +22,7 @@ defmodule BattleBox.GameEngine do
       {Registry, keys: :unique, name: game_registry_name(name)},
       {BattleBox.MatchMaker, %{names: names(name)}},
       {GameSup, %{names: names(name)}},
-      {PlayerSup, %{names: names(name)}},
+      {PlayerSup, %{names: names(name)}}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
