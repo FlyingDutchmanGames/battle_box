@@ -2,10 +2,12 @@
 
 ## Hitlist
 
-[ ] Make the `Game.robots` function more efficent by denormalizing a `game.robots_at_turn` to be a `%{turn_num => [robot]}`
+[x] Make the `Game.robots` function more efficent by denormalizing a `game.robots_at_turn` to be a `%{turn_num => [robot]}`
 [ ] Visualize games better (include moves and historical turns)
 [ ] A decent bot implmentation for testing
 [ ] historical games page
+[ ] Refactor moves requests to be able to contain multiple players
+[ ] write move timeout ms onto the robot game settings
 [ ] live games page
 [ ] Bot Info Page
 [ ] Game Engine Stats Server (# Live Games, # Most Active Lobby, # Connections)?
@@ -14,6 +16,7 @@
 [ ] bot self play/user self play lobby matchmaker settings
 [ ] Github Pages landing page
 [ ] Pick a domain name and associate it
+[ ] BattleBox Elixir Client
 [ ] envsubt in ubuntu setup to deal with changing hostnames
 [ ] tar ball for release, maybe build on mac? systemd service for server
 [ ] postgres superadmin user doesn't exist?
