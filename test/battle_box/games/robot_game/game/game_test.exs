@@ -150,11 +150,11 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
 
     test "you can persist changes multiple time" do
-      game = Game.new(turn: 42, settings: %{terrain: %{}})
+      game = Game.new(settings: %{terrain: %{}})
       assert {:ok, game} = Game.persist(game)
       game = Game.complete_turn(game)
       {:ok, game} = Game.persist(game)
-      assert 43 == Game.get_by_id(game.id).turn
+      assert 1 == Game.get_by_id(game.id).turn
     end
 
     test "when you persist a game it flushes the unpersisted events to disk" do
@@ -443,7 +443,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/121/
 
       game =
-        Game.new(turn: 20, settings: %{max_turns: 20})
+        Game.new(settings: %{max_turns: 0})
         |> Game.put_events(robot_spawns)
 
       assert Game.over?(game)
@@ -454,7 +454,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/1212/
 
       game =
-        Game.new(turn: 20, settings: %{max_turns: 20})
+        Game.new(settings: %{max_turns: 0})
         |> Game.put_events(robot_spawns)
 
       assert Game.over?(game)

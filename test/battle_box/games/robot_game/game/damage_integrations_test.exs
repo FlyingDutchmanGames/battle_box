@@ -30,7 +30,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
         settings: %{terrain: @terrain, spawn_enabled: false, attack_damage: 50, robot_hp: 50}
       )
 
-    inital_game = Game.put_events(game, robot_spawns)
+    inital_game = Game.put_events(game, robot_spawns) |> Game.complete_turn()
     player_2_moves = [%{"type" => "attack", "target" => [0, 0], "robot_id" => 2}]
 
     after_turn =
@@ -50,7 +50,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       %{"type" => "attack", "target" => [0, 0], "robot_id" => 2}
     ]
 
-    inital_game = Game.put_events(game, robot_spawns)
+    inital_game = Game.put_events(game, robot_spawns) |> Game.complete_turn()
 
     after_turn =
       Logic.calculate_turn(inital_game, %{
@@ -75,7 +75,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       %{"type" => "attack", "target" => [0, 0], "robot_id" => 2}
     ]
 
-    inital_game = Game.put_events(game, robot_spawns)
+    inital_game = Game.put_events(game, robot_spawns) |> Game.complete_turn()
 
     after_turn =
       Logic.calculate_turn(inital_game, %{
@@ -101,7 +101,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       %{"type" => "move", "target" => [1, 0], "robot_id" => 2}
     ]
 
-    inital_game = Game.put_events(game, robot_spawns)
+    inital_game = Game.put_events(game, robot_spawns) |> Game.complete_turn()
 
     after_turn =
       Logic.calculate_turn(inital_game, %{
@@ -124,7 +124,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       %{"type" => "attack", "target" => [0, 0], "robot_id" => 4}
     ]
 
-    inital_game = Game.put_events(game, robot_spawns)
+    inital_game = Game.put_events(game, robot_spawns) |> Game.complete_turn()
 
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => [], "player_2" => player_2_moves})
@@ -140,7 +140,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       %{"type" => "attack", "target" => [0, 0], "robot_id" => 2}
     ]
 
-    inital_game = Game.put_events(game, robot_spawns)
+    inital_game = Game.put_events(game, robot_spawns) |> Game.complete_turn()
 
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => [], "player_2" => player_2_moves})
@@ -155,7 +155,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       %{"type" => "attack", "target" => [0, 0], "robot_id" => 1}
     ]
 
-    inital_game = Game.put_events(game, robot_spawns)
+    inital_game = Game.put_events(game, robot_spawns) |> Game.complete_turn()
 
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => player_1_moves, "player_2" => []})
@@ -171,7 +171,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       %{"type" => "suicide", "robot_id" => 1}
     ]
 
-    inital_game = Game.put_events(game, robot_spawns)
+    inital_game = Game.put_events(game, robot_spawns) |> Game.complete_turn()
 
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => player_1_moves, "player_2" => []})

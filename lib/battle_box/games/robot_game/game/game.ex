@@ -13,6 +13,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     embeds_many :events, Event, on_replace: :delete
     field :winner, :string, virtual: true
     field :move_time_ms, :integer, virtual: true, default: 5000
+    field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
 
     belongs_to :settings, Settings
     belongs_to :battle_box_game, BattleBoxGame
@@ -35,8 +36,10 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def db_name, do: "robot_game"
 
-  def get_by_id_with_settings(id), do: Repo.preload(get_by_id(id), :settings)
-  def get_by_id(<<_::288>> = id), do: Repo.get_by(__MODULE__, id: id)
+  def get_by_id_with_settings(id),
+    do: Repo.preload(get_by_id(id), :settings) |> set_robots_at_turn
+
+  def get_by_id(<<_::288>> = id), do: Repo.get_by(__MODULE__, id: id) |> set_robots_at_turn
   def get_by_id(_), do: nil
 
   def disqualify(game, player) do
@@ -85,8 +88,10 @@ defmodule BattleBox.Games.RobotGame.Game do
     end
   end
 
-  def complete_turn(game),
-    do: update_in(game.turn, &(&1 + 1))
+  def complete_turn(game) do
+    game = set_robots_at_turn(game)
+    update_in(game.turn, &(&1 + 1))
+  end
 
   def put_events(game, events),
     do: Enum.reduce(events, game, &put_event(&2, &1))
@@ -102,7 +107,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     update_in(game.events, &[event | &1])
   end
 
-  def apply_effects_to_robots(robots, effects),
+  def apply_effects_to_robots(robots, effects) when is_list(robots),
     do: Enum.reduce(effects, robots, &apply_effect_to_robots(&2, &1))
 
   def apply_effect_to_robots(robots, effect) do
@@ -168,16 +173,6 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def robots(game), do: robots_at_turn(game, game.turn)
 
-  def robots_at_turn(game, turn) do
-    events =
-      game.events
-      |> Enum.filter(fn event -> event.turn <= turn end)
-      |> Enum.sort_by(fn event -> event.seq_num end)
-      |> Enum.flat_map(fn event -> event.effects end)
-
-    apply_effects_to_robots([], events)
-  end
-
   def spawning_round?(game),
     do: game.settings.spawn_enabled && rem(game.turn, game.settings.spawn_every) == 0
 
@@ -227,6 +222,30 @@ defmodule BattleBox.Games.RobotGame.Game do
       :collision_damage
       # :terrain,
     ])
+  end
+
+  def events_for_turn(game, turn) do
+    game.events
+    |> Enum.filter(fn event -> event.turn == turn end)
+  end
+
+  def effects_for_turn(game, turn) do
+    events_for_turn(game, turn)
+    |> Enum.sort_by(fn event -> event.seq_num end)
+    |> Enum.flat_map(fn event -> event.effects end)
+  end
+
+  def robots_at_turn(game, turn) do
+    game.robots_at_end_of_turn[turn - 1]
+    |> apply_effects_to_robots(effects_for_turn(game, turn))
+  end
+
+  def set_robots_at_turn(nil), do: nil
+
+  def set_robots_at_turn(game) do
+    Enum.reduce(0..game.turn, game, fn turn, game ->
+      update_in(game.robots_at_end_of_turn, &Map.put(&1, turn, robots_at_turn(game, turn)))
+    end)
   end
 end
 
