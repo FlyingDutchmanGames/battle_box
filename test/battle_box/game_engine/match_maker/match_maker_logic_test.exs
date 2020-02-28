@@ -1,7 +1,7 @@
-defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
+defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{Lobby, Repo}
-  import BattleBox.MatchMaker.MatchMakerLogic
+  import BattleBox.GameEngine.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @player_1_id Ecto.UUID.generate()

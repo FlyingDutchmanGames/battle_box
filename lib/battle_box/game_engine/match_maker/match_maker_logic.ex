@@ -1,4 +1,4 @@
-defmodule BattleBox.MatchMaker.MatchMakerLogic do
+defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
   alias BattleBox.{Lobby, Game, GameBot}
   alias BattleBox.Games.{RobotGame, RobotGame.Settings}
 

@@ -1,8 +1,10 @@
 defmodule BattleBox.GameEngine do
   use Supervisor
-  alias BattleBox.GameServer.GameSupervisor, as: GameSup
-  alias BattleBox.PlayerServer.PlayerSupervisor, as: PlayerSup
-  alias BattleBox.{MatchMakerServer, TcpConnectionServer}
+  alias BattleBox.GameEngine.GameServer.GameSupervisor, as: GameSup
+  alias BattleBox.GameEngine.PlayerServer.PlayerSupervisor, as: PlayerSup
+  alias BattleBox.GameEngine.MatchMaker, as: MatchMakerSup
+  alias BattleBox.GameEngine.MatchMakerServer
+  alias BattleBox.TcpConnectionServer
 
   @default_name GameEngine
   def default_name, do: @default_name
@@ -20,9 +22,9 @@ defmodule BattleBox.GameEngine do
       {Registry, keys: :unique, name: connection_registry_name(name)},
       {Registry, keys: :unique, name: player_registry_name(name)},
       {Registry, keys: :unique, name: game_registry_name(name)},
-      {BattleBox.MatchMaker, %{names: names(name)}},
       {GameSup, %{names: names(name)}},
-      {PlayerSup, %{names: names(name)}}
+      {PlayerSup, %{names: names(name)}},
+      {MatchMakerSup, %{names: names(name)}}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

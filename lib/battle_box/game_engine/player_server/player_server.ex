@@ -1,6 +1,7 @@
-defmodule BattleBox.PlayerServer do
+defmodule BattleBox.GameEngine.PlayerServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.{Lobby, MatchMaker, GameServer}
+  alias BattleBox.Lobby
+  alias BattleBox.GameEngine.{MatchMaker, GameServer}
 
   def accept_game(player_server, game_id, timeout \\ 5000) do
     GenStateMachine.call(player_server, {:accept_game, game_id}, timeout)

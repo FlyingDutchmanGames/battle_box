@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngineProvider.Mock do
-  alias BattleBox.GameEngineProvider
+  alias BattleBox.GameEngine.GameEngineProvider
   use Agent
 
   def start_link() do

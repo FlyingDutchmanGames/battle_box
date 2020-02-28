@@ -1,7 +1,11 @@
-defmodule BattleBox.MatchMakerServer do
+defmodule BattleBox.GameEngine.MatchMakerServer do
   use GenServer
-  alias BattleBox.GameServer.GameSupervisor
-  alias BattleBox.{MatchMaker, MatchMaker.MatchMakerLogic}
+
+  alias BattleBox.GameEngine.{
+    MatchMaker,
+    MatchMaker.MatchMakerLogic,
+    GameServer.GameSupervisor
+  }
 
   @match_make_delay_ms 100
 

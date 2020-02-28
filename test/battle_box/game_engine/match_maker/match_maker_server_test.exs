@@ -1,6 +1,7 @@
-defmodule BattleBox.MatchMakerServerTest do
+defmodule BattleBox.GameEngine.MatchMakerServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Lobby, GameEngine, MatchMaker, MatchMakerServer}
+  alias BattleBox.{Lobby, GameEngine}
+  alias BattleBox.GameEngine.{MatchMaker, MatchMakerServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @player_1_id Ecto.UUID.generate()

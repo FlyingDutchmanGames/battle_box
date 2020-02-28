@@ -1,7 +1,6 @@
-defmodule BattleBox.MatchMakerTest do
+defmodule BattleBox.GameEngine.MatchMakerTest do
   use ExUnit.Case, async: true
-  alias BattleBox.MatchMaker
-  alias BattleBox.GameEngine
+  alias BattleBox.{GameEngine, GameEngine.MatchMaker}
 
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)

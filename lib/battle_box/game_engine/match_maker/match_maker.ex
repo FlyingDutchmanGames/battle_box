@@ -1,6 +1,6 @@
-defmodule BattleBox.MatchMaker do
+defmodule BattleBox.GameEngine.MatchMaker do
   use Supervisor
-  alias BattleBox.MatchMakerServer
+  alias BattleBox.GameEngine.MatchMakerServer
   alias BattleBox.GameEngine
 
   @doc """

@@ -1,8 +1,8 @@
-defmodule BattleBox.PlayerServerTest do
+defmodule BattleBox.GameEngine.PlayerServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{GameEngine, MatchMaker, PlayerServer, Repo, Lobby}
+  alias BattleBox.{GameEngine, Repo, Lobby, Games.RobotGame}
+  alias BattleBox.GameEngine.{MatchMaker, PlayerServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
-  alias BattleBox.Games.RobotGame
 
   @player_1_id Ecto.UUID.generate()
   @player_2_id Ecto.UUID.generate()

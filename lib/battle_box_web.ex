@@ -1,5 +1,5 @@
 defmodule BattleBoxWeb do
-  alias BattleBox.GameEngineProvider
+  alias BattleBox.GameEngine.GameEngineProvider
 
   def live_view do
     quote do

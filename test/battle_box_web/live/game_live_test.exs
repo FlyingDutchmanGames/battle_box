@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.GameLiveTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.{GameEngine, GameServer, Games.RobotGame}
+  alias BattleBox.{GameEngine, GameEngine.GameServer, Games.RobotGame}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @game_id Ecto.UUID.generate()
