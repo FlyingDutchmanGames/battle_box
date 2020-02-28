@@ -159,9 +159,11 @@ defmodule BattleBox.Games.RobotGame.Game do
 
   def over?(game), do: game.winner || game.turn >= game.settings.max_turns
 
-  def score(game) do
+  def score(game), do: score_at_turn(game, game.turn)
+
+  def score_at_turn(game, turn) do
     robot_score =
-      robots(game)
+      robots_at_turn(game, turn)
       |> Enum.frequencies_by(fn robot -> robot.player_id end)
 
     Map.merge(%{"player_1" => 0, "player_2" => 0}, robot_score)

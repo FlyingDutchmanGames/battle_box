@@ -9,10 +9,14 @@ defmodule BattleBoxWeb.GameLiveTest do
   test "it can display a game off disk", %{conn: conn} do
     id = Ecto.UUID.generate()
 
-    {:ok, _} = Game.persist(Game.new(%{id: id}))
+    {:ok, _} =
+      Game.new(%{id: id})
+      |> Game.complete_turn()
+      |> Game.complete_turn()
+      |> Game.persist()
 
     {:ok, _view, html} = live(conn, "/games/#{id}")
-    assert html =~ "TURN: 0 / 100"
+    assert html =~ "TURN: 2 / 2"
   end
 
   describe "live game watching" do
@@ -49,7 +53,7 @@ defmodule BattleBoxWeb.GameLiveTest do
 
     test "it can display a game in progress", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/games/#{@game_id}")
-      assert html =~ "TURN: 0 / 100"
+      assert html =~ "TURN: 0 / 0"
     end
 
     test "it will update when the game updates", %{conn: conn} = context do
@@ -58,7 +62,7 @@ defmodule BattleBoxWeb.GameLiveTest do
 
       {:ok, view, html} = live(conn, "/games/#{@game_id}")
       Process.link(view.pid)
-      assert html =~ "TURN: 0 / 100"
+      assert html =~ "TURN: 0 / 0"
 
       Enum.each(1..9, fn _ ->
         :ok = GameServer.submit_moves(context.game_server, "player_1", [])
@@ -66,7 +70,7 @@ defmodule BattleBoxWeb.GameLiveTest do
       end)
 
       Process.sleep(10)
-      assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 100/, render(view))
+      assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 9/, render(view))
     end
   end
 end

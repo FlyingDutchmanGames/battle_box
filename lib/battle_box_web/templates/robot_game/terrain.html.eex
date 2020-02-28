@@ -1,7 +1,0 @@
-<% [row, col] = @location %>
-<div
-  class='<%= "terrain #{@terrain}" %>'
-  style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'
-  phx-click="terrain-click">
-  <div class="number"><%= terrain_number(@location) %></div>
-</div>
