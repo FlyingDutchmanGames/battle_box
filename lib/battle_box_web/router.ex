@@ -23,7 +23,7 @@ defmodule BattleBoxWeb.Router do
     get "/logout", LogoutController, :logout
 
     live("/live_games", GamesLiveLive)
-    get "/games", GamesController, :index
+    get "/games", GameController, :index
     live("/games/:game_id", GameLive)
 
     scope "/auth" do

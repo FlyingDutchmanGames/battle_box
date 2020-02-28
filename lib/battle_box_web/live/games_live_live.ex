@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.GamesLiveLive do
-  alias BattleBoxWeb.GamesView
   use BattleBoxWeb, :live_view
+  alias BattleBoxWeb.GameView
   alias BattleBox.GameEngine
 
   @refresh_rate_ms 1000
@@ -20,6 +20,6 @@ defmodule BattleBoxWeb.GamesLiveLive do
   end
 
   def render(assigns) do
-    GamesView.render("live.html", assigns)
+    GameView.render("live.html", assigns)
   end
 end

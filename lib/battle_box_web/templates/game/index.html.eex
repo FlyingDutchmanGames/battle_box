@@ -1,0 +1,26 @@
+<div class="games">
+  <%= for game <- @games do %>
+      <div class="game">
+        <div class="game-details">
+          <div><%= game.inserted_at %></div>
+          <a href="<%= Routes.live_path(@conn, BattleBoxWeb.GameLive, game.robot_game.id) %>"><div>Watch</div></a>
+          <a><div>Download</div></a>
+        </div>
+        <%= for %{bot: %{user: user} = bot, score: score, player: player} <- Enum.sort_by(game.battle_box_game_bots, fn bot -> bot.player end) do %>
+          <div class="game-bot <%= player %>">
+            <div class="bot">
+              <div style="text-transform: capitalize;"><%= bot.name %></div>
+              <div class="score"><%= score %></div>
+            </div>
+            <div class="user-profile">
+              <img class="avatar" src="<%= @user.github_avatar_url %>">
+              <div class="user-info">
+                <div><%= user.name %></div>
+                <div class="name"><%= @user.github_login_name %></div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+  <% end %>
+</div>

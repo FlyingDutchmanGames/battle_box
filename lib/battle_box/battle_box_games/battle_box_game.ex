@@ -3,6 +3,7 @@ defmodule BattleBox.BattleBoxGame do
   import Ecto.Changeset
   alias BattleBox.{Lobby, Bot, BattleBoxGameBot}
   alias BattleBox.Games.RobotGame.Game, as: RobotGame
+  import Ecto.Query, only: [from: 2]
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -28,6 +29,7 @@ defmodule BattleBox.BattleBoxGame do
     }
   end
 
-  defp base do
+  def base do
+    from bbg in __MODULE__, select: bbg
   end
 end
