@@ -2,10 +2,12 @@
   <div class="logo">BATTLE BOX</div>
   <div class="spacer"></div>
   <%= if @user do %>
-    <div class="user">
-      <div class="name"><%= @user.name %></div>
-      <img src="<%= @user.github_avatar_url %>">
-    </div>
+    <a style="text-decoration: none;" href="<%= Routes.user_path(@conn, :show, @user.id) %>">
+      <div class="user">
+        <div class="name"><%= @user.name %></div>
+        <img src="<%= @user.github_avatar_url %>">
+      </div>
+    </a>
   <% else %>
     <div class="github-login">
       <a href="<%= Routes.github_login_path(@conn, :github_login) %>">Login With Github</a>
