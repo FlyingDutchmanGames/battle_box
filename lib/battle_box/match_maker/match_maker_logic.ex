@@ -1,6 +1,7 @@
 defmodule BattleBox.MatchMaker.MatchMakerLogic do
   alias BattleBox.{Lobby, Game, GameBot}
-  alias BattleBox.Games.RobotGame.{Settings, Game}
+  alias BattleBox.Games.RobotGame.Settings
+  alias BattleBox.Games.RobotGame.Game, as: RobotGame
 
   def make_matches(enqueued_players, lobby_id) do
     %Lobby{} = lobby = Lobby.get_by_id(lobby_id)
@@ -16,7 +17,7 @@ defmodule BattleBox.MatchMaker.MatchMakerLogic do
     p2_bot = GameBot.new(player: "player_2", bot_id: player_2.player_id)
     bbg = Game.new(lobby_id: lobby.id, game_bots: [p1_bot, p2_bot])
 
-    game = Game.new(settings: Settings.new(), battle_box_game: bbg)
-    %{game: game, players: %{"player_1" => player_1.pid, "player_2" => player_2.pid}}
+    robot_game = RobotGame.new(settings: Settings.new(), game: bbg)
+    %{game: robot_game, players: %{"player_1" => player_1.pid, "player_2" => player_2.pid}}
   end
 end

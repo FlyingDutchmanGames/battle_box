@@ -11,7 +11,7 @@ defmodule BattleBox.GameBotTest do
         player: "foo",
         score: 0,
         bot_id: @bot_id,
-        battle_box_game_id: @bbg_id
+        game_id: @bbg_id
       })
 
     assert {:ok, _bot} = Repo.insert(changeset)

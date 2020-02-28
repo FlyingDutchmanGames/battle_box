@@ -107,17 +107,18 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "persisting will persist the battle box game, and puts scores on the players" do
       # TODO:// This feels like it doesn't belong here with this many imports
-      alias BattleBox.{Game, GameBot, Repo}
+      alias BattleBox.{GameBot, Repo}
+      alias BattleBox.Game, as: BBG
 
       bbg =
-        Game.new(
+        BBG.new(
           game_bots: [
             GameBot.new(player: "player_1", bot_id: @bot_id)
           ]
         )
 
       {:ok, game} =
-        Game.new(battle_box_game: bbg)
+        Game.new(game: bbg)
         |> Game.put_event(%{
           cause: "spawn",
           effects: [["create_robot", "player_1", uuid(), 50, [1, 1]]]
