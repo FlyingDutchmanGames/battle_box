@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.Game do
-  alias BattleBox.{Repo, BattleBoxGame}
+  alias BattleBox.{Repo, Game}
   alias BattleBox.Games.RobotGame.{Settings, Settings.DamageModifier}
   alias __MODULE__.Event
   use Ecto.Schema
@@ -16,22 +16,22 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
 
     belongs_to :settings, Settings
-    belongs_to :battle_box_game, BattleBoxGame
+    belongs_to :game, Game
 
     timestamps()
   end
 
   def changeset(game, params \\ %{}) do
     game
-    |> Repo.preload([:settings, :battle_box_game])
+    |> Repo.preload([:settings, :game])
     |> cast(params, [
       :winner,
       :turn,
       :settings_id,
-      :battle_box_game_id
+      :game_id
     ])
     |> cast_embed(:events)
-    |> cast_assoc(:battle_box_game)
+    |> cast_assoc(:game)
   end
 
   def db_name, do: "robot_game"
@@ -53,7 +53,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     scores = score(game)
 
     game =
-      update_in(game.battle_box_game.battle_box_game_bots, fn bots ->
+      update_in(game.game.game_bots, fn bots ->
         for bot <- bots, do: %{bot | score: scores[bot.player]}
       end)
 
@@ -143,15 +143,15 @@ defmodule BattleBox.Games.RobotGame.Game do
         %{} = settings -> Settings.new(settings)
       end
 
-    bbg =
-      case opts[:battle_box_game] do
-        nil -> BattleBoxGame.new()
-        %BattleBoxGame{} = bbg -> bbg
+    game =
+      case opts[:game] do
+        nil -> Game.new()
+        %Game{} = game -> game
       end
 
     opts = Enum.into(opts, %{})
     opts = Map.put_new(opts, :id, Ecto.UUID.generate())
-    opts = Map.merge(opts, %{settings: settings, battle_box_game: bbg})
+    opts = Map.merge(opts, %{settings: settings, game: game})
 
     %__MODULE__{}
     |> Map.merge(opts)
