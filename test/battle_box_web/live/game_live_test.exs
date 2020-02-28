@@ -56,7 +56,8 @@ defmodule BattleBoxWeb.GameLiveTest do
       assert html =~ "TURN: 0 / 0"
     end
 
-    test "it will update when the game updates", %{conn: conn} = context do
+    test "it will update when the game updates (and go to the most recent move)",
+         %{conn: conn} = context do
       Process.link(context.game_server)
       GameEngine.subscribe(context.game_engine, "game:#{@game_id}")
 
@@ -71,6 +72,41 @@ defmodule BattleBoxWeb.GameLiveTest do
 
       Process.sleep(10)
       assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 9/, render(view))
+    end
+  end
+
+  describe "Arrow Keys let you change the turn you're viewing" do
+    setup do
+      id = Ecto.UUID.generate()
+
+      {:ok, _} =
+        Game.new(%{id: id})
+        |> Game.complete_turn()
+        |> Game.complete_turn()
+        |> Game.persist()
+
+      %{game_id: id}
+    end
+
+    test "Arrow Keys move the page around but only to extent of game", %{
+      conn: conn,
+      game_id: game_id
+    } do
+      {:ok, view, html} = live(conn, "/games/#{game_id}")
+      assert html =~ "TURN: 2 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowLeft"}) =~ "TURN: 1 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowLeft"}) =~ "TURN: 0 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowLeft"}) =~ "TURN: 0 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowRight"}) =~ "TURN: 1 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowRight"}) =~ "TURN: 2 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowRight"}) =~ "TURN: 2 / 2"
+    end
+
+    test "other arrow keys don't break it", %{conn: conn, game_id: game_id} do
+      {:ok, view, html} = live(conn, "/games/#{game_id}")
+      assert html =~ "TURN: 2 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowUp"}) =~ "TURN: 2 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowDown"}) =~ "TURN: 2 / 2"
     end
   end
 end

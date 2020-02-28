@@ -14,51 +14,41 @@ defmodule BattleBoxWeb.GameLive do
         {:ok, assign(socket, :not_found, true)}
 
       game ->
-        turn =
-          case params["turn"] do
-            nil -> game.turn
-            turn when is_binary(turn) -> String.to_integer(turn)
-          end
-
+        turn = box_turn_number(game, params["turn"])
         {:ok, assign(socket, game: game, turn: turn)}
     end
   end
 
   def handle_params(params, _uri, %{assigns: %{game: game}} = socket) do
-    turn =
-      case params["turn"] do
-        nil ->
-          game.turn
-
-        turn when is_binary(turn) ->
-          turn = String.to_integer(turn)
-
-          case turn do
-            turn when turn < 0 -> 0
-            turn -> turn
-          end
-      end
-
+    turn = box_turn_number(game, params["turn"])
     {:noreply, assign(socket, :turn, turn)}
   end
 
   def handle_params(_params, _uri, socket), do: {:noreply, socket}
 
-  def handle_event("change_turn", %{"code" => code}, socket)
+  def handle_event(
+        "change_turn",
+        %{"code" => code},
+        %{assigns: %{turn: current_turn, game: game}} = socket
+      )
       when code in ["ArrowRight", "ArrowLeft"] do
     turn =
       case code do
-        "ArrowRight" -> socket.assigns.turn + 1
-        "ArrowLeft" -> socket.assigns.turn - 1
+        "ArrowRight" -> current_turn + 1
+        "ArrowLeft" -> current_turn - 1
       end
+
+    turn = box_turn_number(game, turn)
 
     {:noreply,
      push_patch(socket,
-       to: Routes.live_path(socket, __MODULE__, socket.assigns.game.id, %{turn: turn})
+       to: Routes.live_path(socket, __MODULE__, game.id, %{turn: turn})
      )}
   end
 
-  def handle_event("change_turn", _, socket), do: {:noreply, socket}
+  def handle_event("change_turn", _event, socket) do
+    {:noreply, socket}
+  end
 
   def handle_info({:game_update, id}, %{assigns: %{game: %{id: id}}} = socket) do
     game = get_game(id)
@@ -67,6 +57,14 @@ defmodule BattleBoxWeb.GameLive do
 
   def render(%{not_found: true}), do: PageView.render("not_found.html", message: "Game not found")
   def render(%{game: _} = assigns), do: RobotGameView.render("play.html", assigns)
+
+  defp box_turn_number(game, turn) when is_binary(turn),
+    do: box_turn_number(game, String.to_integer(turn))
+
+  defp box_turn_number(%{turn: game_turn}, nil), do: game_turn
+  defp box_turn_number(%{turn: game_turn}, turn) when turn > game_turn, do: game_turn
+  defp box_turn_number(_, turn) when turn < 0, do: 0
+  defp box_turn_number(_, turn), do: turn
 
   defp get_game(game_id) do
     case GameEngine.get_game(game_engine(), game_id) do
