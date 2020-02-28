@@ -1,5 +1,5 @@
-defmodule BattleBox.Games.RobotGame.Game.EventTest do
-  alias BattleBox.Games.RobotGame.{Game, Settings}
+defmodule BattleBox.Games.RobotGame.EventTest do
+  alias BattleBox.Games.{RobotGame, RobotGame.Settings}
   use BattleBox.DataCase
   import Ecto.Query, only: [from: 2]
 
@@ -57,11 +57,11 @@ defmodule BattleBox.Games.RobotGame.Game.EventTest do
       }
     ]
     |> Enum.each(fn event ->
-      game = Game.new(settings: Settings.new(), events: [event]) |> Game.changeset()
+      game = RobotGame.new(settings: Settings.new(), events: [event]) |> RobotGame.changeset()
 
       {:ok, game} = Repo.insert(game)
 
-      retrieved_game = Repo.one!(from g in Game, where: g.id == ^game.id, select: g)
+      retrieved_game = Repo.one!(from g in RobotGame, where: g.id == ^game.id, select: g)
 
       assert [^event] =
                Enum.map(retrieved_game.events, fn event ->

@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.RobotGameView do
   use BattleBoxWeb, :view
-  alias BattleBox.Games.RobotGame.Game
+  alias BattleBox.Games.RobotGame
 
   def move_direction({from_row, from_col}, {to_row, to_col}) do
     case {from_row - to_row, from_col - to_col} do

@@ -1,5 +1,5 @@
-<% %{row_max: rows, row_min: 0, col_max: cols, col_min: 0} = Game.dimensions(@game) %>
-<% %{"player_1" => p1_score, "player_2" => p2_score} = Game.score_at_turn(@game, @turn) %>
+<% %{row_max: rows, row_min: 0, col_max: cols, col_min: 0} = RobotGame.dimensions(@game) %>
+<% %{"player_1" => p1_score, "player_2" => p2_score} = RobotGame.score_at_turn(@game, @turn) %>
 
 <div class="robot-game" phx-window-keyup="change_turn">
   <div class="game-header">
@@ -27,7 +27,7 @@
       </div>
     <% end %>
 
-    <%= for robot <- Game.robots_at_turn(@game, @turn) do %>
+    <%= for robot <- RobotGame.robots_at_turn(@game, @turn) do %>
       <% [row, col] = robot.location %>
       <div class='<%= "robot #{robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'><%= robot.hp %></div>
     <% end %>

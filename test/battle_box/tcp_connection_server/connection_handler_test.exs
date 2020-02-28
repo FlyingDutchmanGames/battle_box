@@ -2,7 +2,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase
   alias BattleBox.{Bot, GameEngine, TcpConnectionServer, Lobby}
   import GameEngine, only: [get_connection: 2]
-  alias BattleBox.Games.RobotGame.Game
+  alias BattleBox.Games.RobotGame
   import BattleBox.TcpConnectionServer.Message
 
   @ip {127, 0, 0, 1}
@@ -29,7 +29,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   setup do
     {:ok, lobby} =
-      Lobby.changeset(%Lobby{}, %{name: @lobby_name, game_type: Game, user_id: @user_id})
+      Lobby.changeset(%Lobby{}, %{name: @lobby_name, game_type: RobotGame, user_id: @user_id})
       |> Repo.insert()
 
     {:ok, bot} =

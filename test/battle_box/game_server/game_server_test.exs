@@ -1,6 +1,6 @@
 defmodule BattleBox.GameServerTest do
   alias BattleBox.{GameEngine, GameServer}
-  alias BattleBox.Games.RobotGame.Game
+  alias BattleBox.Games.RobotGame
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
@@ -16,7 +16,7 @@ defmodule BattleBox.GameServerTest do
           "player_1" => named_proxy(:player_1),
           "player_2" => named_proxy(:player_2)
         },
-        game: Game.new()
+        game: RobotGame.new()
       }
     }
   end
@@ -32,7 +32,7 @@ defmodule BattleBox.GameServerTest do
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
     assert Registry.count(context.game_registry) == 1
 
-    assert [{^pid, %{started_at: started_at, game_type: Game, game: game}}] =
+    assert [{^pid, %{started_at: started_at, game_type: RobotGame, game: game}}] =
              Registry.lookup(context.game_registry, context.init_opts.game.id)
 
     assert game == context.init_opts.game
@@ -150,7 +150,7 @@ defmodule BattleBox.GameServerTest do
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
-    game = Game.new(settings: %{max_turns: 10})
+    game = RobotGame.new(settings: %{max_turns: 10})
 
     {:ok, pid} = GameEngine.start_game(context.game_engine, %{context.init_opts | game: game})
 
@@ -182,7 +182,7 @@ defmodule BattleBox.GameServerTest do
     assert_receive {:player_2, {:game_over, %{game_id: ^game_id}}}
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
 
-    loaded_game = Game.get_by_id(game_id)
+    loaded_game = RobotGame.get_by_id(game_id)
     refute is_nil(loaded_game)
   end
 end

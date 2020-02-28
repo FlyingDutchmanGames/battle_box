@@ -2,7 +2,7 @@ defmodule BattleBox.PlayerServerTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{GameEngine, MatchMaker, PlayerServer, Repo, Lobby}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
-  alias BattleBox.Games.RobotGame.Game
+  alias BattleBox.Games.RobotGame
 
   @player_1_id Ecto.UUID.generate()
   @player_2_id Ecto.UUID.generate()
@@ -17,7 +17,7 @@ defmodule BattleBox.PlayerServerTest do
 
   setup do
     changeset =
-      Lobby.changeset(%Lobby{user_id: @player_1_id}, %{name: "LOBBY NAME", game_type: Game})
+      Lobby.changeset(%Lobby{user_id: @player_1_id}, %{name: "LOBBY NAME", game_type: RobotGame})
 
     {:ok, lobby} = Repo.insert(changeset)
     %{lobby: lobby}

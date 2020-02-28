@@ -1,6 +1,6 @@
-defmodule BattleBox.Games.RobotGame.Game do
+defmodule BattleBox.Games.RobotGame do
   alias BattleBox.{Repo, Game}
-  alias BattleBox.Games.RobotGame.{Settings, Settings.DamageModifier}
+  alias __MODULE__.{Settings, Settings.DamageModifier}
   alias __MODULE__.Event
   use Ecto.Schema
   import Ecto.Changeset
@@ -251,16 +251,16 @@ defmodule BattleBox.Games.RobotGame.Game do
   end
 end
 
-defimpl BattleBoxGame, for: BattleBox.Games.RobotGame.Game do
-  alias BattleBox.Games.RobotGame.Game
+defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do
+  alias BattleBox.Games.RobotGame
   def id(game), do: game.id
-  def disqualify(game, player), do: Game.disqualify(game, player)
-  def over?(game), do: Game.over?(game)
-  def persist(game), do: Game.persist(game)
-  def settings(game), do: Game.settings(game)
-  def moves_request(game), do: Game.moves_request(game)
-  def calculate_turn(game, moves), do: Game.Logic.calculate_turn(game, moves)
+  def disqualify(game, player), do: RobotGame.disqualify(game, player)
+  def over?(game), do: RobotGame.over?(game)
+  def persist(game), do: RobotGame.persist(game)
+  def settings(game), do: RobotGame.settings(game)
+  def moves_request(game), do: RobotGame.moves_request(game)
+  def calculate_turn(game, moves), do: RobotGame.Logic.calculate_turn(game, moves)
   def move_time_ms(game), do: game.move_time_ms
-  def score(game), do: Game.score(game)
+  def score(game), do: RobotGame.score(game)
   def winner(game), do: game.winner
 end
