@@ -11,35 +11,6 @@ defmodule BattleBoxWeb.RobotGameView do
     end
   end
 
-  def move_icon(move, robot_location) do
-    case move.type do
-      :attack ->
-        case move_direction(robot_location, move.target) do
-          :left -> "🤛"
-          :right -> "🤜"
-          :up -> "✊"
-          :down -> "👎"
-        end
-
-      :guard ->
-        "🐢"
-
-      :move ->
-        case move_direction(robot_location, move.target) do
-          :left -> "⬅️"
-          :right -> "➡️"
-          :up -> "⬆️"
-          :down -> "⬇️"
-        end
-
-      :suicide ->
-        "💣"
-
-      _ ->
-        ""
-    end
-  end
-
   def terrain_number(location) do
     case location do
       [0, col] -> col
