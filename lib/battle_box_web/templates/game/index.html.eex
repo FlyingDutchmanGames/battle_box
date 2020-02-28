@@ -1,3 +1,4 @@
+<div>Games</div>
 <div class="games">
   <%= for game <- @games do %>
       <div class="game">
