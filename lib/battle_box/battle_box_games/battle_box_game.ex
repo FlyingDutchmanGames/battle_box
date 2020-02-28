@@ -7,7 +7,7 @@ defmodule BattleBox.BattleBoxGame do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "battle_box_games" do
+  schema "games" do
     belongs_to :lobby, Lobby
     many_to_many :bots, Bot, join_through: "battle_box_game_players"
     has_many :battle_box_game_bots, BattleBoxGameBot

@@ -6,7 +6,7 @@ defmodule BattleBox.BattleBoxGameBot do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  schema "battle_box_game_bots" do
+  schema "game_bots" do
     field :score, :integer, default: 0
     field :player, :string
     belongs_to :bot, Bot
