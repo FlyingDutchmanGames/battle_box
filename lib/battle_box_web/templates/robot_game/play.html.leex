@@ -1,8 +1,4 @@
 <script>window.useLiveView = true</script>
+<div class="game-viewer">
 <%= render("game_board.html", assigns) %>
-<%= live_patch to: Routes.live_path(@socket, @live_view_module, @game.id, %{turn: @turn - 1}) do %>
-  previous
-<% end %>
-<%= live_patch to: Routes.live_path(@socket, @live_view_module, @game.id, %{turn: @turn + 1}) do %>
-  next
-<% end %>
+</div>
