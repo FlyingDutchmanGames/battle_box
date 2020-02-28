@@ -1,13 +1,13 @@
-defmodule BattleBox.BattleBoxGameBotTest do
+defmodule BattleBox.GameBotTest do
   use BattleBox.DataCase
-  alias BattleBox.{BattleBoxGameBot, Repo}
+  alias BattleBox.{GameBot, Repo}
 
   @bot_id Ecto.UUID.generate()
   @bbg_id Ecto.UUID.generate()
 
   test "you can persist them" do
     changeset =
-      BattleBoxGameBot.changeset(%BattleBoxGameBot{}, %{
+      GameBot.changeset(%GameBot{}, %{
         player: "foo",
         score: 0,
         bot_id: @bot_id,
@@ -18,7 +18,7 @@ defmodule BattleBox.BattleBoxGameBotTest do
   end
 
   test "new/1 creates one" do
-    assert %BattleBoxGameBot{score: 10, player: "BAR", bot_id: @bot_id} =
-             BattleBoxGameBot.new(score: 10, player: "BAR", bot_id: @bot_id)
+    assert %GameBot{score: 10, player: "BAR", bot_id: @bot_id} =
+             GameBot.new(score: 10, player: "BAR", bot_id: @bot_id)
   end
 end

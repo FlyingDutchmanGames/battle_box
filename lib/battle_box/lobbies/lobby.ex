@@ -2,7 +2,7 @@ defmodule BattleBox.Lobby do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query, only: [from: 2]
-  alias BattleBox.{Repo, User, BattleBoxGame}
+  alias BattleBox.{Repo, User, Game}
   alias __MODULE__.GameType
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -22,7 +22,7 @@ defmodule BattleBox.Lobby do
     field :name, :string
     field :game_type, GameType
     field :game_acceptance_timeout_ms, :integer, default: 2000
-    has_many :battle_box_games, BattleBoxGame
+    has_many :games, Game
     belongs_to :user, User
 
     timestamps()

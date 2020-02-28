@@ -1,7 +1,7 @@
-defmodule BattleBox.BattleBoxGameBot do
+defmodule BattleBox.GameBot do
   use Ecto.Schema
   import Ecto.Changeset
-  alias BattleBox.{BattleBoxGame, Bot}
+  alias BattleBox.{Game, Bot}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -10,13 +10,13 @@ defmodule BattleBox.BattleBoxGameBot do
     field :score, :integer, default: 0
     field :player, :string
     belongs_to :bot, Bot
-    belongs_to :battle_box_game, BattleBoxGame
+    belongs_to :game, Game
     timestamps()
   end
 
   def changeset(bot, params \\ %{}) do
     bot
-    |> cast(params, [:score, :player, :bot_id, :battle_box_game_id])
+    |> cast(params, [:score, :player, :bot_id, :game_id])
   end
 
   def new(opts) do

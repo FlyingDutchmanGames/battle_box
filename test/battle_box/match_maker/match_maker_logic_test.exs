@@ -79,8 +79,8 @@ defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
       )
 
     {:ok, game} = BattleBoxGame.persist(game)
-    game = Repo.preload(game, battle_box_game: [:battle_box_game_bots])
-    assert %{lobby_id: lobby_id} = game.battle_box_game
+    game = Repo.preload(game, game: [:game_bots])
+    assert %{lobby_id: lobby_id} = game.game
 
     assert [
              %{
@@ -93,6 +93,6 @@ defmodule BattleBox.MatchMaker.MatchMakerLogicTest do
                bot_id: @player_2_id,
                score: 0
              }
-           ] = game.battle_box_game.battle_box_game_bots
+           ] = game.game.game_bots
   end
 end

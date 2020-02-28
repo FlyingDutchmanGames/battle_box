@@ -1,7 +1,7 @@
-defmodule BattleBox.BattleBoxGame do
+defmodule BattleBox.Game do
   use Ecto.Schema
   import Ecto.Changeset
-  alias BattleBox.{Lobby, Bot, BattleBoxGameBot}
+  alias BattleBox.{Lobby, Bot, GameBot}
   alias BattleBox.Games.RobotGame.Game, as: RobotGame
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -9,8 +9,8 @@ defmodule BattleBox.BattleBoxGame do
 
   schema "games" do
     belongs_to :lobby, Lobby
-    many_to_many :bots, Bot, join_through: "battle_box_game_players"
-    has_many :battle_box_game_bots, BattleBoxGameBot
+    many_to_many :bots, Bot, join_through: "game_bots"
+    has_many :game_bots, GameBot
     has_one :robot_game, RobotGame
     timestamps()
   end
@@ -18,12 +18,12 @@ defmodule BattleBox.BattleBoxGame do
   def changeset(game, params \\ %{}) do
     game
     |> cast(params, [:lobby_id])
-    |> cast_assoc(:battle_box_game_bots)
+    |> cast_assoc(:game_bots)
   end
 
   def new(opts \\ %{}) do
     %__MODULE__{
-      battle_box_game_bots: opts[:battle_box_game_bots] || [],
+      game_bots: opts[:game_bots] || [],
       lobby_id: opts[:lobby_id]
     }
   end

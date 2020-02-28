@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.Game do
-  alias BattleBox.{Repo, BattleBoxGame}
+  alias BattleBox.{Repo, Game}
   alias BattleBox.Games.RobotGame.{Settings, Settings.DamageModifier}
   alias __MODULE__.Event
   use Ecto.Schema
@@ -16,7 +16,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
 
     belongs_to :settings, Settings
-    belongs_to :battle_box_game, BattleBoxGame
+    belongs_to :battle_box_game, Game
 
     timestamps()
   end
@@ -53,7 +53,7 @@ defmodule BattleBox.Games.RobotGame.Game do
     scores = score(game)
 
     game =
-      update_in(game.battle_box_game.battle_box_game_bots, fn bots ->
+      update_in(game.game.game_bots, fn bots ->
         for bot <- bots, do: %{bot | score: scores[bot.player]}
       end)
 
@@ -145,8 +145,8 @@ defmodule BattleBox.Games.RobotGame.Game do
 
     bbg =
       case opts[:battle_box_game] do
-        nil -> BattleBoxGame.new()
-        %BattleBoxGame{} = bbg -> bbg
+        nil -> Game.new()
+        %Game{} = bbg -> bbg
       end
 
     opts = Enum.into(opts, %{})

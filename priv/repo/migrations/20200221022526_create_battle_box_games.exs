@@ -8,7 +8,7 @@ defmodule BattleBox.Repo.Migrations.CreateGames do
     end
 
     create table("game_bots") do
-      add :battle_box_game_id, :uuid, null: false
+      add :game_id, :uuid, null: false
       add :bot_id, :uuid, null: false
       add :player, :text, null: false
       add :score, :integer, null: false, default: 0
@@ -17,6 +17,6 @@ defmodule BattleBox.Repo.Migrations.CreateGames do
 
     create index("games", ["lobby_id, updated_at DESC"])
     create index("game_bots", [:bot_id])
-    create index("game_bots", [:battle_box_game_id, :player], unique: true)
+    create index("game_bots", [:game_id, :player], unique: true)
   end
 end
