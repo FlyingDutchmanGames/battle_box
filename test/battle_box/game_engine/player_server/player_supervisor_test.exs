@@ -1,4 +1,4 @@
-defmodule BattleBox.PlayerSever.PlayerSupervisorTest do
+defmodule BattleBox.GameEngine.PlayerSever.PlayerSupervisorTest do
   alias BattleBox.GameEngine
   use ExUnit.Case, async: true
 

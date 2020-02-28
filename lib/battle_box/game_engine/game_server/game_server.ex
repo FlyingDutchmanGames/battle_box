@@ -1,4 +1,4 @@
-defmodule BattleBox.GameServer do
+defmodule BattleBox.GameEngine.GameServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   alias BattleBoxGame, as: Game
   alias BattleBox.GameEngine

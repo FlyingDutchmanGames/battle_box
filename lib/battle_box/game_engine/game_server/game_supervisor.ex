@@ -1,6 +1,6 @@
-defmodule BattleBox.GameServer.GameSupervisor do
+defmodule BattleBox.GameEngine.GameServer.GameSupervisor do
   use DynamicSupervisor
-  alias BattleBox.GameServer
+  alias BattleBox.GameEngine.GameServer
 
   def start_link(%{names: names} = opts) do
     DynamicSupervisor.start_link(__MODULE__, opts, name: names.game_supervisor)
