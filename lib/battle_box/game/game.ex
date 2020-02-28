@@ -2,7 +2,7 @@ defmodule BattleBox.Game do
   use Ecto.Schema
   import Ecto.Changeset
   alias BattleBox.{Lobby, Bot, GameBot}
-  alias BattleBox.Games.RobotGame.Game, as: RobotGame
+  alias BattleBox.Games.RobotGame
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id

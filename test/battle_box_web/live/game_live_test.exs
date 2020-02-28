@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.GameLiveTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.{GameEngine, GameServer, Games.RobotGame.Game}
+  alias BattleBox.{GameEngine, GameServer, Games.RobotGame}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @game_id Ecto.UUID.generate()
@@ -10,10 +10,10 @@ defmodule BattleBoxWeb.GameLiveTest do
     id = Ecto.UUID.generate()
 
     {:ok, _} =
-      Game.new(%{id: id})
-      |> Game.complete_turn()
-      |> Game.complete_turn()
-      |> Game.persist()
+      RobotGame.new(%{id: id})
+      |> RobotGame.complete_turn()
+      |> RobotGame.complete_turn()
+      |> RobotGame.persist()
 
     {:ok, _view, html} = live(conn, "/games/#{id}")
     assert html =~ "TURN: 2 / 2"
@@ -37,7 +37,7 @@ defmodule BattleBoxWeb.GameLiveTest do
             "player_1" => named_proxy(:player_1),
             "player_2" => named_proxy(:player_2)
           },
-          game: Game.new(id: @game_id)
+          game: RobotGame.new(id: @game_id)
         })
 
       :ok = GameServer.accept_game(pid, "player_1")
@@ -80,10 +80,10 @@ defmodule BattleBoxWeb.GameLiveTest do
       id = Ecto.UUID.generate()
 
       {:ok, _} =
-        Game.new(%{id: id})
-        |> Game.complete_turn()
-        |> Game.complete_turn()
-        |> Game.persist()
+        RobotGame.new(%{id: id})
+        |> RobotGame.complete_turn()
+        |> RobotGame.complete_turn()
+        |> RobotGame.persist()
 
       %{game_id: id}
     end

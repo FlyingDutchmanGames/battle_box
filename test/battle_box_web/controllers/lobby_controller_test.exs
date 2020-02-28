@@ -60,7 +60,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
         Repo.insert!(%Lobby{
           name: "TEST_NAME#{i}",
           user_id: @user_id,
-          game_type: BattleBox.Games.RobotGame.Game
+          game_type: BattleBox.Games.RobotGame
         })
       end
 

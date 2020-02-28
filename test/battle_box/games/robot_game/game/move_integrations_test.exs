@@ -1,6 +1,6 @@
-defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
+defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   use ExUnit.Case, async: true
-  alias BattleBox.Games.RobotGame.{Game, Game.Logic}
+  alias BattleBox.Games.{RobotGame, RobotGame.Logic}
   import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
   import BattleBox.Games.RobotGameTest.Helpers
 
@@ -12,8 +12,8 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
                       0 0/
 
     game =
-      Game.new(settings: %{terrain: terrain, spawn_enabled: false})
-      |> Game.put_events(robot_spawns)
+      RobotGame.new(settings: %{terrain: terrain, spawn_enabled: false})
+      |> RobotGame.put_events(robot_spawns)
 
     assert %{location: [0, 0]} =
              game
@@ -21,7 +21,7 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
                "player_1" => [%{"type" => "move", "target" => [1, 1], "robot_id" => 1}],
                "player_2" => []
              })
-             |> Game.get_robot(1)
+             |> RobotGame.get_robot(1)
   end
 
   # 0 - Invalid
@@ -87,9 +87,9 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
       |> Enum.map(fn effect -> %{effects: [effect]} end)
 
     initial_game =
-      Game.new(settings: %{terrain: terrain, spawn_enabled: false})
-      |> Game.put_events(robot_spawns)
-      |> Game.complete_turn()
+      RobotGame.new(settings: %{terrain: terrain, spawn_enabled: false})
+      |> RobotGame.put_events(robot_spawns)
+      |> RobotGame.complete_turn()
 
     moves =
       graph_with_indexes
@@ -119,17 +119,21 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
   end
 
   defp validate_no_damage(initial_game, after_turn, robot_id) do
-    assert Game.get_robot(initial_game, robot_id).hp == Game.get_robot(after_turn, robot_id).hp
+    assert RobotGame.get_robot(initial_game, robot_id).hp ==
+             RobotGame.get_robot(after_turn, robot_id).hp
   end
 
   defp validate_collision_damage(initial_game, after_turn, robot_id) do
-    damage = Game.get_robot(initial_game, robot_id).hp - Game.get_robot(after_turn, robot_id).hp
-    assert damage > 0 && rem(damage, Game.collision_damage(initial_game)) == 0
+    damage =
+      RobotGame.get_robot(initial_game, robot_id).hp -
+        RobotGame.get_robot(after_turn, robot_id).hp
+
+    assert damage > 0 && rem(damage, RobotGame.collision_damage(initial_game)) == 0
   end
 
   defp validate_moved(initial_game, after_turn, robot_id, move_direction) do
-    [x1, y1] = Game.get_robot(initial_game, robot_id).location
-    [x2, y2] = Game.get_robot(after_turn, robot_id).location
+    [x1, y1] = RobotGame.get_robot(initial_game, robot_id).location
+    [x2, y2] = RobotGame.get_robot(after_turn, robot_id).location
     delta = {x2 - x1, y2 - y1}
 
     expected =
@@ -144,8 +148,8 @@ defmodule BattleBox.Games.RobotGame.Game.MoveIntegrationTest do
   end
 
   def validate_did_not_move(initial_game, after_turn, robot_id) do
-    assert Game.get_robot(initial_game, robot_id).location ==
-             Game.get_robot(after_turn, robot_id).location
+    assert RobotGame.get_robot(initial_game, robot_id).location ==
+             RobotGame.get_robot(after_turn, robot_id).location
   end
 
   defp terrain_val(val) do

@@ -2,7 +2,7 @@ defmodule BattleBoxWeb.GameLive do
   alias BattleBoxWeb.{PageView, RobotGameView}
   use BattleBoxWeb, :live_view
   alias BattleBox.GameEngine
-  alias BattleBox.Games.RobotGame.Game
+  alias BattleBox.Games.RobotGame
 
   def mount(%{"game_id" => game_id} = params, _session, socket) do
     if connected?(socket) do
@@ -68,7 +68,7 @@ defmodule BattleBoxWeb.GameLive do
 
   defp get_game(game_id) do
     case GameEngine.get_game(game_engine(), game_id) do
-      nil -> Game.get_by_id_with_settings(game_id)
+      nil -> RobotGame.get_by_id_with_settings(game_id)
       %{game: game} -> game
     end
   end
