@@ -1,10 +1,11 @@
 defmodule BattleBoxWeb do
-  alias BattleBox.GameEngineProvider
+  alias BattleBox.GameEngine.GameEngineProvider
 
   def live_view do
     quote do
-      use Phoenix.LiveView, namespace: BattleBoxWeb
+      use Phoenix.LiveView
       alias BattleBoxWeb.Router.Helpers, as: Routes
+
       @endpoint BattleBoxWeb.Endpoint
       @game_engine_provider Application.get_env(
                               :battle_box,
@@ -19,6 +20,7 @@ defmodule BattleBoxWeb do
 
   def controller do
     quote do
+      import Phoenix.LiveView.Controller
       use Phoenix.Controller, namespace: BattleBoxWeb
 
       import Plug.Conn
@@ -41,6 +43,7 @@ defmodule BattleBoxWeb do
       import BattleBoxWeb.ErrorHelpers
       import BattleBoxWeb.Gettext
       alias BattleBoxWeb.Router.Helpers, as: Routes
+      import Phoenix.LiveView.Helpers
     end
   end
 

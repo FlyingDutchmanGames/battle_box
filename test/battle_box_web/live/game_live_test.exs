@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.GameLiveTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.{GameEngine, GameServer, Games.RobotGame.Game}
+  alias BattleBox.{GameEngine, GameEngine.GameServer, Games.RobotGame}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @game_id Ecto.UUID.generate()
@@ -9,10 +9,14 @@ defmodule BattleBoxWeb.GameLiveTest do
   test "it can display a game off disk", %{conn: conn} do
     id = Ecto.UUID.generate()
 
-    {:ok, _} = Game.persist(Game.new(%{id: id}))
+    {:ok, _} =
+      RobotGame.new(%{id: id})
+      |> RobotGame.complete_turn()
+      |> RobotGame.complete_turn()
+      |> RobotGame.persist()
 
     {:ok, _view, html} = live(conn, "/games/#{id}")
-    assert html =~ "TURN: 0 / 100"
+    assert html =~ "TURN: 2 / 2"
   end
 
   describe "live game watching" do
@@ -33,7 +37,7 @@ defmodule BattleBoxWeb.GameLiveTest do
             "player_1" => named_proxy(:player_1),
             "player_2" => named_proxy(:player_2)
           },
-          game: Game.new(id: @game_id)
+          game: RobotGame.new(id: @game_id)
         })
 
       :ok = GameServer.accept_game(pid, "player_1")
@@ -49,16 +53,17 @@ defmodule BattleBoxWeb.GameLiveTest do
 
     test "it can display a game in progress", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/games/#{@game_id}")
-      assert html =~ "TURN: 0 / 100"
+      assert html =~ "TURN: 0 / 0"
     end
 
-    test "it will update when the game updates", %{conn: conn} = context do
+    test "it will update when the game updates (and go to the most recent move)",
+         %{conn: conn} = context do
       Process.link(context.game_server)
       GameEngine.subscribe(context.game_engine, "game:#{@game_id}")
 
       {:ok, view, html} = live(conn, "/games/#{@game_id}")
       Process.link(view.pid)
-      assert html =~ "TURN: 0 / 100"
+      assert html =~ "TURN: 0 / 0"
 
       Enum.each(1..9, fn _ ->
         :ok = GameServer.submit_moves(context.game_server, "player_1", [])
@@ -66,7 +71,42 @@ defmodule BattleBoxWeb.GameLiveTest do
       end)
 
       Process.sleep(10)
-      assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 100/, render(view))
+      assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 9/, render(view))
+    end
+  end
+
+  describe "Arrow Keys let you change the turn you're viewing" do
+    setup do
+      id = Ecto.UUID.generate()
+
+      {:ok, _} =
+        RobotGame.new(%{id: id})
+        |> RobotGame.complete_turn()
+        |> RobotGame.complete_turn()
+        |> RobotGame.persist()
+
+      %{game_id: id}
+    end
+
+    test "Arrow Keys move the page around but only to extent of game", %{
+      conn: conn,
+      game_id: game_id
+    } do
+      {:ok, view, html} = live(conn, "/games/#{game_id}")
+      assert html =~ "TURN: 2 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowLeft"}) =~ "TURN: 1 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowLeft"}) =~ "TURN: 0 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowLeft"}) =~ "TURN: 0 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowRight"}) =~ "TURN: 1 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowRight"}) =~ "TURN: 2 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowRight"}) =~ "TURN: 2 / 2"
+    end
+
+    test "other arrow keys don't break it", %{conn: conn, game_id: game_id} do
+      {:ok, view, html} = live(conn, "/games/#{game_id}")
+      assert html =~ "TURN: 2 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowUp"}) =~ "TURN: 2 / 2"
+      assert render_keyup(view, "change_turn", %{"code" => "ArrowDown"}) =~ "TURN: 2 / 2"
     end
   end
 end

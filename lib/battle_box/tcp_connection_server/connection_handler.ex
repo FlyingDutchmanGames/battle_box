@@ -1,6 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.{Bot, GameEngine, PlayerServer}
+  alias BattleBox.{Bot, GameEngine, GameEngine.PlayerServer}
   import BattleBox.TcpConnectionServer.Message
   @behaviour :ranch_protocol
 

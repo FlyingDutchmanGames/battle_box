@@ -1,5 +1,5 @@
-defmodule BattleBox.Games.RobotGame.Game.Logic do
-  import BattleBox.Games.RobotGame.Game
+defmodule BattleBox.Games.RobotGame.Logic do
+  import BattleBox.Games.RobotGame
   alias Ecto.UUID
 
   def calculate_turn(game, %{"player_1" => player_1_moves, "player_2" => player_2_moves}) do

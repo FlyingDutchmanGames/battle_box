@@ -9,7 +9,6 @@ defmodule BattleBoxWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_user
-    plug Phoenix.LiveView.Flash
   end
 
   pipeline :api do
@@ -37,6 +36,7 @@ defmodule BattleBoxWeb.Router do
       get "/connections", UserRedirectController, :connections
       get "/lobbies", UserRedirectController, :lobbies
       get "/bots", UserRedirectController, :bots
+      get "/me", UserRedirectController, :users
 
       resources "/bots", BotController, only: [:create, :new]
       resources "/lobbies", LobbyController, only: [:create, :new]
@@ -47,7 +47,7 @@ defmodule BattleBoxWeb.Router do
 
     live("/users/:user_id/connections", ConnectionsLive)
 
-    resources "/users", UserController, only: [:index, :show] do
+    resources "/users", UserController, only: [:show] do
       resources "/lobbies", LobbyController, only: [:index]
       resources "/bots", BotController, only: [:index]
     end

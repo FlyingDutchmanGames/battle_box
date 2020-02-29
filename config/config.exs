@@ -1,6 +1,6 @@
 use Mix.Config
 
-alias BattleBox.Games.RobotGame.Game, as: RobotGame
+alias BattleBox.Games.RobotGame
 
 config :battle_box,
   ecto_repos: [BattleBox.Repo],

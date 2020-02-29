@@ -21,6 +21,11 @@ defmodule BattleBoxWeb.BotControllerTest do
     assert html_response(conn, 200) =~ bot.token
   end
 
+  test "trying to view a non existant bot is a not found 404", %{conn: conn} do
+    conn = conn |> get("/bots/#{Ecto.UUID.generate()}")
+    assert html_response(conn, 404) =~ "Not Found"
+  end
+
   test "trying to create a bot without logging in redirects to the login page", %{conn: conn} do
     conn = post(conn, "/bots", %{"bot" => %{"name" => "FOO"}})
     assert "/login" <> id = redirected_to(conn, 302)
