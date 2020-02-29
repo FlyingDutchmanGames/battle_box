@@ -60,4 +60,13 @@ defmodule BattleBox.LobbyTest do
       assert <<_::288>> = retrieved_lobby.id
     end
   end
+
+  describe "settings" do
+    test "lobbies are created with the default settings for their game mode" do
+      {:ok, lobby} =
+        Lobby.create(%{name: "Grant's Test", game_type: RobotGame, user_id: @user_id})
+
+      %{id: <<_::288>>, attack_damage: _, terrain: _} = Lobby.get_settings_for_lobby(lobby)
+    end
+  end
 end

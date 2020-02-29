@@ -46,6 +46,10 @@ defmodule BattleBox.Lobby do
     from lobby in __MODULE__, as: :lobby
   end
 
+  def get_settings_for_lobby(lobby) do
+    lobby.game_type.settings_module.get_by_id(lobby.settings_id)
+  end
+
   def create(params) do
     {:ok, game_type} = GameType.cast(params[:game_type] || params["game_type"])
     settings_module = game_type.settings_module()
