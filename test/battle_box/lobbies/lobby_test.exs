@@ -66,7 +66,7 @@ defmodule BattleBox.LobbyTest do
       {:ok, lobby} =
         Lobby.create(%{name: "Grant's Test", game_type: RobotGame, user_id: @user_id})
 
-      %{id: <<_::288>>, attack_damage: _, terrain: _} = Lobby.get_settings_for_lobby(lobby)
+      %{id: <<_::288>>, attack_damage: _, terrain: _} = Lobby.get_settings(lobby)
     end
   end
 end
