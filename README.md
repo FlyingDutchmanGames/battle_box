@@ -4,19 +4,17 @@
 
 V1
 ====
-[ ] Rename (battle box game) => (game), (battle box game bot) => (game bot), (robot game game) => (robot game)
-[ ] Reorganize the game engine
+[ ] Refactor the save strategy for games/robot games
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
-[ ] Static Site
-  [ ] Wire protocol docs
-  [ ] Robot game rules docs
-[ ] players > 2 game mode
-[ ] sequential turn mode
 [ ] Lobby settings passed correctly
   [ ] bot self play allowed toggle
   [ ] user self play allowed toggle
   [ ] Delay moves until alloted time/submit as fast as possible setting
   [ ] write move timeout ms onto the lobby settings
+[ ] Static Site
+  [ ] Wire protocol docs
+  [ ] Robot game rules docs
+[ ] players > 2 game mode / sequential turn mode
 [ ] Domain Name
   [x] pick one
   [ ] Point domain to servers
@@ -50,6 +48,8 @@ Nice to Haves
 
 Done
 =======
+[x] Rename (battle box game) => (game), (battle box game bot) => (game bot), (robot game game) => (robot game)
+[x] Reorganize the game engine
 [x] Make the `Game.robots` function more efficent by denormalizing a `game.robots_at_turn` to be a `%{turn_num => [robot]}`
 [x] Move Parser
 [x] Lobby CRUD
