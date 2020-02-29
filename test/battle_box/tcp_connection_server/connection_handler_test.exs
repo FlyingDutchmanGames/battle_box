@@ -28,9 +28,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   end
 
   setup do
-    {:ok, lobby} =
-      Lobby.changeset(%Lobby{}, %{name: @lobby_name, game_type: RobotGame, user_id: @user_id})
-      |> Repo.insert()
+    {:ok, lobby} = Lobby.create(%{name: @lobby_name, game_type: RobotGame, user_id: @user_id})
 
     {:ok, bot} =
       Bot.changeset(%Bot{}, %{name: @bot_name, user_id: @user_id})

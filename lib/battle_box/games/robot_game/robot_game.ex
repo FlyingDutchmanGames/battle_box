@@ -35,6 +35,7 @@ defmodule BattleBox.Games.RobotGame do
   end
 
   def db_name, do: "robot_game"
+  def settings_module, do: Settings
 
   def get_by_id_with_settings(id),
     do: Repo.preload(get_by_id(id), :settings) |> set_robots_at_turn
