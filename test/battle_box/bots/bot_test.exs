@@ -12,7 +12,7 @@ defmodule BattleBox.BotTest do
              })
              |> Repo.insert()
 
-    assert <<_::512>> = bot.token
+    assert <<_::256>> = bot.token
   end
 
   describe "validations" do
