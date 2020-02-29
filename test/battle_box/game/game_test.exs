@@ -1,6 +1,6 @@
 defmodule BattleBox.GameTest do
-  use BattleBox.DataCase
-  alias BattleBox.{Game, Repo}
+  use BattleBox.DataCase, async: false
+  alias BattleBox.{Game, Repo, Games.RobotGame}
 
   @lobby_id Ecto.UUID.generate()
 
@@ -10,6 +10,12 @@ defmodule BattleBox.GameTest do
                lobby_id: @lobby_id,
                game_bots: []
              })
+  end
+
+  describe "persist/1" do
+    test "you can persist a game with a robot game" do
+      {:ok, _} = Game.persist(Game.new(robot_game: RobotGame.new()))
+    end
   end
 
   test "new/1 creates one" do
