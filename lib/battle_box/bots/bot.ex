@@ -50,8 +50,8 @@ defmodule BattleBox.Bot do
   end
 
   def generate_token() do
-    :crypto.strong_rand_bytes(32)
-    |> Base.encode16()
+    :crypto.strong_rand_bytes(20)
+    |> Base.encode32()
     |> String.downcase()
   end
 
