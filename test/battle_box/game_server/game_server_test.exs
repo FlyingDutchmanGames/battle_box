@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.GameServerTest do
-  alias BattleBox.{GameEngine, GameEngine.GameServer, Games.RobotGame}
+  alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
@@ -15,7 +15,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
           "player_1" => named_proxy(:player_1),
           "player_2" => named_proxy(:player_2)
         },
-        game: RobotGame.new()
+        game: Game.new(robot_game: RobotGame.new())
       }
     }
   end
@@ -32,14 +32,14 @@ defmodule BattleBox.GameEngine.GameServerTest do
     assert Registry.count(context.game_registry) == 1
 
     assert [{^pid, %{started_at: started_at, game_type: RobotGame, game: game}}] =
-             Registry.lookup(context.game_registry, context.init_opts.game.id)
+             Registry.lookup(context.game_registry, context.init_opts.game.robot_game.id)
 
-    assert game == context.init_opts.game
+    assert game == context.init_opts.game.robot_game
     assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 
   test "The game server sends out game update messages", context do
-    game_id = context.init_opts.game.id
+    game_id = context.init_opts.game.robot_game.id
     GameEngine.subscribe(context.game_engine, "game:#{game_id}")
     {:ok, _pid} = GameEngine.start_game(context.game_engine, context.init_opts)
     assert_receive {:game_update, ^game_id}
@@ -47,7 +47,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
   test "the starting of the game server will send init messages to p1 & p2", context do
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
-    game = context.init_opts.game
+    game = context.init_opts.game.robot_game
 
     expected = %{
       game_server: pid,
@@ -78,7 +78,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
       assert :ok = GameServer.accept_game(pid, "player_1")
       assert :ok = GameServer.reject_game(pid, "player_2")
 
-      game_id = context.init_opts.game.id
+      game_id = context.init_opts.game.robot_game.id
 
       assert_receive {:player_1, {:game_cancelled, ^game_id}}
       assert_receive {:player_2, {:game_cancelled, ^game_id}}
@@ -98,7 +98,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
       Process.exit(player_2_pid, :kill)
       assert_receive {:EXIT, ^player_2_pid, :killed}
 
-      game_id = context.init_opts.game.id
+      game_id = context.init_opts.game.robot_game.id
 
       assert_receive {:player_1, {:game_cancelled, ^game_id}}
       assert_receive {:DOWN, ^game_ref, :process, ^pid, :normal}
@@ -111,7 +111,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     :ok = GameServer.accept_game(pid, "player_1")
     :ok = GameServer.accept_game(pid, "player_2")
 
-    game_id = context.init_opts.game.id
+    game_id = context.init_opts.game.robot_game.id
 
     assert_receive {:player_1,
                     {:moves_request,
@@ -149,7 +149,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
-    game = RobotGame.new(settings: %{max_turns: 10})
+    game = Game.new(robot_game: RobotGame.new(settings: %{max_turns: 10}))
 
     {:ok, pid} = GameEngine.start_game(context.game_engine, %{context.init_opts | game: game})
 

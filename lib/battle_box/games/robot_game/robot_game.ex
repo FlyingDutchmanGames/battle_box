@@ -11,27 +11,25 @@ defmodule BattleBox.Games.RobotGame do
   schema "robot_games" do
     field :turn, :integer, default: 0
     embeds_many :events, Event, on_replace: :delete
+    belongs_to :settings, Settings
+    belongs_to :game, Game
+
     field :winner, :string, virtual: true
     field :move_time_ms, :integer, virtual: true, default: 5000
     field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
-
-    belongs_to :settings, Settings
-    belongs_to :game, Game
 
     timestamps()
   end
 
   def changeset(game, params \\ %{}) do
+    events = Enum.map(game.events, &Map.take(&1, [:turn, :seq_num, :cause, :effects]))
+
     game
-    |> Repo.preload([:settings, :game])
-    |> cast(params, [
-      :winner,
-      :turn,
-      :settings_id,
-      :game_id
-    ])
+    |> Map.put(:events, events)
+    |> Repo.preload(:settings)
+    |> cast(params, [:turn, :settings_id])
     |> cast_embed(:events)
-    |> cast_assoc(:game)
+    |> cast_assoc(:settings)
   end
 
   def db_name, do: "robot_game"
@@ -51,17 +49,8 @@ defmodule BattleBox.Games.RobotGame do
   def persist(%{settings: %{persistent?: false}} = game), do: {:ok, game}
 
   def persist(game) do
-    scores = score(game)
-
-    game =
-      update_in(game.game.game_bots, fn bots ->
-        for bot <- bots, do: %{bot | score: scores[bot.player]}
-      end)
-
-    events = Enum.map(game.events, &Map.take(&1, [:turn, :seq_num, :cause, :effects]))
-
     game
-    |> Map.put(:events, events)
+    |> Repo.preload(:game)
     |> changeset()
     |> Repo.insert(on_conflict: :replace_all, conflict_target: :id)
   end
@@ -144,15 +133,9 @@ defmodule BattleBox.Games.RobotGame do
         %{} = settings -> Settings.new(settings)
       end
 
-    game =
-      case opts[:game] do
-        nil -> Game.new()
-        %Game{} = game -> game
-      end
-
     opts = Enum.into(opts, %{})
     opts = Map.put_new(opts, :id, Ecto.UUID.generate())
-    opts = Map.merge(opts, %{settings: settings, game: game})
+    opts = Map.merge(opts, %{settings: settings})
 
     %__MODULE__{}
     |> Map.merge(opts)

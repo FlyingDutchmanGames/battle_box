@@ -5,7 +5,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   import BattleBox.Games.RobotGameTest.Helpers
 
   @game_id Ecto.UUID.generate()
-  @bot_id Ecto.UUID.generate()
 
   describe "new/1" do
     test "you can override any top level key" do
@@ -103,32 +102,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "You can persist a game" do
       game = RobotGame.new()
       assert {:ok, _} = RobotGame.persist(game)
-    end
-
-    test "persisting will persist the battle box game, and puts scores on the players" do
-      # TODO:// This feels like it doesn't belong here with this many imports
-      alias BattleBox.{Game, GameBot, Repo}
-
-      bbg =
-        Game.new(
-          game_bots: [
-            GameBot.new(player: "player_1", bot_id: @bot_id)
-          ]
-        )
-
-      {:ok, game} =
-        RobotGame.new(game: bbg)
-        |> RobotGame.put_event(%{
-          cause: "spawn",
-          effects: [["create_robot", "player_1", uuid(), 50, [1, 1]]]
-        })
-        |> RobotGame.persist()
-
-      game = RobotGame.get_by_id(game.id)
-
-      [bot] = Repo.preload(game, game: [:game_bots]).game.game_bots
-
-      assert bot.score == 1
     end
 
     test "trying to get a game that doesnt exist yields nil" do
