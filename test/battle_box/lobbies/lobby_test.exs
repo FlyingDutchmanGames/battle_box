@@ -12,14 +12,14 @@ defmodule BattleBox.LobbyTest do
     end
 
     test "you can set a custom game acceptance timeout" do
-      lobby = %Lobby{
-        name: "Grant's Test",
-        game_type: RobotGame,
-        game_acceptance_timeout_ms: 42024,
-        user_id: @user_id
-      }
+      {:ok, _} =
+        Lobby.create(%{
+          name: "Grant's Test",
+          game_type: RobotGame,
+          game_acceptance_timeout_ms: 42024,
+          user_id: @user_id
+        })
 
-      {:ok, _} = Repo.insert(Lobby.changeset(lobby))
       retrieved_lobby = Lobby.get_by_name("Grant's Test")
       assert retrieved_lobby.game_acceptance_timeout_ms == 42024
     end
@@ -41,11 +41,10 @@ defmodule BattleBox.LobbyTest do
 
   describe "queries" do
     test "with_user_id" do
-      lobby = %Lobby{name: "MINE", game_type: RobotGame, user_id: @user_id}
-      {:ok, _} = Repo.insert(Lobby.changeset(lobby))
+      {:ok, _} = Lobby.create(%{name: "MINE", game_type: RobotGame, user_id: @user_id})
 
-      not_my_lobby = %Lobby{name: "NOT MINE", game_type: RobotGame, user_id: Ecto.UUID.generate()}
-      {:ok, _} = Repo.insert(Lobby.changeset(not_my_lobby))
+      {:ok, _} =
+        Lobby.create(%{name: "NOT MINE", game_type: RobotGame, user_id: Ecto.UUID.generate()})
 
       assert [%{name: "MINE"}] = Lobby.with_user_id(@user_id) |> Repo.all()
     end
@@ -53,11 +52,21 @@ defmodule BattleBox.LobbyTest do
 
   describe "persistence" do
     test "You can persist a lobby and get it back out" do
-      lobby = %Lobby{name: "Grant's Test", game_type: RobotGame, user_id: @user_id}
-      {:ok, _} = Repo.insert(Lobby.changeset(lobby))
+      {:ok, lobby} =
+        Lobby.create(%{name: "Grant's Test", game_type: RobotGame, user_id: @user_id})
+
       retrieved_lobby = Lobby.get_by_name("Grant's Test")
       assert lobby.name == retrieved_lobby.name
       assert <<_::288>> = retrieved_lobby.id
+    end
+  end
+
+  describe "settings" do
+    test "lobbies are created with the default settings for their game mode" do
+      {:ok, lobby} =
+        Lobby.create(%{name: "Grant's Test", game_type: RobotGame, user_id: @user_id})
+
+      %{id: <<_::288>>, attack_damage: _, terrain: _} = Lobby.get_settings(lobby)
     end
   end
 end

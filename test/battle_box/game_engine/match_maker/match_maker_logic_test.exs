@@ -65,6 +65,22 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
              matches
   end
 
+  test "it will use the settings from the lobby", %{lobby: lobby} do
+    player_1_pid = named_proxy(:player_1)
+    player_2_pid = named_proxy(:player_2)
+
+    [%{game: game}] =
+      make_matches(
+        [
+          %{player_id: @player_1_id, pid: player_1_pid},
+          %{player_id: @player_2_id, pid: player_2_pid}
+        ],
+        lobby.id
+      )
+
+    assert game.settings.id == Lobby.get_settings(lobby).id
+  end
+
   test "the games it makes are persistable", %{lobby: %{id: lobby_id}} do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)

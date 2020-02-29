@@ -1,17 +1,16 @@
 defmodule BattleBoxWeb.LobbyControllerTest do
-  use BattleBoxWeb.ConnCase
+  use BattleBoxWeb.ConnCase, async: false
   alias BattleBox.Lobby
 
   @user_id Ecto.UUID.generate()
 
   test "you can view a lobby", %{conn: conn} do
-    lobby =
-      Lobby.changeset(%Lobby{}, %{
+    {:ok, lobby} =
+      Lobby.create(%{
         name: "TEST_NAME",
         user_id: @user_id,
         game_type: "robot_game"
       })
-      |> Repo.insert!(returning: true)
 
     conn =
       conn
@@ -32,8 +31,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
   end
 
   test "creating a lobby with the same name as an existing lobby is an error", %{conn: conn} do
-    Lobby.changeset(%Lobby{}, %{name: "FOO", user_id: @user_id, game_type: "robot_game"})
-    |> Repo.insert!()
+    {:ok, _} = Lobby.create(%{name: "FOO", user_id: @user_id, game_type: "robot_game"})
 
     conn =
       conn
@@ -57,11 +55,12 @@ defmodule BattleBoxWeb.LobbyControllerTest do
   describe "lobbies index" do
     test "it will show a user's lobbies", %{conn: conn} do
       for i <- [1, 2, 3] do
-        Repo.insert!(%Lobby{
-          name: "TEST_NAME#{i}",
-          user_id: @user_id,
-          game_type: BattleBox.Games.RobotGame
-        })
+        {:ok, _} =
+          Lobby.create(%{
+            name: "TEST_NAME#{i}",
+            user_id: @user_id,
+            game_type: BattleBox.Games.RobotGame
+          })
       end
 
       conn =
