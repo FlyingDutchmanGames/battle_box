@@ -4,7 +4,7 @@
 
 V1
 ====
-[ ] Refactor the save strategy for games/robot games
+[ ] Have the Game Servers put the `Game` into the registry, and pass around `game.id`s instead of `robot_game.ids`
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] Lobby settings passed correctly
   [ ] bot self play allowed toggle
@@ -48,6 +48,7 @@ Nice to Haves
 
 Done
 =======
+[x] Refactor the save strategy for games/robot games
 [x] Rename (battle box game) => (game), (battle box game bot) => (game bot), (robot game game) => (robot game)
 [x] Reorganize the game engine
 [x] Make the `Game.robots` function more efficent by denormalizing a `game.robots_at_turn` to be a `%{turn_num => [robot]}`
