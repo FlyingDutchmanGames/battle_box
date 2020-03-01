@@ -237,7 +237,6 @@ end
 
 defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do
   alias BattleBox.Games.RobotGame
-  def id(game), do: game.id
   def disqualify(game, player), do: RobotGame.disqualify(game, player)
   def over?(game), do: RobotGame.over?(game)
   def persist(game), do: RobotGame.persist(game)
