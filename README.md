@@ -4,26 +4,22 @@
 
 V1
 ====
-[ ] Have the Game Servers put the `Game` into the registry, and pass around `game.id`s instead of `robot_game.ids`
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
-[ ] Lobby settings passed correctly
-  [ ] bot self play allowed toggle
-  [ ] user self play allowed toggle
-  [ ] Delay moves until alloted time/submit as fast as possible setting
-  [ ] write move timeout ms onto the lobby settings
-[ ] Static Site
-  [ ] Wire protocol docs
-  [ ] Robot game rules docs
-[ ] players > 2 game mode / sequential turn mode
-[ ] Domain Name
-  [x] pick one
-  [ ] Point domain to servers
 [ ] historical games page
   [x] Get something in the page
   [ ] Efficent Pagination
   [ ] Filter by (lobby id, user id, bot id)
   [ ] Arrow key navigation through pages
-[ ] live games page
+[ ] live games page (Probably works via the historical game pages html/css?)
+[ ] Static Site
+  [ ] Wire protocol docs
+  [ ] Robot game rules docs
+[ ] Lobby settings passed correctly
+  [ ] bot self play allowed toggle
+  [ ] user self play allowed toggle
+  [ ] Delay moves until alloted time/submit as fast as possible setting
+  [ ] write move timeout ms onto the lobby settings
+[ ] players > 2 game mode / sequential turn mode
 [ ] Bot Info Page
 [ ] BattleBox Elixir Client
 [ ] Visualize games better (include moves and historical turns)
@@ -45,9 +41,11 @@ Nice to Haves
 [ ] Conncurrent connection limiter
 [ ] Github actions Spec Suite
 [ ] Downloads controller, and `as_downloadable` as part of the game protocol
+[ ] Google Analytics on the github page
 
 Done
 =======
+[x] Have the Game Servers put the `Game` into the registry, and pass around `game.id`s instead of `robot_game.ids`
 [x] Refactor the save strategy for games/robot games
 [x] Rename (battle box game) => (game), (battle box game bot) => (game bot), (robot game game) => (robot game)
 [x] Reorganize the game engine
@@ -59,3 +57,7 @@ Done
 [x] Battle Box Game Table (ID, Players, Lobby, Winner, timestamps) Index [(insertedat desc), (gin players), (lobby id)]
 [x] User controller
 [x] Tear out phoenix pubsub for game engine pubsub and use registry
+[x] Domain Name
+  [x] pick one
+  [x] www. to github pages
+  [ ] Point domain to servers
