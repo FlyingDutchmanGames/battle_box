@@ -19,7 +19,7 @@ defmodule BattleBox.GameEngine.GameServer do
     GenStateMachine.cast(game_server, {:moves, player, moves})
   end
 
-  def start_link(config, %{players: players, game: game} = data) do
+  def start_link(config, %{players: _, game: game} = data) do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
       name: {:via, Registry, {config.names.game_registry, game.id, initial_metadata(game)}}
     )
