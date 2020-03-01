@@ -13,11 +13,16 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
   end
 
   defp make_match(player_1, player_2, lobby, settings) do
-    p1_bot = GameBot.new(player: "player_1", bot_id: player_1.player_id)
-    p2_bot = GameBot.new(player: "player_2", bot_id: player_2.player_id)
-    bbg = Game.new(lobby_id: lobby.id, game_bots: [p1_bot, p2_bot])
+    game =
+      Game.new(
+        lobby: lobby,
+        game_bots: [
+          GameBot.new(player: "player_1", bot_id: player_1.player_id),
+          GameBot.new(player: "player_2", bot_id: player_2.player_id)
+        ],
+        robot_game: RobotGame.new(settings: settings)
+      )
 
-    robot_game = RobotGame.new(settings: settings, game: bbg)
-    %{game: robot_game, players: %{"player_1" => player_1.pid, "player_2" => player_2.pid}}
+    %{game: game, players: %{"player_1" => player_1.pid, "player_2" => player_2.pid}}
   end
 end

@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Lobby, Repo}
+  alias BattleBox.{Game, Lobby, Repo}
   import BattleBox.GameEngine.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -78,7 +78,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
         lobby.id
       )
 
-    assert game.settings.id == Lobby.get_settings(lobby).id
+    assert game.robot_game.settings.id == Lobby.get_settings(lobby).id
   end
 
   test "the games it makes are persistable", %{lobby: %{id: lobby_id}} do
@@ -94,9 +94,9 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
         lobby_id
       )
 
-    {:ok, game} = BattleBoxGame.persist(game)
-    game = Repo.preload(game, game: [:game_bots])
-    assert %{lobby_id: lobby_id} = game.game
+    {:ok, game} = Game.persist(game)
+    game = Repo.preload(game, [:game_bots])
+    assert %{lobby_id: lobby_id} = game
 
     assert [
              %{
@@ -109,6 +109,6 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
                bot_id: @player_2_id,
                score: 0
              }
-           ] = game.game.game_bots
+           ] = game.game_bots
   end
 end

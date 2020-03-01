@@ -1,7 +1,7 @@
 defmodule BattleBox.GameEngine.GameServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBoxGame, as: Game
-  alias BattleBox.GameEngine
+  alias BattleBoxGame
+  alias BattleBox.{Game, GameEngine}
 
   def accept_game(game_server, player) when is_binary(player) do
     GenStateMachine.cast(game_server, {:accept_game, player})
@@ -19,9 +19,9 @@ defmodule BattleBox.GameEngine.GameServer do
     GenStateMachine.cast(game_server, {:moves, player, moves})
   end
 
-  def start_link(config, %{players: _, game: %{id: id} = game} = data) do
+  def start_link(config, %{players: players, game: game} = data) do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
-      name: {:via, Registry, {config.names.game_registry, id, initial_metadata(game)}}
+      name: {:via, Registry, {config.names.game_registry, game.id, initial_metadata(game)}}
     )
   end
 
@@ -47,7 +47,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:cast, {:reject_game, _player}, :game_acceptance, data) do
     for {_player, pid} <- data.players do
-      send(pid, {:game_cancelled, Game.id(data.game)})
+      send(pid, {:game_cancelled, data.game.id})
     end
 
     {:stop, :normal}
@@ -55,7 +55,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:info, {:DOWN, _, :process, _pid, _}, :game_acceptance, data) do
     for {_player, pid} <- data.players do
-      send(pid, {:game_cancelled, Game.id(data.game)})
+      send(pid, {:game_cancelled, data.game.id})
     end
 
     {:stop, :normal}
@@ -76,23 +76,23 @@ defmodule BattleBox.GameEngine.GameServer do
 
       [{other_player, _}] when other_player != player ->
         moves = Map.new([{player, moves} | data.moves])
-        data = update_in(data.game, &Game.calculate_turn(&1, moves))
+        data = update_in(data.game.robot_game, &BattleBoxGame.calculate_turn(&1, moves))
 
-        if Game.over?(data.game),
+        if BattleBoxGame.over?(data.game.robot_game),
           do: {:keep_state, data, {:next_event, :internal, :finalize}},
           else: {:repeat_state, data, {:next_event, :internal, :collect_moves}}
     end
   end
 
   def handle_event(:cast, {:forfeit_game, player}, :moves, data) do
-    {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
+    {:keep_state, update_in(data.game.robot_game, &BattleBoxGame.disqualify(&1, player)),
      {:next_event, :internal, :finalize}}
   end
 
   def handle_event(:info, {:DOWN, _, :process, pid, _}, :moves, data) do
     {player, _} = Enum.find(data.players, fn {_player, player_pid} -> player_pid == pid end)
 
-    {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
+    {:keep_state, update_in(data.game.robot_game, &BattleBoxGame.disqualify(&1, player)),
      {:next_event, :internal, :finalize}}
   end
 
@@ -106,19 +106,22 @@ defmodule BattleBox.GameEngine.GameServer do
     {:stop, :normal}
   end
 
-  def handle_event(:enter, _, new_state, %{names: names, game: game} = data) do
-    metadata = %{status: new_state, game: data.game}
+  def handle_event(:enter, _, new_state, %{names: names, game: game}) do
+    metadata = %{status: new_state, game: game}
+
     {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
+
     :ok = GameEngine.broadcast(names.game_engine, "game:#{game.id}", {:game_update, game.id})
+
     :keep_state_and_data
   end
 
   defp moves_request(game, player) do
     {:moves_request,
      %{
-       game_id: Game.id(game),
-       game_state: Game.moves_request(game),
-       time: Game.move_time_ms(game),
+       game_id: game.id,
+       game_state: BattleBoxGame.moves_request(game.robot_game),
+       time: BattleBoxGame.move_time_ms(game.robot_game),
        player: player
      }}
   end
@@ -127,25 +130,24 @@ defmodule BattleBox.GameEngine.GameServer do
     {:game_request,
      %{
        game_server: self(),
-       game_id: Game.id(game),
+       game_id: game.id,
        player: player,
-       settings: Game.settings(game)
+       settings: BattleBoxGame.settings(game.robot_game)
      }}
   end
 
   def game_over_message(game) do
     {:game_over,
      %{
-       game_id: Game.id(game),
-       score: Game.score(game),
-       winner: Game.winner(game)
+       game_id: game.id,
+       score: BattleBoxGame.score(game.robot_game),
+       winner: BattleBoxGame.winner(game.robot_game)
      }}
   end
 
   defp initial_metadata(game),
     do: %{
       started_at: DateTime.utc_now(),
-      game_type: game.__struct__,
       game: game
     }
 end

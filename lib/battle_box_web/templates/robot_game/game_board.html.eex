@@ -1,5 +1,5 @@
-<% %{row_max: rows, row_min: 0, col_max: cols, col_min: 0} = RobotGame.dimensions(@game) %>
-<% %{"player_1" => p1_score, "player_2" => p2_score} = RobotGame.score_at_turn(@game, @turn) %>
+<% %{row_max: rows, row_min: 0, col_max: cols, col_min: 0} = RobotGame.dimensions(@game.robot_game) %>
+<% %{"player_1" => p1_score, "player_2" => p2_score} = RobotGame.score_at_turn(@game.robot_game, @turn) %>
 
 <div class="robot-game" phx-window-keyup="change_turn">
   <div class="game-header">
@@ -10,7 +10,7 @@
 
     <div class="title-section">
       <div class="title">Robot Game</div>
-      <div class="turns"><%= "TURN: #{@turn} / #{@game.turn}" %></div>
+      <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
     </div>
 
     <div class="score player_2">
@@ -20,14 +20,14 @@
   </div>
 
   <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>
-    <%= for {location, terrain_type} <- @game.settings.terrain do %>
+    <%= for {location, terrain_type} <- @game.robot_game.settings.terrain do %>
       <% [row, col] = location %>
       <div class='<%= "terrain #{terrain_type}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
         <%= terrain_number(location) %>
       </div>
     <% end %>
 
-    <%= for robot <- RobotGame.robots_at_turn(@game, @turn) do %>
+    <%= for robot <- RobotGame.robots_at_turn(@game.robot_game, @turn) do %>
       <% [row, col] = robot.location %>
       <div class='<%= "robot #{robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'><%= robot.hp %></div>
     <% end %>

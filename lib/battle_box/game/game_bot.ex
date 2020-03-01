@@ -9,6 +9,7 @@ defmodule BattleBox.GameBot do
   schema "game_bots" do
     field :score, :integer, default: 0
     field :player, :string
+    field :winner, :boolean, default: false
     belongs_to :bot, Bot
     belongs_to :game, Game
     timestamps()
@@ -16,7 +17,7 @@ defmodule BattleBox.GameBot do
 
   def changeset(bot, params \\ %{}) do
     bot
-    |> cast(params, [:score, :player, :bot_id, :game_id])
+    |> cast(params, [:score, :player, :winner, :bot_id, :game_id])
   end
 
   def new(opts) do
