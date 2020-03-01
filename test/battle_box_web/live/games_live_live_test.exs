@@ -27,7 +27,7 @@ defmodule BattleBoxWeb.GamesLiveLiveTest do
             "player_1" => named_proxy(:player_1),
             "player_2" => named_proxy(:player_2)
           },
-          game: Game.new(robot_game: RobotGame.new(id: @game_id))
+          game: Game.new(id: @game_id, robot_game: RobotGame.new())
         })
 
       :ok = GameServer.accept_game(pid, "player_1")

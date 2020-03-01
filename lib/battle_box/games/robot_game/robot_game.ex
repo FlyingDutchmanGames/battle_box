@@ -141,11 +141,11 @@ defmodule BattleBox.Games.RobotGame do
     |> Map.merge(opts)
   end
 
-  def over?(game), do: game.winner || game.turn >= game.settings.max_turns
+  def over?(%__MODULE__{} = game), do: game.winner || game.turn >= game.settings.max_turns
 
-  def score(game), do: score_at_turn(game, game.turn)
+  def score(%__MODULE__{} = game), do: score_at_turn(game, game.turn)
 
-  def score_at_turn(game, turn) do
+  def score_at_turn(%__MODULE__{} = game, turn) when is_integer(turn) and turn >= 0 do
     robot_score =
       robots_at_turn(game, turn)
       |> Enum.frequencies_by(fn robot -> robot.player_id end)
@@ -221,7 +221,7 @@ defmodule BattleBox.Games.RobotGame do
     |> Enum.flat_map(fn event -> event.effects end)
   end
 
-  def robots_at_turn(game, turn) do
+  def robots_at_turn(%__MODULE__{} = game, turn) when is_integer(turn) and turn >= 0 do
     game.robots_at_end_of_turn[turn - 1]
     |> apply_effects_to_robots(effects_for_turn(game, turn))
   end
@@ -237,7 +237,7 @@ end
 
 defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do
   alias BattleBox.Games.RobotGame
-  def id(game), do: game.id
+  def initialize(game), do: RobotGame.set_robots_at_turn(game)
   def disqualify(game, player), do: RobotGame.disqualify(game, player)
   def over?(game), do: RobotGame.over?(game)
   def persist(game), do: RobotGame.persist(game)

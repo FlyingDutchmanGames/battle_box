@@ -1,8 +1,7 @@
 defmodule BattleBoxWeb.GameLive do
   alias BattleBoxWeb.{PageView, RobotGameView}
   use BattleBoxWeb, :live_view
-  alias BattleBox.GameEngine
-  alias BattleBox.Games.RobotGame
+  alias BattleBox.{Repo, Game, GameEngine}
 
   def mount(%{"game_id" => game_id} = params, _session, socket) do
     if connected?(socket) do
@@ -52,7 +51,7 @@ defmodule BattleBoxWeb.GameLive do
 
   def handle_info({:game_update, id}, %{assigns: %{game: %{id: id}}} = socket) do
     game = get_game(id)
-    {:noreply, assign(socket, game: game, turn: game.turn)}
+    {:noreply, assign(socket, game: game, turn: game.robot_game.turn)}
   end
 
   def render(%{not_found: true}), do: PageView.render("not_found.html", message: "Game not found")
@@ -61,15 +60,25 @@ defmodule BattleBoxWeb.GameLive do
   defp box_turn_number(game, turn) when is_binary(turn),
     do: box_turn_number(game, String.to_integer(turn))
 
-  defp box_turn_number(%{turn: game_turn}, nil), do: game_turn
-  defp box_turn_number(%{turn: game_turn}, turn) when turn > game_turn, do: game_turn
+  defp box_turn_number(%{robot_game: %{turn: game_turn}}, nil), do: game_turn
+
+  defp box_turn_number(%{robot_game: %{turn: game_turn}}, turn) when turn > game_turn,
+    do: game_turn
+
   defp box_turn_number(_, turn) when turn < 0, do: 0
   defp box_turn_number(_, turn), do: turn
 
   defp get_game(game_id) do
     case GameEngine.get_game(game_engine(), game_id) do
-      nil -> RobotGame.get_by_id_with_settings(game_id)
-      %{game: game} -> game
+      nil ->
+        game =
+          Game.get_by_id(game_id)
+          |> Repo.preload(robot_game: [:settings], game_bots: [bot: :user])
+
+        if not is_nil(game), do: update_in(game.robot_game, &BattleBoxGame.initialize/1)
+
+      %{game: game} ->
+        game
     end
   end
 end

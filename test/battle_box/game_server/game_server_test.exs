@@ -31,15 +31,15 @@ defmodule BattleBox.GameEngine.GameServerTest do
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
     assert Registry.count(context.game_registry) == 1
 
-    assert [{^pid, %{started_at: started_at, game_type: RobotGame, game: game}}] =
-             Registry.lookup(context.game_registry, context.init_opts.game.robot_game.id)
+    assert [{^pid, %{started_at: started_at, game: game}}] =
+             Registry.lookup(context.game_registry, context.init_opts.game.id)
 
-    assert game == context.init_opts.game.robot_game
+    assert game == context.init_opts.game
     assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 
   test "The game server sends out game update messages", context do
-    game_id = context.init_opts.game.robot_game.id
+    game_id = context.init_opts.game.id
     GameEngine.subscribe(context.game_engine, "game:#{game_id}")
     {:ok, _pid} = GameEngine.start_game(context.game_engine, context.init_opts)
     assert_receive {:game_update, ^game_id}
@@ -47,18 +47,18 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
   test "the starting of the game server will send init messages to p1 & p2", context do
     {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
-    game = context.init_opts.game.robot_game
+    game = context.init_opts.game
 
     expected = %{
       game_server: pid,
       game_id: game.id,
       settings: %{
-        spawn_every: game.settings.spawn_every,
-        spawn_per_player: game.settings.spawn_per_player,
-        robot_hp: game.settings.robot_hp,
-        attack_damage: game.settings.attack_damage,
-        collision_damage: game.settings.collision_damage,
-        max_turns: game.settings.max_turns
+        spawn_every: game.robot_game.settings.spawn_every,
+        spawn_per_player: game.robot_game.settings.spawn_per_player,
+        robot_hp: game.robot_game.settings.robot_hp,
+        attack_damage: game.robot_game.settings.attack_damage,
+        collision_damage: game.robot_game.settings.collision_damage,
+        max_turns: game.robot_game.settings.max_turns
       }
     }
 
@@ -78,7 +78,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
       assert :ok = GameServer.accept_game(pid, "player_1")
       assert :ok = GameServer.reject_game(pid, "player_2")
 
-      game_id = context.init_opts.game.robot_game.id
+      game_id = context.init_opts.game.id
 
       assert_receive {:player_1, {:game_cancelled, ^game_id}}
       assert_receive {:player_2, {:game_cancelled, ^game_id}}
@@ -98,7 +98,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
       Process.exit(player_2_pid, :kill)
       assert_receive {:EXIT, ^player_2_pid, :killed}
 
-      game_id = context.init_opts.game.robot_game.id
+      game_id = context.init_opts.game.id
 
       assert_receive {:player_1, {:game_cancelled, ^game_id}}
       assert_receive {:DOWN, ^game_ref, :process, ^pid, :normal}
@@ -111,7 +111,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     :ok = GameServer.accept_game(pid, "player_1")
     :ok = GameServer.accept_game(pid, "player_2")
 
-    game_id = context.init_opts.game.robot_game.id
+    game_id = context.init_opts.game.id
 
     assert_receive {:player_1,
                     {:moves_request,
@@ -181,7 +181,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     assert_receive {:player_2, {:game_over, %{game_id: ^game_id}}}
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
 
-    loaded_game = RobotGame.get_by_id(game_id)
+    loaded_game = Game.get_by_id(game_id)
     refute is_nil(loaded_game)
   end
 end

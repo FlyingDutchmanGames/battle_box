@@ -16,6 +16,10 @@ defmodule BattleBox.Game do
     timestamps()
   end
 
+  def get_by_id(id) do
+    Repo.get_by(__MODULE__, id: id)
+  end
+
   def persist(game) do
     scores = BattleBoxGame.score(game.robot_game)
     winner = BattleBoxGame.winner(game.robot_game)
@@ -44,7 +48,11 @@ defmodule BattleBox.Game do
 
   def new(opts \\ %{}) do
     opts = Enum.into(opts, %{})
-    opts = Map.merge(%{game_bots: []}, opts)
+
+    opts =
+      Map.merge(%{game_bots: []}, opts)
+      |> Map.put_new(:id, Ecto.UUID.generate())
+
     Map.merge(%__MODULE__{}, opts)
   end
 end

@@ -21,9 +21,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def start_link(config, %{players: players, game: game} = data) do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
-      name:
-        {:via, Registry,
-         {config.names.game_registry, game.robot_game.id, initial_metadata(game.robot_game)}}
+      name: {:via, Registry, {config.names.game_registry, game.id, initial_metadata(game)}}
     )
   end
 
@@ -34,7 +32,7 @@ defmodule BattleBox.GameEngine.GameServer do
   def handle_event(:internal, :setup, :game_acceptance, data) do
     for {player, pid} <- data.players do
       Process.monitor(pid)
-      send(pid, init_message(data.game.robot_game, player))
+      send(pid, init_message(data.game, player))
     end
 
     {:keep_state, Map.put(data, :acceptances, [])}
@@ -49,7 +47,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:cast, {:reject_game, _player}, :game_acceptance, data) do
     for {_player, pid} <- data.players do
-      send(pid, {:game_cancelled, BattleBoxGame.id(data.game.robot_game)})
+      send(pid, {:game_cancelled, data.game.id})
     end
 
     {:stop, :normal}
@@ -57,7 +55,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:info, {:DOWN, _, :process, _pid, _}, :game_acceptance, data) do
     for {_player, pid} <- data.players do
-      send(pid, {:game_cancelled, BattleBoxGame.id(data.game.robot_game)})
+      send(pid, {:game_cancelled, data.game.id})
     end
 
     {:stop, :normal}
@@ -65,7 +63,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:internal, :collect_moves, :moves, data) do
     for {player, pid} <- data.players do
-      send(pid, moves_request(data.game.robot_game, player))
+      send(pid, moves_request(data.game, player))
     end
 
     {:keep_state, Map.put(data, :moves, [])}
@@ -102,61 +100,54 @@ defmodule BattleBox.GameEngine.GameServer do
     {:ok, game} = Game.persist(game)
 
     for {_player, pid} <- data.players do
-      send(pid, game_over_message(game.robot_game))
+      send(pid, game_over_message(game))
     end
 
     {:stop, :normal}
   end
 
   def handle_event(:enter, _, new_state, %{names: names, game: game}) do
-    metadata = %{status: new_state, game: game.robot_game}
+    metadata = %{status: new_state, game: game}
 
-    {_, _} =
-      Registry.update_value(names.game_registry, game.robot_game.id, &Map.merge(&1, metadata))
+    {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
 
-    :ok =
-      GameEngine.broadcast(
-        names.game_engine,
-        "game:#{game.robot_game.id}",
-        {:game_update, game.robot_game.id}
-      )
+    :ok = GameEngine.broadcast(names.game_engine, "game:#{game.id}", {:game_update, game.id})
 
     :keep_state_and_data
   end
 
-  defp moves_request(robot_game, player) do
+  defp moves_request(game, player) do
     {:moves_request,
      %{
-       game_id: BattleBoxGame.id(robot_game),
-       game_state: BattleBoxGame.moves_request(robot_game),
-       time: BattleBoxGame.move_time_ms(robot_game),
+       game_id: game.id,
+       game_state: BattleBoxGame.moves_request(game.robot_game),
+       time: BattleBoxGame.move_time_ms(game.robot_game),
        player: player
      }}
   end
 
-  defp init_message(robot_game, player) do
+  defp init_message(game, player) do
     {:game_request,
      %{
        game_server: self(),
-       game_id: BattleBoxGame.id(robot_game),
+       game_id: game.id,
        player: player,
-       settings: BattleBoxGame.settings(robot_game)
+       settings: BattleBoxGame.settings(game.robot_game)
      }}
   end
 
-  def game_over_message(robot_game) do
+  def game_over_message(game) do
     {:game_over,
      %{
-       game_id: BattleBoxGame.id(robot_game),
-       score: BattleBoxGame.score(robot_game),
-       winner: BattleBoxGame.winner(robot_game)
+       game_id: game.id,
+       score: BattleBoxGame.score(game.robot_game),
+       winner: BattleBoxGame.winner(game.robot_game)
      }}
   end
 
-  defp initial_metadata(robot_game),
+  defp initial_metadata(game),
     do: %{
       started_at: DateTime.utc_now(),
-      game_type: robot_game.__struct__,
-      game: robot_game
+      game: game
     }
 end

@@ -51,10 +51,6 @@ defmodule BattleBoxWeb.Router do
       resources "/lobbies", LobbyController, only: [:index]
       resources "/bots", BotController, only: [:index]
     end
-
-    scope "/robot_game", RobotGame do
-      live("/play", PlayLive)
-    end
   end
 
   defp require_logged_in(conn, _) do

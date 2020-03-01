@@ -7,13 +7,14 @@ defmodule BattleBoxWeb.GameLiveTest do
   @game_id Ecto.UUID.generate()
 
   test "it can display a game off disk", %{conn: conn} do
-    id = Ecto.UUID.generate()
+    robot_game =
+      RobotGame.new()
+      |> RobotGame.complete_turn()
+      |> RobotGame.complete_turn()
 
-    {:ok, _} =
-      RobotGame.new(%{id: id})
-      |> RobotGame.complete_turn()
-      |> RobotGame.complete_turn()
-      |> RobotGame.persist()
+    {:ok, %{id: id}} =
+      Game.new(robot_game: robot_game)
+      |> Game.persist()
 
     {:ok, _view, html} = live(conn, "/games/#{id}")
     assert html =~ "TURN: 2 / 2"
@@ -37,7 +38,7 @@ defmodule BattleBoxWeb.GameLiveTest do
             "player_1" => named_proxy(:player_1),
             "player_2" => named_proxy(:player_2)
           },
-          game: Game.new(robot_game: RobotGame.new(id: @game_id))
+          game: Game.new(id: @game_id, robot_game: RobotGame.new())
         })
 
       :ok = GameServer.accept_game(pid, "player_1")
@@ -77,13 +78,14 @@ defmodule BattleBoxWeb.GameLiveTest do
 
   describe "Arrow Keys let you change the turn you're viewing" do
     setup do
-      id = Ecto.UUID.generate()
+      robot_game =
+        RobotGame.new()
+        |> RobotGame.complete_turn()
+        |> RobotGame.complete_turn()
 
-      {:ok, _} =
-        RobotGame.new(%{id: id})
-        |> RobotGame.complete_turn()
-        |> RobotGame.complete_turn()
-        |> RobotGame.persist()
+      {:ok, %{id: id}} =
+        Game.new(robot_game: robot_game)
+        |> Game.persist()
 
       %{game_id: id}
     end
