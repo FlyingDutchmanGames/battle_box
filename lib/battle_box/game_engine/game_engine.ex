@@ -90,7 +90,7 @@ defmodule BattleBox.GameEngine do
 
   defp get_process(registry, id) do
     case Registry.lookup(registry, id) do
-      [{pid, attributes}] -> Map.put(attributes, :pid, pid)
+      [{pid, attributes}] -> Map.merge(attributes, %{pid: pid, id: id})
       [] -> nil
     end
   end

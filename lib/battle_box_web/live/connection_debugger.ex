@@ -12,8 +12,9 @@ defmodule BattleBoxWeb.ConnectionDebugger do
       nil ->
         {:ok, assign(socket, :not_found, true)}
 
-      connection ->
-        {:ok, assign(socket, connection: connection), temporary_assigns: [debug_messages: []]}
+      %{pid: pid} = connection ->
+        Process.monitor(pid)
+        {:ok, assign(socket, connection: connection, connected?: connected?(socket)), temporary_assigns: [messages: []]}
     end
   end
 
@@ -24,8 +25,11 @@ defmodule BattleBoxWeb.ConnectionDebugger do
     ConnectionView.render("debug.html", assigns)
   end
 
+  def handle_info({type, _connection_id, message}, socket) when type in [:got_message, :sent_to_socket] do
+    {:noreply, assign(socket, messages: [%{id: Ecto.UUID.generate(), type: type, message: message}])}
+  end
+
   def get_connection(connection_id) do
     GameEngine.get_connection(game_engine(), connection_id)
-    |> IO.inspect(label: "CONNECTION")
   end
 end
