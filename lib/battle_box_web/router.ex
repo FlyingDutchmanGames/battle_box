@@ -34,6 +34,7 @@ defmodule BattleBoxWeb.Router do
       pipe_through :require_logged_in
 
       get "/connections", UserRedirectController, :connections
+      live("/connections/:connection_id", ConnectionDebugger)
       get "/lobbies", UserRedirectController, :lobbies
       get "/bots", UserRedirectController, :bots
       get "/me", UserRedirectController, :users

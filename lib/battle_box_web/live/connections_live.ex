@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.ConnectionsLive do
   use BattleBoxWeb, :live_view
-  alias BattleBoxWeb.{ConnectionsView, PageView}
+  alias BattleBoxWeb.{ConnectionView, PageView}
   alias BattleBox.{GameEngine, User}
 
   @refresh_rate_ms 1000
@@ -28,7 +28,7 @@ defmodule BattleBoxWeb.ConnectionsLive do
   end
 
   def render(assigns) do
-    ConnectionsView.render("connections.html", assigns)
+    ConnectionView.render("connections.html", assigns)
   end
 
   def handle_event("kill_connection_" <> connection_id, _, socket) do

@@ -12,6 +12,7 @@
       <div>game_id: <a href="<%= Routes.live_path(@socket, BattleBoxWeb.GameLive, connection.game_id) %>"><%= connection.game_id %></a></div>
     <% end %>
     <button phx-click="kill_connection_<%= connection.connection_id %>">Kill Connection</button>
+    <a href="<%= Routes.live_path(@socket, BattleBoxWeb.ConnectionDebugger, connection.connection_id) %>">Debug</a>
   </div>
 <% end %>
 </div>
