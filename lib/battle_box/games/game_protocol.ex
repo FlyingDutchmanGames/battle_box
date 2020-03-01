@@ -1,4 +1,7 @@
 defprotocol BattleBoxGame do
+  @spec initialize(struct()) :: struct()
+  def initialize(game)
+
   @spec disqualify(struct(), :player_1 | :player_2) :: struct()
   def disqualify(game, player)
 

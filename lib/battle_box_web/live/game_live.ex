@@ -71,8 +71,11 @@ defmodule BattleBoxWeb.GameLive do
   defp get_game(game_id) do
     case GameEngine.get_game(game_engine(), game_id) do
       nil ->
-        Game.get_by_id(game_id)
-        |> Repo.preload(robot_game: [:settings], game_bots: [bot: :user])
+        game =
+          Game.get_by_id(game_id)
+          |> Repo.preload(robot_game: [:settings], game_bots: [bot: :user])
+
+        if not is_nil(game), do: update_in(game.robot_game, &BattleBoxGame.initialize/1)
 
       %{game: game} ->
         game
