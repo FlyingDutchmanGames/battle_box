@@ -57,6 +57,20 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 
+  test "it will emit debug messages", %{bot: %{token: token}} = context do
+    {:ok, socket} = connect(context.port)
+    assert_receive {:tcp, ^socket, msg}
+    assert %{"connection_id" => connection_id} = Jason.decode!(msg)
+    GameEngine.subscribe(context.game_engine, "connection-debugger:#{connection_id}")
+    bot_connect_req = encode(%{"token" => token, "lobby" => @lobby_name})
+    :ok = :gen_tcp.send(socket, bot_connect_req)
+    assert_receive {:got_message, ^connection_id, got}
+    assert_receive {:sent_to_socket, ^connection_id, sent}
+    assert_receive {:tcp, ^socket, through_socket}
+    assert got == bot_connect_req
+    assert sent == through_socket
+  end
+
   test "closing the tcp connection causes the connection process to die", context do
     {:ok, socket} = connect(context.port)
     assert_receive {:tcp, ^socket, msg}

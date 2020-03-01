@@ -34,6 +34,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   def handle_event(:info, {:tcp_error, _socket, _reason}, _state, _data), do: {:stop, :normal}
 
   def handle_event(:info, {:tcp, socket, bytes}, _state, %{socket: socket} = data) do
+    broadcast_debug_info(data, {:got_message, data.connection_id, bytes})
     :ok = data.transport.setopts(socket, active: :once)
 
     case Jason.decode(bytes) do
@@ -202,6 +203,15 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     }
 
   defp send_to_socket(data, msg) do
+    broadcast_debug_info(data, {:sent_to_socket, data.connection_id, msg})
     :ok = data.transport.send(data.socket, msg)
+  end
+
+  def broadcast_debug_info(data, debug_msg) do
+    GameEngine.broadcast(
+      data.names.game_engine,
+      "connection-debugger:#{data.connection_id}",
+      debug_msg
+    )
   end
 end
