@@ -24,9 +24,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
   def handle_event(:internal, :initialize, :unauthed, data) do
     {:ok, socket} = :ranch.handshake(data.ranch_ref)
-    :ok = data.transport.setopts(socket, active: :once, packet: :line, recbuf: 65536)
-    :ok = data.transport.send(socket, initial_msg(data.connection_id))
     data = Map.put(data, :socket, socket)
+    :ok = data.transport.setopts(socket, active: :once, packet: 2, recbuf: 65536)
     {:keep_state, data}
   end
 
@@ -41,7 +40,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         {:keep_state_and_data, {:next_event, :internal, msg}}
 
       {:error, %Jason.DecodeError{}} ->
-        :ok = data.transport.send(socket, encode_error("invalid_json"))
+        :ok = send_to_socket(data, encode_error("invalid_json"))
         :keep_state_and_data
     end
   end
@@ -59,27 +58,27 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
       Process.monitor(player_server)
 
       data = Map.merge(data, %{bot: bot, player_server: player_server, lobby_name: lobby_name})
-      :ok = data.transport.send(data.socket, status_msg(data, :idle))
+      :ok = send_to_socket(data, status_msg(data, :idle))
       {:next_state, :idle, data}
     else
       {:bot, nil} ->
-        :ok = data.transport.send(data.socket, encode_error("invalid_token"))
+        :ok = send_to_socket(data, encode_error("invalid_token"))
         :keep_state_and_data
 
       {:player, {:error, :lobby_not_found}} ->
-        :ok = data.transport.send(data.socket, encode_error("lobby_not_found"))
+        :ok = send_to_socket(data, encode_error("lobby_not_found"))
         :keep_state_and_data
     end
   end
 
   def handle_event(:internal, %{"action" => "start_match_making"}, :idle, data) do
     :ok = PlayerServer.match_make(data.player_server)
-    :ok = data.transport.send(data.socket, status_msg(data, :match_making))
+    :ok = send_to_socket(data, status_msg(data, :match_making))
     {:next_state, :match_making, data}
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
-    :ok = data.transport.send(data.socket, game_request(game_info))
+    :ok = send_to_socket(data, game_request(game_info))
     data = Map.put(data, :game_info, game_info)
     {:next_state, :game_acceptance, data}
   end
@@ -98,13 +97,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
       "reject_game" ->
         :ok = PlayerServer.reject_game(data.player_server, id)
-        data.transport.send(data.socket, game_cancelled(id))
+        send_to_socket(data, game_cancelled(id))
         {:next_state, :idle, data}
     end
   end
 
   def handle_event(:info, {:moves_request, request}, :playing, data) do
-    :ok = data.transport.send(data.socket, moves_request(request))
+    :ok = send_to_socket(data, moves_request(request))
     data = Map.put(data, :moves_request, request)
     {:keep_state, data}
   end
@@ -126,19 +125,19 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         _,
         data
       ) do
-    :ok = data.transport.send(data.socket, game_over(result))
+    :ok = send_to_socket(data, game_over(result))
     {:ok, data} = teardown_game(data, game_id)
     {:next_state, :idle, data}
   end
 
   def handle_event(:info, {:game_cancelled, id}, _state, %{game_info: %{game_id: id}} = data) do
-    :ok = data.transport.send(data.socket, game_cancelled(id))
+    :ok = send_to_socket(data, game_cancelled(id))
     {:ok, data} = teardown_game(data, id)
     {:next_state, :idle, data}
   end
 
   def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{player_server: pid} = data) do
-    :ok = data.transport.send(data.socket, encode_error("bot_instance_failure"))
+    :ok = send_to_socket(data, encode_error("bot_instance_failure"))
     :ok = data.transport.close(data.socket)
     {:stop, :normal}
   end
@@ -160,7 +159,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   def handle_event(:internal, _msg, _state, data) do
-    :ok = data.transport.send(data.socket, encode_error("invalid_msg_sent"))
+    :ok = send_to_socket(data, encode_error("invalid_msg_sent"))
     :keep_state_and_data
   end
 
@@ -188,9 +187,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     do: encode(%{info: "game_cancelled", game_id: game_id})
 
   defp status_msg(data, status),
-    do: encode(%{bot_id: data.bot.id, lobby: data.lobby_name, status: status})
-
-  defp initial_msg(connection_id), do: encode(%{connection_id: connection_id})
+    do:
+      encode(%{
+        bot_id: data.bot.id,
+        lobby: data.lobby_name,
+        status: status,
+        connection_id: data.connection_id
+      })
 
   defp initial_metadata,
     do: %{
@@ -200,4 +203,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
       status: :unauthed,
       started_at: DateTime.utc_now()
     }
+
+  defp send_to_socket(data, msg) do
+    :ok = data.transport.send(data.socket, msg)
+  end
 end

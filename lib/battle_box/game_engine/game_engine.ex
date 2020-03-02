@@ -3,6 +3,7 @@ defmodule BattleBox.GameEngine do
   alias BattleBox.GameEngine.GameServer.GameSupervisor, as: GameSup
   alias BattleBox.GameEngine.PlayerServer.PlayerSupervisor, as: PlayerSup
   alias BattleBox.GameEngine.MatchMaker, as: MatchMakerSup
+  alias BattleBox.GameEngine.PubSub, as: GameEnginePubSub
   alias BattleBox.GameEngine.MatchMakerServer
   alias BattleBox.TcpConnectionServer
 
@@ -18,10 +19,10 @@ defmodule BattleBox.GameEngine do
     name = Keyword.fetch!(opts, :name)
 
     children = [
-      {Registry, keys: :duplicate, name: pubsub_name(name)},
       {Registry, keys: :unique, name: connection_registry_name(name)},
       {Registry, keys: :unique, name: player_registry_name(name)},
       {Registry, keys: :unique, name: game_registry_name(name)},
+      {GameEnginePubSub, %{names: names(name)}},
       {GameSup, %{names: names(name)}},
       {PlayerSup, %{names: names(name)}},
       {MatchMakerSup, %{names: names(name)}}
@@ -30,15 +31,11 @@ defmodule BattleBox.GameEngine do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  def broadcast(game_engine, topic, message) do
-    Registry.dispatch(pubsub_name(game_engine), topic, fn entries ->
-      for {pid, _} <- entries, do: send(pid, message)
-    end)
-  end
+  def broadcast(game_engine, topic, message),
+    do: GameEnginePubSub.broadcast(pubsub_name(game_engine), topic, message)
 
-  def subscribe(game_engine, topic) do
-    Registry.register(pubsub_name(game_engine), topic, [])
-  end
+  def subscribe(game_engine, topic),
+    do: GameEnginePubSub.subscribe(pubsub_name(game_engine), topic)
 
   def start_game(game_engine, opts),
     do: GameSup.start_game(game_supervisor_name(game_engine), opts)
@@ -76,7 +73,8 @@ defmodule BattleBox.GameEngine do
       match_maker: match_maker_name(name),
       match_maker_server: match_maker_server_name(name),
       match_maker_registry: match_maker_registry_name(name),
-      connection_registry: connection_registry_name(name)
+      connection_registry: connection_registry_name(name),
+      pubsub: pubsub_name(name)
     }
   end
 
