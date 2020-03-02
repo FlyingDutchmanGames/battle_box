@@ -36,6 +36,8 @@ app.botskrieg.com.	3588	IN	A	68.183.104.42
   C.) Port 443 (HTTPS)
   D.) Port 4001 (BattleBox TCP Connections)
   E.) Port 4002 (BattleBox WS Connections)
+4.) Go to Github and make a new Oauth App
+  A.) Set the callback to `$BATTLE_BOX_HOST/auth/github/callback` (for me `https://app.botskrieg.com/auth/github/callback`)
 
 ## Box Setup (To be run on the server)
 
@@ -94,6 +96,7 @@ chown battle_box:battle_box /srv/battle_box
 
 ```
 cat | envsubst > /etc/default/battle_box <<CONF
+BATTLE_BOX_HOST=$BATTLE_BOX_HOST
 BATTLE_BOX_SECRET_KEY_BASE=$FILL_ME_IN
 BATTLE_BOX_DATABASE_URL=$FILL_ME_IN
 BATTLE_BOX_GITHUB_CLIENT_ID=$FILL_ME_IN
@@ -183,4 +186,3 @@ stream {
 }
 CONF
 ```
-
