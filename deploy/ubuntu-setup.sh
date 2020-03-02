@@ -122,7 +122,7 @@ CONF
 
 cat > /etc/systemd/system/battle_box.service <<CONF
 [Unit]
-Description=BattleBox Server
+Description=BattleBox
 After=network.target
 [Service]
 Type=simple
