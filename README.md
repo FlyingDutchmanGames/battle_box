@@ -25,10 +25,6 @@ V1
 [ ] Visualize games better (include moves and historical turns)
   [x] Key through turns, and have turns be sharable via url
   [ ] Changing a turn does not affect history api so its easier to use back button
-[ ] Switch to dockerized production app
-  [ ] Create a prod docker file
-  [ ] rebuild prod server from docker image
-  [ ] envsubt in ubuntu setup to deal with changing hostnames
 [ ] Game Engine Stats Server (# Live Games, # Most Active Lobby, # Connections)?
 
 Nice to Haves
@@ -36,15 +32,19 @@ Nice to Haves
 [ ] Handle when connection is closed on trying to send from connection server
 [ ] SuperAdmin
 [ ] A decent bot implmentation for testing
-[ ] Connection Debugger
+[ ] Connection Debugger (this has some issues due to amount of messages...)
 [ ] Element Storybook
 [ ] Conncurrent connection limiter
-[ ] Github actions Spec Suite
 [ ] Downloads controller, and `as_downloadable` as part of the game protocol
 [ ] Google Analytics on the github page
 
 Done
 =======
+[x] Github actions Spec Suite
+[x] Switch to dockerized production app
+  [x] Create a prod docker file
+  [x] rebuild prod server from docker image
+  [x] envsubt in ubuntu setup to deal with changing hostnames
 [x] Have the Game Servers put the `Game` into the registry, and pass around `game.id`s instead of `robot_game.ids`
 [x] Refactor the save strategy for games/robot games
 [x] Rename (battle box game) => (game), (battle box game bot) => (game bot), (robot game game) => (robot game)
@@ -60,4 +60,4 @@ Done
 [x] Domain Name
   [x] pick one
   [x] www. to github pages
-  [ ] Point domain to servers
+  [x] Point domain to servers
