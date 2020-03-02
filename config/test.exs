@@ -4,7 +4,7 @@ config :battle_box, BattleBox.Repo,
   username: "postgres",
   password: "postgres",
   database: "battle_box_test",
-  hostname: "localhost",
+  hostname: System.get_env("PG_HOST") || "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :battle_box, BattleBoxWeb.Endpoint,
