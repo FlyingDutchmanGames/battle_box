@@ -46,11 +46,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   test "you can connect and the process will register", context do
     {:ok, socket} = connect(context.port)
+
+    :ok = :gen_tcp.send(socket, context.connection_request)
     assert_receive {:tcp, ^socket, msg}
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
 
     assert %{
-             status: :unauthed,
+             status: :idle,
              started_at: started_at
            } = get_connection(context.game_engine, connection_id)
 
@@ -59,6 +61,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   test "closing the tcp connection causes the connection process to die", context do
     {:ok, socket} = connect(context.port)
+    :ok = :gen_tcp.send(socket, context.connection_request)
     assert_receive {:tcp, ^socket, msg}
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
     %{pid: pid} = get_connection(context.game_engine, connection_id)
@@ -70,9 +73,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   describe "joining a lobby as a bot" do
     setup context do
       {:ok, socket} = connect(context.port)
-      assert_receive {:tcp, ^socket, connection_msg}
-      %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
-      %{socket: socket, connection_id: connection_id}
+      %{socket: socket}
     end
 
     test "you can join", %{socket: socket, bot: %{id: id, token: token}} = context do
@@ -81,27 +82,25 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
 
-      assert %{"bot_id" => ^id, "lobby" => @lobby_name, "status" => "idle"} = Jason.decode!(msg)
+      assert %{
+               "bot_id" => ^id,
+               "lobby" => @lobby_name,
+               "status" => "idle",
+               "connection_id" => connection_id
+             } = Jason.decode!(msg)
 
       assert %{
                status: :idle,
                player_id: ^id,
                user_id: @user_id
-             } = get_connection(context.game_engine, context.connection_id)
+             } = get_connection(context.game_engine, connection_id)
     end
 
-    test "trying to join a lobby that doesn't exist is an error",
-         %{socket: socket, bot: bot} = context do
+    test "trying to join a lobby that doesn't exist is an error", %{socket: socket, bot: bot} do
       bot_connect_req = encode(%{"token" => bot.token, "lobby" => "FAKE"})
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => "lobby_not_found"} = Jason.decode!(msg)
-
-      assert %{
-               status: :unauthed,
-               player_id: nil,
-               user_id: nil
-             } = get_connection(context.game_engine, context.connection_id)
     end
 
     test "you get notified if the player server dies and the connection closes",
@@ -109,8 +108,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       :ok = :gen_tcp.send(socket, context.connection_request)
 
       assert_receive {:tcp, ^socket, msg}
+      assert %{"connection_id" => connection_id} = Jason.decode!(msg)
       [player_pid] = Registry.select(context.player_registry, [{{:_, :"$1", :_}, [], [:"$1"]}])
-      [{connection_pid, _}] = Registry.lookup(context.connection_registry, context.connection_id)
+      [{connection_pid, _}] = Registry.lookup(context.connection_registry, connection_id)
       Process.monitor(connection_pid)
       Process.exit(player_pid, :kill)
 
@@ -121,7 +121,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
     test "if you try to join as a bot that doesn't exist it fails", %{socket: socket} = context do
       bot_connect_req = encode(%{"token" => "FAKE", "lobby" => context.lobby.name})
-
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => "invalid_token"} = Jason.decode!(msg)
@@ -132,17 +131,11 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     setup context do
       for player <- [:p1, :p2] do
         {:ok, socket} = connect(context.port)
-        assert_receive {:tcp, ^socket, connection_msg}
-        %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
-
-        join_request =
-          encode(%{
-            "token" => context.bot.token,
-            "lobby" => context.lobby.name
-          })
+        join_request = encode(%{"token" => context.bot.token, "lobby" => context.lobby.name})
 
         :ok = :gen_tcp.send(socket, join_request)
-        assert_receive {:tcp, ^socket, _bot_connect_msg}
+        assert_receive {:tcp, ^socket, msg}
+        %{"connection_id" => connection_id} = Jason.decode!(msg)
 
         {player, %{socket: socket, connection_id: connection_id}}
       end
@@ -191,13 +184,10 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     setup context do
       for player <- [:p1, :p2] do
         {:ok, socket} = connect(context.port)
-        assert_receive {:tcp, ^socket, connection_msg}
-        %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
-
         join_request = encode(%{"token" => context.bot.token, "lobby" => context.lobby.name})
-
         :ok = :gen_tcp.send(socket, join_request)
-        assert_receive {:tcp, ^socket, _bot_connect_msg}
+        assert_receive {:tcp, ^socket, msg}
+        %{"connection_id" => connection_id} = Jason.decode!(msg)
         :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
         assert_receive {:tcp, ^socket, msg}
         {player, %{socket: socket, connection_id: connection_id}}
@@ -278,13 +268,11 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       players =
         for player <- [:p1, :p2] do
           {:ok, socket} = connect(context.port)
-          assert_receive {:tcp, ^socket, connection_msg}
-          %{"connection_id" => connection_id} = Jason.decode!(connection_msg)
 
           join_request = encode(%{"token" => context.bot.token, "lobby" => context.lobby.name})
-
           :ok = :gen_tcp.send(socket, join_request)
-          assert_receive {:tcp, ^socket, _bot_connect_msg}
+          assert_receive {:tcp, ^socket, msg}
+          %{"connection_id" => connection_id} = Jason.decode!(msg)
           :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
           assert_receive {:tcp, ^socket, _info_msg}
           {player, %{socket: socket, connection_id: connection_id}}
