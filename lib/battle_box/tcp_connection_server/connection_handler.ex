@@ -26,7 +26,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     {:ok, socket} = :ranch.handshake(data.ranch_ref)
     data = Map.put(data, :socket, socket)
     :ok = data.transport.setopts(socket, active: :once, packet: 2, recbuf: 65536)
-    :ok = send_to_socket(data, initial_msg(data.connection_id))
     {:keep_state, data}
   end
 
@@ -188,9 +187,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     do: encode(%{info: "game_cancelled", game_id: game_id})
 
   defp status_msg(data, status),
-    do: encode(%{bot_id: data.bot.id, lobby: data.lobby_name, status: status})
-
-  defp initial_msg(connection_id), do: encode(%{connection_id: connection_id})
+    do:
+      encode(%{
+        bot_id: data.bot.id,
+        lobby: data.lobby_name,
+        status: status,
+        connection_id: data.connection_id
+      })
 
   defp initial_metadata,
     do: %{
