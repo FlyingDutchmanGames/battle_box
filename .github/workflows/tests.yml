@@ -28,6 +28,14 @@ jobs:
         elixir-version: 1.10.0
         otp-version: 22.2
     - name: Install Dependencies
-      run: MIX_ENV=test mix deps.get
+      env:
+        MIX_ENV: test
+      run: mix deps.get
     - name: Run Tests
+      env:
+        MIX_ENV: test
       run: mix test
+    - name: Check Formatted
+      env:
+        MIX_ENV: test
+      run: mix format --check-formatted
