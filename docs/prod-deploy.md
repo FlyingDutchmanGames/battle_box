@@ -92,9 +92,9 @@ mkdir /srv/battle_box
 chown battle_box:battle_box /srv/battle_box
 ```
 
-### Fill in These Values then add them to the `/etc/default/battle_box` file
+### Fill in These Values then add them to an env file
 
-```
+```base
 cat | envsubst > /etc/default/battle_box <<CONF
 BATTLE_BOX_HOST=$BATTLE_BOX_HOST
 BATTLE_BOX_SECRET_KEY_BASE=$FILL_ME_IN
@@ -185,4 +185,65 @@ stream {
   }
 }
 CONF
+```
+### Building the Image
+
+Setup SSH forwarding to grab the repo
+```
+https://developer.github.com/v3/guides/using-ssh-agent-forwarding/
+```
+
+Clone it 
+```
+git clone git@github.com:GrantJamesPowell/battle_box.git
+```
+
+Build the Image
+```
+root@botskreig:~/battle_box# docker build . -t battle_box:`git rev-parse HEAD`
+root@botskreig:~/battle_box# docker build . -t battle_box:master
+```
+
+### Setting the image to run as Service
+
+```
+mkdir /srv/battle_box
+```
+
+```
+cat > /etc/systemd/system/battle_box.service <<CONF
+[Unit]
+Description=BattleBox
+After=network.target
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/srv/battle_box
+EnvironmentFile=/etc/default/battle_box
+ExecStart=/usr/bin/docker run -p 4000 -p 4001 -p 4002 --network="host" --env-file=/etc/default/battle_box battle_box:master
+Restart=on-failure
+RestartSec=5
+Environment=LANG=en_US.UTF-8
+SyslogIdentifier=battle_box
+RemainAfterExit=no
+[Install]
+WantedBy=multi-user.target
+CONF
+```
+
+```
+systemctl enable battle_box.service
+```
+
+### To shell into the box
+
+```
+docker exec -it `docker ps | grep battle_box | awk '{print $1}'` /bin/bash
+```
+
+Once inside
+
+```
+./battle_box/bin/battle_box remote
 ```
