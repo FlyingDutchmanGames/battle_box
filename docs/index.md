@@ -1,24 +1,24 @@
-# Botskreig Documentation
+# Botskrieg Documentation
 
-## What is Botskreig?
+## What is Botskrieg?
 
-Botskreig is a platform for building, debugging, and fighting bots against other users in real time.
+Botskrieg is a platform for building, debugging, and fighting bots against other users in real time.
 
-Botskreig is written in [Elixir](https://elixir-lang.org/) on top of the `BattleBox` multiplayer game engine.
+Botskrieg is written in [Elixir](https://elixir-lang.org/) on top of the `BattleBox` multiplayer game engine.
 
 ## Getting Started
 
 ### Making an account
 
-Botskreig uses Github Login. Visit `https://botskreig.com/login` to get login to Botskreig with Github! Botskreig only requires public permissions and we'll never email you (we don't even get your email address from GitHub!)
+Botskrieg uses Github Login. Visit `https://botskrieg.com/login` to get login to Botskrieg with Github! Botskrieg only requires public permissions and we'll never email you (we don't even get your email address from GitHub!)
 
 ### Creating a Bot
 
-Create a bot by going to `https://botskreig.com/bots/new`. Make sure to save the token somewhere locally
+Create a bot by going to `https://botskrieg.com/bots/new`. Make sure to save the token somewhere locally
 
 ### Connecting to the server
 
-### Botskreig wire protocol
+### Botskrieg wire protocol
 
 ## Games
 
@@ -26,11 +26,11 @@ Create a bot by going to `https://botskreig.com/bots/new`. Make sure to save the
 
 ## Why build this?
 
-Botskreig is the classroom assignment I always wanted when I was learning to program. My goal with Botskreig is to give programming teachers a tool to build classroom assignments around.
+Botskrieg is the classroom assignment I always wanted when I was learning to program. My goal with Botskrieg is to give programming teachers a tool to build classroom assignments around.
 
 ## What is BattleBox?
 
-BattleBox is the Multiplayer Game Engine I wrote to support Botskreig.
+BattleBox is the Multiplayer Game Engine I wrote to support Botskrieg.
 
 The goals of BattleBox are as follows
 
@@ -50,7 +50,7 @@ My next game I'm working on is Texas Hold'em. I like it because it's different f
 
 I also like it for the following reasons
 
-1.) Computers haven't mastered it. Games like connect four or tic-tac-toe wouldn't be fun on Botskreig because you could write an AI that plays perfectly
+1.) Computers haven't mastered it. Games like connect four or tic-tac-toe wouldn't be fun on Botskrieg because you could write an AI that plays perfectly
 2.) There is an element of randomness
 3.) Most people know how to play it, and there is a large real life following
 
