@@ -34,8 +34,8 @@ app.botskrieg.com.	3588	IN	A	68.183.104.42
   A.) Port 22 (SSH)
   B.) Port 80 (HTTP to be redirected to HTTP 443)
   C.) Port 443 (HTTPS)
-  D.) Port 4001 (BattleBox TCP Connections)
-  E.) Port 4002 (BattleBox WS Connections)
+  D.) Port 4242 (BattleBox TCP Connections)
+  E.) Port 4243 (BattleBox WS Connections)
 4.) Go to Github and make a new Oauth App
   A.) Set the callback to `$BATTLE_BOX_HOST/auth/github/callback` (for me `https://app.botskrieg.com/auth/github/callback`)
 
@@ -53,8 +53,8 @@ export BATTLE_BOX_HOST=app.botskrieg.com
 ufw allow ssh/tcp
 ufw allow http/tcp
 ufw allow https/tcp
-ufw allow 4001
-ufw allow 4002
+ufw allow 4242
+ufw allow 4243
 ufw logging on
 yes | ufw enable
 ufw status
