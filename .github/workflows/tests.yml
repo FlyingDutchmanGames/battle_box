@@ -30,6 +30,4 @@ jobs:
     - name: Install Dependencies
       run: MIX_ENV=test mix deps.get
     - name: Run Tests
-      env:
-        PG_HOST: postgres
       run: mix test
