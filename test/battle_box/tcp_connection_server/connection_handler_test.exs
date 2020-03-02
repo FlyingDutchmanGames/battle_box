@@ -337,6 +337,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   end
 
   defp connect(port) do
-    :gen_tcp.connect(@ip, port, [:binary, active: true, packet: :line, recbuf: 65536])
+    :gen_tcp.connect(@ip, port, [:binary, active: true, packet: 2, recbuf: 65536])
   end
 end

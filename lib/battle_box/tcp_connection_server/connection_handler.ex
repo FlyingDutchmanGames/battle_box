@@ -25,7 +25,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   def handle_event(:internal, :initialize, :unauthed, data) do
     {:ok, socket} = :ranch.handshake(data.ranch_ref)
     data = Map.put(data, :socket, socket)
-    :ok = data.transport.setopts(socket, active: :once, packet: :line, recbuf: 65536)
+    :ok = data.transport.setopts(socket, active: :once, packet: 2, recbuf: 65536)
     :ok = send_to_socket(data, initial_msg(data.connection_id))
     {:keep_state, data}
   end
