@@ -40,6 +40,8 @@ Nice to Haves
 
 Done
 =======
+[x] Client starts the convo
+[x] Length framed messages
 [x] Github actions Spec Suite
 [x] Switch to dockerized production app
   [x] Create a prod docker file
