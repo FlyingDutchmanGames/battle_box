@@ -4,6 +4,9 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
   alias BattleBox.GameEngine.{MatchMaker, PlayerServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
+  @user_1_id Ecto.UUID.generate()
+  @user_2_id Ecto.UUID.generate()
+
   @player_1_id Ecto.UUID.generate()
   @player_2_id Ecto.UUID.generate()
 
@@ -26,6 +29,7 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
     %{
       init_opts_p1: %{
         player_id: @player_1_id,
+        user_id: @user_1_id,
         player_server_id: @player_1_server_id,
         lobby_name: lobby_name,
         connection: named_proxy(:p1_connection),
@@ -34,6 +38,7 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
       init_opts_p2: %{
         player_id: @player_2_id,
         player_server_id: @player_2_server_id,
+        user_id: @user_2_id,
         lobby_name: lobby_name,
         connection: named_proxy(:p2_connection),
         connection_id: Ecto.UUID.generate()
@@ -74,10 +79,10 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
        %{p1_server: p1, p2_server: p2} = context do
     assert Registry.count(context.player_registry) == 2
 
-    assert [{^p1, %{player_id: @player_1_id}}] =
+    assert [{^p1, %{player_id: @player_1_id, user_id: @user_1_id}}] =
              Registry.lookup(context.player_registry, context.init_opts_p1.player_server_id)
 
-    assert [{^p2, %{player_id: @player_2_id}}] =
+    assert [{^p2, %{player_id: @player_2_id, user_id: @user_2_id}}] =
              Registry.lookup(context.player_registry, context.init_opts_p2.player_server_id)
   end
 

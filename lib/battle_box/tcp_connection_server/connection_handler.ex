@@ -53,6 +53,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
               connection_id: data.connection_id,
               connection: self(),
               player_id: bot.id,
+              user_id: bot.user_id,
               lobby_name: lobby_name
             })} do
       Process.monitor(player_server)

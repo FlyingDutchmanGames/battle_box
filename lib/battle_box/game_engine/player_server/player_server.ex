@@ -21,7 +21,7 @@ defmodule BattleBox.GameEngine.PlayerServer do
 
   def start_link(
         %{names: _} = config,
-        %{connection: _, player_id: _, lobby_name: _, connection_id: _} = data
+        %{connection: _, player_id: _, user_id: _, lobby_name: _, connection_id: _} = data
       ) do
     data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
 
@@ -36,6 +36,7 @@ defmodule BattleBox.GameEngine.PlayerServer do
               %{
                 player_id: data.player_id,
                 lobby_id: lobby.id,
+                user_id: data.user_id,
                 connection_id: data.connection_id
               }}}
         )
@@ -75,8 +76,7 @@ defmodule BattleBox.GameEngine.PlayerServer do
   end
 
   def handle_event(:enter, _old_state, :game_acceptance, data) do
-    {:keep_state, data,
-     [{:state_timeout, data.lobby.game_acceptance_time_ms, :game_acceptance_timeout}]}
+    {:keep_state, data, [{:state_timeout, data.game_info.accept_time, :game_acceptance_timeout}]}
   end
 
   def handle_event(
