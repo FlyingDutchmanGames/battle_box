@@ -166,7 +166,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{
                "game_info" => %{
-                 "acceptance_time" => 2000,
                  "game_id" => <<_::288>> = game_id,
                  "player" => "player_" <> _
                },

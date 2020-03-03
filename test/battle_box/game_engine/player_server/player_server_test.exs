@@ -114,7 +114,7 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
   end
 
   test "if you wait too long to accept, the game is cancelled", context do
-    Lobby.changeset(context.lobby, %{game_acceptance_timeout_ms: 1})
+    Lobby.changeset(context.lobby, %{game_acceptance_time_ms: 1})
     |> Repo.update!()
 
     PlayerServer.reload_lobby(context.p1_server)
@@ -122,8 +122,8 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
     :ok = PlayerServer.match_make(context.p1_server)
     :ok = PlayerServer.match_make(context.p2_server)
     :ok = GameEngine.force_match_make(context.game_engine)
-    assert_receive {:p1_connection, {:game_request, %{game_id: game_id, acceptance_time: 1}}}
-    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id, acceptance_time: 1}}}
+    assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
     assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
     assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
   end
