@@ -28,7 +28,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   end
 
   setup do
-    {:ok, lobby} = Lobby.create(%{name: @lobby_name, game_type: RobotGame, user_id: @user_id})
+    {:ok, lobby} =
+      Lobby.create(%{
+        name: @lobby_name,
+        game_type: RobotGame,
+        user_id: @user_id,
+        move_time_minimum_ms: 1
+      })
 
     {:ok, bot} =
       Bot.changeset(%Bot{}, %{name: @bot_name, user_id: @user_id})

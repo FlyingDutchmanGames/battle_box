@@ -6,10 +6,8 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
 
   @user_1_id Ecto.UUID.generate()
   @user_2_id Ecto.UUID.generate()
-
   @player_1_id Ecto.UUID.generate()
   @player_2_id Ecto.UUID.generate()
-
   @player_1_server_id Ecto.UUID.generate()
   @player_2_server_id Ecto.UUID.generate()
 
@@ -20,7 +18,12 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
 
   setup do
     {:ok, lobby} =
-      Lobby.create(%{user_id: @player_1_id, name: "LOBBY NAME", game_type: RobotGame})
+      Lobby.create(%{
+        user_id: @player_1_id,
+        name: "LOBBY NAME",
+        game_type: RobotGame,
+        move_time_minimum_ms: 10
+      })
 
     %{lobby: lobby}
   end
@@ -131,6 +134,29 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
     assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
   end
 
+  test "Your moves aren't submitted until after the lobby.minimum_time", context do
+    Lobby.changeset(context.lobby, %{move_time_minimum_ms: 60})
+    |> Repo.update!()
+
+    :ok = PlayerServer.match_make(context.p1_server)
+    :ok = PlayerServer.match_make(context.p2_server)
+    :ok = GameEngine.force_match_make(context.game_engine)
+    assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
+    assert :ok = PlayerServer.accept_game(context.p1_server, game_id)
+    assert :ok = PlayerServer.accept_game(context.p2_server, game_id)
+    assert_receive {:p1_connection, {:moves_request, %{request_id: id1}}}
+    assert_receive {:p2_connection, {:moves_request, %{request_id: id2}}}
+    :ok = PlayerServer.submit_moves(context.p1_server, id1, [])
+    :ok = PlayerServer.submit_moves(context.p2_server, id2, [])
+    # We don't get asked for more moves for at least 50 ms
+    refute_receive {:p1_connection, {:moves_request, %{}}}, 50
+    refute_receive {:p2_connection, {:moves_request, %{}}}, 50
+    # Then we get asked for moves
+    assert_receive {:p1_connection, {:moves_request, %{}}}
+    assert_receive {:p2_connection, {:moves_request, %{}}}
+  end
+
   test "trying to accept or reject a game you're not currently watching yield :ok", context do
     assert :ok = PlayerServer.accept_game(context.p1_server, Ecto.UUID.generate())
     assert :ok = PlayerServer.reject_game(context.p1_server, Ecto.UUID.generate())
@@ -205,11 +231,6 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
 
       {:error, :invalid_moves_submission} =
         PlayerServer.submit_moves(context.p1_server, "INVALID", [])
-    end
-
-    test "Moves timeouts submit blank moves and send an error to the connection" do
-      # TODO:// not sure how to test this one yet, because the timeout comes from pretty deep in engine
-      # eventually it should be derived from the lobby settings
     end
 
     test "game server dies => game cancelled notification", %{game_id: game_id} = context do
