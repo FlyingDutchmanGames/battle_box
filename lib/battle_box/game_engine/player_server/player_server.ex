@@ -19,40 +19,35 @@ defmodule BattleBox.GameEngine.PlayerServer do
     GenStateMachine.call(player_server, {:submit_moves, move_id, moves}, timeout)
   end
 
-  def reload_lobby(player_server) do
-    GenStateMachine.cast(player_server, :reload_lobby)
-  end
-
   def start_link(
         %{names: _} = config,
         %{connection: _, player_id: _, lobby_name: _, connection_id: _} = data
       ) do
     data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
-    GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
-  end
 
-  def init(%{names: names, player_id: player_id} = data) do
     case Lobby.get_by_name(data.lobby_name) do
       %Lobby{} = lobby ->
         data = Map.put(data, :lobby, lobby)
 
-        Registry.register(names.player_registry, data.player_server_id, %{
-          player_id: player_id,
-          lobby_id: lobby.id,
-          connection_id: data.connection_id
-        })
-
-        Process.monitor(data.connection)
-        {:ok, :options, data}
+        GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
+          name:
+            {:via, Registry,
+             {config.names.player_registry, data.player_server_id,
+              %{
+                player_id: data.player_id,
+                lobby_id: lobby.id,
+                connection_id: data.connection_id
+              }}}
+        )
 
       nil ->
-        {:stop, :lobby_not_found}
+        {:error, :lobby_not_found}
     end
   end
 
-  def handle_event(:cast, :reload_lobby, _state, data) do
-    data = Map.put(data, :lobby, Lobby.get_by_id(data.lobby.id))
-    {:keep_state, data}
+  def init(%{connection: connection} = data) do
+    Process.monitor(connection)
+    {:ok, :options, data}
   end
 
   def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{connection: pid} = data) do

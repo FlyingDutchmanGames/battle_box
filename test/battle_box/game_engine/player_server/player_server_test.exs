@@ -117,8 +117,6 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
     Lobby.changeset(context.lobby, %{game_acceptance_time_ms: 1})
     |> Repo.update!()
 
-    PlayerServer.reload_lobby(context.p1_server)
-    PlayerServer.reload_lobby(context.p2_server)
     :ok = PlayerServer.match_make(context.p1_server)
     :ok = PlayerServer.match_make(context.p2_server)
     :ok = GameEngine.force_match_make(context.game_engine)
