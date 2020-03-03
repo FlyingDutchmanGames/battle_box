@@ -81,7 +81,7 @@ defmodule BattleBox.GameEngine.PlayerServer do
 
   def handle_event(:enter, _old_state, :game_acceptance, data) do
     {:keep_state, data,
-     [{:state_timeout, data.lobby.game_acceptance_timeout_ms, :game_acceptance_timeout}]}
+     [{:state_timeout, data.lobby.game_acceptance_time_ms, :game_acceptance_timeout}]}
   end
 
   def handle_event(
@@ -177,7 +177,6 @@ defmodule BattleBox.GameEngine.PlayerServer do
   def handle_event(:enter, _old_state, _state, _data), do: :keep_state_and_data
 
   defp setup_game(data, game_info) do
-    game_info = Map.put(game_info, :acceptance_time, data.lobby.game_acceptance_timeout_ms)
     game_monitor = Process.monitor(game_info.game_server)
     send(data.connection, {:game_request, game_info})
     data = Map.merge(data, %{game_info: game_info, game_monitor: game_monitor})

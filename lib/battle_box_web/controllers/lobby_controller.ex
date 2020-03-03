@@ -22,7 +22,7 @@ defmodule BattleBoxWeb.LobbyController do
       Map.merge(lobby, %{
         "user_id" => user.id,
         "game_type" => "robot_game",
-        "game_acceptance_timeout_ms" => 1000
+        "game_acceptance_time_ms" => 1000
       })
 
     case Lobby.create(params) do

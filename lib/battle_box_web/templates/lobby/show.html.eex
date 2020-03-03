@@ -2,6 +2,8 @@
   <div>Name: <%= @lobby.name %></div>
   <div>User: <%= @lobby.user_id %></div>
   <div>Game Type: <%= @lobby.game_type %></div>
-  <div>Game Acceptance Time (ms): <%= @lobby.game_acceptance_timeout_ms %></div>
+  <div>Game Acceptance Time (ms): <%= @lobby.game_acceptance_time_ms %></div>
+  <div>Minimum Move Time (ms): <%= @lobby.move_time_minimum_ms %></div>
+  <div>Maximum Move Time (ms): <%= @lobby.move_time_maximum_ms %></div>
 </div>
 
