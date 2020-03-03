@@ -173,8 +173,12 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
       :ok = PlayerServer.accept_game(context.p1_server, game_id)
       :ok = PlayerServer.accept_game(context.p2_server, game_id)
 
-      assert_receive {:p1_connection, {:moves_request, %{game_id: ^game_id, time: time}}}
-      assert_receive {:p2_connection, {:moves_request, %{game_id: ^game_id, time: ^time}}}
+      assert_receive {:p1_connection,
+                      {:moves_request, %{game_id: ^game_id, maximum_time: max, minimum_time: min}}}
+
+      assert_receive {:p2_connection,
+                      {:moves_request,
+                       %{game_id: ^game_id, maximum_time: ^max, minimum_time: ^min}}}
     end
   end
 
@@ -188,7 +192,6 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
 
       :ok = PlayerServer.accept_game(context.p1_server, game_id)
       :ok = PlayerServer.accept_game(context.p2_server, game_id)
-
       %{game_id: game_id, game_info: game_info}
     end
 

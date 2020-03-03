@@ -134,7 +134,7 @@ defmodule BattleBox.GameEngine.PlayerServer do
 
   def handle_event(:enter, :playing, :moves_request, %{moves_request: moves_request} = data) do
     send(data.connection, {:moves_request, moves_request})
-    {:keep_state, data, {:state_timeout, moves_request.time, :moves_timeout}}
+    {:keep_state, data, {:state_timeout, moves_request.maximum_time, :moves_timeout}}
   end
 
   def handle_event(
