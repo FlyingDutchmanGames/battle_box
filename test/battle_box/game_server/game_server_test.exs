@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.GameServerTest do
-  alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame}
+  alias BattleBox.{Game, Lobby, GameEngine, GameEngine.GameServer, Games.RobotGame}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
@@ -9,14 +9,18 @@ defmodule BattleBox.GameEngine.GameServerTest do
   end
 
   setup do
+    {:ok, lobby} =
+      Lobby.create(%{name: "TEST LOBBY", game_type: RobotGame, user_id: Ecto.UUID.generate()})
+
     %{
       init_opts: %{
         players: %{
           "player_1" => named_proxy(:player_1),
           "player_2" => named_proxy(:player_2)
         },
-        game: Game.new(robot_game: RobotGame.new())
-      }
+        game: Game.new(lobby: lobby, robot_game: RobotGame.new())
+      },
+      lobby: lobby
     }
   end
 
@@ -52,6 +56,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     expected = %{
       game_server: pid,
       game_id: game.id,
+      accept_time: 2000,
       settings: %{
         spawn_every: game.robot_game.settings.spawn_every,
         spawn_per_player: game.robot_game.settings.spawn_per_player,
@@ -115,11 +120,23 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
     assert_receive {:player_1,
                     {:moves_request,
-                     %{game_id: ^game_id, game_state: %{robots: [], turn: 0}, player: "player_1"}}}
+                     %{
+                       game_id: ^game_id,
+                       maximum_time: 1000,
+                       minimum_time: 250,
+                       game_state: %{robots: [], turn: 0},
+                       player: "player_1"
+                     }}}
 
     assert_receive {:player_2,
                     {:moves_request,
-                     %{game_id: ^game_id, game_state: %{robots: [], turn: 0}, player: "player_2"}}}
+                     %{
+                       game_id: ^game_id,
+                       maximum_time: 1000,
+                       minimum_time: 250,
+                       game_state: %{robots: [], turn: 0},
+                       player: "player_2"
+                     }}}
   end
 
   test "if you forefit, you get a game over message/ the other player wins", context do
@@ -149,7 +166,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
-    game = Game.new(robot_game: RobotGame.new(settings: %{max_turns: 10}))
+    game = Game.new(lobby: context.lobby, robot_game: RobotGame.new(settings: %{max_turns: 10}))
 
     {:ok, pid} = GameEngine.start_game(context.game_engine, %{context.init_opts | game: game})
 

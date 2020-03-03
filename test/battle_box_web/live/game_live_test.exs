@@ -1,19 +1,26 @@
 defmodule BattleBoxWeb.GameLiveTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame}
+  alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame, Lobby}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @game_id Ecto.UUID.generate()
 
-  test "it can display a game off disk", %{conn: conn} do
+  setup do
+    {:ok, lobby} =
+      Lobby.create(%{name: "TEST LOBBY", game_type: RobotGame, user_id: Ecto.UUID.generate()})
+
+    %{lobby: lobby}
+  end
+
+  test "it can display a game off disk", %{conn: conn} = context do
     robot_game =
       RobotGame.new()
       |> RobotGame.complete_turn()
       |> RobotGame.complete_turn()
 
     {:ok, %{id: id}} =
-      Game.new(robot_game: robot_game)
+      Game.new(lobby: context.lobby, robot_game: robot_game)
       |> Game.persist()
 
     {:ok, _view, html} = live(conn, "/games/#{id}")
@@ -31,14 +38,14 @@ defmodule BattleBoxWeb.GameLiveTest do
       on_exit(fn -> GameEngineProvider.reset!() end)
     end
 
-    setup %{game_engine: game_engine} do
+    setup %{game_engine: game_engine, lobby: lobby} do
       {:ok, pid} =
         GameEngine.start_game(game_engine, %{
           players: %{
             "player_1" => named_proxy(:player_1),
             "player_2" => named_proxy(:player_2)
           },
-          game: Game.new(id: @game_id, robot_game: RobotGame.new())
+          game: Game.new(id: @game_id, lobby: lobby, robot_game: RobotGame.new())
         })
 
       :ok = GameServer.accept_game(pid, "player_1")

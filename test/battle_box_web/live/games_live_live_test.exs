@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.GamesLiveLiveTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame}
+  alias BattleBox.{Lobby, Game, GameEngine, GameEngine.GameServer, Games.RobotGame}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @game_id Ecto.UUID.generate()
@@ -21,13 +21,16 @@ defmodule BattleBoxWeb.GamesLiveLiveTest do
     end
 
     setup %{game_engine: game_engine} do
+      {:ok, lobby} =
+        Lobby.create(%{name: "TEST LOBBY", game_type: RobotGame, user_id: Ecto.UUID.generate()})
+
       {:ok, pid} =
         GameEngine.start_game(game_engine, %{
           players: %{
             "player_1" => named_proxy(:player_1),
             "player_2" => named_proxy(:player_2)
           },
-          game: Game.new(id: @game_id, robot_game: RobotGame.new())
+          game: Game.new(id: @game_id, lobby: lobby, robot_game: RobotGame.new())
         })
 
       :ok = GameServer.accept_game(pid, "player_1")
