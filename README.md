@@ -4,6 +4,7 @@
 
 V1
 ====
+[ ] Deal with move timeouts
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] historical games page
   [x] Get something in the page
