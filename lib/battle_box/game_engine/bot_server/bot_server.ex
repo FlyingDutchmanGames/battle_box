@@ -41,7 +41,7 @@ defmodule BattleBox.GameEngine.BotServer do
   end
 
   def handle_event({:call, from}, :match_make, :options, data) do
-    :ok = MatchMaker.join_queue(data.names.game_engine, data.lobby.id, data.bot_id)
+    :ok = MatchMaker.join_queue(data.names.game_engine, data.lobby.id, data.bot.id)
     {:next_state, :match_making, data, {:reply, from, :ok}}
   end
 

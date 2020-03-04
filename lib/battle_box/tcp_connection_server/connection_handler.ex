@@ -54,7 +54,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
          }) do
       {:ok, bot_server, %{user_id: user_id}} ->
         Process.monitor(bot_server)
-        data = Map.put(data, :user_id, user_id)
+        data = Map.merge(data, %{user_id: user_id, bot_server: bot_server})
         :ok = send_to_socket(data, status_msg(data, :idle))
         {:next_state, :idle, data}
 
@@ -140,7 +140,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   def handle_event(:enter, _old_state, new_state, %{connection_id: id, names: names} = data) do
-    metadata = %{status: new_state, game_id: data[:game_info][:game_id]}
+    metadata = %{status: new_state, game_id: data[:game_info][:game_id], user_id: data[:user_id]}
     {_, _} = Registry.update_value(names.connection_registry, id, &Map.merge(&1, metadata))
     :keep_state_and_data
   end

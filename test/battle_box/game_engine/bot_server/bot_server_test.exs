@@ -1,13 +1,10 @@
 defmodule BattleBox.GameEngine.BotServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{GameEngine, Repo, Lobby, Games.RobotGame}
+  alias BattleBox.{GameEngine, Repo, Bot, Lobby, Games.RobotGame}
   alias BattleBox.GameEngine.{MatchMaker, BotServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
-  @bot_1_id Ecto.UUID.generate()
-  @bot_2_id Ecto.UUID.generate()
-  @user_1_id Ecto.UUID.generate()
-  @user_2_id Ecto.UUID.generate()
+  @user_id Ecto.UUID.generate()
   @bot_1_server_id Ecto.UUID.generate()
   @bot_2_server_id Ecto.UUID.generate()
 
@@ -17,41 +14,43 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   setup do
+    {:ok, bot} =
+      Bot.create(%{
+        user_id: @user_id,
+        name: "BOT_NAME"
+      })
+
     {:ok, lobby} =
       Lobby.create(%{
-        user_id: @user_1_id,
+        user_id: @user_id,
         name: "LOBBY NAME",
         game_type: RobotGame,
         move_time_minimum_ms: 10
       })
 
-    %{lobby: lobby}
+    %{lobby: lobby, bot: bot}
   end
 
-  setup %{lobby: %{name: lobby_name}} do
+  setup %{lobby: lobby, bot: bot} do
     %{
       init_opts_p1: %{
-        bot_id: @bot_1_id,
-        user_id: @user_1_id,
         bot_server_id: @bot_1_server_id,
-        lobby_name: lobby_name,
-        connection: named_proxy(:p1_connection),
-        connection_id: Ecto.UUID.generate()
+        bot: bot,
+        lobby: lobby,
+        connection: named_proxy(:p1_connection)
       },
       init_opts_p2: %{
-        bot_id: @bot_2_id,
         bot_server_id: @bot_2_server_id,
-        user_id: @user_2_id,
-        lobby_name: lobby_name,
-        connection: named_proxy(:p2_connection),
-        connection_id: Ecto.UUID.generate()
+        bot: bot,
+        lobby: lobby,
+        connection: named_proxy(:p2_connection)
       }
     }
   end
 
   setup context do
-    {:ok, p1_server} = GameEngine.start_bot(context.game_engine, context.init_opts_p1)
-    {:ok, p2_server} = GameEngine.start_bot(context.game_engine, context.init_opts_p2)
+    {:ok, p1_server, _} = GameEngine.start_bot(context.game_engine, context.init_opts_p1)
+    {:ok, p2_server, _} = GameEngine.start_bot(context.game_engine, context.init_opts_p2)
     Process.monitor(p1_server)
     Process.monitor(p2_server)
     %{p1_server: p1_server, p2_server: p2_server}
@@ -65,8 +64,9 @@ defmodule BattleBox.GameEngine.BotServerTest do
   test "its an error to ask to join a lobby that doesn't exist", context do
     assert {:error, :lobby_not_found} =
              GameEngine.start_bot(context.game_engine, %{
-               context.init_opts_p1
-               | lobby_name: "FAKE"
+               lobby_name: "FAKE",
+               token: context.bot.token,
+               connection: self()
              })
   end
 
@@ -79,23 +79,24 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   test "the player server registers in the player server registry",
-       %{p1_server: p1, p2_server: p2} = context do
+       %{p1_server: p1, p2_server: p2, bot: bot, lobby: lobby} = context do
     assert Registry.count(context.bot_registry) == 2
 
-    assert [{^p1, %{bot_id: @bot_1_id, user_id: @user_1_id}}] =
+    assert [{^p1, %{bot: ^bot, lobby: ^lobby}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)
 
-    assert [{^p2, %{bot_id: @bot_2_id, user_id: @user_2_id}}] =
+    assert [{^p2, %{bot: ^bot, lobby: ^lobby}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p2.bot_server_id)
   end
 
   describe "Matchmaking in a lobby" do
-    test "You can ask the player server to match_make", %{p1_server: p1} = context do
+    test "You can ask the player server to match_make",
+         %{p1_server: p1, bot: %{id: bot_id}} = context do
       assert [] == MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
 
       :ok = BotServer.match_make(context.p1_server)
 
-      assert [%{bot_id: @bot_1_id, pid: ^p1}] =
+      assert [%{bot_id: ^bot_id, pid: ^p1}] =
                MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
     end
 

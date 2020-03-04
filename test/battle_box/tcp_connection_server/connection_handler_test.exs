@@ -82,24 +82,15 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       %{socket: socket}
     end
 
-    test "you can join", %{socket: socket, bot: %{id: id, token: token}} = context do
+    test "you can join", %{socket: socket, bot: %{token: token}} = context do
       bot_connect_req = encode(%{"token" => token, "lobby" => @lobby_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
 
-      assert %{
-               "bot_id" => ^id,
-               "lobby" => @lobby_name,
-               "status" => "idle",
-               "connection_id" => connection_id
-             } = Jason.decode!(msg)
+      assert %{"status" => "idle", "connection_id" => connection_id} = Jason.decode!(msg)
 
-      assert %{
-               status: :idle,
-               bot_id: ^id,
-               user_id: @user_id
-             } = get_connection(context.game_engine, connection_id)
+      assert %{status: :idle, user_id: @user_id} = get_connection(context.game_engine, connection_id)
     end
 
     test "trying to join a lobby that doesn't exist is an error", %{socket: socket, bot: bot} do

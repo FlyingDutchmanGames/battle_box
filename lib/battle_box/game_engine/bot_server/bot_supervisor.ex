@@ -27,16 +27,8 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     end
   end
 
-  def start_bot(
-        bot_supervisor,
-        %{lobby: %Lobby{} = lobby, bot: %Bot{} = bot, connection: connection}
-      ) do
-    {:ok, bot_server} =
-      DynamicSupervisor.start_child(
-        bot_supervisor,
-        {BotServer, %{bot: bot, lobby: lobby, connnection: connection}}
-      )
-
+  def start_bot(bot_supervisor, %{lobby: %Lobby{}, bot: %Bot{} = bot, connection: _} = opts) do
+    {:ok, bot_server} = DynamicSupervisor.start_child(bot_supervisor, {BotServer, opts})
     {:ok, bot_server, %{user_id: bot.user_id}}
   end
 
