@@ -9,17 +9,17 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     {:ok, GameEngine.names(name)}
   end
 
+  setup do
+    {:ok, bot} = Bot.create(%{name: "FOO", user_id: @user_id})
+    {:ok, lobby} = Lobby.create(%{name: "BAR", user_id: @user_id, game_type: "robot_game"})
+    %{lobby: lobby, bot: bot}
+  end
+
   test "you can start the supervisor server", %{bot_supervisor: bot_supervisor} do
     assert Process.whereis(bot_supervisor) |> Process.alive?()
   end
 
   describe "starting a bot" do
-    setup do
-      {:ok, bot} = Bot.create(%{name: "FOO", user_id: @user_id})
-      {:ok, lobby} = Lobby.create(%{name: "BAR", user_id: @user_id, game_type: "robot_game"})
-      %{lobby: lobby, bot: bot}
-    end
-
     test "you can start a bot with a lobby name and a token", context do
       assert {:ok, server, %{user_id: @user_id}} =
                BotSupervisor.start_bot(context.bot_supervisor, %{
@@ -64,6 +64,47 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                  context.bot_registry,
                  Ecto.UUID.generate()
                )
+    end
+
+    test "it will not return the bots for a different user", context do
+      assert {:ok, server1, %{user_id: @user_id}} =
+               BotSupervisor.start_bot(context.bot_supervisor, %{
+                 lobby: context.lobby,
+                 bot: context.bot,
+                 connection: self()
+               })
+
+      assert [] ==
+               BotSupervisor.get_bot_servers_with_user_id(
+                 context.bot_registry,
+                 Ecto.UUID.generate()
+               )
+    end
+
+    test "getting by user will return the bots for a user", %{bot: bot, lobby: lobby} = context do
+      assert {:ok, server1, %{user_id: @user_id}} =
+               BotSupervisor.start_bot(context.bot_supervisor, %{
+                 lobby: lobby,
+                 bot: bot,
+                 connection: self()
+               })
+
+      assert {:ok, server2, %{user_id: @user_id}} =
+               BotSupervisor.start_bot(context.bot_supervisor, %{
+                 lobby: lobby,
+                 bot: bot,
+                 connection: self()
+               })
+
+      assert [
+               %{bot: ^bot, lobby: ^lobby, pid: pid1},
+               %{bot: ^bot, lobby: ^lobby, pid: pid2}
+             ] =
+               BotSupervisor.get_bot_servers_with_user_id(context.bot_registry, @user_id)
+               |> Enum.sort()
+
+      assert pid1 in [server1, server2]
+      assert pid2 in [server1, server2]
     end
   end
 end

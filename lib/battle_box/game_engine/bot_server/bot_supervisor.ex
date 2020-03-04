@@ -47,12 +47,12 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
   # these match specs could be much more concisely written if `:'$_'` was available
 
   defp matches_user_id(user_id) do
-    # :ets.fun2ms(fn {bot_server_id, pid, attrs} when :erlang.map_get(:erlang.map_get(attrs, :bot), :user_id) == 2 ->
+    # :ets.fun2ms(fn {bot_server_id, pid, attrs} when :erlang.map_get(:user_id, :erlang.map_get(:bot, attrs)) == 2 ->
     #   {bot_server_id, pid, attrs}
     # end)
 
     [
-      {{:"$1", :"$2", :"$3"}, [{:==, {:map_get, {:map_get, :"$3", :bot}, :user_id}, user_id}],
+      {{:"$1", :"$2", :"$3"}, [{:==, {:map_get, :user_id, {:map_get, :bot, :"$3"}}, user_id}],
        [{{:"$1", :"$2", :"$3"}}]}
     ]
   end
