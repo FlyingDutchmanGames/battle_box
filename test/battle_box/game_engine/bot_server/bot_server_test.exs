@@ -207,6 +207,23 @@ defmodule BattleBox.GameEngine.BotServerTest do
     end
   end
 
+  test "waiting too long to send moves will cause the bot server to send you a timeout", context do
+    Lobby.changeset(context.lobby, %{move_time_minimum_ms: 1, move_time_maximum_ms: 2})
+    |> Repo.update!()
+
+    :ok = BotServer.match_make(context.p1_server)
+    :ok = BotServer.match_make(context.p2_server)
+    :ok = GameEngine.force_match_make(context.game_engine)
+    assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
+    :ok = BotServer.accept_game(context.p1_server, game_id)
+    :ok = BotServer.accept_game(context.p2_server, game_id)
+    assert_receive {:p1_connection, {:moves_request, %{request_id: request_id}}}
+    assert_receive {:p1_connection, {:moves_request_timeout, ^request_id}}
+    assert_receive {:p2_connection, {:moves_request, %{request_id: request_id}}}
+    assert_receive {:p2_connection, {:moves_request_timeout, ^request_id}}
+  end
+
   describe "playing a game!" do
     setup context do
       :ok = BotServer.match_make(context.p1_server)
@@ -231,6 +248,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
       {:error, :invalid_moves_submission} =
         BotServer.submit_moves(context.p1_server, "INVALID", [])
     end
+
 
     test "game server dies => game cancelled notification", %{game_id: game_id} = context do
       # Bot 1 in the "playing" state after submitting his moves
