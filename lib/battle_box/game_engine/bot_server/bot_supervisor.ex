@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
   use DynamicSupervisor
-  alias BattleBox.GameEngine.BotServer
+  alias BattleBox.{Bot, Lobby, GameEngine.BotServer}
 
   def start_link(%{names: names} = opts) do
     DynamicSupervisor.start_link(__MODULE__, opts, name: names.bot_supervisor)
@@ -11,8 +11,33 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one, extra_arguments: [init_arg])
   end
 
-  def start_bot(bot_supervisor, %{connection: _} = opts) do
-    DynamicSupervisor.start_child(bot_supervisor, {BotServer, opts})
+  def start_bot(
+        bot_supervisor,
+        %{connection: connection, lobby_name: lobby_name, token: token}
+      ) do
+    with {:lobby, %Lobby{} = lobby} <- {:lobby, Lobby.get_by_name(lobby_name)},
+         {:bot, %Bot{} = bot} <- {:bot, Bot.get_by_token(token)} do
+      start_bot(bot_supervisor, %{connection: connection, bot: bot, lobby: lobby})
+    else
+      {:bot, nil} ->
+        {:error, :invalid_token}
+
+      {:lobby, nil} ->
+        {:error, :lobby_not_found}
+    end
+  end
+
+  def start_bot(
+        bot_supervisor,
+        %{lobby: %Lobby{} = lobby, bot: %Bot{} = bot, connection: connection}
+      ) do
+    {:ok, bot_server} =
+      DynamicSupervisor.start_child(
+        bot_supervisor,
+        {BotServer, %{bot: bot, lobby: lobby, connnection: connection}}
+      )
+
+    {:ok, bot_server, %{user_id: bot.user_id}}
   end
 
   def bot_servers_with_connection_id(bot_registry, connection_id) do

@@ -1,6 +1,5 @@
 defmodule BattleBox.GameEngine.BotServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.Lobby
   alias BattleBox.GameEngine.{MatchMaker, GameServer}
 
   def accept_game(bot_server, game_id, timeout \\ 5000) do
@@ -21,29 +20,15 @@ defmodule BattleBox.GameEngine.BotServer do
 
   def start_link(
         %{names: _} = config,
-        %{connection: _, bot_id: _, user_id: _, lobby_name: _, connection_id: _} = data
+        %{connection: _, bot: bot, lobby: lobby} = data
       ) do
     data = Map.put_new(data, :bot_server_id, Ecto.UUID.generate())
 
-    case Lobby.get_by_name(data.lobby_name) do
-      %Lobby{} = lobby ->
-        data = Map.put(data, :lobby, lobby)
-
-        GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
-          name:
-            {:via, Registry,
-             {config.names.bot_registry, data.bot_server_id,
-              %{
-                bot_id: data.bot_id,
-                lobby_id: lobby.id,
-                user_id: data.user_id,
-                connection_id: data.connection_id
-              }}}
-        )
-
-      nil ->
-        {:error, :lobby_not_found}
-    end
+    GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
+      name:
+        {:via, Registry,
+         {config.names.bot_registry, data.bot_server_id, %{bot: bot, lobby: lobby}}}
+    )
   end
 
   def init(%{connection: connection} = data) do

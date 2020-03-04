@@ -1,6 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.{Bot, GameEngine, GameEngine.BotServer}
+  alias BattleBox.{GameEngine, GameEngine.BotServer}
   import BattleBox.TcpConnectionServer.Message
   @behaviour :ranch_protocol
 
@@ -46,27 +46,23 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   def handle_event(:internal, %{"token" => token, "lobby" => lobby_name}, :unauthed, data) do
-    with {:bot, bot} when not is_nil(bot) <- {:bot, Bot.get_by_token(token)},
-         {:bot_server, {:ok, bot_server}} <-
-           {:bot_server,
-            GameEngine.start_bot(data.names.game_engine, %{
-              connection_id: data.connection_id,
-              connection: self(),
-              bot_id: bot.id,
-              user_id: bot.user_id,
-              lobby_name: lobby_name
-            })} do
-      Process.monitor(bot_server)
+    case GameEngine.start_bot(data.names.game_engine, %{
+           token: token,
+           lobby_name: lobby_name,
+           connection: self(),
+           connection_id: data.connection_id
+         }) do
+      {:ok, bot_server, %{user_id: user_id}} ->
+        Process.monitor(bot_server)
+        data = Map.put(data, :user_id, user_id)
+        :ok = send_to_socket(data, status_msg(data, :idle))
+        {:next_state, :idle, data}
 
-      data = Map.merge(data, %{bot: bot, bot_server: bot_server, lobby_name: lobby_name})
-      :ok = send_to_socket(data, status_msg(data, :idle))
-      {:next_state, :idle, data}
-    else
-      {:bot, nil} ->
+      {:error, :invalid_token} ->
         :ok = send_to_socket(data, encode_error("invalid_token"))
         :keep_state_and_data
 
-      {:bot_server, {:error, :lobby_not_found}} ->
+      {:error, :lobby_not_found} ->
         :ok = send_to_socket(data, encode_error("lobby_not_found"))
         :keep_state_and_data
     end
@@ -145,16 +141,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
   def handle_event(:enter, _old_state, new_state, %{connection_id: id, names: names} = data) do
     metadata = %{status: new_state, game_id: data[:game_info][:game_id]}
-
-    metadata =
-      case data[:bot] do
-        %Bot{id: bot_id, user_id: user_id} ->
-          Map.merge(metadata, %{bot_id: bot_id, user_id: user_id})
-
-        _ ->
-          metadata
-      end
-
     {_, _} = Registry.update_value(names.connection_registry, id, &Map.merge(&1, metadata))
     :keep_state_and_data
   end
@@ -188,19 +174,12 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     do: encode(%{info: "game_cancelled", game_id: game_id})
 
   defp status_msg(data, status),
-    do:
-      encode(%{
-        bot_id: data.bot.id,
-        lobby: data.lobby_name,
-        status: status,
-        connection_id: data.connection_id
-      })
+    do: encode(%{status: status, connection_id: data.connection_id})
 
   defp initial_metadata,
     do: %{
       game_id: nil,
       user_id: nil,
-      bot_id: nil,
       status: :unauthed,
       started_at: DateTime.utc_now()
     }
