@@ -134,7 +134,13 @@ defmodule BattleBox.GameEngine.PlayerServer do
 
   def handle_event(:enter, :playing, :moves_request, %{moves_request: moves_request} = data) do
     send(data.connection, {:moves_request, moves_request})
-    {:keep_state, data, {:state_timeout, moves_request.maximum_time, :moves_timeout}}
+    data = Map.put(data, :min_time_met, false)
+
+    {:keep_state, data,
+     [
+       {{:timeout, :min_time}, moves_request.minimum_time, :min_time},
+       {{:timeout, :max_time}, moves_request.maximum_time, :max_time}
+     ]}
   end
 
   def handle_event(
@@ -143,20 +149,37 @@ defmodule BattleBox.GameEngine.PlayerServer do
         :moves_request,
         %{moves_request: %{request_id: id}} = data
       ) do
-    :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, moves)
-    data = Map.drop(data, [:moves_request])
-    {:next_state, :playing, data, {:reply, from, :ok}}
+    if data[:min_time_met] do
+      data = submit_moves_to_game_server(data, moves)
+
+      {:next_state, :playing, data,
+       [
+         {:reply, from, :ok},
+         {{:timeout, :min_time}, :cancel},
+         {{:timeout, :max_time}, :cancel}
+       ]}
+    else
+      {:keep_state, Map.put(data, :moves, moves), {:reply, from, :ok}}
+    end
+  end
+
+  def handle_event({:timeout, :min_time}, :min_time, :moves_request, %{moves: moves} = data) do
+    data = submit_moves_to_game_server(data, moves)
+    {:next_state, :playing, data, {{:timeout, :max_time}, :cancel}}
+  end
+
+  def handle_event({:timeout, :min_time}, :min_time, :moves_request, data) do
+    {:keep_state, Map.put(data, :min_time_met, true)}
+  end
+
+  def handle_event({:timeout, :max_time}, :max_time, :moves_request, data) do
+    send(data.connection, {:moves_request_timeout, data.moves_request.request_id})
+    data = submit_moves_to_game_server(data, [])
+    {:next_state, :playing, data}
   end
 
   def handle_event({:call, from}, {:submit_moves, _, _}, _, _),
     do: {:keep_state_and_data, {:reply, from, {:error, :invalid_moves_submission}}}
-
-  def handle_event(:state_timemout, :moves_timeout, :moves_request, data) do
-    send(data.connection, {:moves_request_timeout, data.moves_request.request_id})
-    :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, [])
-    data = Map.drop(data, :moves_request)
-    {:next_state, :playing, data}
-  end
 
   def handle_event(
         :info,
@@ -185,4 +208,9 @@ defmodule BattleBox.GameEngine.PlayerServer do
   end
 
   defp teardown_game(_game_id, data), do: {:ok, data}
+
+  defp submit_moves_to_game_server(data, moves) do
+    :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, moves)
+    Map.drop(data, [:moves, :moves_request, :min_time_met])
+  end
 end
