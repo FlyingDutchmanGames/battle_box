@@ -1,9 +1,18 @@
 <script>window.useLiveView = true</script>
+<% bot_servers_by_bot = Enum.group_by(@bot_servers, fn bot_server -> bot_server.bot.id end) %>
 <h1>User: <%= @user.github_login_name %></h1>
 <div class="bots">
   <%= for bot <- @bots do %>
     <div class="bot">
       <div>Name: <%= bot.name %></div>
+      <div class="bot-servers">
+        <%= for bot_server <- Map.get(bot_servers_by_bot, bot.id, []) do %>
+          <div class="bot-server">
+            <div>ID: <%= bot_server.bot_server_id %></div>
+            <div>Lobby <%= bot_server.lobby.name %></div>
+          </div>
+        <% end %>
+      </div>
     </div>
   <% end %>
 </div>
