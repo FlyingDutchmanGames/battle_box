@@ -135,7 +135,7 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
   end
 
   test "Your moves aren't submitted until after the lobby.minimum_time", context do
-    Lobby.changeset(context.lobby, %{move_time_minimum_ms: 60})
+    Lobby.changeset(context.lobby, %{move_time_minimum_ms: 30})
     |> Repo.update!()
 
     :ok = PlayerServer.match_make(context.p1_server)
@@ -150,8 +150,7 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
     :ok = PlayerServer.submit_moves(context.p1_server, id1, [])
     :ok = PlayerServer.submit_moves(context.p2_server, id2, [])
     # We don't get asked for more moves for at least 50 ms
-    refute_receive {:p1_connection, {:moves_request, %{}}}, 50
-    refute_receive {:p2_connection, {:moves_request, %{}}}, 50
+    refute_receive {_, {:moves_request, %{}}}, 30
     # Then we get asked for moves
     assert_receive {:p1_connection, {:moves_request, %{}}}
     assert_receive {:p2_connection, {:moves_request, %{}}}
