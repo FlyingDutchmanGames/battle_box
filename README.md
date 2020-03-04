@@ -4,9 +4,10 @@
 
 V1
 ====
-[ ] Bots Live Page
-  [ ] Show a user's bots
+[x] Bots Live Page
+  [x] Show a user's bots
   [ ] Show the bot servers active for each bot
+  [ ] Show recent games for each bot
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
