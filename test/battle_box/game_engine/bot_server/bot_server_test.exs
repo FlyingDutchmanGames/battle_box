@@ -61,15 +61,6 @@ defmodule BattleBox.GameEngine.BotServerTest do
     assert Process.alive?(context.p2_server)
   end
 
-  test "its an error to ask to join a lobby that doesn't exist", context do
-    assert {:error, :lobby_not_found} =
-             GameEngine.start_bot(context.game_engine, %{
-               lobby_name: "FAKE",
-               token: context.bot.token,
-               connection: self()
-             })
-  end
-
   test "The player server dies if the connection dies", %{p1_server: p1} = context do
     Process.flag(:trap_exit, true)
     p1_conn = context.init_opts_p1.connection

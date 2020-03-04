@@ -90,7 +90,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{"status" => "idle", "connection_id" => connection_id} = Jason.decode!(msg)
 
-      assert %{status: :idle, user_id: @user_id} = get_connection(context.game_engine, connection_id)
+      assert %{status: :idle, user_id: @user_id} =
+               get_connection(context.game_engine, connection_id)
     end
 
     test "trying to join a lobby that doesn't exist is an error", %{socket: socket, bot: bot} do
