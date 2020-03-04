@@ -5,6 +5,8 @@
 V1
 ====
 [ ] Deal with move timeouts
+  [ ] We should tell people when they miss a timeout?
+[ ] Bot Server Registry Improvements
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] historical games page
   [x] Get something in the page
@@ -18,8 +20,8 @@ V1
 [ ] Lobby settings passed correctly
   [ ] bot self play allowed toggle
   [ ] user self play allowed toggle
-  [ ] Delay moves until alloted time/submit as fast as possible setting
-  [ ] write move timeout ms onto the lobby settings
+  [x] Delay moves until alloted time/submit as fast as possible setting
+  [x] write move timeout ms onto the lobby settings
 [ ] players > 2 game mode / sequential turn mode
 [ ] Bot Info Page
 [ ] BattleBox Elixir Client
@@ -35,7 +37,7 @@ Nice to Haves
 [ ] A decent bot implmentation for testing
 [ ] Connection Debugger (this has some issues due to amount of messages...)
 [ ] Element Storybook
-[ ] Conncurrent connection limiter
+[ ] Concurrent connection limiter
 [ ] Downloads controller, and `as_downloadable` as part of the game protocol
 [ ] Google Analytics on the github page
 
