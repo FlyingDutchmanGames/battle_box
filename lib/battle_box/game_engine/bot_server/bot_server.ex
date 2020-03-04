@@ -1,29 +1,29 @@
-defmodule BattleBox.GameEngine.PlayerServer do
+defmodule BattleBox.GameEngine.BotServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   alias BattleBox.Lobby
   alias BattleBox.GameEngine.{MatchMaker, GameServer}
 
-  def accept_game(player_server, game_id, timeout \\ 5000) do
-    GenStateMachine.call(player_server, {:accept_game, game_id}, timeout)
+  def accept_game(bot_server, game_id, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:accept_game, game_id}, timeout)
   end
 
-  def reject_game(player_server, game_id, timeout \\ 5000) do
-    GenStateMachine.call(player_server, {:reject_game, game_id}, timeout)
+  def reject_game(bot_server, game_id, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:reject_game, game_id}, timeout)
   end
 
-  def match_make(player_server, timeout \\ 5000) do
-    GenStateMachine.call(player_server, :match_make, timeout)
+  def match_make(bot_server, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, :match_make, timeout)
   end
 
-  def submit_moves(player_server, move_id, moves, timeout \\ 5000) do
-    GenStateMachine.call(player_server, {:submit_moves, move_id, moves}, timeout)
+  def submit_moves(bot_server, move_id, moves, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:submit_moves, move_id, moves}, timeout)
   end
 
   def start_link(
         %{names: _} = config,
-        %{connection: _, player_id: _, user_id: _, lobby_name: _, connection_id: _} = data
+        %{connection: _, bot_id: _, user_id: _, lobby_name: _, connection_id: _} = data
       ) do
-    data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
+    data = Map.put_new(data, :bot_server_id, Ecto.UUID.generate())
 
     case Lobby.get_by_name(data.lobby_name) do
       %Lobby{} = lobby ->
@@ -32,9 +32,9 @@ defmodule BattleBox.GameEngine.PlayerServer do
         GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
           name:
             {:via, Registry,
-             {config.names.player_registry, data.player_server_id,
+             {config.names.bot_registry, data.bot_server_id,
               %{
-                player_id: data.player_id,
+                bot_id: data.bot_id,
                 lobby_id: lobby.id,
                 user_id: data.user_id,
                 connection_id: data.connection_id
@@ -60,7 +60,7 @@ defmodule BattleBox.GameEngine.PlayerServer do
   end
 
   def handle_event({:call, from}, :match_make, :options, data) do
-    :ok = MatchMaker.join_queue(data.names.game_engine, data.lobby.id, data.player_id)
+    :ok = MatchMaker.join_queue(data.names.game_engine, data.lobby.id, data.bot_id)
     {:next_state, :match_making, data, {:reply, from, :ok}}
   end
 

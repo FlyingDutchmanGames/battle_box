@@ -4,9 +4,9 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   import BattleBox.GameEngine.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
-  @player_1_id Ecto.UUID.generate()
-  @player_2_id Ecto.UUID.generate()
-  @player_3_id Ecto.UUID.generate()
+  @bot_1_id Ecto.UUID.generate()
+  @bot_2_id Ecto.UUID.generate()
+  @bot_3_id Ecto.UUID.generate()
 
   setup do
     {:ok, lobby} =
@@ -25,7 +25,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
 
   test "one player means no matches", %{lobby: lobby} do
     player_1_pid = named_proxy(:player_1)
-    matches = make_matches([%{player_id: @player_1_id, pid: player_1_pid}], lobby.id)
+    matches = make_matches([%{bot_id: @bot_1_id, pid: player_1_pid}], lobby.id)
     assert [] = matches
   end
 
@@ -36,8 +36,8 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     matches =
       make_matches(
         [
-          %{player_id: @player_1_id, pid: player_1_pid},
-          %{player_id: @player_2_id, pid: player_2_pid}
+          %{bot_id: @bot_1_id, pid: player_1_pid},
+          %{bot_id: @bot_2_id, pid: player_2_pid}
         ],
         lobby.id
       )
@@ -54,9 +54,9 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     matches =
       make_matches(
         [
-          %{player_id: @player_1_id, pid: player_1_pid},
-          %{player_id: @player_2_id, pid: player_2_pid},
-          %{player_id: @player_3_id, pid: player_3_pid}
+          %{bot_id: @bot_1_id, pid: player_1_pid},
+          %{bot_id: @bot_2_id, pid: player_2_pid},
+          %{bot_id: @bot_3_id, pid: player_3_pid}
         ],
         lobby.id
       )
@@ -72,8 +72,8 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     [%{game: game}] =
       make_matches(
         [
-          %{player_id: @player_1_id, pid: player_1_pid},
-          %{player_id: @player_2_id, pid: player_2_pid}
+          %{bot_id: @bot_1_id, pid: player_1_pid},
+          %{bot_id: @bot_2_id, pid: player_2_pid}
         ],
         lobby.id
       )
@@ -88,8 +88,8 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     [%{game: game}] =
       make_matches(
         [
-          %{player_id: @player_1_id, pid: player_1_pid},
-          %{player_id: @player_2_id, pid: player_2_pid}
+          %{bot_id: @bot_1_id, pid: player_1_pid},
+          %{bot_id: @bot_2_id, pid: player_2_pid}
         ],
         lobby_id
       )
@@ -101,12 +101,12 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     assert [
              %{
                player: "player_1",
-               bot_id: @player_1_id,
+               bot_id: @bot_1_id,
                score: 0
              },
              %{
                player: "player_2",
-               bot_id: @player_2_id,
+               bot_id: @bot_2_id,
                score: 0
              }
            ] = game.game_bots
