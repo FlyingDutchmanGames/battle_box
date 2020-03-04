@@ -4,10 +4,19 @@
 
 V1
 ====
-[ ] Pass the bot object into the matchmaker
+[ ] Bots Live Page
+  [ ] Show a user's bots
+  [ ] Show the bot servers active for each bot
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
+[ ] url identifiers
+  [ ] `/users/grantjamespowell`
+  [ ] `/users/grantjamespowell/bots`
+  [ ] `/users/grantjamespowell/bots/foo`
+  [ ] `/users/grantjamespowell/*`
+  [ ] `/users/grantjamespowell/lobbies/foo`
+  [ ] `/lobbies/foo`
 [ ] historical games page
   [ ] Get something in the page
   [ ] Efficent Pagination
@@ -43,6 +52,7 @@ Nice to Haves
 
 Done
 =======
+[x] Pass the bot object into the matchmaker
 [x] Bot Server Registry Improvements
 [x] Client starts the convo
 [x] Length framed messages
