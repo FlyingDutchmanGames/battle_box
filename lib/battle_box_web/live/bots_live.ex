@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.BotsLive do
   use BattleBoxWeb, :live_view
   alias BattleBoxWeb.{BotView, PageView}
-  alias BattleBox.{GameEngine, User, Bot, Repo}
+  alias BattleBox.{User, Bot, Repo}
 
   @refresh_rate_ms 1000
 
@@ -19,6 +19,10 @@ defmodule BattleBoxWeb.BotsLive do
     end
   end
 
+  def handle_info(:refresh, socket) do
+    {:noreply, socket}
+  end
+
   def render(%{not_found: true}) do
     PageView.render("not_found.html", message: "User not found")
   end
@@ -29,6 +33,6 @@ defmodule BattleBoxWeb.BotsLive do
 
   def bots_for_user(user_id) do
     Bot.with_user_id(user_id)
-    |> Repo.all
+    |> Repo.all()
   end
 end
