@@ -51,11 +51,7 @@ defmodule BattleBox.GameEngine.BotServer do
     {:ok, :options, data}
   end
 
-  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{connection: pid} = data) do
-    {:next_state, :disconnected, data}
-  end
-
-  def handle_event(:enter, _old_state, :disconnected, _data) do
+  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{connection: pid}) do
     {:stop, :normal}
   end
 
