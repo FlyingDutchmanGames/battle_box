@@ -122,7 +122,6 @@ defmodule BattleBox.GameEngine.GameServer do
        game_state: BattleBoxGame.moves_request(game.robot_game),
        minimum_time: game.lobby.move_time_minimum_ms,
        maximum_time: game.lobby.move_time_maximum_ms,
-       time: BattleBoxGame.move_time_ms(game.robot_game),
        player: player
      }}
   end
