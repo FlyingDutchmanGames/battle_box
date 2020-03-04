@@ -19,8 +19,8 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
       Game.new(
         lobby: lobby,
         game_bots: [
-          GameBot.new(player: "player_1", bot_id: player_1.bot_id),
-          GameBot.new(player: "player_2", bot_id: player_2.bot_id)
+          GameBot.new(player: "player_1", bot: player_1.bot),
+          GameBot.new(player: "player_2", bot: player_2.bot)
         ],
         robot_game: RobotGame.new(settings: settings)
       )

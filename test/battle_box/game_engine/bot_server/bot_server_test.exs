@@ -87,7 +87,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
 
       :ok = BotServer.match_make(context.p1_server)
 
-      assert [%{bot_id: ^bot_id, pid: ^p1}] =
+      assert [%{bot: %{id: ^bot_id}, pid: ^p1}] =
                MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
     end
 
