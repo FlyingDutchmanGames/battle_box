@@ -4,12 +4,12 @@
 
 V1
 ====
+[ ] Pass the bot object into the matchmaker
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
-[ ] Bot Server Registry Improvements
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] historical games page
-  [x] Get something in the page
+  [ ] Get something in the page
   [ ] Efficent Pagination
   [ ] Filter by (lobby id, user id, bot id)
   [ ] Arrow key navigation through pages
@@ -43,6 +43,7 @@ Nice to Haves
 
 Done
 =======
+[x] Bot Server Registry Improvements
 [x] Client starts the convo
 [x] Length framed messages
 [x] Github actions Spec Suite
