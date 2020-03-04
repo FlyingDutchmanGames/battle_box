@@ -63,6 +63,9 @@ defmodule BattleBox.GameEngine do
   def get_bot_server(game_engine, bot_server_id),
     do: get_process(bot_registry_name(game_engine), bot_server_id)
 
+  def get_bot_servers_with_user_id(game_engine, user_id),
+    do: BotSup.get_bot_servers_with_user_id(bot_registry_name(game_engine), user_id)
+
   def names(name \\ @default_name) do
     %{
       game_engine: name,

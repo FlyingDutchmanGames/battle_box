@@ -56,4 +56,14 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                })
     end
   end
+
+  describe "getting bot servers from the registry" do
+    test "if there are no bot servers that match the result is an empty list", context do
+      assert [] ==
+               BotSupervisor.get_bot_servers_with_user_id(
+                 context.bot_registry,
+                 Ecto.UUID.generate()
+               )
+    end
+  end
 end
