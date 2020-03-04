@@ -31,12 +31,6 @@ defmodule BattleBoxWeb.ConnectionsLive do
     ConnectionsView.render("connections.html", assigns)
   end
 
-  def handle_event("kill_connection_" <> connection_id, _, socket) do
-    %{pid: pid} = GameEngine.get_connection(game_engine(), connection_id)
-    Process.exit(pid, :kill)
-    {:noreply, socket}
-  end
-
   def handle_info(:refresh, socket) do
     {:noreply, assign(socket, :connections, get_connections(socket.assigns.user.id))}
   end

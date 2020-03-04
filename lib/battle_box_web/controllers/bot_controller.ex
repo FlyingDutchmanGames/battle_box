@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.BotController do
   use BattleBoxWeb, :controller
   alias BattleBoxWeb.PageView
-  alias BattleBox.{Bot, Repo}
+  alias BattleBox.Bot
 
   def new(conn, _params) do
     changeset = Bot.changeset(%Bot{})
@@ -33,10 +33,5 @@ defmodule BattleBoxWeb.BotController do
         |> put_view(PageView)
         |> render("not_found.html", message: "Bot not found")
     end
-  end
-
-  def index(conn, %{"user_id" => user_id}) do
-    bots = Bot.with_user_id(user_id) |> Repo.all()
-    render(conn, "index.html", bots: bots)
   end
 end

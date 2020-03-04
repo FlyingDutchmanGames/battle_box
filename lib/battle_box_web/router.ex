@@ -24,6 +24,7 @@ defmodule BattleBoxWeb.Router do
 
     live("/live_games", GamesLiveLive)
     live("/games/:game_id", GameLive)
+    live("/users/:user_id/bots", BotsLive)
 
     scope "/auth" do
       get "/github/login", GithubLoginController, :github_login
@@ -49,7 +50,6 @@ defmodule BattleBoxWeb.Router do
 
     resources "/users", UserController, only: [:show] do
       resources "/lobbies", LobbyController, only: [:index]
-      resources "/bots", BotController, only: [:index]
     end
   end
 
