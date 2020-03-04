@@ -97,7 +97,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{
                status: :idle,
-               player_id: ^id,
+               bot_id: ^id,
                user_id: @user_id
              } = get_connection(context.game_engine, connection_id)
     end
@@ -115,7 +115,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert_receive {:tcp, ^socket, msg}
       assert %{"connection_id" => connection_id} = Jason.decode!(msg)
-      [player_pid] = Registry.select(context.player_registry, [{{:_, :"$1", :_}, [], [:"$1"]}])
+      [player_pid] = Registry.select(context.bot_registry, [{{:_, :"$1", :_}, [], [:"$1"]}])
       [{connection_pid, _}] = Registry.lookup(context.connection_registry, connection_id)
       Process.monitor(connection_pid)
       Process.exit(player_pid, :kill)

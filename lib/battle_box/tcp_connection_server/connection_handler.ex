@@ -1,6 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.{Bot, GameEngine, GameEngine.PlayerServer}
+  alias BattleBox.{Bot, GameEngine, GameEngine.BotServer}
   import BattleBox.TcpConnectionServer.Message
   @behaviour :ranch_protocol
 
@@ -47,18 +47,18 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
   def handle_event(:internal, %{"token" => token, "lobby" => lobby_name}, :unauthed, data) do
     with {:bot, bot} when not is_nil(bot) <- {:bot, Bot.get_by_token(token)},
-         {:player, {:ok, player_server}} <-
-           {:player,
-            GameEngine.start_player(data.names.game_engine, %{
+         {:bot_server, {:ok, bot_server}} <-
+           {:bot_server,
+            GameEngine.start_bot(data.names.game_engine, %{
               connection_id: data.connection_id,
               connection: self(),
-              player_id: bot.id,
+              bot_id: bot.id,
               user_id: bot.user_id,
               lobby_name: lobby_name
             })} do
-      Process.monitor(player_server)
+      Process.monitor(bot_server)
 
-      data = Map.merge(data, %{bot: bot, player_server: player_server, lobby_name: lobby_name})
+      data = Map.merge(data, %{bot: bot, bot_server: bot_server, lobby_name: lobby_name})
       :ok = send_to_socket(data, status_msg(data, :idle))
       {:next_state, :idle, data}
     else
@@ -66,14 +66,14 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         :ok = send_to_socket(data, encode_error("invalid_token"))
         :keep_state_and_data
 
-      {:player, {:error, :lobby_not_found}} ->
+      {:bot_server, {:error, :lobby_not_found}} ->
         :ok = send_to_socket(data, encode_error("lobby_not_found"))
         :keep_state_and_data
     end
   end
 
   def handle_event(:internal, %{"action" => "start_match_making"}, :idle, data) do
-    :ok = PlayerServer.match_make(data.player_server)
+    :ok = BotServer.match_make(data.bot_server)
     :ok = send_to_socket(data, status_msg(data, :match_making))
     {:next_state, :match_making, data}
   end
@@ -93,11 +93,11 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
       when action in ["accept_game", "reject_game"] do
     case action do
       "accept_game" ->
-        :ok = PlayerServer.accept_game(data.player_server, id)
+        :ok = BotServer.accept_game(data.bot_server, id)
         {:next_state, :playing, data}
 
       "reject_game" ->
-        :ok = PlayerServer.reject_game(data.player_server, id)
+        :ok = BotServer.reject_game(data.bot_server, id)
         send_to_socket(data, game_cancelled(id))
         {:next_state, :idle, data}
     end
@@ -115,7 +115,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         :playing,
         %{moves_request: %{request_id: request_id}} = data
       ) do
-    :ok = PlayerServer.submit_moves(data.player_server, request_id, moves)
+    :ok = BotServer.submit_moves(data.bot_server, request_id, moves)
     data = Map.drop(data, [:moves_request])
     {:keep_state, data}
   end
@@ -137,7 +137,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     {:next_state, :idle, data}
   end
 
-  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{player_server: pid} = data) do
+  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{bot_server: pid} = data) do
     :ok = send_to_socket(data, encode_error("bot_instance_failure"))
     :ok = data.transport.close(data.socket)
     {:stop, :normal}
@@ -148,8 +148,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
     metadata =
       case data[:bot] do
-        %Bot{id: player_id, user_id: user_id} ->
-          Map.merge(metadata, %{player_id: player_id, user_id: user_id})
+        %Bot{id: bot_id, user_id: user_id} ->
+          Map.merge(metadata, %{bot_id: bot_id, user_id: user_id})
 
         _ ->
           metadata
@@ -198,9 +198,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
   defp initial_metadata,
     do: %{
-      player_id: nil,
       game_id: nil,
       user_id: nil,
+      bot_id: nil,
       status: :unauthed,
       started_at: DateTime.utc_now()
     }
