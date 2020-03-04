@@ -28,7 +28,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   end
 
   setup do
-    {:ok, lobby} = Lobby.create(%{name: @lobby_name, game_type: RobotGame, user_id: @user_id})
+    {:ok, lobby} =
+      Lobby.create(%{
+        name: @lobby_name,
+        game_type: RobotGame,
+        user_id: @user_id,
+        move_time_minimum_ms: 1
+      })
 
     {:ok, bot} =
       Bot.changeset(%Bot{}, %{name: @bot_name, user_id: @user_id})
@@ -76,24 +82,16 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       %{socket: socket}
     end
 
-    test "you can join", %{socket: socket, bot: %{id: id, token: token}} = context do
+    test "you can join", %{socket: socket, bot: %{token: token}} = context do
       bot_connect_req = encode(%{"token" => token, "lobby" => @lobby_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
 
-      assert %{
-               "bot_id" => ^id,
-               "lobby" => @lobby_name,
-               "status" => "idle",
-               "connection_id" => connection_id
-             } = Jason.decode!(msg)
+      assert %{"status" => "idle", "connection_id" => connection_id} = Jason.decode!(msg)
 
-      assert %{
-               status: :idle,
-               player_id: ^id,
-               user_id: @user_id
-             } = get_connection(context.game_engine, connection_id)
+      assert %{status: :idle, user_id: @user_id} =
+               get_connection(context.game_engine, connection_id)
     end
 
     test "trying to join a lobby that doesn't exist is an error", %{socket: socket, bot: bot} do
@@ -109,7 +107,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert_receive {:tcp, ^socket, msg}
       assert %{"connection_id" => connection_id} = Jason.decode!(msg)
-      [player_pid] = Registry.select(context.player_registry, [{{:_, :"$1", :_}, [], [:"$1"]}])
+      [player_pid] = Registry.select(context.bot_registry, [{{:_, :"$1", :_}, [], [:"$1"]}])
       [{connection_pid, _}] = Registry.lookup(context.connection_registry, connection_id)
       Process.monitor(connection_pid)
       Process.exit(player_pid, :kill)
@@ -166,7 +164,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{
                "game_info" => %{
-                 "acceptance_time" => 2000,
                  "game_id" => <<_::288>> = game_id,
                  "player" => "player_" <> _
                },

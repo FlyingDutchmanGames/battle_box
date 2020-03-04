@@ -13,9 +13,7 @@ defmodule BattleBox.Games.RobotGame do
     embeds_many :events, Event, on_replace: :delete
     belongs_to :settings, Settings
     belongs_to :game, Game
-
     field :winner, :string, virtual: true
-    field :move_time_ms, :integer, virtual: true, default: 5000
     field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
 
     timestamps()
@@ -244,7 +242,6 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do
   def settings(game), do: RobotGame.settings(game)
   def moves_request(game), do: RobotGame.moves_request(game)
   def calculate_turn(game, moves), do: RobotGame.Logic.calculate_turn(game, moves)
-  def move_time_ms(game), do: game.move_time_ms
   def score(game), do: RobotGame.score(game)
   def winner(game), do: game.winner
 end

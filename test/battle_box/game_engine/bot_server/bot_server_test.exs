@@ -1,14 +1,12 @@
-defmodule BattleBox.GameEngine.PlayerServerTest do
+defmodule BattleBox.GameEngine.BotServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{GameEngine, Repo, Lobby, Games.RobotGame}
-  alias BattleBox.GameEngine.{MatchMaker, PlayerServer}
+  alias BattleBox.{GameEngine, Repo, Bot, Lobby, Games.RobotGame}
+  alias BattleBox.GameEngine.{MatchMaker, BotServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
-  @player_1_id Ecto.UUID.generate()
-  @player_2_id Ecto.UUID.generate()
-
-  @player_1_server_id Ecto.UUID.generate()
-  @player_2_server_id Ecto.UUID.generate()
+  @user_id Ecto.UUID.generate()
+  @bot_1_server_id Ecto.UUID.generate()
+  @bot_2_server_id Ecto.UUID.generate()
 
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
@@ -16,34 +14,43 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
   end
 
   setup do
-    {:ok, lobby} =
-      Lobby.create(%{user_id: @player_1_id, name: "LOBBY NAME", game_type: RobotGame})
+    {:ok, bot} =
+      Bot.create(%{
+        user_id: @user_id,
+        name: "BOT_NAME"
+      })
 
-    %{lobby: lobby}
+    {:ok, lobby} =
+      Lobby.create(%{
+        user_id: @user_id,
+        name: "LOBBY NAME",
+        game_type: RobotGame,
+        move_time_minimum_ms: 10
+      })
+
+    %{lobby: lobby, bot: bot}
   end
 
-  setup %{lobby: %{name: lobby_name}} do
+  setup %{lobby: lobby, bot: bot} do
     %{
       init_opts_p1: %{
-        player_id: @player_1_id,
-        player_server_id: @player_1_server_id,
-        lobby_name: lobby_name,
-        connection: named_proxy(:p1_connection),
-        connection_id: Ecto.UUID.generate()
+        bot_server_id: @bot_1_server_id,
+        bot: bot,
+        lobby: lobby,
+        connection: named_proxy(:p1_connection)
       },
       init_opts_p2: %{
-        player_id: @player_2_id,
-        player_server_id: @player_2_server_id,
-        lobby_name: lobby_name,
-        connection: named_proxy(:p2_connection),
-        connection_id: Ecto.UUID.generate()
+        bot_server_id: @bot_2_server_id,
+        bot: bot,
+        lobby: lobby,
+        connection: named_proxy(:p2_connection)
       }
     }
   end
 
   setup context do
-    {:ok, p1_server} = GameEngine.start_player(context.game_engine, context.init_opts_p1)
-    {:ok, p2_server} = GameEngine.start_player(context.game_engine, context.init_opts_p2)
+    {:ok, p1_server, _} = GameEngine.start_bot(context.game_engine, context.init_opts_p1)
+    {:ok, p2_server, _} = GameEngine.start_bot(context.game_engine, context.init_opts_p2)
     Process.monitor(p1_server)
     Process.monitor(p2_server)
     %{p1_server: p1_server, p2_server: p2_server}
@@ -52,14 +59,6 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
   test "you can start the player server", context do
     assert Process.alive?(context.p1_server)
     assert Process.alive?(context.p2_server)
-  end
-
-  test "its an error to ask to join a lobby that doesn't exist", context do
-    assert {:error, :lobby_not_found} =
-             GameEngine.start_player(context.game_engine, %{
-               context.init_opts_p1
-               | lobby_name: "FAKE"
-             })
   end
 
   test "The player server dies if the connection dies", %{p1_server: p1} = context do
@@ -71,29 +70,30 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
   end
 
   test "the player server registers in the player server registry",
-       %{p1_server: p1, p2_server: p2} = context do
-    assert Registry.count(context.player_registry) == 2
+       %{p1_server: p1, p2_server: p2, bot: bot, lobby: lobby} = context do
+    assert Registry.count(context.bot_registry) == 2
 
-    assert [{^p1, %{player_id: @player_1_id}}] =
-             Registry.lookup(context.player_registry, context.init_opts_p1.player_server_id)
+    assert [{^p1, %{bot: ^bot, lobby: ^lobby}}] =
+             Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)
 
-    assert [{^p2, %{player_id: @player_2_id}}] =
-             Registry.lookup(context.player_registry, context.init_opts_p2.player_server_id)
+    assert [{^p2, %{bot: ^bot, lobby: ^lobby}}] =
+             Registry.lookup(context.bot_registry, context.init_opts_p2.bot_server_id)
   end
 
   describe "Matchmaking in a lobby" do
-    test "You can ask the player server to match_make", %{p1_server: p1} = context do
+    test "You can ask the player server to match_make",
+         %{p1_server: p1, bot: %{id: bot_id}} = context do
       assert [] == MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
 
-      :ok = PlayerServer.match_make(context.p1_server)
+      :ok = BotServer.match_make(context.p1_server)
 
-      assert [%{player_id: @player_1_id, pid: ^p1}] =
+      assert [%{bot_id: ^bot_id, pid: ^p1}] =
                MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
     end
 
     test "When a match is made it forwards the request to the connections", context do
-      :ok = PlayerServer.match_make(context.p1_server)
-      :ok = PlayerServer.match_make(context.p2_server)
+      :ok = BotServer.match_make(context.p1_server)
+      :ok = BotServer.match_make(context.p2_server)
       :ok = GameEngine.force_match_make(context.game_engine)
 
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
@@ -114,43 +114,63 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
   end
 
   test "if you wait too long to accept, the game is cancelled", context do
-    Lobby.changeset(context.lobby, %{game_acceptance_timeout_ms: 1})
+    Lobby.changeset(context.lobby, %{game_acceptance_time_ms: 1})
     |> Repo.update!()
 
-    PlayerServer.reload_lobby(context.p1_server)
-    PlayerServer.reload_lobby(context.p2_server)
-    :ok = PlayerServer.match_make(context.p1_server)
-    :ok = PlayerServer.match_make(context.p2_server)
+    :ok = BotServer.match_make(context.p1_server)
+    :ok = BotServer.match_make(context.p2_server)
     :ok = GameEngine.force_match_make(context.game_engine)
-    assert_receive {:p1_connection, {:game_request, %{game_id: game_id, acceptance_time: 1}}}
-    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id, acceptance_time: 1}}}
+    assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
     assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
     assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
   end
 
+  test "Your moves aren't submitted until after the lobby.minimum_time", context do
+    Lobby.changeset(context.lobby, %{move_time_minimum_ms: 30})
+    |> Repo.update!()
+
+    :ok = BotServer.match_make(context.p1_server)
+    :ok = BotServer.match_make(context.p2_server)
+    :ok = GameEngine.force_match_make(context.game_engine)
+    assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
+    assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
+    assert :ok = BotServer.accept_game(context.p1_server, game_id)
+    assert :ok = BotServer.accept_game(context.p2_server, game_id)
+    assert_receive {:p1_connection, {:moves_request, %{request_id: id1}}}
+    assert_receive {:p2_connection, {:moves_request, %{request_id: id2}}}
+    :ok = BotServer.submit_moves(context.p1_server, id1, [])
+    :ok = BotServer.submit_moves(context.p2_server, id2, [])
+    # We don't get asked for more moves for at least 50 ms
+    refute_receive {_, {:moves_request, %{}}}, 30
+    # Then we get asked for moves
+    assert_receive {:p1_connection, {:moves_request, %{}}}
+    assert_receive {:p2_connection, {:moves_request, %{}}}
+  end
+
   test "trying to accept or reject a game you're not currently watching yield :ok", context do
-    assert :ok = PlayerServer.accept_game(context.p1_server, Ecto.UUID.generate())
-    assert :ok = PlayerServer.reject_game(context.p1_server, Ecto.UUID.generate())
+    assert :ok = BotServer.accept_game(context.p1_server, Ecto.UUID.generate())
+    assert :ok = BotServer.reject_game(context.p1_server, Ecto.UUID.generate())
   end
 
   describe "game acceptance" do
     setup context do
-      :ok = PlayerServer.match_make(context.p1_server)
-      :ok = PlayerServer.match_make(context.p2_server)
+      :ok = BotServer.match_make(context.p1_server)
+      :ok = BotServer.match_make(context.p2_server)
       :ok = GameEngine.force_match_make(context.game_engine)
     end
 
     test "if you accept a game and it gets cancelled you go to matchmaking", context do
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
-      :ok = PlayerServer.accept_game(context.p1_server, game_id)
-      :ok = PlayerServer.reject_game(context.p2_server, game_id)
+      :ok = BotServer.accept_game(context.p1_server, game_id)
+      :ok = BotServer.reject_game(context.p2_server, game_id)
       assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
     end
 
     test "if the other player dies you get a game cancelled", context do
       Process.flag(:trap_exit, true)
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
-      :ok = PlayerServer.accept_game(context.p1_server, game_id)
+      :ok = BotServer.accept_game(context.p1_server, game_id)
       Process.exit(context.p2_server, :kill)
       assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
     end
@@ -167,50 +187,48 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
       assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
 
-      :ok = PlayerServer.accept_game(context.p1_server, game_id)
-      :ok = PlayerServer.accept_game(context.p2_server, game_id)
+      :ok = BotServer.accept_game(context.p1_server, game_id)
+      :ok = BotServer.accept_game(context.p2_server, game_id)
 
-      assert_receive {:p1_connection, {:moves_request, %{game_id: ^game_id, time: time}}}
-      assert_receive {:p2_connection, {:moves_request, %{game_id: ^game_id, time: ^time}}}
+      assert_receive {:p1_connection,
+                      {:moves_request, %{game_id: ^game_id, maximum_time: max, minimum_time: min}}}
+
+      assert_receive {:p2_connection,
+                      {:moves_request,
+                       %{game_id: ^game_id, maximum_time: ^max, minimum_time: ^min}}}
     end
   end
 
   describe "playing a game!" do
     setup context do
-      :ok = PlayerServer.match_make(context.p1_server)
-      :ok = PlayerServer.match_make(context.p2_server)
+      :ok = BotServer.match_make(context.p1_server)
+      :ok = BotServer.match_make(context.p2_server)
       :ok = GameEngine.force_match_make(context.game_engine)
 
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id} = game_info}}
 
-      :ok = PlayerServer.accept_game(context.p1_server, game_id)
-      :ok = PlayerServer.accept_game(context.p2_server, game_id)
-
+      :ok = BotServer.accept_game(context.p1_server, game_id)
+      :ok = BotServer.accept_game(context.p2_server, game_id)
       %{game_id: game_id, game_info: game_info}
     end
 
     test "you can submit back a moves request", context do
       assert_receive {:p1_connection, {:moves_request, %{request_id: id}}}
-      :ok = PlayerServer.submit_moves(context.p1_server, id, [])
+      :ok = BotServer.submit_moves(context.p1_server, id, [])
     end
 
     test "trying to submit the wrong moves raises an error", context do
       assert_receive {:p1_connection, {:moves_request, _}}
 
       {:error, :invalid_moves_submission} =
-        PlayerServer.submit_moves(context.p1_server, "INVALID", [])
-    end
-
-    test "Moves timeouts submit blank moves and send an error to the connection" do
-      # TODO:// not sure how to test this one yet, because the timeout comes from pretty deep in engine
-      # eventually it should be derived from the lobby settings
+        BotServer.submit_moves(context.p1_server, "INVALID", [])
     end
 
     test "game server dies => game cancelled notification", %{game_id: game_id} = context do
-      # Player 1 in the "playing" state after submitting his moves
-      # Player 2 in the moves input state, waiting on his moves
+      # Bot 1 in the "playing" state after submitting his moves
+      # Bot 2 in the moves input state, waiting on his moves
       assert_receive {:p1_connection, {:moves_request, %{request_id: id}}}
-      :ok = PlayerServer.submit_moves(context.p1_server, id, [])
+      :ok = BotServer.submit_moves(context.p1_server, id, [])
 
       [{game_server_pid, _}] = Registry.lookup(context.game_registry, context.game_id)
       Process.exit(game_server_pid, :kill)
@@ -229,12 +247,12 @@ defmodule BattleBox.GameEngine.PlayerServerTest do
         assert_receive {:p1_connection,
                         {:moves_request, %{request_id: id, game_state: %{turn: ^turn}}}}
 
-        :ok = PlayerServer.submit_moves(context.p1_server, id, [])
+        :ok = BotServer.submit_moves(context.p1_server, id, [])
 
         assert_receive {:p2_connection,
                         {:moves_request, %{request_id: id, game_state: %{turn: ^turn}}}}
 
-        :ok = PlayerServer.submit_moves(context.p2_server, id, [])
+        :ok = BotServer.submit_moves(context.p2_server, id, [])
       end)
 
       assert_receive {:p1_connection, {:game_over, %{game_id: ^game_id}}}

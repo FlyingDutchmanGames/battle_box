@@ -1,7 +1,7 @@
 defmodule BattleBox.GameEngine do
   use Supervisor
   alias BattleBox.GameEngine.GameServer.GameSupervisor, as: GameSup
-  alias BattleBox.GameEngine.PlayerServer.PlayerSupervisor, as: PlayerSup
+  alias BattleBox.GameEngine.BotServer.BotSupervisor, as: BotSup
   alias BattleBox.GameEngine.MatchMaker, as: MatchMakerSup
   alias BattleBox.GameEngine.PubSub, as: GameEnginePubSub
   alias BattleBox.GameEngine.MatchMakerServer
@@ -20,11 +20,11 @@ defmodule BattleBox.GameEngine do
 
     children = [
       {Registry, keys: :unique, name: connection_registry_name(name)},
-      {Registry, keys: :unique, name: player_registry_name(name)},
+      {Registry, keys: :unique, name: bot_registry_name(name)},
       {Registry, keys: :unique, name: game_registry_name(name)},
       {GameEnginePubSub, %{names: names(name)}},
       {GameSup, %{names: names(name)}},
-      {PlayerSup, %{names: names(name)}},
+      {BotSup, %{names: names(name)}},
       {MatchMakerSup, %{names: names(name)}}
     ]
 
@@ -40,8 +40,8 @@ defmodule BattleBox.GameEngine do
   def start_game(game_engine, opts),
     do: GameSup.start_game(game_supervisor_name(game_engine), opts)
 
-  def start_player(game_engine, opts),
-    do: PlayerSup.start_player(player_supervisor_name(game_engine), opts)
+  def start_bot(game_engine, opts),
+    do: BotSup.start_bot(bot_supervisor_name(game_engine), opts)
 
   def force_match_make(game_engine),
     do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
@@ -60,16 +60,16 @@ defmodule BattleBox.GameEngine do
         user_id
       )
 
-  def get_player_server(game_engine, player_server_id),
-    do: get_process(player_registry_name(game_engine), player_server_id)
+  def get_bot_server(game_engine, bot_server_id),
+    do: get_process(bot_registry_name(game_engine), bot_server_id)
 
   def names(name \\ @default_name) do
     %{
       game_engine: name,
       game_registry: game_registry_name(name),
       game_supervisor: game_supervisor_name(name),
-      player_registry: player_registry_name(name),
-      player_supervisor: player_supervisor_name(name),
+      bot_registry: bot_registry_name(name),
+      bot_supervisor: bot_supervisor_name(name),
       match_maker: match_maker_name(name),
       match_maker_server: match_maker_server_name(name),
       match_maker_registry: match_maker_registry_name(name),
@@ -80,8 +80,8 @@ defmodule BattleBox.GameEngine do
 
   defp game_registry_name(name), do: Module.concat(name, GameRegistry)
   defp game_supervisor_name(name), do: Module.concat(name, GameSupervisor)
-  defp player_registry_name(name), do: Module.concat(name, PlayerRegistry)
-  defp player_supervisor_name(name), do: Module.concat(name, PlayerSupervisor)
+  defp bot_registry_name(name), do: Module.concat(name, BotRegistry)
+  defp bot_supervisor_name(name), do: Module.concat(name, BotSupervisor)
   defp match_maker_name(name), do: Module.concat(name, MatchMaker)
   defp match_maker_server_name(name), do: Module.concat(name, MatchMaker.MatchMakerServer)
   defp match_maker_registry_name(name), do: Module.concat(name, MatchMaker.Registry)

@@ -72,7 +72,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
       {:ok, document} = Floki.parse_document(html)
 
       assert ["Name: TEST_NAME1", "Name: TEST_NAME2", "Name: TEST_NAME3"] =
-               Floki.find(document, ".lobby .name") |> Enum.map(&Floki.text/1)
+               Enum.sort(Floki.find(document, ".lobby .name") |> Enum.map(&Floki.text/1))
     end
   end
 end

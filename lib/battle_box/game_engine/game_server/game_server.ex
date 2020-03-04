@@ -1,7 +1,7 @@
 defmodule BattleBox.GameEngine.GameServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   alias BattleBoxGame
-  alias BattleBox.{Game, GameEngine}
+  alias BattleBox.{Repo, Game, GameEngine}
 
   def accept_game(game_server, player) when is_binary(player) do
     GenStateMachine.cast(game_server, {:accept_game, player})
@@ -30,6 +30,8 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event(:internal, :setup, :game_acceptance, data) do
+    data = update_in(data.game, &Repo.preload(&1, :lobby))
+
     for {player, pid} <- data.players do
       Process.monitor(pid)
       send(pid, init_message(data.game, player))
@@ -108,11 +110,8 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:enter, _, new_state, %{names: names, game: game}) do
     metadata = %{status: new_state, game: game}
-
     {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
-
     :ok = GameEngine.broadcast(names.game_engine, "game:#{game.id}", {:game_update, game.id})
-
     :keep_state_and_data
   end
 
@@ -121,7 +120,8 @@ defmodule BattleBox.GameEngine.GameServer do
      %{
        game_id: game.id,
        game_state: BattleBoxGame.moves_request(game.robot_game),
-       time: BattleBoxGame.move_time_ms(game.robot_game),
+       minimum_time: game.lobby.move_time_minimum_ms,
+       maximum_time: game.lobby.move_time_maximum_ms,
        player: player
      }}
   end
@@ -132,6 +132,7 @@ defmodule BattleBox.GameEngine.GameServer do
        game_server: self(),
        game_id: game.id,
        player: player,
+       accept_time: game.lobby.game_acceptance_time_ms,
        settings: BattleBoxGame.settings(game.robot_game)
      }}
   end

@@ -1,77 +1,54 @@
-defmodule BattleBox.GameEngine.PlayerServer do
+defmodule BattleBox.GameEngine.BotServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.Lobby
   alias BattleBox.GameEngine.{MatchMaker, GameServer}
 
-  def accept_game(player_server, game_id, timeout \\ 5000) do
-    GenStateMachine.call(player_server, {:accept_game, game_id}, timeout)
+  def accept_game(bot_server, game_id, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:accept_game, game_id}, timeout)
   end
 
-  def reject_game(player_server, game_id, timeout \\ 5000) do
-    GenStateMachine.call(player_server, {:reject_game, game_id}, timeout)
+  def reject_game(bot_server, game_id, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:reject_game, game_id}, timeout)
   end
 
-  def match_make(player_server, timeout \\ 5000) do
-    GenStateMachine.call(player_server, :match_make, timeout)
+  def match_make(bot_server, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, :match_make, timeout)
   end
 
-  def submit_moves(player_server, move_id, moves, timeout \\ 5000) do
-    GenStateMachine.call(player_server, {:submit_moves, move_id, moves}, timeout)
-  end
-
-  def reload_lobby(player_server) do
-    GenStateMachine.cast(player_server, :reload_lobby)
+  def submit_moves(bot_server, move_id, moves, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:submit_moves, move_id, moves}, timeout)
   end
 
   def start_link(
         %{names: _} = config,
-        %{connection: _, player_id: _, lobby_name: _, connection_id: _} = data
+        %{connection: _, bot: bot, lobby: lobby} = data
       ) do
-    data = Map.put_new(data, :player_server_id, Ecto.UUID.generate())
-    GenStateMachine.start_link(__MODULE__, Map.merge(config, data))
+    data = Map.put_new(data, :bot_server_id, Ecto.UUID.generate())
+
+    GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
+      name:
+        {:via, Registry,
+         {config.names.bot_registry, data.bot_server_id, %{bot: bot, lobby: lobby}}}
+    )
   end
 
-  def init(%{names: names, player_id: player_id} = data) do
-    case Lobby.get_by_name(data.lobby_name) do
-      %Lobby{} = lobby ->
-        data = Map.put(data, :lobby, lobby)
-
-        Registry.register(names.player_registry, data.player_server_id, %{
-          player_id: player_id,
-          lobby_id: lobby.id,
-          connection_id: data.connection_id
-        })
-
-        Process.monitor(data.connection)
-        {:ok, :options, data}
-
-      nil ->
-        {:stop, :lobby_not_found}
-    end
+  def init(%{connection: connection} = data) do
+    Process.monitor(connection)
+    {:ok, :options, data}
   end
 
-  def handle_event(:cast, :reload_lobby, _state, data) do
-    data = Map.put(data, :lobby, Lobby.get_by_id(data.lobby.id))
-    {:keep_state, data}
-  end
-
-  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{connection: pid} = data) do
-    {:next_state, :disconnected, data}
-  end
-
-  def handle_event(:enter, _old_state, :disconnected, _data) do
+  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{connection: pid}) do
     {:stop, :normal}
   end
 
   def handle_event({:call, from}, :match_make, :options, data) do
-    :ok = MatchMaker.join_queue(data.names.game_engine, data.lobby.id, data.player_id)
+    :ok = MatchMaker.join_queue(data.names.game_engine, data.lobby.id, data.bot.id)
     {:next_state, :match_making, data, {:reply, from, :ok}}
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
     :ok = MatchMaker.dequeue_self(data.names.game_engine, data.lobby.id)
     {:ok, data} = setup_game(data, game_info)
-    {:next_state, :game_acceptance, data}
+    {:next_state, :game_acceptance, data, {:next_event, :internal, :setup_game_acceptance}}
   end
 
   def handle_event(:info, {:game_request, game_info}, state, _data) when state != :match_making do
@@ -79,9 +56,8 @@ defmodule BattleBox.GameEngine.PlayerServer do
     :keep_state_and_data
   end
 
-  def handle_event(:enter, _old_state, :game_acceptance, data) do
-    {:keep_state, data,
-     [{:state_timeout, data.lobby.game_acceptance_timeout_ms, :game_acceptance_timeout}]}
+  def handle_event(:internal, :setup_game_acceptance, :game_acceptance, data) do
+    {:keep_state, data, [{:state_timeout, data.game_info.accept_time, :game_acceptance_timeout}]}
   end
 
   def handle_event(
@@ -134,12 +110,23 @@ defmodule BattleBox.GameEngine.PlayerServer do
   def handle_event(:info, {:moves_request, moves_request}, :playing, data) do
     moves_request = Map.put_new(moves_request, :request_id, Ecto.UUID.generate())
     data = Map.put(data, :moves_request, moves_request)
-    {:next_state, :moves_request, data}
+    {:next_state, :moves_request, data, {:next_event, :internal, :setup_moves_request}}
   end
 
-  def handle_event(:enter, :playing, :moves_request, %{moves_request: moves_request} = data) do
+  def handle_event(
+        :internal,
+        :setup_moves_request,
+        :moves_request,
+        %{moves_request: moves_request} = data
+      ) do
     send(data.connection, {:moves_request, moves_request})
-    {:keep_state, data, {:state_timeout, moves_request.time, :moves_timeout}}
+    data = Map.put(data, :min_time_met, false)
+
+    {:keep_state, data,
+     [
+       {{:timeout, :min_time}, moves_request.minimum_time, :min_time},
+       {{:timeout, :max_time}, moves_request.maximum_time, :max_time}
+     ]}
   end
 
   def handle_event(
@@ -148,19 +135,44 @@ defmodule BattleBox.GameEngine.PlayerServer do
         :moves_request,
         %{moves_request: %{request_id: id}} = data
       ) do
-    :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, moves)
-    data = Map.drop(data, [:moves_request])
-    {:next_state, :playing, data, {:reply, from, :ok}}
+    if data[:min_time_met] do
+      data = submit_moves_to_game_server(data, moves)
+
+      {:next_state, :playing, data,
+       [
+         {:reply, from, :ok},
+         {{:timeout, :min_time}, :cancel},
+         {{:timeout, :max_time}, :cancel}
+       ]}
+    else
+      {:keep_state, Map.put(data, :moves, moves), {:reply, from, :ok}}
+    end
+  end
+
+  def handle_event({:timeout, :min_time}, :min_time, :moves_request, %{moves: moves} = data) do
+    data = submit_moves_to_game_server(data, moves)
+    {:next_state, :playing, data, {{:timeout, :max_time}, :cancel}}
+  end
+
+  def handle_event({:timeout, :min_time}, :min_time, :moves_request, data) do
+    {:keep_state, Map.put(data, :min_time_met, true)}
+  end
+
+  def handle_event({:timeout, :max_time}, :max_time, :moves_request, data) do
+    data = submit_moves_to_game_server(data, [])
+    {:next_state, :playing, data}
   end
 
   def handle_event({:call, from}, {:submit_moves, _, _}, _, _),
     do: {:keep_state_and_data, {:reply, from, {:error, :invalid_moves_submission}}}
 
-  def handle_event(:state_timemout, :moves_timeout, :moves_request, data) do
-    send(data.connection, {:moves_request_timeout, data.moves_request.request_id})
-    :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, [])
-    data = Map.drop(data, :moves_request)
-    {:next_state, :playing, data}
+  def handle_event(:enter, _old_state, new_state, %{names: names} = data) do
+    metadata = %{status: new_state}
+
+    {_, _} =
+      Registry.update_value(names.bot_registry, data.bot_server_id, &Map.merge(&1, metadata))
+
+    :keep_state_and_data
   end
 
   def handle_event(
@@ -174,10 +186,7 @@ defmodule BattleBox.GameEngine.PlayerServer do
     {:next_state, :options, data}
   end
 
-  def handle_event(:enter, _old_state, _state, _data), do: :keep_state_and_data
-
   defp setup_game(data, game_info) do
-    game_info = Map.put(game_info, :acceptance_time, data.lobby.game_acceptance_timeout_ms)
     game_monitor = Process.monitor(game_info.game_server)
     send(data.connection, {:game_request, game_info})
     data = Map.merge(data, %{game_info: game_info, game_monitor: game_monitor})
@@ -191,4 +200,9 @@ defmodule BattleBox.GameEngine.PlayerServer do
   end
 
   defp teardown_game(_game_id, data), do: {:ok, data}
+
+  defp submit_moves_to_game_server(data, moves) do
+    :ok = GameServer.submit_moves(data.game_info.game_server, data.moves_request.player, moves)
+    Map.drop(data, [:moves, :moves_request, :min_time_met])
+  end
 end
