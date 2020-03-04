@@ -1,0 +1,11 @@
+.bots {
+  border: 1px solid red;
+  padding: 10px;
+  margin: 10px;
+}
+
+.bot {
+  border: 1px solid blue;
+  padding: 10px;
+  margin: 10px;
+}
