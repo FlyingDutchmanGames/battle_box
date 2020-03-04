@@ -1,7 +1,6 @@
 defmodule BattleBox.GameEngine.MatchMaker do
   use Supervisor
-  alias BattleBox.GameEngine.MatchMakerServer
-  alias BattleBox.GameEngine
+  alias BattleBox.{Bot, GameEngine, GameEngine.MatchMakerServer}
 
   @doc """
   Joining a queue in a lobby
@@ -11,10 +10,10 @@ defmodule BattleBox.GameEngine.MatchMaker do
   pid passed as the last arg. This was done to allow a proxy to wait in line for you, and
   to make it easier to test
   """
-  def join_queue(game_engine, lobby, bot_id, pid \\ self()) when is_atom(game_engine) do
+  def join_queue(game_engine, lobby, %Bot{} = bot, pid \\ self()) when is_atom(game_engine) do
     {:ok, _registry} =
       Registry.register(match_maker_registry_name(game_engine), lobby, %{
-        bot_id: bot_id,
+        bot: bot,
         pid: pid
       })
 
