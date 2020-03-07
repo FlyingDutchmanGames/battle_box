@@ -183,8 +183,9 @@ defmodule BattleBox.Games.RobotGame do
   def guarded_collision_damage(_game), do: 0
   def collision_damage(game), do: DamageModifier.calc_damage(game.settings.collision_damage)
 
-  def moves_request(game) do
-    %{robots: robots(game), turn: game.turn}
+  def moves_requests(game) do
+    request = %{robots: robots(game), turn: game.turn}
+    Map.new(["player_1", "player_2"], fn player -> {player, request} end)
   end
 
   def settings(game) do
@@ -230,7 +231,7 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do
   def disqualify(game, player), do: RobotGame.disqualify(game, player)
   def over?(game), do: RobotGame.over?(game)
   def settings(game), do: RobotGame.settings(game)
-  def moves_request(game), do: RobotGame.moves_request(game)
+  def moves_requests(game), do: RobotGame.moves_requests(game)
   def calculate_turn(game, moves), do: RobotGame.Logic.calculate_turn(game, moves)
   def score(game), do: RobotGame.score(game)
   def winner(game), do: game.winner
