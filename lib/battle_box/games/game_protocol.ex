@@ -8,9 +8,6 @@ defprotocol BattleBoxGame do
   @spec over?(struct()) :: boolean()
   def over?(game)
 
-  @spec persist(struct()) :: {:ok, struct()}
-  def persist(game)
-
   @spec settings(struct()) :: map()
   def settings(game)
 

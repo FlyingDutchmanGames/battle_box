@@ -44,15 +44,6 @@ defmodule BattleBox.Games.RobotGame do
     Map.put(game, :winner, winner)
   end
 
-  def persist(%{settings: %{persistent?: false}} = game), do: {:ok, game}
-
-  def persist(game) do
-    game
-    |> Repo.preload(:game)
-    |> changeset()
-    |> Repo.insert(on_conflict: :replace_all, conflict_target: :id)
-  end
-
   def validate_moves(game, moves, player) do
     moves
     |> Enum.uniq_by(fn move -> move["robot_id"] end)
@@ -238,7 +229,6 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do
   def initialize(game), do: RobotGame.set_robots_at_turn(game)
   def disqualify(game, player), do: RobotGame.disqualify(game, player)
   def over?(game), do: RobotGame.over?(game)
-  def persist(game), do: RobotGame.persist(game)
   def settings(game), do: RobotGame.settings(game)
   def moves_request(game), do: RobotGame.moves_request(game)
   def calculate_turn(game, moves), do: RobotGame.Logic.calculate_turn(game, moves)
