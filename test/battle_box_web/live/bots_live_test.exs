@@ -68,6 +68,31 @@ defmodule BattleBoxWeb.BotsLiveTest do
     assert [bot] = Floki.find(document, ".bot-server")
     assert Floki.text(bot) =~ "LOBBY NAME"
     Process.exit(bot_server_pid, :kill)
+    Process.sleep(10)
+    html = render(view)
+    {:ok, document} = Floki.parse_document(html)
+    assert [] = Floki.find(document, ".bot-server")
+  end
+
+  test "if a bot server joins its reflected on the page", %{conn: conn} = context do
+    {:ok, view, html} = live(conn, "/users/#{@user_id}/bots")
+    {:ok, document} = Floki.parse_document(html)
+    assert [] = Floki.find(document, ".bot-server")
+
+    {:ok, bot_server_pid, _} =
+      GameEngine.start_bot(context.game_engine, %{
+        lobby: context.lobby,
+        bot: context.bot,
+        connection: self()
+      })
+
+    Process.sleep(10)
+    html = render(view)
+    {:ok, document} = Floki.parse_document(html)
+    assert [bot] = Floki.find(document, ".bot-server")
+
+    Process.exit(bot_server_pid, :kill)
+    Process.sleep(10)
     html = render(view)
     {:ok, document} = Floki.parse_document(html)
     assert [] = Floki.find(document, ".bot-server")

@@ -5,7 +5,7 @@ defmodule BattleBoxWeb.GameLive do
 
   def mount(%{"game_id" => game_id} = params, _session, socket) do
     if connected?(socket) do
-      GameEngine.subscribe(game_engine(), "game:#{game_id}")
+      GameEngine.subscribe_to_game_events(game_engine(), game_id, [:game_update])
     end
 
     case get_game(game_id) do
