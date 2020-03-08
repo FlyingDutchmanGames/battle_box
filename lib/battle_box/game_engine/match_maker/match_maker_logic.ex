@@ -7,24 +7,24 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
   def make_matches(enqueued_players, lobby_id) do
     %Lobby{} = lobby = Lobby.get_by_id(lobby_id)
     settings = Lobby.get_settings(lobby)
+    players = lobby.game_type.players_for_settings(settings)
 
     enqueued_players
-    |> Enum.chunk_every(2)
-    |> Enum.filter(fn chunk -> length(chunk) == 2 end)
-    |> Enum.map(fn [player_1, player_2] -> make_match(player_1, player_2, lobby, settings) end)
-  end
+    |> Enum.chunk_every(length(players))
+    |> Enum.filter(fn chunk -> length(chunk) == length(players) end)
+    |> Enum.map(fn chunk -> Enum.zip(players, chunk) end)
+    |> Enum.map(fn chunk ->
+      game_bots = for {player, %{bot: bot}} <- chunk, do: GameBot.new(player: player, bot: bot)
+      player_pid_mapping = Map.new(for {player, %{pid: pid}} <- chunk, do: {player, pid})
 
-  defp make_match(player_1, player_2, lobby, settings) do
-    game =
-      Game.new(
-        lobby: lobby,
-        game_bots: [
-          GameBot.new(player: "player_1", bot: player_1.bot),
-          GameBot.new(player: "player_2", bot: player_2.bot)
-        ],
-        robot_game: RobotGame.new(settings: settings)
-      )
+      game =
+        Game.new(
+          lobby: lobby,
+          game_bots: game_bots,
+          robot_game: RobotGame.new(settings: settings)
+        )
 
-    %{game: game, players: %{"player_1" => player_1.pid, "player_2" => player_2.pid}}
+      %{game: game, players: player_pid_mapping}
+    end)
   end
 end
