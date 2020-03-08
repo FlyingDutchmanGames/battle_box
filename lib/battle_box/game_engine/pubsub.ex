@@ -11,7 +11,7 @@ defmodule BattleBox.GameEngine.PubSub do
     Supervisor.init(children, strategy: :one_for_all)
   end
 
-  def broadcast_bot_server_started(pubsub, %{lobby: lobby, bot: bot, id: id}) do
+  def broadcast_bot_server_started(pubsub, %{lobby: _, bot: bot, bot_server_id: id}) do
     Registry.dispatch(registry_name(pubsub), "user:#{bot.user_id}", fn entries ->
       for {pid, events} <- entries,
           :bot_server_start in events,

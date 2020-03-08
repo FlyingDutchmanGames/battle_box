@@ -22,7 +22,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
   describe "starting a bot" do
     test "you can start a bot with a lobby name and a token", context do
       assert {:ok, server, %{user_id: @user_id}} =
-               BotSupervisor.start_bot(context.bot_supervisor, %{
+               BotSupervisor.start_bot(context.game_engine, %{
                  token: context.bot.token,
                  lobby_name: context.lobby.name,
                  connection: self()
@@ -31,7 +31,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
 
     test "you can start a bot with a bot/lobby object pair", context do
       assert {:ok, server, %{user_id: @user_id}} =
-               BotSupervisor.start_bot(context.bot_supervisor, %{
+               BotSupervisor.start_bot(context.game_engine, %{
                  bot: context.bot,
                  lobby: context.lobby,
                  connection: self()
@@ -40,7 +40,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
 
     test "starting a bot with an invalid token yields an error", context do
       assert {:error, :invalid_token} =
-               BotSupervisor.start_bot(context.bot_supervisor, %{
+               BotSupervisor.start_bot(context.game_engine, %{
                  token: "ABCDEF",
                  lobby_name: context.lobby.name,
                  connection: self()
@@ -49,7 +49,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
 
     test "starting a bot with an invalid lobby name yields an error", context do
       assert {:error, :lobby_not_found} =
-               BotSupervisor.start_bot(context.bot_supervisor, %{
+               BotSupervisor.start_bot(context.game_engine, %{
                  token: context.bot.token,
                  lobby_name: "FAKE LOBBY",
                  connection: self()
@@ -68,7 +68,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
 
     test "it will not return the bots for a different user", context do
       assert {:ok, server1, %{user_id: @user_id}} =
-               BotSupervisor.start_bot(context.bot_supervisor, %{
+               BotSupervisor.start_bot(context.game_engine, %{
                  lobby: context.lobby,
                  bot: context.bot,
                  connection: self()
@@ -83,14 +83,14 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
 
     test "getting by user will return the bots for a user", %{bot: bot, lobby: lobby} = context do
       assert {:ok, server1, %{user_id: @user_id}} =
-               BotSupervisor.start_bot(context.bot_supervisor, %{
+               BotSupervisor.start_bot(context.game_engine, %{
                  lobby: lobby,
                  bot: bot,
                  connection: self()
                })
 
       assert {:ok, server2, %{user_id: @user_id}} =
-               BotSupervisor.start_bot(context.bot_supervisor, %{
+               BotSupervisor.start_bot(context.game_engine, %{
                  lobby: lobby,
                  bot: bot,
                  connection: self()

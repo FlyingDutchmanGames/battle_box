@@ -21,7 +21,7 @@ defmodule BattleBoxWeb.BotsLive do
   end
 
   def handle_info({:DOWN, _ref, :process, pid, _reason}, socket) do
-    bot_servers = Enum.reject(socket.assigns.bot_servers, & &1.pid == pid)
+    bot_servers = Enum.reject(socket.assigns.bot_servers, &(&1.pid == pid))
     {:noreply, assign(socket, :bot_servers, bot_servers)}
   end
 

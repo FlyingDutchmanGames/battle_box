@@ -46,8 +46,7 @@ defmodule BattleBox.GameEngine do
   def start_game(game_engine, opts),
     do: GameSup.start_game(game_supervisor_name(game_engine), opts)
 
-  def start_bot(game_engine, opts),
-    do: BotSup.start_bot(bot_supervisor_name(game_engine), opts)
+  defdelegate start_bot(game_engine, opts), to: BotSup
 
   def force_match_make(game_engine),
     do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
