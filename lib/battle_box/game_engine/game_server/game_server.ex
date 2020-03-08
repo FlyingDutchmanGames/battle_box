@@ -114,7 +114,7 @@ defmodule BattleBox.GameEngine.GameServer do
   def handle_event(:enter, _, new_state, %{names: names, game: game}) do
     metadata = %{status: new_state, game: game}
     {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
-    :ok = GameEngine.broadcast(names.game_engine, "game:#{game.id}", {:game_update, game.id})
+    :ok = GameEngine.broadcast_game_update(names.game_engine, game)
     :keep_state_and_data
   end
 
