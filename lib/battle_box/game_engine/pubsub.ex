@@ -26,11 +26,13 @@ defmodule BattleBox.GameEngine.PubSub do
   end
 
   def subscribe_to_user_events(pubsub, user_id, events) do
-    Registry.register(registry_name(pubsub), "user:#{user_id}", events)
+    {:ok, pid} = Registry.register(registry_name(pubsub), "user:#{user_id}", events)
+    :ok
   end
 
   def subscribe_to_game_events(pubsub, game_id, events) do
-    Registry.register(registry_name(pubsub), "game:#{game_id}", events)
+    {:ok, pid} = Registry.register(registry_name(pubsub), "game:#{game_id}", events)
+    :ok
   end
 
   defp registry_name(pubsub_name) do
