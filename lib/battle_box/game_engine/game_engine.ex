@@ -51,12 +51,13 @@ defmodule BattleBox.GameEngine do
   def force_match_make(game_engine),
     do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
 
-  def get_game(game_engine, game_id), do: get_process(game_registry_name(game_engine), game_id)
+  def get_game(game_engine, game_id),
+    do: get_process(game_registry_name(game_engine), game_id, :game_id)
 
   def get_live_games(game_engine), do: GameSup.get_live_games(game_registry_name(game_engine))
 
   def get_connection(game_engine, connection_id),
-    do: get_process(connection_registry_name(game_engine), connection_id)
+    do: get_process(connection_registry_name(game_engine), connection_id, :connection_id)
 
   def get_connections_with_user_id(game_engine, user_id),
     do:
@@ -66,7 +67,7 @@ defmodule BattleBox.GameEngine do
       )
 
   def get_bot_server(game_engine, bot_server_id),
-    do: get_process(bot_registry_name(game_engine), bot_server_id)
+    do: get_process(bot_registry_name(game_engine), bot_server_id, :bot_server_id)
 
   def get_bot_servers_with_user_id(game_engine, user_id),
     do: BotSup.get_bot_servers_with_user_id(bot_registry_name(game_engine), user_id)
@@ -96,9 +97,9 @@ defmodule BattleBox.GameEngine do
   defp connection_registry_name(name), do: Module.concat(name, Connection.Registry)
   defp pubsub_name(name), do: Module.concat(name, PubSub)
 
-  defp get_process(registry, id) do
+  defp get_process(registry, id, id_name) do
     case Registry.lookup(registry, id) do
-      [{pid, attributes}] -> Map.put(attributes, :pid, pid)
+      [{pid, attributes}] -> Map.merge(attributes, %{:pid => pid, id_name => id})
       [] -> nil
     end
   end
