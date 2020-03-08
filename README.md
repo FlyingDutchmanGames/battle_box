@@ -11,6 +11,7 @@ V1
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
+[ ] Hide `robot_game` from matchmaker logic and game server by putting it in `BattleBox.Game`
 [ ] url identifiers
   [ ] `/users/grantjamespowell`
   [ ] `/users/grantjamespowell/bots`
@@ -32,7 +33,6 @@ V1
   [ ] user self play allowed toggle
   [x] Delay moves until alloted time/submit as fast as possible setting
   [x] write move timeout ms onto the lobby settings
-[ ] players > 2 game mode
 [ ] Bot Info Page
 [ ] BattleBox Elixir Client
 [ ] Visualize games better (include moves and historical turns)
@@ -75,6 +75,7 @@ Done
 [x] User controller
 [x] Tear out phoenix pubsub for game engine pubsub and use registry
 [x] Sequential turn mode
+[x] players > 2 game mode
 [x] Domain Name
   [x] pick one
   [x] www. to github pages
