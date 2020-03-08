@@ -7,11 +7,6 @@ defmodule BattleBoxWeb.LobbyController do
     render(conn, "new.html", changeset: changeset)
   end
 
-  def show(conn, %{"id" => id}) do
-    lobby = Lobby.get_by_id(id)
-    render(conn, "show.html", lobby: lobby)
-  end
-
   def index(conn, %{"user_id" => user_id}) do
     lobbies = Lobby.with_user_id(user_id) |> Repo.all()
     render(conn, "index.html", lobbies: lobbies)
@@ -29,7 +24,7 @@ defmodule BattleBoxWeb.LobbyController do
       {:ok, lobby} ->
         conn
         |> put_flash(:info, "Lobby")
-        |> redirect(to: Routes.lobby_path(conn, :show, lobby.id))
+        |> redirect(to: Routes.live_path(conn, BattleBoxWeb.LobbyLive, lobby.id))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)

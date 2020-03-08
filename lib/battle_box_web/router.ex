@@ -43,8 +43,8 @@ defmodule BattleBoxWeb.Router do
       resources "/lobbies", LobbyController, only: [:create, :new]
     end
 
+    live("/lobbies/:lobby_id", LobbyLive)
     resources "/bots", BotController, only: [:show]
-    resources "/lobbies", LobbyController, only: [:show]
 
     live("/users/:user_id/connections", ConnectionsLive)
 
