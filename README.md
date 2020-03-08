@@ -32,7 +32,7 @@ V1
   [ ] user self play allowed toggle
   [x] Delay moves until alloted time/submit as fast as possible setting
   [x] write move timeout ms onto the lobby settings
-[ ] players > 2 game mode / sequential turn mode
+[ ] players > 2 game mode
 [ ] Bot Info Page
 [ ] BattleBox Elixir Client
 [ ] Visualize games better (include moves and historical turns)
@@ -74,6 +74,7 @@ Done
 [x] Battle Box Game Table (ID, Players, Lobby, Winner, timestamps) Index [(insertedat desc), (gin players), (lobby id)]
 [x] User controller
 [x] Tear out phoenix pubsub for game engine pubsub and use registry
+[x] Sequential turn mode
 [x] Domain Name
   [x] pick one
   [x] www. to github pages
