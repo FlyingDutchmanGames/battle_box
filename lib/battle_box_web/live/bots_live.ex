@@ -8,11 +8,21 @@ defmodule BattleBoxWeb.BotsLive do
       %User{} = user ->
         bots = bots_for_user(user_id)
         bot_servers = bot_servers_for_user(user_id)
+
+        if connected?(socket) do
+          for %{pid: pid} <- bot_servers, do: Process.monitor(pid)
+        end
+
         {:ok, assign(socket, user: user, bots: bots, bot_servers: bot_servers)}
 
       nil ->
         {:ok, assign(socket, not_found: true)}
     end
+  end
+
+  def handle_info({:DOWN, _ref, :process, pid, _reason}, socket) do
+    bot_servers = Enum.reject(socket.assigns.bot_servers, & &1.pid == pid)
+    {:noreply, assign(socket, :bot_servers, bot_servers)}
   end
 
   def render(%{not_found: true}) do

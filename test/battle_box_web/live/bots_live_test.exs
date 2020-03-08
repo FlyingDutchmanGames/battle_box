@@ -54,4 +54,22 @@ defmodule BattleBoxWeb.BotsLiveTest do
     assert [bot] = Floki.find(document, ".bot-server")
     assert Floki.text(bot) =~ "LOBBY NAME"
   end
+
+  test "if a bot server dies it will be removed from the page", %{conn: conn} = context do
+    {:ok, bot_server_pid, _} =
+      GameEngine.start_bot(context.game_engine, %{
+        lobby: context.lobby,
+        bot: context.bot,
+        connection: self()
+      })
+
+    {:ok, view, html} = live(conn, "/users/#{@user_id}/bots")
+    {:ok, document} = Floki.parse_document(html)
+    assert [bot] = Floki.find(document, ".bot-server")
+    assert Floki.text(bot) =~ "LOBBY NAME"
+    Process.exit(bot_server_pid, :kill)
+    html = render(view)
+    {:ok, document} = Floki.parse_document(html)
+    assert [] = Floki.find(document, ".bot-server")
+  end
 end
