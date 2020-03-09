@@ -19,10 +19,29 @@ defmodule BattleBox.GameEngine.PubSub do
     end)
   end
 
-  def broadcast_game_update(pubsub, %{id: id}) do
-    Registry.dispatch(registry_name(pubsub), "game:#{id}", fn entries ->
-      for {pid, events} <- entries, :game_update in events, do: send(pid, {:game_update, id})
+  def broadcast_game_update(pubsub, %{id: game_id} = game) when not is_nil(game_id) do
+    lobby_id =
+      case game do
+        %{lobby: %{id: lobby_id}} when not is_nil(lobby_id) -> lobby_id
+        %{lobby_id: lobby_id} when not is_nil(lobby_id) -> lobby_id
+      end
+
+    [
+      "game:#{game_id}",
+      "lobby:#{lobby_id}"
+    ]
+    |> Enum.each(fn topic ->
+      Registry.dispatch(registry_name(pubsub), topic, fn entries ->
+        for {pid, events} <- entries, :game_update in events do
+          send(pid, {:game_update, game_id})
+        end
+      end)
     end)
+  end
+
+  def subscribe_to_lobby_events(pubsub, lobby_id, events) do
+    {:ok, _pid} = Registry.register(registry_name(pubsub), "lobby:#{lobby_id}", events)
+    :ok
   end
 
   def subscribe_to_user_events(pubsub, user_id, events) do

@@ -40,6 +40,9 @@ defmodule BattleBox.GameEngine do
   def subscribe_to_user_events(game_engine, user_id, events),
     do: GameEnginePubSub.subscribe_to_user_events(pubsub_name(game_engine), user_id, events)
 
+  def subscribe_to_lobby_events(game_engine, lobby_id, events),
+    do: GameEnginePubSub.subscribe_to_lobby_events(pubsub_name(game_engine), lobby_id, events)
+
   def subscribe_to_game_events(game_engine, game_id, events),
     do: GameEnginePubSub.subscribe_to_game_events(pubsub_name(game_engine), game_id, events)
 
