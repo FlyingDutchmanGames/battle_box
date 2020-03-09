@@ -17,8 +17,24 @@ defmodule BattleBox.GameEngine.GameServer.GameSupervisor do
     DynamicSupervisor.start_child(game_supervisor, {GameServer, opts})
   end
 
+  def get_live_games_with_lobby_id(game_registry, lobby_id) do
+    select_from_registry(game_registry, select_games_with_lobby_id(lobby_id))
+  end
+
   def get_live_games(game_registry) do
-    Registry.select(game_registry, @select_all)
+    select_from_registry(game_registry, @select_all)
+  end
+
+  defp select_games_with_lobby_id(lobby_id) do
+    [
+      {{:"$1", :"$2", :"$3"},
+       [{:==, {:map_get, :id, {:map_get, :lobby, {:map_get, :game, :"$3"}}}, lobby_id}],
+       [{{:"$1", :"$2", :"$3"}}]}
+    ]
+  end
+
+  defp select_from_registry(registry, match_spec) do
+    Registry.select(registry, match_spec)
     |> Enum.map(fn {game_id, pid, attrs} ->
       Map.merge(attrs, %{game_id: game_id, pid: pid})
     end)

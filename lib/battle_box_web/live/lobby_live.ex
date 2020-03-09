@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.LobbyLive do
   use BattleBoxWeb, :live_view
-  alias BattleBox.{Lobby, Repo}
+  alias BattleBox.{GameEngine, Lobby, Repo}
   alias BattleBoxWeb.{LobbyView, PageView}
 
   def mount(%{"lobby_id" => lobby_id}, _session, socket) do
@@ -13,8 +13,15 @@ defmodule BattleBoxWeb.LobbyLive do
         {:ok, assign(socket, :not_found, true)}
 
       lobby ->
-        {:ok, assign(socket, :lobby, lobby)}
+        live_games = GameEngine.get_live_games_with_lobby_id(game_engine(), lobby.id)
+        for %{pid: pid} <- live_games, do: Process.monitor(pid)
+        {:ok, assign(socket, lobby: lobby, live_games: live_games)}
     end
+  end
+
+  def handle_info({:DOWN, _ref, :process, pid, _reason}, socket) do
+    live_games = Enum.reject(socket.assigns.live_games, &(&1.pid == pid))
+    {:noreply, assign(socket, :live_games, live_games)}
   end
 
   def render(%{not_found: true}) do

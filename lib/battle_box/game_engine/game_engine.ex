@@ -56,6 +56,9 @@ defmodule BattleBox.GameEngine do
 
   def get_live_games(game_engine), do: GameSup.get_live_games(game_registry_name(game_engine))
 
+  def get_live_games_with_lobby_id(game_engine, lobby_id),
+    do: GameSup.get_live_games_with_lobby_id(game_registry_name(game_engine), lobby_id)
+
   def get_connection(game_engine, connection_id),
     do: get_process(connection_registry_name(game_engine), connection_id, :connection_id)
 
