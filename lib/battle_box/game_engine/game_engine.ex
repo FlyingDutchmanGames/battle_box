@@ -37,6 +37,9 @@ defmodule BattleBox.GameEngine do
   def broadcast_game_update(game_engine, game),
     do: GameEnginePubSub.broadcast_game_update(pubsub_name(game_engine), game)
 
+  def broadcast_game_started(game_engine, game),
+    do: GameEnginePubSub.broadcast_game_started(pubsub_name(game_engine), game)
+
   def subscribe_to_user_events(game_engine, user_id, events),
     do: GameEnginePubSub.subscribe_to_user_events(pubsub_name(game_engine), user_id, events)
 

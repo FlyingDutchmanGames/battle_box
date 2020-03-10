@@ -82,8 +82,6 @@ defmodule BattleBox.PubSubTest do
 
   describe "game events" do
     test "if you subscribe to game events, game_update you get them", context do
-      game_id = @game_id
-
       named_proxy(:game_update_listener, fn ->
         :ok = GameEngine.subscribe_to_game_events(context.game_engine, @game_id, [:game_update])
       end)
@@ -94,8 +92,19 @@ defmodule BattleBox.PubSubTest do
 
       Process.sleep(10)
       :ok = GameEngine.broadcast_game_update(context.game_engine, context.game)
-      assert_receive {:game_update_listener, {:game_update, ^game_id}}
-      assert_receive {:lobby_update_listener, {:game_update, ^game_id}}
+      assert_receive {:game_update_listener, {:game_update, @game_id}}
+      assert_receive {:lobby_update_listener, {:game_update, @game_id}}
+    end
+
+    test "game_started event works", context do
+      named_proxy(:lobby_update_listener, fn ->
+        :ok =
+          GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_started])
+      end)
+
+      Process.sleep(10)
+      GameEngine.broadcast_game_started(context.game_engine, context.game)
+      assert_receive {:lobby_update_listener, {:game_started, @game_id}}
     end
   end
 end
