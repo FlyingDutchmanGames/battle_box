@@ -14,6 +14,10 @@ V1
 [ ] Bot Server Follow Flow
 [ ] More Efficent Robot Game Representation
   [ ] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
+  [ ] limit memory usage of game servers
+  [ ] break out the live game data from the live game metadata, most places (lobby live) only need live game metadad
+  [ ] Binary representation of robot game events
+  [ ] Manual GC?
 [ ] switch game server to be 100% defdelegate
 [ ] Lobby Page
   [x] Show Live Games
