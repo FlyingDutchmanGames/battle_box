@@ -47,7 +47,8 @@ defmodule BattleBox.MixProject do
       {:floki, ">= 0.25.0", only: :test},
       {:gen_state_machine, "~> 2.0"},
       {:httpoison, "~> 1.6"},
-      {:bypass, "~> 1.0", only: :test}
+      {:bypass, "~> 1.0", only: :test},
+      {:observer_cli, "~> 1.5"}
     ]
   end
 
