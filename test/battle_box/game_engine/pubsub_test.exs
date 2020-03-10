@@ -1,9 +1,11 @@
 defmodule BattleBox.PubSubTest do
   use ExUnit.Case, async: true
   alias BattleBox.{Game, Bot, Lobby, GameEngine}
+  import BattleBox.TestConvenienceHelpers, only: [named_proxy: 2]
 
   @user_id Ecto.UUID.generate()
   @game_id Ecto.UUID.generate()
+  @lobby_id Ecto.UUID.generate()
 
   setup %{test: name} do
     {:ok, _pid} = GameEngine.start_link(name: name)
@@ -17,11 +19,13 @@ defmodule BattleBox.PubSubTest do
     }
 
     lobby = %Lobby{
+      id: @lobby_id,
       name: "FOO"
     }
 
     game = %Game{
-      id: @game_id
+      id: @game_id,
+      lobby_id: @lobby_id
     }
 
     %{bot: bot, lobby: lobby, game: game}
@@ -78,10 +82,29 @@ defmodule BattleBox.PubSubTest do
 
   describe "game events" do
     test "if you subscribe to game events, game_update you get them", context do
-      game_id = @game_id
-      :ok = GameEngine.subscribe_to_game_events(context.game_engine, @game_id, [:game_update])
+      named_proxy(:game_update_listener, fn ->
+        :ok = GameEngine.subscribe_to_game_events(context.game_engine, @game_id, [:game_update])
+      end)
+
+      named_proxy(:lobby_update_listener, fn ->
+        :ok = GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_update])
+      end)
+
+      Process.sleep(10)
       :ok = GameEngine.broadcast_game_update(context.game_engine, context.game)
-      assert_receive {:game_update, ^game_id}
+      assert_receive {:game_update_listener, {:game_update, @game_id}}
+      assert_receive {:lobby_update_listener, {:game_update, @game_id}}
+    end
+
+    test "game_started event works", context do
+      named_proxy(:lobby_update_listener, fn ->
+        :ok =
+          GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_started])
+      end)
+
+      Process.sleep(10)
+      GameEngine.broadcast_game_started(context.game_engine, context.game)
+      assert_receive {:lobby_update_listener, {:game_started, @game_id}}
     end
   end
 end

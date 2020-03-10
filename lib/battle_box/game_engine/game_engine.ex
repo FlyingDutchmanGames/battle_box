@@ -37,8 +37,14 @@ defmodule BattleBox.GameEngine do
   def broadcast_game_update(game_engine, game),
     do: GameEnginePubSub.broadcast_game_update(pubsub_name(game_engine), game)
 
+  def broadcast_game_started(game_engine, game),
+    do: GameEnginePubSub.broadcast_game_started(pubsub_name(game_engine), game)
+
   def subscribe_to_user_events(game_engine, user_id, events),
     do: GameEnginePubSub.subscribe_to_user_events(pubsub_name(game_engine), user_id, events)
+
+  def subscribe_to_lobby_events(game_engine, lobby_id, events),
+    do: GameEnginePubSub.subscribe_to_lobby_events(pubsub_name(game_engine), lobby_id, events)
 
   def subscribe_to_game_events(game_engine, game_id, events),
     do: GameEnginePubSub.subscribe_to_game_events(pubsub_name(game_engine), game_id, events)
@@ -55,6 +61,9 @@ defmodule BattleBox.GameEngine do
     do: get_process(game_registry_name(game_engine), game_id, :game_id)
 
   def get_live_games(game_engine), do: GameSup.get_live_games(game_registry_name(game_engine))
+
+  def get_live_games_with_lobby_id(game_engine, lobby_id),
+    do: GameSup.get_live_games_with_lobby_id(game_registry_name(game_engine), lobby_id)
 
   def get_connection(game_engine, connection_id),
     do: get_process(connection_registry_name(game_engine), connection_id, :connection_id)
