@@ -12,10 +12,12 @@ V1
   [ ] We should tell people when they miss a timeout?
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] Bot Server Follow Flow
+[ ] More Efficent Robot Game Representation
+  [ ] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
 [ ] switch game server to be 100% defdelegate
 [ ] Lobby Page
   [x] Show Live Games
-  [ ] Add score to in game server registry metadata
+  [x] Add score to in game server registry metadata
   [ ] Link to historical games
 [ ] Hide `robot_game` from matchmaker logic and game server by putting it in `BattleBox.Game`
 [ ] url identifiers
