@@ -11,7 +11,7 @@ defmodule BattleBox.GameEngine.PubSub do
     Supervisor.init(children, strategy: :one_for_all)
   end
 
-  def broadcast_bot_server_started(pubsub, %{lobby: _, bot: bot, bot_server_id: id}) do
+  def broadcast_bot_server_start(pubsub, %{lobby: _, bot: bot, bot_server_id: id}) do
     Registry.dispatch(registry_name(pubsub), "user:#{bot.user_id}", fn entries ->
       for {pid, events} <- entries,
           :bot_server_start in events,
@@ -19,14 +19,14 @@ defmodule BattleBox.GameEngine.PubSub do
     end)
   end
 
-  def broadcast_game_started(pubsub, %{id: game_id} = game) when not is_nil(game_id) do
+  def broadcast_game_start(pubsub, %{id: game_id} = game) when not is_nil(game_id) do
     lobby_id = get_lobby_id(game)
 
     ["lobby:#{lobby_id}"]
     |> Enum.each(fn topic ->
       Registry.dispatch(registry_name(pubsub), topic, fn entries ->
-        for {pid, events} <- entries, :game_started in events do
-          send(pid, {:game_started, game_id})
+        for {pid, events} <- entries, :game_start in events do
+          send(pid, {:game_start, game_id})
         end
       end)
     end)

@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.GameEngine.{MatchMaker, GameServer}
+  alias BattleBox.{GameEngine, GameEngine.MatchMaker, GameEngine.GameServer}
 
   def accept_game(bot_server, game_id, timeout \\ 5000) do
     GenStateMachine.call(bot_server, {:accept_game, game_id}, timeout)
@@ -32,6 +32,12 @@ defmodule BattleBox.GameEngine.BotServer do
   end
 
   def init(%{connection: connection} = data) do
+    :ok =
+      GameEngine.broadcast_bot_server_start(
+        data.names.game_engine,
+        Map.take(data, [:bot, :lobby, :bot_server_id])
+      )
+
     Process.monitor(connection)
     {:ok, :options, data}
   end

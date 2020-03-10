@@ -31,14 +31,14 @@ defmodule BattleBox.GameEngine do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  def broadcast_bot_server_started(game_engine, bot_server),
-    do: GameEnginePubSub.broadcast_bot_server_started(pubsub_name(game_engine), bot_server)
+  def broadcast_bot_server_start(game_engine, bot_server),
+    do: GameEnginePubSub.broadcast_bot_server_start(pubsub_name(game_engine), bot_server)
+
+  def broadcast_game_start(game_engine, game),
+    do: GameEnginePubSub.broadcast_game_start(pubsub_name(game_engine), game)
 
   def broadcast_game_update(game_engine, game),
     do: GameEnginePubSub.broadcast_game_update(pubsub_name(game_engine), game)
-
-  def broadcast_game_started(game_engine, game),
-    do: GameEnginePubSub.broadcast_game_started(pubsub_name(game_engine), game)
 
   def subscribe_to_user_events(game_engine, user_id, events),
     do: GameEnginePubSub.subscribe_to_user_events(pubsub_name(game_engine), user_id, events)

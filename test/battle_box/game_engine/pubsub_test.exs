@@ -39,7 +39,7 @@ defmodule BattleBox.PubSubTest do
         GameEngine.subscribe_to_user_events(context.game_engine, @user_id, [:bot_server_start])
 
       :ok =
-        GameEngine.broadcast_bot_server_started(context.game_engine, %{
+        GameEngine.broadcast_bot_server_start(context.game_engine, %{
           bot: context.bot,
           lobby: context.lobby,
           bot_server_id: bot_server_id
@@ -55,7 +55,7 @@ defmodule BattleBox.PubSubTest do
         GameEngine.subscribe_to_user_events(context.game_engine, @user_id, [:bot_server_start])
 
       :ok =
-        GameEngine.broadcast_bot_server_started(context.game_engine, %{
+        GameEngine.broadcast_bot_server_start(context.game_engine, %{
           bot: %{context.bot | user_id: Ecto.UUID.generate()},
           lobby: context.lobby,
           bot_server_id: bot_server_id
@@ -70,7 +70,7 @@ defmodule BattleBox.PubSubTest do
       :ok = GameEngine.subscribe_to_user_events(context.game_engine, @user_id, [])
 
       :ok =
-        GameEngine.broadcast_bot_server_started(context.game_engine, %{
+        GameEngine.broadcast_bot_server_start(context.game_engine, %{
           bot: context.bot,
           lobby: context.lobby,
           bot_server_id: bot_server_id
@@ -96,15 +96,14 @@ defmodule BattleBox.PubSubTest do
       assert_receive {:lobby_update_listener, {:game_update, @game_id}}
     end
 
-    test "game_started event works", context do
+    test "game_start event works", context do
       named_proxy(:lobby_update_listener, fn ->
-        :ok =
-          GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_started])
+        :ok = GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_start])
       end)
 
       Process.sleep(10)
-      GameEngine.broadcast_game_started(context.game_engine, context.game)
-      assert_receive {:lobby_update_listener, {:game_started, @game_id}}
+      GameEngine.broadcast_game_start(context.game_engine, context.game)
+      assert_receive {:lobby_update_listener, {:game_start, @game_id}}
     end
   end
 end

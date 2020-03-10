@@ -14,7 +14,7 @@ defmodule BattleBoxWeb.LobbyLive do
 
       lobby ->
         GameEngine.subscribe_to_lobby_events(game_engine(), lobby_id, [
-          :game_started,
+          :game_start,
           :game_update
         ])
 
@@ -29,7 +29,7 @@ defmodule BattleBoxWeb.LobbyLive do
     {:noreply, assign(socket, :live_games, live_games)}
   end
 
-  def handle_info({:game_started, game_id}, socket) do
+  def handle_info({:game_start, game_id}, socket) do
     live_games =
       case GameEngine.get_game(game_engine(), game_id) do
         nil ->
