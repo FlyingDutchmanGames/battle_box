@@ -13,7 +13,11 @@ defmodule BattleBoxWeb.LobbyLive do
         {:ok, assign(socket, :not_found, true)}
 
       lobby ->
-        GameEngine.subscribe_to_lobby_events(game_engine(), lobby_id, [:game_update])
+        GameEngine.subscribe_to_lobby_events(game_engine(), lobby_id, [
+          :game_started,
+          :game_update
+        ])
+
         live_games = GameEngine.get_live_games_with_lobby_id(game_engine(), lobby.id)
         for %{pid: pid} <- live_games, do: Process.monitor(pid)
         {:ok, assign(socket, lobby: lobby, live_games: live_games)}
@@ -22,6 +26,20 @@ defmodule BattleBoxWeb.LobbyLive do
 
   def handle_info({:DOWN, _ref, :process, pid, _reason}, socket) do
     live_games = Enum.reject(socket.assigns.live_games, &(&1.pid == pid))
+    {:noreply, assign(socket, :live_games, live_games)}
+  end
+
+  def handle_info({:game_started, game_id}, socket) do
+    live_games =
+      case GameEngine.get_game(game_engine(), game_id) do
+        nil ->
+          socket.assigns.live_games
+
+        game ->
+          Process.monitor(game.pid)
+          [game | socket.assigns.live_games]
+      end
+
     {:noreply, assign(socket, :live_games, live_games)}
   end
 

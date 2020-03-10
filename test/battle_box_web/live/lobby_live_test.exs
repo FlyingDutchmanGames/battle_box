@@ -70,5 +70,19 @@ defmodule BattleBoxWeb.LobbyLiveTest do
       {:ok, document} = render(view) |> Floki.parse_document()
       assert [] == Floki.find(document, ".game")
     end
+
+    test "it will add newly started games to the page", %{conn: conn} = context do
+      {:ok, view, html} = live(conn, "/lobbies/#{context.lobby.id}")
+      {:ok, document} = Floki.parse_document(html)
+      assert [] == Floki.find(document, ".game")
+
+      :ok = BotServer.match_make(context.bot_server_1)
+      :ok = BotServer.match_make(context.bot_server_2)
+      :ok = GameEngine.force_match_make(context.game_engine)
+
+      Process.sleep(20)
+      {:ok, document} = render(view) |> Floki.parse_document()
+      assert [_] = Floki.find(document, ".game")
+    end
   end
 end
