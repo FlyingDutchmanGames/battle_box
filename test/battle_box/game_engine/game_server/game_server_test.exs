@@ -29,12 +29,12 @@ defmodule BattleBox.GameEngine.GameServerTest do
     assert Process.alive?(pid)
   end
 
-  test "game servers release a game started event", %{init_opts: %{game: %{id: id}}} = context do
+  test "game servers emit a game start event", %{init_opts: %{game: %{id: id}}} = context do
     :ok =
-      GameEngine.subscribe_to_lobby_events(context.game_engine, context.lobby.id, [:game_started])
+      GameEngine.subscribe_to_lobby_events(context.game_engine, context.lobby.id, [:game_start])
 
     {:ok, _pid} = GameEngine.start_game(context.game_engine, context.init_opts)
-    assert_receive {:game_started, ^id}
+    assert_receive {:game_start, ^id}
   end
 
   test "the game server registers in the registry", context do

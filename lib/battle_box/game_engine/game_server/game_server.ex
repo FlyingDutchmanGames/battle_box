@@ -26,7 +26,7 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def init(data) do
-    :ok = GameEngine.broadcast_game_started(data.names.game_engine, data.game)
+    :ok = GameEngine.broadcast_game_start(data.names.game_engine, data.game)
     {:ok, :game_acceptance, data, {:next_event, :internal, :setup}}
   end
 

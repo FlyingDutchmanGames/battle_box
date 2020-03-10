@@ -56,12 +56,22 @@ defmodule BattleBox.GameEngine.BotServerTest do
     %{p1_server: p1_server, p2_server: p2_server}
   end
 
-  test "you can start the player server", context do
+  test "you can start the bot server", context do
     assert Process.alive?(context.p1_server)
     assert Process.alive?(context.p2_server)
   end
 
-  test "The player server dies if the connection dies", %{p1_server: p1} = context do
+  test "it publishes the bot server start event", context do
+    id = Ecto.UUID.generate()
+    GameEngine.subscribe_to_user_events(context.game_engine, @user_id, [:bot_server_start])
+
+    {:ok, _, _} =
+      GameEngine.start_bot(context.game_engine, %{context.init_opts_p1 | bot_server_id: id})
+
+    assert_receive {:bot_server_start, ^id}
+  end
+
+  test "The bot server dies if the connection dies", %{p1_server: p1} = context do
     Process.flag(:trap_exit, true)
     p1_conn = context.init_opts_p1.connection
     Process.exit(p1_conn, :kill)
@@ -69,7 +79,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
     assert_receive {:DOWN, _, _, ^p1, :normal}
   end
 
-  test "the player server registers in the player server registry",
+  test "the bot server registers in the bot server registry",
        %{p1_server: p1, p2_server: p2, bot: bot, lobby: lobby} = context do
     assert Registry.count(context.bot_registry) == 2
 
@@ -81,7 +91,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   describe "Matchmaking in a lobby" do
-    test "You can ask the player server to match_make",
+    test "You can ask the bot server to match_make",
          %{p1_server: p1, bot: %{id: bot_id}} = context do
       assert [] == MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
 
