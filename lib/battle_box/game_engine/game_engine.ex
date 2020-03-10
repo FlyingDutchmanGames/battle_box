@@ -31,27 +31,42 @@ defmodule BattleBox.GameEngine do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  def broadcast(game_engine, topic, message),
-    do: GameEnginePubSub.broadcast(pubsub_name(game_engine), topic, message)
+  def broadcast_bot_server_started(game_engine, bot_server),
+    do: GameEnginePubSub.broadcast_bot_server_started(pubsub_name(game_engine), bot_server)
 
-  def subscribe(game_engine, topic),
-    do: GameEnginePubSub.subscribe(pubsub_name(game_engine), topic)
+  def broadcast_game_update(game_engine, game),
+    do: GameEnginePubSub.broadcast_game_update(pubsub_name(game_engine), game)
+
+  def broadcast_game_started(game_engine, game),
+    do: GameEnginePubSub.broadcast_game_started(pubsub_name(game_engine), game)
+
+  def subscribe_to_user_events(game_engine, user_id, events),
+    do: GameEnginePubSub.subscribe_to_user_events(pubsub_name(game_engine), user_id, events)
+
+  def subscribe_to_lobby_events(game_engine, lobby_id, events),
+    do: GameEnginePubSub.subscribe_to_lobby_events(pubsub_name(game_engine), lobby_id, events)
+
+  def subscribe_to_game_events(game_engine, game_id, events),
+    do: GameEnginePubSub.subscribe_to_game_events(pubsub_name(game_engine), game_id, events)
 
   def start_game(game_engine, opts),
     do: GameSup.start_game(game_supervisor_name(game_engine), opts)
 
-  def start_bot(game_engine, opts),
-    do: BotSup.start_bot(bot_supervisor_name(game_engine), opts)
+  defdelegate start_bot(game_engine, opts), to: BotSup
 
   def force_match_make(game_engine),
     do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
 
-  def get_game(game_engine, game_id), do: get_process(game_registry_name(game_engine), game_id)
+  def get_game(game_engine, game_id),
+    do: get_process(game_registry_name(game_engine), game_id, :game_id)
 
   def get_live_games(game_engine), do: GameSup.get_live_games(game_registry_name(game_engine))
 
+  def get_live_games_with_lobby_id(game_engine, lobby_id),
+    do: GameSup.get_live_games_with_lobby_id(game_registry_name(game_engine), lobby_id)
+
   def get_connection(game_engine, connection_id),
-    do: get_process(connection_registry_name(game_engine), connection_id)
+    do: get_process(connection_registry_name(game_engine), connection_id, :connection_id)
 
   def get_connections_with_user_id(game_engine, user_id),
     do:
@@ -61,7 +76,10 @@ defmodule BattleBox.GameEngine do
       )
 
   def get_bot_server(game_engine, bot_server_id),
-    do: get_process(bot_registry_name(game_engine), bot_server_id)
+    do: get_process(bot_registry_name(game_engine), bot_server_id, :bot_server_id)
+
+  def get_bot_servers_with_user_id(game_engine, user_id),
+    do: BotSup.get_bot_servers_with_user_id(bot_registry_name(game_engine), user_id)
 
   def names(name \\ @default_name) do
     %{
@@ -88,9 +106,9 @@ defmodule BattleBox.GameEngine do
   defp connection_registry_name(name), do: Module.concat(name, Connection.Registry)
   defp pubsub_name(name), do: Module.concat(name, PubSub)
 
-  defp get_process(registry, id) do
+  defp get_process(registry, id, id_name) do
     case Registry.lookup(registry, id) do
-      [{pid, attributes}] -> Map.put(attributes, :pid, pid)
+      [{pid, attributes}] -> Map.merge(attributes, %{:pid => pid, id_name => id})
       [] -> nil
     end
   end

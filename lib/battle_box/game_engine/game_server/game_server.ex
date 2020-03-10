@@ -26,6 +26,7 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def init(data) do
+    :ok = GameEngine.broadcast_game_started(data.names.game_engine, data.game)
     {:ok, :game_acceptance, data, {:next_event, :internal, :setup}}
   end
 
@@ -64,25 +65,28 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event(:internal, :collect_moves, :moves, data) do
-    for {player, pid} <- data.players do
-      send(pid, moves_request(data.game, player))
+    requests = BattleBoxGame.moves_requests(data.game.robot_game)
+
+    for {player, request} <- requests do
+      send(data.players[player], moves_request(data.game, player, request))
     end
 
-    {:keep_state, Map.put(data, :moves, [])}
+    moves = Map.new(requests, fn {player, _} -> {player, nil} end)
+
+    {:keep_state, Map.put(data, :moves, moves)}
   end
 
   def handle_event(:cast, {:moves, player, moves}, :moves, data) do
-    case data.moves do
-      [] ->
-        {:keep_state, put_in(data.moves, [{player, moves}])}
+    moves = Map.put(data.moves, player, moves)
 
-      [{other_player, _}] when other_player != player ->
-        moves = Map.new([{player, moves} | data.moves])
-        data = update_in(data.game.robot_game, &BattleBoxGame.calculate_turn(&1, moves))
+    if Enum.all?(Map.values(moves)) do
+      data = update_in(data.game.robot_game, &BattleBoxGame.calculate_turn(&1, moves))
 
-        if BattleBoxGame.over?(data.game.robot_game),
-          do: {:keep_state, data, {:next_event, :internal, :finalize}},
-          else: {:repeat_state, data, {:next_event, :internal, :collect_moves}}
+      if BattleBoxGame.over?(data.game.robot_game),
+        do: {:keep_state, data, {:next_event, :internal, :finalize}},
+        else: {:repeat_state, data, {:next_event, :internal, :collect_moves}}
+    else
+      {:keep_state, put_in(data.moves, moves)}
     end
   end
 
@@ -111,15 +115,15 @@ defmodule BattleBox.GameEngine.GameServer do
   def handle_event(:enter, _, new_state, %{names: names, game: game}) do
     metadata = %{status: new_state, game: game}
     {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
-    :ok = GameEngine.broadcast(names.game_engine, "game:#{game.id}", {:game_update, game.id})
+    :ok = GameEngine.broadcast_game_update(names.game_engine, game)
     :keep_state_and_data
   end
 
-  defp moves_request(game, player) do
+  defp moves_request(game, player, request) do
     {:moves_request,
      %{
        game_id: game.id,
-       game_state: BattleBoxGame.moves_request(game.robot_game),
+       game_state: request,
        minimum_time: game.lobby.move_time_minimum_ms,
        maximum_time: game.lobby.move_time_maximum_ms,
        player: player

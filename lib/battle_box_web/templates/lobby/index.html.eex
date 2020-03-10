@@ -4,7 +4,7 @@
 <%= for lobby <- @lobbies do %>
   <div class="lobby" style="border: 1px solid black; padding: 10px; margin: 10px;">
     <div class="name">Name: <%= lobby.name %></div>
-    <div class="id">ID: <a href="<%= Routes.lobby_path(@conn, :show, lobby.id) %>"><%= lobby.id %></a></div>
+    <div class="id">ID: <a href="<%= Routes.live_path(@conn, BattleBoxWeb.LobbyLive, lobby.id) %>"><%= lobby.id %></a></div>
   </div>
 <% end %>
 </div>

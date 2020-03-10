@@ -9,3 +9,15 @@
   padding: 10px;
   margin: 10px;
 }
+
+.bot-servers {
+  border: 1px solid green;
+  padding: 10px;
+  margin: 10px;
+}
+
+.bot-server {
+  border: 1px solid orange;
+  padding: 10px;
+  margin: 10px;
+}

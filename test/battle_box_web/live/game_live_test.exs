@@ -66,9 +66,6 @@ defmodule BattleBoxWeb.GameLiveTest do
 
     test "it will update when the game updates (and go to the most recent move)",
          %{conn: conn} = context do
-      Process.link(context.game_server)
-      GameEngine.subscribe(context.game_engine, "game:#{@game_id}")
-
       {:ok, view, html} = live(conn, "/games/#{@game_id}")
       Process.link(view.pid)
       assert html =~ "TURN: 0 / 0"

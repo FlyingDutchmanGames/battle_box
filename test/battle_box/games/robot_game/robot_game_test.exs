@@ -98,80 +98,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
-  describe "persistance" do
-    test "You can persist a game" do
-      game = RobotGame.new()
-      assert {:ok, _} = RobotGame.persist(game)
-    end
-
-    test "trying to get a game that doesnt exist yields nil" do
-      assert nil == RobotGame.get_by_id(Ecto.UUID.generate())
-    end
-
-    test "trying to perist a game that has persistent?: false is a noop" do
-      game = RobotGame.new(settings: %{persistent?: false})
-      assert {:ok, game} = RobotGame.persist(game)
-      refute is_nil(game.id)
-      assert nil == RobotGame.get_by_id(game.id)
-    end
-
-    test "you can persist a game twice" do
-      game = RobotGame.new()
-      assert {:ok, game} = RobotGame.persist(game)
-      assert {:ok, _} = RobotGame.persist(game)
-    end
-
-    test "you can persist changes multiple time" do
-      game = RobotGame.new(settings: %{terrain: %{}})
-      assert {:ok, game} = RobotGame.persist(game)
-      game = RobotGame.complete_turn(game)
-      {:ok, game} = RobotGame.persist(game)
-      assert 1 == RobotGame.get_by_id(game.id).turn
-    end
-
-    test "when you persist a game it flushes the unpersisted events to disk" do
-      game = RobotGame.new()
-
-      game =
-        RobotGame.put_event(game, %{
-          cause: "spawn",
-          effects: [["create_robot", "player_1", uuid(), 50, [0, 0]]]
-        })
-
-      {:ok, game} = RobotGame.persist(game)
-
-      reloaded_game = RobotGame.get_by_id(game.id)
-      assert normalize_events(game.events) == normalize_events(reloaded_game.events)
-      assert RobotGame.robots(game) == RobotGame.robots(reloaded_game)
-    end
-
-    test "you can persist a new turn to a game that already has a turn" do
-      game = RobotGame.new()
-
-      game =
-        RobotGame.put_event(game, %{
-          cause: "spawn",
-          effects: [["create_robot", "player_1", uuid(), 50, [0, 0]]]
-        })
-
-      {:ok, game} = RobotGame.persist(game)
-
-      game = RobotGame.complete_turn(game)
-
-      game =
-        RobotGame.put_event(game, %{
-          cause: "spawn",
-          effects: [["create_robot", "player_1", uuid(), 50, [1, 1]]]
-        })
-
-      {:ok, game} = RobotGame.persist(game)
-      reloaded_game = RobotGame.get_by_id(game.id)
-
-      assert RobotGame.robots(game) == RobotGame.robots(reloaded_game)
-      assert normalize_events(game.events) == normalize_events(reloaded_game.events)
-    end
-  end
-
   describe "spawning_round?/1" do
     test "it knows if its a spawning round based on the turn and spawn_every param" do
       should_spawn = [
@@ -433,10 +359,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert RobotGame.over?(game)
       assert RobotGame.calculate_winner(game).winner == nil
     end
-  end
-
-  defp normalize_events(events) do
-    Enum.map(events, &Map.drop(&1, [:__meta__, :__struct__]))
   end
 
   defp uuid(), do: Ecto.UUID.generate()
