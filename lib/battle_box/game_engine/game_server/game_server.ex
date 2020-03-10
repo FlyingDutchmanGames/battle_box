@@ -80,7 +80,7 @@ defmodule BattleBox.GameEngine.GameServer do
     moves = Map.put(data.moves, player, moves)
 
     if Enum.all?(Map.values(moves)) do
-      data = update_in(data.game.robot_game, &BattleBoxGame.calculate_turn(&1, moves))
+      data = update_in(data.game, &Game.calculate_turn(&1, moves))
 
       if BattleBoxGame.over?(data.game.robot_game),
         do: {:keep_state, data, {:next_event, :internal, :finalize}},
