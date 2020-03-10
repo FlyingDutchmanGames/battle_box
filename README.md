@@ -11,6 +11,12 @@ V1
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
+[ ] Bot Server Follow Flow
+[ ] switch game server to be 100% defdelegate
+[ ] Make bot server announce bot server start
+[ ] Lobby Page
+  [ ] Show Live Games
+  [ ] Link to historical games
 [ ] Hide `robot_game` from matchmaker logic and game server by putting it in `BattleBox.Game`
 [ ] url identifiers
   [ ] `/users/grantjamespowell`
