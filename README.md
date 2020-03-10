@@ -13,9 +13,9 @@ V1
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] Bot Server Follow Flow
 [ ] switch game server to be 100% defdelegate
-[ ] Make bot server announce bot server start
 [ ] Lobby Page
-  [ ] Show Live Games
+  [x] Show Live Games
+  [ ] Add score to in game server registry metadata
   [ ] Link to historical games
 [ ] Hide `robot_game` from matchmaker logic and game server by putting it in `BattleBox.Game`
 [ ] url identifiers
@@ -48,6 +48,7 @@ V1
 
 Nice to Haves
 ======
+[ ] Matchmaker page
 [ ] Handle when connection is closed on trying to send from connection server
 [ ] SuperAdmin
 [ ] A decent bot implmentation for testing
@@ -59,6 +60,7 @@ Nice to Haves
 
 Done
 =======
+[x] Make bot server announce bot server start
 [x] Pass the bot object into the matchmaker
 [x] Bot Server Registry Improvements
 [x] Client starts the convo
