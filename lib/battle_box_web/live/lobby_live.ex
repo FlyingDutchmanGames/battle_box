@@ -31,7 +31,7 @@ defmodule BattleBoxWeb.LobbyLive do
 
   def handle_info({:game_start, game_id}, socket) do
     live_games =
-      case GameEngine.get_game(game_engine(), game_id) do
+      case GameEngine.get_game_server(game_engine(), game_id) do
         nil ->
           socket.assigns.live_games
 
@@ -44,7 +44,7 @@ defmodule BattleBoxWeb.LobbyLive do
   end
 
   def handle_info({:game_update, game_id}, socket) do
-    game = GameEngine.get_game(game_engine(), game_id)
+    game = GameEngine.get_game_server(game_engine(), game_id)
 
     live_games =
       Enum.map(socket.assigns.live_games, fn

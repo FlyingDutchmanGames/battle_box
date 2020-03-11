@@ -69,7 +69,7 @@ defmodule BattleBoxWeb.GameLive do
   defp box_turn_number(_, turn), do: turn
 
   defp get_game(game_id) do
-    case GameEngine.get_game(game_engine(), game_id) do
+    case GameEngine.get_game_server(game_engine(), game_id) do
       nil ->
         game =
           Game.get_by_id(game_id)
