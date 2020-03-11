@@ -29,6 +29,12 @@ defmodule BattleBox.GameEngine.GameServerTest do
     assert Process.alive?(pid)
   end
 
+  test "you can get the game from it", context do
+    {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+    {:ok, game} = GameServer.get_game(pid)
+    assert game == Game.compress(context.init_opts.game)
+  end
+
   test "game servers emit a game start event", %{init_opts: %{game: %{id: id}}} = context do
     :ok =
       GameEngine.subscribe_to_lobby_events(context.game_engine, context.lobby.id, [:game_start])

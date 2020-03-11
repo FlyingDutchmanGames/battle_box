@@ -3,6 +3,10 @@ defmodule BattleBox.GameEngine.GameServer do
   alias BattleBoxGame
   alias BattleBox.{Repo, Game, GameEngine}
 
+  def get_game(game_server) do
+    GenStateMachine.call(game_server, :get_game)
+  end
+
   def accept_game(game_server, player) when is_binary(player) do
     GenStateMachine.cast(game_server, {:accept_game, player})
   end
@@ -28,6 +32,10 @@ defmodule BattleBox.GameEngine.GameServer do
   def init(data) do
     :ok = GameEngine.broadcast_game_start(data.names.game_engine, data.game)
     {:ok, :game_acceptance, data, {:next_event, :internal, :setup}}
+  end
+
+  def handle_event({:call, from}, :get_game, _state, data) do
+    {:keep_state_and_data, {:reply, from, {:ok, Game.compress(data.game)}}}
   end
 
   def handle_event(:internal, :setup, :game_acceptance, data) do
