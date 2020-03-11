@@ -35,6 +35,10 @@ defmodule BattleBox.Game do
     end)
   end
 
+  def metadata_only(game) do
+    Map.drop(game, [:robot_game])
+  end
+
   def persist(game) do
     game
     |> changeset

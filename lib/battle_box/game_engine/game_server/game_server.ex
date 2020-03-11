@@ -3,6 +3,10 @@ defmodule BattleBox.GameEngine.GameServer do
   alias BattleBoxGame
   alias BattleBox.{Repo, Game, GameEngine}
 
+  def get_game(game_server) do
+    GenStateMachine.call(game_server, :get_game)
+  end
+
   def accept_game(game_server, player) when is_binary(player) do
     GenStateMachine.cast(game_server, {:accept_game, player})
   end
@@ -28,6 +32,10 @@ defmodule BattleBox.GameEngine.GameServer do
   def init(data) do
     :ok = GameEngine.broadcast_game_start(data.names.game_engine, data.game)
     {:ok, :game_acceptance, data, {:next_event, :internal, :setup}}
+  end
+
+  def handle_event({:call, from}, :get_game, _state, data) do
+    {:keep_state_and_data, {:reply, from, {:ok, data.game}}}
   end
 
   def handle_event(:internal, :setup, :game_acceptance, data) do
@@ -113,7 +121,7 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event(:enter, _, new_state, %{names: names, game: game}) do
-    metadata = %{status: new_state, game: game}
+    metadata = %{status: new_state, game: Game.metadata_only(game)}
     {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
     :ok = GameEngine.broadcast_game_update(names.game_engine, game)
     :keep_state_and_data

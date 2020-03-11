@@ -29,6 +29,12 @@ defmodule BattleBox.GameEngine.GameServerTest do
     assert Process.alive?(pid)
   end
 
+  test "you can get the game from it", context do
+    {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+    {:ok, game} = GameServer.get_game(pid)
+    assert game == context.init_opts.game
+  end
+
   test "game servers emit a game start event", %{init_opts: %{game: %{id: id}}} = context do
     :ok =
       GameEngine.subscribe_to_lobby_events(context.game_engine, context.lobby.id, [:game_start])
@@ -45,7 +51,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     assert [{^pid, %{started_at: started_at, game: game}}] =
              Registry.lookup(context.game_registry, context.init_opts.game.id)
 
-    assert game == context.init_opts.game
+    assert game == Game.metadata_only(context.init_opts.game)
     assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 
