@@ -35,7 +35,7 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event({:call, from}, :get_game, _state, data) do
-    {:keep_state_and_data, {:reply, from, {:ok, Game.compress(data.game)}}}
+    {:keep_state_and_data, {:reply, from, {:ok, data.game}}}
   end
 
   def handle_event(:internal, :setup, :game_acceptance, data) do
@@ -121,7 +121,7 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event(:enter, _, new_state, %{names: names, game: game}) do
-    metadata = %{status: new_state, game: game}
+    metadata = %{status: new_state, game: Game.metadata_only(game)}
     {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
     :ok = GameEngine.broadcast_game_update(names.game_engine, game)
     :keep_state_and_data

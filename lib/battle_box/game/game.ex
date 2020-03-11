@@ -35,10 +35,6 @@ defmodule BattleBox.Game do
     end)
   end
 
-  def compress(game) do
-    update_in(game.robot_game, &Map.drop(&1, [:events]))
-  end
-
   def metadata_only(game) do
     Map.drop(game, [:robot_game])
   end
