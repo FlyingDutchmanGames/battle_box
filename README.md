@@ -28,12 +28,17 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 ```
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] Bot Server Follow Flow
+[ ] Game Live Page
+  [ ] Show the (Live) Badge
+  [ ] Show which player we're waiting on
+  [ ] Show if its recorded
+  [ ] Reload the page if there is a failure
 [ ] More Efficent Robot Game Representation
   [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
   [x] break out the live game data from the live game metadata, most places (lobby live) only need live game metadad
-  [ ] limit memory usage of game servers (they're currently at 2 mbs)
-  [ ] Binary representation of robot game events
+  [x] Binary representation of robot game events
   [ ] Binary representation of terrain (would be nice if was a literal)
+  [ ] limit memory usage of game servers (they're currently at 2 mbs)
   [ ] Manual GC?
 [ ] switch game server to be 100% defdelegate
 [ ] Lobby Page
