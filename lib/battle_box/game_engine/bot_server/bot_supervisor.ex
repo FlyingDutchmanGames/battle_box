@@ -34,7 +34,8 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     {:ok, bot_server, %{user_id: bot.user_id}}
   end
 
-  def get_bot_servers_with_user_id(bot_registry, user_id) do
+  def get_bot_servers_with_user_id(game_engine, user_id) do
+    bot_registry = GameEngine.names(game_engine).bot_registry
     get_from_registry(bot_registry, matches_user_id(user_id))
   end
 

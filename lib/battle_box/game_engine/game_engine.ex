@@ -42,6 +42,7 @@ defmodule BattleBox.GameEngine do
     do: GameSup.start_game(game_supervisor_name(game_engine), opts)
 
   defdelegate start_bot(game_engine, opts), to: BotSup
+  defdelegate get_bot_servers_with_user_id(game_engine, user_id), to: BotSup
 
   def force_match_make(game_engine),
     do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
@@ -66,9 +67,6 @@ defmodule BattleBox.GameEngine do
 
   def get_bot_server(game_engine, bot_server_id),
     do: get_process(bot_registry_name(game_engine), bot_server_id, :bot_server_id)
-
-  def get_bot_servers_with_user_id(game_engine, user_id),
-    do: BotSup.get_bot_servers_with_user_id(bot_registry_name(game_engine), user_id)
 
   def names(name \\ @default_name) do
     %{
