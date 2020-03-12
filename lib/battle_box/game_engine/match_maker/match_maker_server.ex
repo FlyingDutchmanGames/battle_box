@@ -1,15 +1,12 @@
 defmodule BattleBox.GameEngine.MatchMakerServer do
   use GenServer
-
-  alias BattleBox.GameEngine.{
-    MatchMaker,
-    MatchMaker.MatchMakerLogic,
-    GameServer.GameSupervisor
-  }
+  alias BattleBox.GameEngine
+  alias BattleBox.GameEngine.{MatchMaker, MatchMaker.MatchMakerLogic}
 
   @match_make_delay_ms 100
 
-  def force_match_make(match_maker_server) do
+  def force_match_make(game_engine) do
+    match_maker_server = GameEngine.names(game_engine).match_maker_server
     send(match_maker_server, :match_make)
     :ok
   end
@@ -29,7 +26,7 @@ defmodule BattleBox.GameEngine.MatchMakerServer do
       MatchMaker.queue_for_lobby(names.game_engine, lobby_id)
       |> MatchMakerLogic.make_matches(lobby_id)
       |> Enum.each(fn match_settings ->
-        {:ok, _pid} = GameSupervisor.start_game(names.game_supervisor, match_settings)
+        {:ok, _pid} = GameEngine.start_game(names.game_engine, match_settings)
       end)
     end)
 

@@ -46,7 +46,7 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
 
     :ok = MatchMaker.join_queue(names.game_engine, lobby.id, bot, player_1_pid)
     :ok = MatchMaker.join_queue(names.game_engine, lobby.id, bot, player_2_pid)
-    :ok = MatchMakerServer.force_match_make(names.match_maker_server)
+    :ok = MatchMakerServer.force_match_make(names.game_engine)
 
     assert_receive {:player_1,
                     {:game_request,
@@ -71,7 +71,7 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
 
     :ok = MatchMaker.join_queue(names.game_engine, lobby.id, bot, player_1_pid)
     :ok = MatchMaker.join_queue(names.game_engine, lobby2.id, bot, player_2_pid)
-    :ok = MatchMakerServer.force_match_make(names.match_maker_server)
+    :ok = MatchMakerServer.force_match_make(names.game_engine)
 
     refute_receive {_, {:game_request, _}}
   end
