@@ -78,6 +78,23 @@ defmodule BattleBoxWeb.GameLiveTest do
       Process.sleep(10)
       assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 9/, render(view))
     end
+
+    test "when the game server dies, it will switch to the historical view", context do
+      robot_game =
+        RobotGame.new()
+        |> RobotGame.complete_turn()
+        |> RobotGame.complete_turn()
+
+      {:ok, %{id: id}} =
+        Game.new(lobby: context.lobby, robot_game: robot_game, id: @game_id)
+        |> Game.persist()
+
+      {:ok, view, html} = live(conn, "/games/#{@game_id}")
+      assert html =~ "LIVE"
+      Process.exit(context.game_server, :kill)
+      Process.sleep(10)
+      refute render(view) =~ "LIVE"
+    end
   end
 
   describe "Arrow Keys let you change the turn you're viewing" do

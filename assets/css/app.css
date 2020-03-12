@@ -13,3 +13,21 @@ body {
 .alert:empty {
   display: none;
 }
+
+.flex-center-row-space-evenly {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+
+.blinking {
+  animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
