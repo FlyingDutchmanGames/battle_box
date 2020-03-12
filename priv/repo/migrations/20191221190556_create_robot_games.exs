@@ -3,7 +3,7 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
 
   def change do
     create table("robot_games") do
-      add :events, :jsonb, null: false, default: fragment("'[]'::jsonb")
+      add :events, {:array, :binary}, null: false, default: []
       add :turn, :integer, null: false
       add :settings_id, :uuid, null: false
       add :game_id, :uuid, null: true
