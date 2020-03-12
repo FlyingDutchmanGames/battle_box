@@ -10,7 +10,15 @@
 
     <div class="title-section">
       <div class="title">Robot Game</div>
-      <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
+      <div class="flex-center-row-space-evenly" style="width: 100%; padding-bottom: 5px;">
+        <%= if match?({:live, _}, @game_source) do %>
+          <div class="live-badge">
+            <div class="live-dot blinking"></div>
+            <div>LIVE</div>
+          </div>
+        <% end %>
+        <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
+      </div>
     </div>
 
     <div class="score player_2">

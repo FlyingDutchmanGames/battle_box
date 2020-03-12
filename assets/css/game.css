@@ -1,0 +1,28 @@
+.game-source {
+  padding: 10px;
+  display: flex;
+}
+
+.live-dot {
+  border-radius: 10px;
+  background-color: white;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+}
+
+.live-badge {
+  display: flex;
+  user-select: none;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 15px;
+  padding-right: 20px;
+  background-color: red;
+  border-radius: 10px;
+}
+

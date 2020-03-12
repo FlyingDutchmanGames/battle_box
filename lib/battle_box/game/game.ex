@@ -35,6 +35,10 @@ defmodule BattleBox.Game do
     end)
   end
 
+  def initialize(game) do
+    update_in(game.robot_game, &BattleBoxGame.initialize/1)
+  end
+
   def score(game) do
     BattleBoxGame.score(game.robot_game)
   end
