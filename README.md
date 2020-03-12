@@ -4,10 +4,8 @@
 
 V1
 ====
-[x] Bots Live Page
-  [x] Show a user's bots
-  [ ] Show the bot servers active for each bot
-  [ ] Show recent games for each bot
+[ ] Styling
+  [ ] Bots Live Page
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
   [ ] dealing with closed sockets
@@ -45,7 +43,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   [x] Show Live Games
   [x] Add score to in game server registry metadata
   [ ] Link to historical games
-[ ] Hide `robot_game` from matchmaker logic and game server by putting it in `BattleBox.Game`
 [ ] url identifiers
   [ ] `/users/grantjamespowell`
   [ ] `/users/grantjamespowell/bots`
@@ -88,7 +85,11 @@ Nice to Haves
 
 Done
 =======
+[x] Bots Live Page
+  [x] Show a user's bots
+  [x] Show the bot servers active for each bot
 [x] switch game server to be 100% defdelegate
+[x] Hide `robot_game` from matchmaker logic and game server by putting it in `BattleBox.Game`
 [x] Make bot server announce bot server start
 [x] Pass the bot object into the matchmaker
 [x] Bot Server Registry Improvements
