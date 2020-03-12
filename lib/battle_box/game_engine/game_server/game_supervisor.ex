@@ -18,11 +18,13 @@ defmodule BattleBox.GameEngine.GameServer.GameSupervisor do
     DynamicSupervisor.start_child(game_supervisor, {GameServer, opts})
   end
 
-  def get_live_games_with_lobby_id(game_registry, lobby_id) do
+  def get_live_games_with_lobby_id(game_engine, lobby_id) do
+    game_registry = GameEngine.names(game_engine).game_registry
     select_from_registry(game_registry, select_games_with_lobby_id(lobby_id))
   end
 
-  def get_live_games(game_registry) do
+  def get_live_games(game_engine) do
+    game_registry = GameEngine.names(game_engine).game_registry
     select_from_registry(game_registry, @select_all)
   end
 

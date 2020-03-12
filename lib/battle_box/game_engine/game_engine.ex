@@ -42,17 +42,14 @@ defmodule BattleBox.GameEngine do
   defdelegate get_bot_servers_with_user_id(game_engine, user_id), to: BotSup
 
   defdelegate start_game(game_engine, opts), to: GameSup
+  defdelegate get_live_games(game_engine), to: GameSup
+  defdelegate get_live_games_with_lobby_id(game_engine, lobby_id), to: GameSup
 
   def force_match_make(game_engine),
     do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
 
   def get_game_server(game_engine, game_id),
     do: get_process(game_registry_name(game_engine), game_id, :game_id)
-
-  def get_live_games(game_engine), do: GameSup.get_live_games(game_registry_name(game_engine))
-
-  def get_live_games_with_lobby_id(game_engine, lobby_id),
-    do: GameSup.get_live_games_with_lobby_id(game_registry_name(game_engine), lobby_id)
 
   def get_connection(game_engine, connection_id),
     do: get_process(connection_registry_name(game_engine), connection_id, :connection_id)
