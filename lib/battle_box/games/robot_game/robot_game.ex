@@ -10,7 +10,7 @@ defmodule BattleBox.Games.RobotGame do
 
   schema "robot_games" do
     field :turn, :integer, default: 0
-    embeds_many :events, Event, on_replace: :delete
+    field :events, {:array, Event}, default: []
     belongs_to :settings, Settings
     belongs_to :game, Game
     field :winner, :string, virtual: true
@@ -21,13 +21,9 @@ defmodule BattleBox.Games.RobotGame do
   end
 
   def changeset(game, params \\ %{}) do
-    events = Enum.map(game.events, &Map.take(&1, [:turn, :seq_num, :cause, :effects]))
-
     game
-    |> Map.put(:events, events)
     |> Repo.preload(:settings)
-    |> cast(params, [:turn, :settings_id])
-    |> cast_embed(:events)
+    |> cast(params, [:turn, :settings_id, :events])
     |> cast_assoc(:settings)
   end
 
