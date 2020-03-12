@@ -38,7 +38,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
         |> RobotGame.robots()
 
       assert length(robots) == 2
-      Enum.each(robots, fn robot -> refute robot.id in [1, 2] end)
+      Enum.each(robots, fn robot -> refute robot.id in [100, 200] end)
     end
   end
 end
