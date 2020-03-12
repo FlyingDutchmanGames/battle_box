@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.GameServer.GameSupervisor do
   use DynamicSupervisor
-  alias BattleBox.GameEngine.GameServer
+  alias BattleBox.{GameEngine, GameEngine.GameServer}
 
   @select_all [{{:"$1", :"$2", :"$3"}, [], [{{:"$1", :"$2", :"$3"}}]}]
 
@@ -13,7 +13,8 @@ defmodule BattleBox.GameEngine.GameServer.GameSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one, extra_arguments: [init_arg])
   end
 
-  def start_game(game_supervisor, %{players: _, game: _} = opts) do
+  def start_game(game_engine, %{players: _, game: _} = opts) do
+    game_supervisor = GameEngine.names(game_engine).game_supervisor
     DynamicSupervisor.start_child(game_supervisor, {GameServer, opts})
   end
 

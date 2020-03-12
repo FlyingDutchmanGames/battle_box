@@ -38,11 +38,10 @@ defmodule BattleBox.GameEngine do
   defdelegate subscribe_to_lobby_events(game_engine, lobby_id, events), to: GameEnginePubSub
   defdelegate subscribe_to_game_events(game_engine, game_id, events), to: GameEnginePubSub
 
-  def start_game(game_engine, opts),
-    do: GameSup.start_game(game_supervisor_name(game_engine), opts)
-
   defdelegate start_bot(game_engine, opts), to: BotSup
   defdelegate get_bot_servers_with_user_id(game_engine, user_id), to: BotSup
+
+  defdelegate start_game(game_engine, opts), to: GameSup
 
   def force_match_make(game_engine),
     do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
