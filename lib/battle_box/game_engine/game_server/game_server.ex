@@ -1,6 +1,5 @@
 defmodule BattleBox.GameEngine.GameServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBoxGame
   alias BattleBox.{Repo, Game, GameEngine}
 
   def get_game(game_server) do
@@ -73,7 +72,7 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event(:internal, :collect_moves, :moves, data) do
-    requests = BattleBoxGame.moves_requests(data.game.robot_game)
+    requests = Game.moves_requests(data.game)
 
     for {player, request} <- requests do
       send(data.players[player], moves_request(data.game, player, request))
@@ -90,7 +89,7 @@ defmodule BattleBox.GameEngine.GameServer do
     if Enum.all?(Map.values(moves)) do
       data = update_in(data.game, &Game.calculate_turn(&1, moves))
 
-      if BattleBoxGame.over?(data.game.robot_game),
+      if Game.over?(data.game),
         do: {:keep_state, data, {:next_event, :internal, :finalize}},
         else: {:repeat_state, data, {:next_event, :internal, :collect_moves}}
     else
@@ -99,14 +98,14 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event(:cast, {:forfeit_game, player}, :moves, data) do
-    {:keep_state, update_in(data.game.robot_game, &BattleBoxGame.disqualify(&1, player)),
+    {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
      {:next_event, :internal, :finalize}}
   end
 
   def handle_event(:info, {:DOWN, _, :process, pid, _}, :moves, data) do
     {player, _} = Enum.find(data.players, fn {_player, player_pid} -> player_pid == pid end)
 
-    {:keep_state, update_in(data.game.robot_game, &BattleBoxGame.disqualify(&1, player)),
+    {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
      {:next_event, :internal, :finalize}}
   end
 
@@ -145,7 +144,7 @@ defmodule BattleBox.GameEngine.GameServer do
        game_id: game.id,
        player: player,
        accept_time: game.lobby.game_acceptance_time_ms,
-       settings: BattleBoxGame.settings(game.robot_game)
+       settings: Game.settings(game)
      }}
   end
 
@@ -153,8 +152,8 @@ defmodule BattleBox.GameEngine.GameServer do
     {:game_over,
      %{
        game_id: game.id,
-       score: BattleBoxGame.score(game.robot_game),
-       winner: BattleBoxGame.winner(game.robot_game)
+       score: Game.score(game),
+       winner: Game.winner(game)
      }}
   end
 
