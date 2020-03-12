@@ -79,13 +79,13 @@ defmodule BattleBoxWeb.GameLiveTest do
       assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 9/, render(view))
     end
 
-    test "when the game server dies, it will switch to the historical view", context do
+    test "when the game server dies, it will switch to the historical view", %{conn: conn} = context do
       robot_game =
         RobotGame.new()
         |> RobotGame.complete_turn()
         |> RobotGame.complete_turn()
 
-      {:ok, %{id: id}} =
+      {:ok, _} =
         Game.new(lobby: context.lobby, robot_game: robot_game, id: @game_id)
         |> Game.persist()
 

@@ -1,5 +1,5 @@
 <div class="header">
-  <div class="logo">BATTLE BOX</div>
+  <div class="logo">Botskrieg</div>
   <div class="spacer"></div>
   <%= if @user do %>
     <a style="text-decoration: none;" href="<%= Routes.user_path(@conn, :show, @user.id) %>">

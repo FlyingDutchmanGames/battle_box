@@ -9,7 +9,7 @@
     </div>
 
     <div class="title-section">
-      <div class="title">Robot Game</div>
+      <div class="title">Botskrieg</div>
       <div class="flex-center-row-space-evenly" style="width: 100%; padding-bottom: 5px;">
         <%= if match?({:live, _}, @game_source) do %>
           <div class="live-badge">
