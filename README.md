@@ -28,6 +28,7 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 ```
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] Bot Server Follow Flow
+[ ] Make sure user input can't cause a game to crash
 [ ] Game Live Page
   [ ] Show the (Live) Badge
   [ ] Show which player we're waiting on
@@ -40,7 +41,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   [ ] Binary representation of terrain (would be nice if was a literal)
   [ ] limit memory usage of game servers (they're currently at 2 mbs)
   [ ] Manual GC?
-[ ] switch game server to be 100% defdelegate
 [ ] Lobby Page
   [x] Show Live Games
   [x] Add score to in game server registry metadata
@@ -88,6 +88,7 @@ Nice to Haves
 
 Done
 =======
+[x] switch game server to be 100% defdelegate
 [x] Make bot server announce bot server start
 [x] Pass the bot object into the matchmaker
 [x] Bot Server Registry Improvements
