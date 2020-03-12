@@ -5,7 +5,15 @@
 V1
 ====
 [ ] Styling
+  [ ] Pick some colors
+  [ ] Pick a font
+  [ ] Rebrand everything to botskrieg
   [ ] Bots Live Page
+[ ] Top level navigation
+  [ ] Bots
+  [ ] Lobbies
+  [ ] Games
+[ ] Signout drop down
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
   [ ] dealing with closed sockets
@@ -27,11 +35,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 [ ] Bot Server Follow Flow
 [ ] Make sure user input can't cause a game to crash
-[ ] Game Live Page
-  [ ] Show the (Live) Badge
-  [ ] Show which player we're waiting on
-  [ ] Show if its recorded
-  [ ] Reload the page if there is a failure
 [ ] More Efficent Robot Game Representation
   [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
   [x] break out the live game data from the live game metadata, most places (lobby live) only need live game metadad
@@ -118,3 +121,7 @@ Done
   [x] pick one
   [x] www. to github pages
   [x] Point domain to servers
+[x] Game Live Page
+  [x] Show the (Live) Badge
+  [x] Show if its recorded
+  [x] Reload the page if there is a failure
