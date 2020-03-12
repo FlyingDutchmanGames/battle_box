@@ -48,13 +48,13 @@ defmodule BattleBox.Games.RobotGame.GameTest do
         |> RobotGame.put_events(robot_spawns)
 
       assert [
-               %{"type" => "move", "robot_id" => 1, "target" => [1, 0]}
+               %{"type" => "move", "robot_id" => 100, "target" => [1, 0]}
              ] ==
                RobotGame.validate_moves(
                  game,
                  [
-                   %{"type" => "move", "robot_id" => 1, "target" => [1, 0]},
-                   %{"type" => "move", "robot_id" => 1, "target" => [0, 1]}
+                   %{"type" => "move", "robot_id" => 100, "target" => [1, 0]},
+                   %{"type" => "move", "robot_id" => 100, "target" => [0, 1]}
                  ],
                  "player_1"
                )
@@ -156,7 +156,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "it can give back a robot if there is one at a location" do
       robot_spawns = ~g/1/
-      robot = %{player_id: "player_1", id: 1, location: [0, 0], hp: 50}
+      robot = %{player_id: "player_1", id: 100, location: [0, 0], hp: 50}
 
       assert robot ==
                RobotGame.put_events(RobotGame.new(), robot_spawns)
@@ -182,7 +182,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "put_events (create_robot)" do
     test "you can create a robot" do
       game = RobotGame.new()
-      id = uuid()
+      id = 10
       effect = ["create_robot", "player_1", id, 42, [42, 42]]
       game = RobotGame.put_event(game, %{move: :test, effects: [effect]})
 
@@ -196,8 +196,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/1/
       game = RobotGame.new() |> RobotGame.put_events(robot_spawns)
       robots = RobotGame.robots(game)
-      robots = RobotGame.apply_effect_to_robots(robots, ["move", 1, [0, 1]])
-      assert [%{location: [0, 1], id: 1}] = robots
+      robots = RobotGame.apply_effect_to_robots(robots, ["move", 100, [0, 1]])
+      assert [%{location: [0, 1], id: 100}] = robots
     end
   end
 
@@ -206,8 +206,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robot_spawns = ~g/1/
       game = RobotGame.new() |> RobotGame.put_events(robot_spawns)
       robots = RobotGame.robots(game)
-      robots = RobotGame.apply_effect_to_robots(robots, ["damage", 1, 10])
-      assert [%{hp: 40, id: 1}] = robots
+      robots = RobotGame.apply_effect_to_robots(robots, ["damage", 100, 10])
+      assert [%{hp: 40, id: 100}] = robots
     end
   end
 
@@ -219,7 +219,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       robots = RobotGame.robots(game)
 
       assert 1 == length(robots)
-      robots = RobotGame.apply_effect_to_robots(robots, ["remove_robot", 1])
+      robots = RobotGame.apply_effect_to_robots(robots, ["remove_robot", 100])
       assert 0 == length(robots)
     end
 
@@ -233,10 +233,10 @@ defmodule BattleBox.Games.RobotGame.GameTest do
   describe "get_robot/2" do
     test "you can get a robot by id" do
       robot_spawns = ~g/1/
-      robot = %{player_id: "player_1", location: [0, 0], id: 1, hp: 50}
+      robot = %{player_id: "player_1", location: [0, 0], id: 100, hp: 50}
 
       game = RobotGame.put_events(RobotGame.new(), robot_spawns)
-      assert robot == RobotGame.get_robot(game, 1)
+      assert robot == RobotGame.get_robot(game, 100)
     end
 
     test "trying to get a robot by id that doesn't exist gives `nil`" do

@@ -21,7 +21,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
                "player_1" => [%{"type" => "move", "target" => [1, 1], "robot_id" => 1}],
                "player_2" => []
              })
-             |> RobotGame.get_robot(1)
+             |> RobotGame.get_robot(100)
   end
 
   # 0 - Invalid

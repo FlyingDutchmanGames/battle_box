@@ -10,23 +10,20 @@ defmodule BattleBox.Games.RobotGame do
 
   schema "robot_games" do
     field :turn, :integer, default: 0
-    embeds_many :events, Event, on_replace: :delete
+    field :events, {:array, Event}, default: []
     belongs_to :settings, Settings
     belongs_to :game, Game
     field :winner, :string, virtual: true
     field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
+    field :robot_id_seq, :integer, default: 0, virtual: true
 
     timestamps()
   end
 
   def changeset(game, params \\ %{}) do
-    events = Enum.map(game.events, &Map.take(&1, [:turn, :seq_num, :cause, :effects]))
-
     game
-    |> Map.put(:events, events)
     |> Repo.preload(:settings)
-    |> cast(params, [:turn, :settings_id])
-    |> cast_embed(:events)
+    |> cast(params, [:turn, :settings_id, :events])
     |> cast_assoc(:settings)
   end
 
@@ -50,6 +47,8 @@ defmodule BattleBox.Games.RobotGame do
     |> Enum.uniq_by(fn move -> move["robot_id"] end)
     |> Enum.filter(fn move -> match?(%{player_id: ^player}, get_robot(game, move["robot_id"])) end)
   end
+
+  def next_robot_id(game), do: {update_in(game.robot_id_seq, &(&1 + 1)), game.robot_id_seq}
 
   def calculate_winner(game) do
     if over?(game) do

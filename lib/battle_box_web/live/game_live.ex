@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.GameLive do
   alias BattleBoxWeb.{PageView, RobotGameView}
   use BattleBoxWeb, :live_view
-  alias BattleBox.{Repo, Game, GameEngine}
+  alias BattleBox.{Repo, Game, GameEngine, GameEngine.GameServer}
 
   def mount(%{"game_id" => game_id} = params, _session, socket) do
     if connected?(socket) do
@@ -69,7 +69,7 @@ defmodule BattleBoxWeb.GameLive do
   defp box_turn_number(_, turn), do: turn
 
   defp get_game(game_id) do
-    case GameEngine.get_game(game_engine(), game_id) do
+    case GameEngine.get_game_server(game_engine(), game_id) do
       nil ->
         game =
           Game.get_by_id(game_id)
@@ -77,7 +77,8 @@ defmodule BattleBoxWeb.GameLive do
 
         if not is_nil(game), do: update_in(game.robot_game, &BattleBoxGame.initialize/1)
 
-      %{game: game} ->
+      %{pid: pid} ->
+        {:ok, game} = GameServer.get_game(pid)
         game
     end
   end

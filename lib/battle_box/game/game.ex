@@ -20,20 +20,26 @@ defmodule BattleBox.Game do
     Repo.get_by(__MODULE__, id: id)
   end
 
-  def persist(game) do
+  def calculate_turn(game, moves) do
+    game = update_in(game.robot_game, &BattleBoxGame.calculate_turn(&1, moves))
     scores = BattleBoxGame.score(game.robot_game)
     winner = BattleBoxGame.winner(game.robot_game)
 
-    game =
-      update_in(game.game_bots, fn bots ->
-        for bot <- bots,
-            do: %{
-              bot
-              | score: scores[bot.player],
-                winner: winner == bot.player
-            }
-      end)
+    update_in(game.game_bots, fn bots ->
+      for bot <- bots,
+          do: %{
+            bot
+            | score: scores[bot.player],
+              winner: winner == bot.player
+          }
+    end)
+  end
 
+  def metadata_only(game) do
+    Map.drop(game, [:robot_game])
+  end
+
+  def persist(game) do
     game
     |> changeset
     |> Repo.insert()

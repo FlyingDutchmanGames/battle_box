@@ -31,23 +31,23 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
       )
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
-    player_2_moves = [%{"type" => "attack", "target" => [0, 0], "robot_id" => 2}]
+    player_2_moves = [%{"type" => "attack", "target" => [0, 0], "robot_id" => 200}]
 
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => [], "player_2" => player_2_moves})
 
-    assert nil == RobotGame.get_robot(after_turn, 1)
+    assert nil == RobotGame.get_robot(after_turn, 100)
   end
 
   test "If you attack a square a robot is in it takes damage", %{game: game} do
     robot_spawns = ~g/1 2/
 
     player_1_moves = [
-      %{"type" => "noop", "robot_id" => 1}
+      %{"type" => "noop", "robot_id" => 100}
     ]
 
     player_2_moves = [
-      %{"type" => "attack", "target" => [0, 0], "robot_id" => 2}
+      %{"type" => "attack", "target" => [0, 0], "robot_id" => 200}
     ]
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
@@ -61,18 +61,18 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     assert %{
              location: [0, 0],
              hp: 49
-           } = RobotGame.get_robot(after_turn, 1)
+           } = RobotGame.get_robot(after_turn, 100)
   end
 
   test "If you attack a robot that moves out of a square it takes not damage", %{game: game} do
     robot_spawns = ~g/1 2/
 
     player_1_moves = [
-      %{"type" => "move", "target" => [1, 0], "robot_id" => 1}
+      %{"type" => "move", "target" => [1, 0], "robot_id" => 100}
     ]
 
     player_2_moves = [
-      %{"type" => "attack", "target" => [0, 0], "robot_id" => 2}
+      %{"type" => "attack", "target" => [0, 0], "robot_id" => 200}
     ]
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
@@ -86,7 +86,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     assert %{
              location: [1, 0],
              hp: 50
-           } = RobotGame.get_robot(after_turn, 1)
+           } = RobotGame.get_robot(after_turn, 100)
   end
 
   test "If you move into a square being attacked you take damage", %{game: game} do
@@ -94,11 +94,11 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
                       0 2/
 
     player_1_moves = [
-      %{"type" => "attack", "target" => [1, 0], "robot_id" => 1}
+      %{"type" => "attack", "target" => [1, 0], "robot_id" => 100}
     ]
 
     player_2_moves = [
-      %{"type" => "move", "target" => [1, 0], "robot_id" => 2}
+      %{"type" => "move", "target" => [1, 0], "robot_id" => 200}
     ]
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
@@ -112,7 +112,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     assert %{
              location: [1, 0],
              hp: 49
-           } = RobotGame.get_robot(after_turn, 2)
+           } = RobotGame.get_robot(after_turn, 200)
   end
 
   test "A robot can suffer multiple attacks", %{game: game} do
@@ -120,8 +120,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
                       4 0/
 
     player_2_moves = [
-      %{"type" => "attack", "target" => [0, 0], "robot_id" => 2},
-      %{"type" => "attack", "target" => [0, 0], "robot_id" => 4}
+      %{"type" => "attack", "target" => [0, 0], "robot_id" => 200},
+      %{"type" => "attack", "target" => [0, 0], "robot_id" => 400}
     ]
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
@@ -129,7 +129,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => [], "player_2" => player_2_moves})
 
-    assert %{hp: 48} = RobotGame.get_robot(after_turn, 1)
+    assert %{hp: 48} = RobotGame.get_robot(after_turn, 100)
   end
 
   test "Trying to attack a non adjacent square does not work", %{game: game} do
@@ -137,7 +137,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
                       0 2/
 
     player_2_moves = [
-      %{"type" => "attack", "target" => [0, 0], "robot_id" => 2}
+      %{"type" => "attack", "target" => [0, 0], "robot_id" => 200}
     ]
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
@@ -145,14 +145,14 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => [], "player_2" => player_2_moves})
 
-    assert %{hp: 50} = RobotGame.get_robot(after_turn, 1)
+    assert %{hp: 50} = RobotGame.get_robot(after_turn, 100)
   end
 
   test "you can't attack yourself I guess? ¯\_(ツ)_/¯", %{game: game} do
     robot_spawns = ~g/1/
 
     player_1_moves = [
-      %{"type" => "attack", "target" => [0, 0], "robot_id" => 1}
+      %{"type" => "attack", "target" => [0, 0], "robot_id" => 100}
     ]
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
@@ -160,7 +160,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => player_1_moves, "player_2" => []})
 
-    assert %{hp: 50} = RobotGame.get_robot(after_turn, 1)
+    assert %{hp: 50} = RobotGame.get_robot(after_turn, 100)
   end
 
   test "suicide removes the robot and damages adjacent squares", %{game: game} do
@@ -168,7 +168,7 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
                       4 6/
 
     player_1_moves = [
-      %{"type" => "suicide", "robot_id" => 1}
+      %{"type" => "suicide", "robot_id" => 100}
     ]
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
@@ -176,10 +176,10 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     after_turn =
       Logic.calculate_turn(inital_game, %{"player_1" => player_1_moves, "player_2" => []})
 
-    assert nil == RobotGame.get_robot(after_turn, 1)
-    assert %{hp: 45} = RobotGame.get_robot(after_turn, 2)
-    assert %{hp: 45} = RobotGame.get_robot(after_turn, 4)
-    assert %{hp: 50} = RobotGame.get_robot(after_turn, 6)
+    assert nil == RobotGame.get_robot(after_turn, 100)
+    assert %{hp: 45} = RobotGame.get_robot(after_turn, 200)
+    assert %{hp: 45} = RobotGame.get_robot(after_turn, 400)
+    assert %{hp: 50} = RobotGame.get_robot(after_turn, 600)
   end
 
   test "You can't move into the square of a suiciding robot", %{game: game} do
@@ -201,6 +201,6 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
         "player_2" => player_2_moves
       })
 
-    assert %{location: [0, 1]} = RobotGame.get_robot(after_turn, 2)
+    assert %{location: [0, 1]} = RobotGame.get_robot(after_turn, 200)
   end
 end
