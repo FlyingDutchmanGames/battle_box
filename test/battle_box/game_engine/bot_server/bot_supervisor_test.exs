@@ -61,7 +61,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     test "if there are no bot servers that match the result is an empty list", context do
       assert [] ==
                BotSupervisor.get_bot_servers_with_user_id(
-                 context.bot_registry,
+                 context.game_engine,
                  Ecto.UUID.generate()
                )
     end
@@ -76,7 +76,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
 
       assert [] ==
                BotSupervisor.get_bot_servers_with_user_id(
-                 context.bot_registry,
+                 context.game_engine,
                  Ecto.UUID.generate()
                )
     end
@@ -100,7 +100,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                %{bot: ^bot, lobby: ^lobby, pid: pid1},
                %{bot: ^bot, lobby: ^lobby, pid: pid2}
              ] =
-               BotSupervisor.get_bot_servers_with_user_id(context.bot_registry, @user_id)
+               BotSupervisor.get_bot_servers_with_user_id(context.game_engine, @user_id)
                |> Enum.sort()
 
       assert pid1 in [server1, server2]
