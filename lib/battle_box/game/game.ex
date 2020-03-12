@@ -35,6 +35,30 @@ defmodule BattleBox.Game do
     end)
   end
 
+  def score(game) do
+    BattleBoxGame.score(game.robot_game)
+  end
+
+  def winner(game) do
+    BattleBoxGame.winner(game.robot_game)
+  end
+
+  def moves_requests(game) do
+    BattleBoxGame.moves_requests(game.robot_game)
+  end
+
+  def over?(game) do
+    BattleBoxGame.over?(game.robot_game)
+  end
+
+  def disqualify(game, player) do
+    update_in(game.robot_game, &BattleBoxGame.disqualify(&1, player))
+  end
+
+  def settings(game) do
+    BattleBoxGame.settings(game.robot_game)
+  end
+
   def metadata_only(game) do
     Map.drop(game, [:robot_game])
   end
