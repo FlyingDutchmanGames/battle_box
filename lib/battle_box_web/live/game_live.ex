@@ -64,7 +64,7 @@ defmodule BattleBoxWeb.GameLive do
     {:noreply, assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
   end
 
-  def handle_info({:DOWN, _ref, :process, pid, _reason}, socket) do
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
     {game_source, game} = get_game(socket.assigns.game.id)
     {:noreply, assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
   end
