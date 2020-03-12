@@ -5,7 +5,8 @@ defmodule BattleBox.GameEngine.MatchMakerServer do
 
   @match_make_delay_ms 100
 
-  def force_match_make(match_maker_server) do
+  def force_match_make(game_engine) do
+    match_maker_server = GameEngine.names(game_engine).match_maker_server
     send(match_maker_server, :match_make)
     :ok
   end

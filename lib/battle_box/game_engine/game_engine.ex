@@ -45,8 +45,7 @@ defmodule BattleBox.GameEngine do
   defdelegate get_live_games(game_engine), to: GameSup
   defdelegate get_live_games_with_lobby_id(game_engine, lobby_id), to: GameSup
 
-  def force_match_make(game_engine),
-    do: MatchMakerServer.force_match_make(match_maker_server_name(game_engine))
+  defdelegate force_match_make(game_engine), to: MatchMakerServer
 
   def get_game_server(game_engine, game_id),
     do: get_process(game_registry_name(game_engine), game_id, :game_id)
