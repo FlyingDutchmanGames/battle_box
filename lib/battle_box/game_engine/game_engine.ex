@@ -47,18 +47,13 @@ defmodule BattleBox.GameEngine do
 
   defdelegate force_match_make(game_engine), to: MatchMakerServer
 
+  defdelegate get_connections_with_user_id(game_engine, user_id), to: TcpConnectionServer
+
   def get_game_server(game_engine, game_id),
     do: get_process(game_registry_name(game_engine), game_id, :game_id)
 
   def get_connection(game_engine, connection_id),
     do: get_process(connection_registry_name(game_engine), connection_id, :connection_id)
-
-  def get_connections_with_user_id(game_engine, user_id),
-    do:
-      TcpConnectionServer.get_connections_with_user_id(
-        connection_registry_name(game_engine),
-        user_id
-      )
 
   def get_bot_server(game_engine, bot_server_id),
     do: get_process(bot_registry_name(game_engine), bot_server_id, :bot_server_id)

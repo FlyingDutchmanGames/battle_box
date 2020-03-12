@@ -21,7 +21,8 @@ defmodule BattleBox.TcpConnectionServer do
     )
   end
 
-  def get_connections_with_user_id(connection_registry, user_id) do
+  def get_connections_with_user_id(game_engine, user_id) do
+    connection_registry = GameEngine.names(game_engine).connection_registry
     Registry.select(connection_registry, matches_user_id(user_id))
     |> Enum.map(fn {connection_id, pid, attrs} ->
       Map.merge(attrs, %{connection_id: connection_id, pid: pid})
