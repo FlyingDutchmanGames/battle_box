@@ -3,7 +3,7 @@ defmodule BattleBox.Games.RobotGame.EventTest do
   use BattleBox.DataCase
   import Ecto.Query, only: [from: 2]
 
-  @robot_id "7b875c94-8fe0-4fa3-992a-d6d9f7da1a08"
+  @robot_id 1
 
   @move_move %{"type" => "move", "robot_id" => @robot_id, "target" => [0, 0]}
   @guard_move %{"type" => "guard", "robot_id" => @robot_id}
@@ -65,6 +65,7 @@ defmodule BattleBox.Games.RobotGame.EventTest do
 
       assert [^event] =
                Enum.map(retrieved_game.events, fn event ->
+                 event = update_in(event.effects, &Enum.sort/1)
                  Map.take(event, [:cause, :effects, :seq_num, :turn])
                end)
     end)
