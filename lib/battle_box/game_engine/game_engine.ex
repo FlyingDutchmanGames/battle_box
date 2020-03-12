@@ -31,23 +31,12 @@ defmodule BattleBox.GameEngine do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  def broadcast_bot_server_start(game_engine, bot_server),
-    do: GameEnginePubSub.broadcast_bot_server_start(pubsub_name(game_engine), bot_server)
-
-  def broadcast_game_start(game_engine, game),
-    do: GameEnginePubSub.broadcast_game_start(pubsub_name(game_engine), game)
-
-  def broadcast_game_update(game_engine, game),
-    do: GameEnginePubSub.broadcast_game_update(pubsub_name(game_engine), game)
-
-  def subscribe_to_user_events(game_engine, user_id, events),
-    do: GameEnginePubSub.subscribe_to_user_events(pubsub_name(game_engine), user_id, events)
-
-  def subscribe_to_lobby_events(game_engine, lobby_id, events),
-    do: GameEnginePubSub.subscribe_to_lobby_events(pubsub_name(game_engine), lobby_id, events)
-
-  def subscribe_to_game_events(game_engine, game_id, events),
-    do: GameEnginePubSub.subscribe_to_game_events(pubsub_name(game_engine), game_id, events)
+  defdelegate broadcast_bot_server_start(game_engine, bot_server), to: GameEnginePubSub
+  defdelegate broadcast_game_start(game_engine, game), to: GameEnginePubSub
+  defdelegate broadcast_game_update(game_engine, game), to: GameEnginePubSub
+  defdelegate subscribe_to_user_events(game_engine, user_id, events), to: GameEnginePubSub
+  defdelegate subscribe_to_lobby_events(game_engine, lobby_id, events), to: GameEnginePubSub
+  defdelegate subscribe_to_game_events(game_engine, game_id, events), to: GameEnginePubSub
 
   def start_game(game_engine, opts),
     do: GameSup.start_game(game_supervisor_name(game_engine), opts)
