@@ -1,6 +1,5 @@
 defmodule BattleBox.Games.RobotGame.Logic do
   import BattleBox.Games.RobotGame
-  alias Ecto.UUID
 
   def calculate_turn(game, %{"player_1" => player_1_moves, "player_2" => player_2_moves}) do
     moves =
@@ -144,29 +143,21 @@ defmodule BattleBox.Games.RobotGame.Logic do
       |> Enum.shuffle()
       |> Enum.take(game.settings.spawn_per_player * 2)
 
-    spawned_robots =
+    {game, spawned_robots} =
       spawn_locations
       |> Enum.zip(Stream.cycle(["player_1", "player_2"]))
-      |> Enum.map(fn {spawn_location, player_id} ->
-        %{
-          cause: "spawn",
-          effects: [
-            ["create_robot", player_id, UUID.generate(), game.settings.robot_hp, spawn_location]
-          ]
-        }
+      |> Enum.reduce({game, []}, fn {spawn_location, player_id}, {game, spawned_robots} ->
+        {game, robot_id} = next_robot_id(game)
+        event = ["create_robot", player_id, robot_id, game.settings.robot_hp, spawn_location]
+        {game, [event | spawned_robots]}
       end)
 
     destroyed_robots =
       robots(game)
       |> Enum.filter(fn robot -> robot.location in spawn_locations end)
-      |> Enum.map(fn robot ->
-        %{
-          cause: "spawn",
-          effects: [["remove_robot", robot.id]]
-        }
-      end)
+      |> Enum.map(fn robot -> ["remove_robot", robot.id] end)
 
-    destroyed_robots ++ spawned_robots
+    [%{cause: "spawn", effects: destroyed_robots ++ spawned_robots}]
   end
 
   defp calc_movement(game, move, movements, stuck_robots \\ []) do

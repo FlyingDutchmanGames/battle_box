@@ -19,7 +19,7 @@ defmodule BattleBox.Games.RobotGameTest.Helpers do
 
       player_id = if rem(val, 2) == 1, do: "player_1", else: "player_2"
 
-      %{cause: "test_helper", effects: [["create_robot", player_id, val, 50, location]]}
+      %{cause: "test_helper", effects: [["create_robot", player_id, val * 100, 50, location]]}
     end)
   end
 end
