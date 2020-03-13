@@ -19,7 +19,7 @@ defmodule BattleBox.HumanizeTest do
       {184_000_001, "5 year(s) ago"}
     ]
     |> Enum.each(fn {seconds, expected} ->
-      assert Humanize.seconds_ago_to_human_time(seconds) == expected
+      assert Humanize.humanize_seconds_ago(seconds) == expected
     end)
   end
 end
