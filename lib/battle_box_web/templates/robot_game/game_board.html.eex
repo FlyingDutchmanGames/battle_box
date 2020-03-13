@@ -1,13 +1,10 @@
 <% %{row_max: rows, row_min: 0, col_max: cols, col_min: 0} = RobotGame.dimensions(@game.robot_game) %>
-<% %{"player_1" => p1_score, "player_2" => p2_score} = RobotGame.score_at_turn(@game.robot_game, @turn) %>
+<% game_bot_1 = Enum.find(@game.game_bots, fn bot -> bot.player == "player_1" end) %>
+<% game_bot_2 = Enum.find(@game.game_bots, fn bot -> bot.player == "player_2" end) %>
 
 <div class="robot-game" phx-window-keyup="change_turn">
   <div class="game-header">
-    <div class="score player_1">
-      <div class="number"><%= p1_score %></div>
-      <div class="player-name">Player 1</div>
-    </div>
-
+    <%= render("score.html", player: "player_1", game_bot: game_bot_1) %>
     <div class="title-section">
       <div class="title">Botskrieg</div>
       <div class="flex-center-row-space-evenly" style="width: 100%; padding-bottom: 5px;">
@@ -22,11 +19,7 @@
         <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
       </div>
     </div>
-
-    <div class="score player_2">
-      <div class="number"><%= p2_score %></div>
-      <div class="player-name">Player 2</div>
-    </div>
+    <%= render("score.html", player: "player_2", game_bot: game_bot_2) %>
   </div>
 
   <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>

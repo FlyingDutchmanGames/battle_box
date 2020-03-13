@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
-  alias BattleBox.{Lobby, Game, GameBot}
+  alias BattleBox.{Repo, Lobby, Game, GameBot}
   alias BattleBox.Games.RobotGame
 
   def make_matches([_], _), do: []
@@ -14,7 +14,12 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
     |> Enum.filter(fn chunk -> length(chunk) == length(players) end)
     |> Enum.map(fn chunk -> Enum.zip(players, chunk) end)
     |> Enum.map(fn chunk ->
-      game_bots = for {player, %{bot: bot}} <- chunk, do: GameBot.new(player: player, bot: bot)
+      game_bots =
+        for {player, %{bot: bot}} <- chunk do
+          bot = Repo.preload(bot, :user)
+          GameBot.new(player: player, bot: bot)
+        end
+
       player_pid_mapping = Map.new(for {player, %{pid: pid}} <- chunk, do: {player, pid})
 
       game =
