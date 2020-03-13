@@ -20,7 +20,7 @@
         <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
       </div>
     </div>
-    <%= render("score.html", player: "player_2", score: p2_score , game_bot: game_bot_2) %>
+    <%= render("score.html", player: "player_2", score: p2_score, game_bot: game_bot_2) %>
   </div>
 
   <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>
