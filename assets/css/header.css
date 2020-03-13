@@ -2,9 +2,14 @@
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
-  background-color: red;
   height: 50px;
-  box-shadow: gray 1px 1px 2px;
+  box-shadow: 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2);
+  color: white;
+  background-color: var(--primary-zero);
+}
+
+.header a {
+  color: white;
 }
 
 .header .logo { 
@@ -14,6 +19,8 @@
   align-items: center;
   margin: 10px;
   border-radius: 3px;
+  font-weight: bold;
+  font-size: 1.5em;
 }
 
 .header .spacer {
@@ -25,6 +32,7 @@
   justify-content: center;
   align-items: center;
   margin-right: 15px;
+  font-weight: lighter;
 }
 
 .header .github-login {
@@ -43,6 +51,7 @@
 
 .header .user .name {
   margin-right: 20px;
+  font-weight: bold;
 }
 
 .header .user img {
