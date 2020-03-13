@@ -1,7 +1,18 @@
 defmodule BattleBoxWeb.GameLiveTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.{Bot, Repo, GameBot, Game, GameEngine, GameEngine.GameServer, Games.RobotGame, Lobby}
+
+  alias BattleBox.{
+    Bot,
+    Repo,
+    GameBot,
+    Game,
+    GameEngine,
+    GameEngine.GameServer,
+    Games.RobotGame,
+    Lobby
+  }
+
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @game_id Ecto.UUID.generate()
@@ -56,7 +67,13 @@ defmodule BattleBoxWeb.GameLiveTest do
             "player_1" => named_proxy(:player_1),
             "player_2" => named_proxy(:player_2)
           },
-          game: Game.new(id: @game_id, lobby: lobby, game_bots: game_bots, robot_game: RobotGame.new())
+          game:
+            Game.new(
+              id: @game_id,
+              lobby: lobby,
+              game_bots: game_bots,
+              robot_game: RobotGame.new()
+            )
         })
 
       :ok = GameServer.accept_game(pid, "player_1")
@@ -98,7 +115,12 @@ defmodule BattleBoxWeb.GameLiveTest do
         |> RobotGame.complete_turn()
 
       {:ok, _} =
-        Game.new(lobby: context.lobby, robot_game: robot_game, game_bots: context.game_bots, id: @game_id)
+        Game.new(
+          lobby: context.lobby,
+          robot_game: robot_game,
+          game_bots: context.game_bots,
+          id: @game_id
+        )
         |> Game.persist()
 
       {:ok, view, html} = live(conn, "/games/#{@game_id}")
