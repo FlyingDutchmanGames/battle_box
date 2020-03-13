@@ -44,6 +44,7 @@ defmodule BattleBoxWeb do
       import BattleBoxWeb.Gettext
       alias BattleBoxWeb.Router.Helpers, as: Routes
       import Phoenix.LiveView.Helpers
+      import BattleBox.Humanize
     end
   end
 

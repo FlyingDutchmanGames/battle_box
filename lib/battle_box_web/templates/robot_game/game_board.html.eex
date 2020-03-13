@@ -12,10 +12,12 @@
       <div class="title">Botskrieg</div>
       <div class="flex-center-row-space-evenly" style="width: 100%; padding-bottom: 5px;">
         <%= if match?({:live, _}, @game_source) do %>
-          <div class="live-badge">
+          <div class="game-source-badge live">
             <div class="live-dot blinking"></div>
             <div>LIVE</div>
           </div>
+        <% else %>
+          <div title="<%= @game.inserted_at %>"class="game-source-badge recorded"><div><%= humanize_seconds_ago(@game.inserted_at) %></div></div>
         <% end %>
         <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
       </div>

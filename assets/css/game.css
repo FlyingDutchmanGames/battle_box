@@ -11,7 +11,7 @@
   margin-right: 10px;
 }
 
-.live-badge {
+.game-source-badge {
   display: flex;
   user-select: none;
   flex-flow: row nowrap;
@@ -20,9 +20,12 @@
   color: white;
   padding-top: 5px;
   padding-bottom: 5px;
-  padding-left: 15px;
-  padding-right: 20px;
-  background-color: red;
+  padding-left: 10px;
+  padding-right: 10px;
   border-radius: 10px;
+  margin-right: 10px;
 }
+
+.game-source-badge.live { background-color: red; }
+.game-source-badge.recorded { background-color: green; }
 
