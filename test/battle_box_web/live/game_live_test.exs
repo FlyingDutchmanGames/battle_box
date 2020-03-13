@@ -1,16 +1,27 @@
 defmodule BattleBoxWeb.GameLiveTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame, Lobby}
+  alias BattleBox.{Bot, Repo, GameBot, Game, GameEngine, GameEngine.GameServer, Games.RobotGame, Lobby}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @game_id Ecto.UUID.generate()
+  @user_id Ecto.UUID.generate()
 
   setup do
-    {:ok, lobby} =
-      Lobby.create(%{name: "TEST LOBBY", game_type: RobotGame, user_id: Ecto.UUID.generate()})
+    {:ok, user} = create_user(%{user_id: @user_id})
+    {:ok, lobby} = Lobby.create(%{name: "TEST LOBBY", game_type: RobotGame, user_id: @user_id})
+    {:ok, bot} = Bot.create(%{user: user, user_id: @user_id, name: "FOO"})
+    bot = Repo.preload(bot, :user)
 
-    %{lobby: lobby}
+    %{
+      lobby: lobby,
+      user: user,
+      bot: bot,
+      game_bots: [
+        GameBot.new(player: "player_1", bot: bot),
+        GameBot.new(player: "player_2", bot: bot)
+      ]
+    }
   end
 
   test "it can display a game off disk", %{conn: conn} = context do
@@ -20,7 +31,7 @@ defmodule BattleBoxWeb.GameLiveTest do
       |> RobotGame.complete_turn()
 
     {:ok, %{id: id}} =
-      Game.new(lobby: context.lobby, robot_game: robot_game)
+      Game.new(lobby: context.lobby, robot_game: robot_game, game_bots: context.game_bots)
       |> Game.persist()
 
     {:ok, _view, html} = live(conn, "/games/#{id}")
@@ -38,14 +49,14 @@ defmodule BattleBoxWeb.GameLiveTest do
       on_exit(fn -> GameEngineProvider.reset!() end)
     end
 
-    setup %{game_engine: game_engine, lobby: lobby} do
+    setup %{game_engine: game_engine, lobby: lobby, game_bots: game_bots} do
       {:ok, pid} =
         GameEngine.start_game(game_engine, %{
           players: %{
             "player_1" => named_proxy(:player_1),
             "player_2" => named_proxy(:player_2)
           },
-          game: Game.new(id: @game_id, lobby: lobby, robot_game: RobotGame.new())
+          game: Game.new(id: @game_id, lobby: lobby, game_bots: game_bots, robot_game: RobotGame.new())
         })
 
       :ok = GameServer.accept_game(pid, "player_1")
@@ -87,7 +98,7 @@ defmodule BattleBoxWeb.GameLiveTest do
         |> RobotGame.complete_turn()
 
       {:ok, _} =
-        Game.new(lobby: context.lobby, robot_game: robot_game, id: @game_id)
+        Game.new(lobby: context.lobby, robot_game: robot_game, game_bots: context.game_bots, id: @game_id)
         |> Game.persist()
 
       {:ok, view, html} = live(conn, "/games/#{@game_id}")
@@ -99,14 +110,14 @@ defmodule BattleBoxWeb.GameLiveTest do
   end
 
   describe "Arrow Keys let you change the turn you're viewing" do
-    setup do
+    setup %{game_bots: game_bots} do
       robot_game =
         RobotGame.new()
         |> RobotGame.complete_turn()
         |> RobotGame.complete_turn()
 
       {:ok, %{id: id}} =
-        Game.new(robot_game: robot_game)
+        Game.new(robot_game: robot_game, game_bots: game_bots)
         |> Game.persist()
 
       %{game_id: id}
