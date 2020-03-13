@@ -5,6 +5,7 @@
   padding: 20px;
 }
 
+
 .robot-game {
   display: grid;
   grid-template: max-content max-content max-content / max-content;
@@ -37,33 +38,39 @@
 .robot-game .game-header .score {
   display: flex;
   flex-flow: column nowrap;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
   color: white;
-  padding: 10px 20px;
-  margin: 10px 4px;
+  width: 25%;
   border-radius: 10px;
+  padding: 5px 10px;
 }
 
-.robot-game .game-header .score .player-name {
-  font-size: 0.5em;
+.robot-game .score img {
+  width: 30px;
+  border-radius: 5px;
 }
 
-.robot-game .game-header .score .number {
-  font-size: 2em;
+.robot-game .score .bot-info {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-.robot-game .game-header .score.player_1 {
-  background-color: #c10c06;
+.robot-game .score .names {
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 0px 10px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.robot-game .game-header .score.player_2 {
-  background-color: #016dd6;
-}
+.robot-game .game-header .score.player_1 { background-color: #c10c06; }
+.robot-game .game-header .score.player_2 { background-color: #016dd6; }
 
-.robot-game-board {
-  display: grid;
-}
+.robot-game-board { display: grid; }
 
 .robot-game-board .terrain {
   width: 35px;
