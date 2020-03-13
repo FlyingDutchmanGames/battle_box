@@ -6,5 +6,5 @@
       <div><%= @game_bot.bot.name %></div>
     </div>
   </div>
-  <div style="font-size: 2em;"><%= @game_bot.score %></div>
+  <div style="font-size: 2em;"><%= @score %></div>
 </div>
