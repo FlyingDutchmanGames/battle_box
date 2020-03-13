@@ -4,9 +4,9 @@ defmodule BattleBox.HumanizeTest do
 
   test "seconds_ago_to_human_time" do
     [
-      {0, "Less than a minute ago"},
-      {10, "Less than a minute ago"},
-      {59, "Less than a minute ago"},
+      {0, "< 1 minute ago"},
+      {10, "< 1 minute ago"},
+      {59, "< 1 minute ago"},
       {61, "1 minute(s) ago"},
       {121, "2 minute(s) ago"},
       {2701, "45 minute(s) ago"},

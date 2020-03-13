@@ -105,7 +105,7 @@ defmodule BattleBoxWeb.GameLiveTest do
       assert html =~ "LIVE"
       Process.exit(context.game_server, :kill)
       Process.sleep(10)
-      assert render(view) =~ "Less than a minute ago"
+      assert render(view) =~ "1 minute ago"
     end
   end
 
