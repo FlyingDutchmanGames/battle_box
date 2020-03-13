@@ -27,5 +27,5 @@
 }
 
 .game-source-badge.live { background-color: red; }
-.game-source-badge.recorded { background-color: green; }
+.game-source-badge.recorded { background-color: var(--primary-three); }
 

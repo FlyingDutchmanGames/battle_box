@@ -67,7 +67,7 @@
   overflow: hidden;
 }
 
-.robot-game .game-header .score.player_1 { background-color: #c10c06; }
+.robot-game .game-header .score.player_1 { background-color: #ff4943; }
 .robot-game .game-header .score.player_2 { background-color: #016dd6; }
 
 .robot-game-board { display: grid; }
