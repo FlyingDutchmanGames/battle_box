@@ -22,6 +22,12 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
 
       assert ["player_1", "player_2"] ==
                Enum.map(RobotGame.robots(game), &Map.get(&1, :player_id)) |> Enum.sort()
+
+      assert 2 ==
+               RobotGame.robots(game)
+               |> Enum.map(&Map.get(&1, :id))
+               |> Enum.uniq()
+               |> length
     end
 
     test "it will destroy an existing robot on a spawn point" do

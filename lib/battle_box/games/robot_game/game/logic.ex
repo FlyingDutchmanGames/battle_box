@@ -36,10 +36,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     game = put_events(game, events)
 
-    game =
-      if spawning_round?(game),
-        do: put_events(game, generate_spawn_events(game)),
-        else: game
+    game = if spawning_round?(game), do: do_spawn(game), else: game
 
     deaths = for %{id: id, hp: hp} <- robots(game), hp <= 0, do: ["remove_robot", id]
 
@@ -137,7 +134,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     %{cause: move, effects: [["remove_robot", robot.id] | damage_effects]}
   end
 
-  defp generate_spawn_events(game) do
+  defp do_spawn(game) do
     spawn_locations =
       spawns(game)
       |> Enum.shuffle()
@@ -157,7 +154,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
       |> Enum.filter(fn robot -> robot.location in spawn_locations end)
       |> Enum.map(fn robot -> ["remove_robot", robot.id] end)
 
-    [%{cause: "spawn", effects: destroyed_robots ++ spawned_robots}]
+    put_events(game, [%{cause: "spawn", effects: destroyed_robots ++ spawned_robots}])
   end
 
   defp calc_movement(game, move, movements, stuck_robots \\ []) do

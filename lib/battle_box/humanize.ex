@@ -14,7 +14,7 @@ defmodule BattleBox.Humanize do
   def humanize_seconds_ago(seconds_ago) when is_integer(seconds_ago) do
     case seconds_ago do
       x when x in 0..@one_minute_in_seconds ->
-        "Less than a minute ago"
+        "< 1 minute ago"
 
       x when x in @one_minute_in_seconds..@one_hour_in_seconds ->
         "#{Integer.floor_div(seconds_ago, @one_minute_in_seconds)} minute(s) ago"
