@@ -6,13 +6,20 @@ V1
 ====
 [ ] Styling
   [ ] Pick some colors
-  [ ] Pick a font
-  [ ] Rebrand everything to botskrieg
+  [x] Pick a font
+  [x] Rebrand everything to botskrieg
   [ ] Bots Live Page
 [ ] Top level navigation
   [ ] Bots
   [ ] Lobbies
   [ ] Games
+[ ] Live Games Page
+  [ ] Show winner (fix winner bug?)
+  [ ] Show moves
+    [ ] Move
+    [ ] Guard
+    [ ] Suicide
+    [ ] Attack
 [ ] Signout drop down
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
