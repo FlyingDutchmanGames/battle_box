@@ -1,6 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Event do
   use Ecto.Type
   def type, do: :binary
+  import BattleBox.Games.RobotGame.EventHelpers
 
   # Causes
   @spawn 0
@@ -126,28 +127,25 @@ defmodule BattleBox.Games.RobotGame.Event do
 
   defp encode_cause(cause) do
     case cause do
-      cause when cause in ["spawn", "death"] ->
-        code = %{"spawn" => @spawn, "death" => @death}[cause]
-        <<code::unsigned-integer-8>>
+      "spawn" ->
+        rg_spawn()
+
+      "death" ->
+        rg_death()
 
       %{"type" => type, "robot_id" => robot_id, "target" => [x, y]}
-      when type in ["move", "attack"] and is_integer(x) and is_integer(y) ->
-        code = %{"move" => @move, "attack" => @attack}[type]
-
-        <<
-          code::unsigned-integer-8,
-          robot_id::unsigned-integer-16,
-          x::unsigned-integer-16,
-          y::unsigned-integer-16
-        >>
+      when type in ["move", "attack"] ->
+        case type do
+          "move" -> rg_move(robot_id, x, y)
+          "attack" -> rg_attack(robot_id, x, y)
+        end
 
       %{"type" => type, "robot_id" => robot_id} when type in ["suicide", "guard", "noop"] ->
-        code = %{"suicide" => @suicide, "guard" => @guard, "noop" => @noop}[type]
-
-        <<
-          code::unsigned-integer-8,
-          robot_id::unsigned-integer-16
-        >>
+        case type do
+          "suicide" -> rg_suicide(robot_id)
+          "guard" -> rg_guard(robot_id)
+          "noop" -> rg_noop(robot_id)
+        end
     end
   end
 
