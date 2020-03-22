@@ -80,7 +80,12 @@ defmodule BattleBox.GameEngine.GameServer do
 
     moves = Map.new(requests, fn {player, _} -> {player, nil} end)
 
-    {:keep_state, Map.put(data, :moves, moves)}
+    {:keep_state, Map.put(data, :moves, moves), {:next_event, :internal, :gc}}
+  end
+
+  def handle_event(:internal, :gc, _, data) do
+    :erlang.garbage_collect()
+    :keep_state_and_data
   end
 
   def handle_event(:cast, {:moves, player, moves}, :moves, data) do
