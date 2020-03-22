@@ -7,7 +7,21 @@ defmodule BattleBoxWeb.BotServerFollow do
     case GameEngine.get_bot_server(game_engine(), bot_server_id) do
       nil ->
         {:ok, assign(socket, not_found: true)}
+
+      bot_server ->
+        if connected?(socket) do
+          Process.monitor(bot_server.pid)
+        end
+
+        {:ok, assign(socket, bot_server: bot_server)}
     end
+  end
+
+  def handle_info(
+        {:DOWN, _ref, :process, pid, _reason},
+        %{assigns: %{bot_server: %{pid: pid}}} = socket
+      ) do
+    {:noreply, assign(socket, not_found: true)}
   end
 
   def render(%{not_found: true}) do

@@ -1,1 +1,12 @@
-<h1>Lets follow some bots!</h1>
+<script>window.useLiveView = true</script>
+<div class="bot-server-follow">
+  <%= case @bot_server.status do %>
+    <% status when status in [:options, :idle] -> %>
+      <div class="status">Idle 😴</div>
+    <% :match_making -> %>
+      <div class="status blinking">Match Making</div>
+  <% end %>
+  
+  <a href="<%= Routes.bot_path(@socket, :show, @bot_server.bot.id) %>">Bot: <%= @bot_server.bot.name %></a>
+  <a href="<%= Routes.live_path(@socket, BattleBoxWeb.LobbyLive, @bot_server.lobby.id) %>">Lobby: <%= @bot_server.lobby.name %></a>
+</div>

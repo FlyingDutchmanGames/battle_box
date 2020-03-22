@@ -1,0 +1,14 @@
+.bot-server-follow {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px;
+}
+
+.bot-server-follow .status {
+  font-weight: bold;
+  user-select: none;
+  font-size: 7.5em;
+}
