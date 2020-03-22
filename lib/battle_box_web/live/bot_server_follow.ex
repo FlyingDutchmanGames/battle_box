@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.BotServerFollow do
   use BattleBoxWeb, :live_view
-  alias BattleBoxWeb.{BotView, PageView}
+  alias BattleBoxWeb.{GameLive, BotView, PageView}
   alias BattleBox.GameEngine
 
   def mount(%{"bot_server_id" => bot_server_id}, _session, socket) do
@@ -17,6 +17,8 @@ defmodule BattleBoxWeb.BotServerFollow do
             bot_server_id,
             [:bot_server_update]
           )
+
+          send(self(), :redirect_to_game_if_playing)
         end
 
         {:ok, assign(socket, bot_server: bot_server)}
@@ -29,7 +31,21 @@ defmodule BattleBoxWeb.BotServerFollow do
         {:noreply, assign(socket, not_found: true)}
 
       bot_server ->
+        send(self(), :redirect_to_game_if_playing)
         {:noreply, assign(socket, bot_server: bot_server)}
+    end
+  end
+
+  def handle_info(:redirect_to_game_if_playing, %{assigns: %{bot_server: bot_server}} = socket) do
+    case bot_server.game_id do
+      nil ->
+        {:noreply, socket}
+
+      game_id ->
+        {:noreply,
+         redirect(socket,
+           to: Routes.live_path(socket, GameLive, game_id, follow: bot_server.bot_server_id)
+         )}
     end
   end
 

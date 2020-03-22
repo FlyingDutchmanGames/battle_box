@@ -1,5 +1,5 @@
 defmodule BattleBoxWeb.GameLive do
-  alias BattleBoxWeb.{PageView, RobotGameView}
+  alias BattleBoxWeb.{BotServerFollow, PageView, RobotGameView}
   use BattleBoxWeb, :live_view
   alias BattleBox.{Repo, Game, GameEngine, GameEngine.GameServer}
 
@@ -13,8 +13,12 @@ defmodule BattleBoxWeb.GameLive do
           GameEngine.subscribe_to_game_events(game_engine(), game_id, [:game_update])
 
           case game_source do
-            {:live, pid} -> Process.monitor(pid)
-            _ -> nil
+            {:live, pid} ->
+              Process.monitor(pid)
+
+            _ ->
+              send(self(), :redirect_if_following)
+              nil
           end
         end
 
@@ -22,6 +26,7 @@ defmodule BattleBoxWeb.GameLive do
          assign(
            socket,
            game: game,
+           follow: params["follow"],
            turn: box_turn_number(game, params["turn"]),
            game_source: game_source
          )}
@@ -59,12 +64,23 @@ defmodule BattleBoxWeb.GameLive do
     {:noreply, socket}
   end
 
+  def handle_info(
+        :redirect_if_following,
+        %{assigns: %{game_source: :historical, follow: bot_server_id}} = socket
+      )
+      when not is_nil(bot_server_id) do
+    {:noreply, redirect(socket, to: Routes.live_path(socket, BotServerFollow, bot_server_id))}
+  end
+
+  def handle_info(:redirect_if_following, socket), do: {:noreply, socket}
+
   def handle_info({:game_update, id}, %{assigns: %{game: %{id: id}}} = socket) do
     {game_source, game} = get_game(id)
     {:noreply, assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
   end
 
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
+    send(self(), :redirect_if_following)
     {game_source, game} = get_game(socket.assigns.game.id)
     {:noreply, assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
   end
