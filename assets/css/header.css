@@ -47,6 +47,7 @@
   align-items: center;
   flex-flow: row nowrap;
   padding: 10px;
+  margin-right: 5px;
 }
 
 .header .user .name {

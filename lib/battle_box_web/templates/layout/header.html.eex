@@ -14,6 +14,9 @@
         <img src="<%= @user.github_avatar_url %>">
       </div>
     </a>
+    <div class="nav-item">
+      <a href="<%= Routes.logout_path(@conn, :logout) %>" title="logout" sytle="font-weight: bold;">x</a>
+    </div>
   <% else %>
     <div class="github-login">
       <a href="<%= Routes.github_login_path(@conn, :github_login) %>">Login With Github</a>
