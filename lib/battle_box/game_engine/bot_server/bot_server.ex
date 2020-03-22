@@ -178,6 +178,12 @@ defmodule BattleBox.GameEngine.BotServer do
     {_, _} =
       Registry.update_value(names.bot_registry, data.bot_server_id, &Map.merge(&1, metadata))
 
+    :ok =
+      GameEngine.broadcast_bot_server_update(
+        names.game_engine,
+        Map.take(data, [:bot, :lobby, :bot_server_id])
+      )
+
     :keep_state_and_data
   end
 
