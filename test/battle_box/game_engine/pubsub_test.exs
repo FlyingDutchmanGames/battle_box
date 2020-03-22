@@ -6,6 +6,7 @@ defmodule BattleBox.PubSubTest do
   @user_id Ecto.UUID.generate()
   @game_id Ecto.UUID.generate()
   @lobby_id Ecto.UUID.generate()
+  @bot_server_id Ecto.UUID.generate()
 
   setup %{test: name} do
     {:ok, _pid} = GameEngine.start_link(name: name)
@@ -28,7 +29,13 @@ defmodule BattleBox.PubSubTest do
       lobby_id: @lobby_id
     }
 
-    %{bot: bot, lobby: lobby, game: game}
+    bot_server = %{
+      bot_server_id: @bot_server_id,
+      lobby: lobby,
+      bot: bot
+    }
+
+    %{bot: bot, lobby: lobby, game: game, bot_server: bot_server}
   end
 
   describe "user events" do
@@ -104,6 +111,21 @@ defmodule BattleBox.PubSubTest do
       Process.sleep(10)
       GameEngine.broadcast_game_start(context.game_engine, context.game)
       assert_receive {:lobby_update_listener, {:game_start, @game_id}}
+    end
+  end
+
+  describe "bot server events" do
+    test "you can subscribe to bot server events", context do
+      named_proxy(:bot_server_update_listener, fn ->
+        :ok =
+          GameEngine.subscribe_to_bot_server_events(context.game_engine, @bot_server_id, [
+            :bot_server_update
+          ])
+      end)
+
+      Process.sleep(10)
+      GameEngine.broadcast_bot_server_update(context.game_engine, context.bot_server)
+      assert_receive {:bot_server_update_listener, {:bot_server_update, @bot_server_id}}
     end
   end
 end
