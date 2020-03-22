@@ -33,7 +33,7 @@
 
     <%= for robot <- RobotGame.robots_at_turn(@game.robot_game, @turn) do %>
       <% [row, col] = robot.location %>
-      <div class='<%= "robot #{robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'><%= robot.hp %></div>
+      <div class='<%= "robot player_#{robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'><%= robot.hp %></div>
     <% end %>
   </div>
 </div>
