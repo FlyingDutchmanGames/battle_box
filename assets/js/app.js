@@ -3,6 +3,7 @@ import bot_css from "../css/bots.css"
 import header_css from "../css/header.css"
 import robot_game_css from "../css/robot_game.css"
 import game_css from "../css/game.css"
+import not_found_css from "../css/not_found.css"
 
 import {Socket as PhxSocket} from "phoenix"
 import LiveSocket from "phoenix_live_view"

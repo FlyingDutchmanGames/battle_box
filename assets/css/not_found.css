@@ -1,0 +1,14 @@
+.not-found-container {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  padding: 50px;
+}
+
+.not-found-container .title {
+  font-size: 10em;
+}
+
+.not-found-container .message {
+  font-size: 2em;
+}
