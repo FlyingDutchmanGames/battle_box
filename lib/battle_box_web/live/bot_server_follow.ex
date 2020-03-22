@@ -11,9 +11,25 @@ defmodule BattleBoxWeb.BotServerFollow do
       bot_server ->
         if connected?(socket) do
           Process.monitor(bot_server.pid)
+
+          GameEngine.subscribe_to_bot_server_events(
+            game_engine(),
+            bot_server_id,
+            [:bot_server_update]
+          )
         end
 
         {:ok, assign(socket, bot_server: bot_server)}
+    end
+  end
+
+  def handle_info({:bot_server_update, bot_server_id}, socket) do
+    case GameEngine.get_bot_server(game_engine(), bot_server_id) do
+      nil ->
+        {:noreply, assign(socket, not_found: true)}
+
+      bot_server ->
+        {:noreply, assign(socket, bot_server: bot_server)}
     end
   end
 
