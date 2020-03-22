@@ -20,7 +20,7 @@ V1
     [ ] Guard
     [ ] Suicide
     [ ] Attack
-[ ] Signout drop down
+[x] Signout
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
   [ ] dealing with closed sockets
