@@ -8,7 +8,7 @@ defmodule BattleBox.GameBot do
 
   schema "game_bots" do
     field :score, :integer, default: 0
-    field :player, :string
+    field :player, :integer
     field :winner, :boolean, default: false
     belongs_to :bot, Bot
     belongs_to :game, Game

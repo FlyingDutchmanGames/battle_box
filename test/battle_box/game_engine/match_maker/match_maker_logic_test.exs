@@ -38,8 +38,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     matches =
       make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], lobby.id)
 
-    assert [%{game: game, players: %{"player_1" => ^player_1_pid, "player_2" => ^player_2_pid}}] =
-             matches
+    assert [%{game: game, players: %{1 => ^player_1_pid, 2 => ^player_2_pid}}] = matches
   end
 
   test "it will only make one match if there are three in the queue", %{lobby: lobby, bot: bot} do
@@ -57,8 +56,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
         lobby.id
       )
 
-    assert [%{game: game, players: %{"player_1" => ^player_1_pid, "player_2" => ^player_2_pid}}] =
-             matches
+    assert [%{game: game, players: %{1 => ^player_1_pid, 2 => ^player_2_pid}}] = matches
   end
 
   test "it will use the settings from the lobby", %{lobby: lobby, bot: bot} do
@@ -90,12 +88,12 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
 
     assert [
              %{
-               player: "player_1",
+               player: 1,
                bot: bot,
                score: 0
              },
              %{
-               player: "player_2",
+               player: 2,
                bot: bot,
                score: 0
              }

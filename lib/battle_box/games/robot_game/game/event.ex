@@ -10,11 +10,7 @@ defmodule BattleBox.Games.RobotGame.Event do
   def dump(%{turn: turn, seq_num: seq_num, cause: cause, effects: effects}) do
     header = <<seq_num::unsigned-integer-32, turn::unsigned-integer-16>>
     cause = encode_cause(cause)
-
-    effects =
-      effects
-      |> Enum.map(&encode_effect/1)
-      |> IO.iodata_to_binary()
+    effects = IO.iodata_to_binary(effects)
 
     {:ok, header <> cause <> effects}
   end
@@ -56,24 +52,19 @@ defmodule BattleBox.Games.RobotGame.Event do
   defp decode_effects(effects, acc) do
     case effects do
       <<move_effect(robot_id, x, y), rest::binary>> ->
-        effect = ["move", robot_id, [x, y]]
-        decode_effects(rest, [effect | acc])
+        decode_effects(rest, [move_effect(robot_id, x, y) | acc])
 
       <<damage_effect(robot_id, amount), rest::binary>> ->
-        effect = ["damage", robot_id, amount]
-        decode_effects(rest, [effect | acc])
+        decode_effects(rest, [damage_effect(robot_id, amount) | acc])
 
       <<guard_effect(robot_id), rest::binary>> ->
-        effect = ["guard", robot_id]
-        decode_effects(rest, [effect | acc])
+        decode_effects(rest, [guard_effect(robot_id) | acc])
 
       <<remove_robot_effect(robot_id), rest::binary>> ->
-        effect = ["remove_robot", robot_id]
-        decode_effects(rest, [effect | acc])
+        decode_effects(rest, [remove_robot_effect(robot_id) | acc])
 
       <<create_robot_effect(robot_id, player_id, hp, x, y), rest::binary>> ->
-        effect = ["create_robot", "player_#{player_id}", robot_id, hp, [x, y]]
-        decode_effects(rest, [effect | acc])
+        decode_effects(rest, [create_robot_effect(robot_id, player_id, hp, x, y) | acc])
     end
   end
 
@@ -98,26 +89,6 @@ defmodule BattleBox.Games.RobotGame.Event do
           "guard" -> rg_guard(robot_id)
           "noop" -> rg_noop(robot_id)
         end
-    end
-  end
-
-  defp encode_effect(effect) do
-    case effect do
-      ["move", robot_id, [x, y]] ->
-        move_effect(robot_id, x, y)
-
-      ["damage", robot_id, amount] ->
-        damage_effect(robot_id, amount)
-
-      ["guard", robot_id] ->
-        guard_effect(robot_id)
-
-      ["remove_robot", robot_id] ->
-        remove_robot_effect(robot_id)
-
-      ["create_robot", "player_" <> player_id, robot_id, hp, [x, y]] ->
-        player_id = String.to_integer(player_id)
-        create_robot_effect(robot_id, player_id, hp, x, y)
     end
   end
 end

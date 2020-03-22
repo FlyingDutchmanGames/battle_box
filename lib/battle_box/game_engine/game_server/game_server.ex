@@ -6,19 +6,19 @@ defmodule BattleBox.GameEngine.GameServer do
     GenStateMachine.call(game_server, :get_game)
   end
 
-  def accept_game(game_server, player) when is_binary(player) do
+  def accept_game(game_server, player) when is_integer(player) do
     GenStateMachine.cast(game_server, {:accept_game, player})
   end
 
-  def reject_game(game_server, player) when is_binary(player) do
+  def reject_game(game_server, player) when is_integer(player) do
     GenStateMachine.cast(game_server, {:reject_game, player})
   end
 
-  def forfeit_game(game_server, player) when is_binary(player) do
+  def forfeit_game(game_server, player) when is_integer(player) do
     GenStateMachine.cast(game_server, {:forfeit_game, player})
   end
 
-  def submit_moves(game_server, player, moves) when is_binary(player) do
+  def submit_moves(game_server, player, moves) when is_integer(player) do
     GenStateMachine.cast(game_server, {:moves, player, moves})
   end
 
