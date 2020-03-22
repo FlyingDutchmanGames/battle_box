@@ -1,5 +1,5 @@
 <div class="header">
-  <div class="logo">Botskrieg</div>
+  <a href="/"><div class="logo">Botskrieg</div></a>
   <div class="spacer"></div>
   <%= if @user do %>
     <div class="nav-item">
