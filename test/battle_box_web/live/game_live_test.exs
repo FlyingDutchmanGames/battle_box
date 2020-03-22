@@ -49,6 +49,17 @@ defmodule BattleBoxWeb.GameLiveTest do
     assert html =~ "TURN: 2 / 2"
   end
 
+  test "with the follow flag it will redirect to bot server follow", %{conn: conn} = context do
+    bot_server_id = Ecto.UUID.generate()
+
+    {:ok, %{id: id}} =
+      Game.new(lobby: context.lobby, robot_game: RobotGame.new(), game_bots: context.game_bots)
+      |> Game.persist()
+
+    assert {:error, %{redirect: "/bot_servers/#{bot_server_id}/follow"}} ==
+             live(conn, "/games/#{id}?follow=#{bot_server_id}")
+  end
+
   describe "live game watching" do
     setup %{test: name} do
       {:ok, _} = GameEngine.start_link(name: name)
@@ -105,6 +116,26 @@ defmodule BattleBoxWeb.GameLiveTest do
 
       Process.sleep(10)
       assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 9/, render(view))
+    end
+
+    test "if you're following a bot server if and the game server dies you get redirected",
+         %{conn: conn} = context do
+      id = Ecto.UUID.generate()
+
+      {:ok, _} =
+        Game.new(
+          lobby: context.lobby,
+          robot_game: RobotGame.new(),
+          game_bots: context.game_bots,
+          id: @game_id
+        )
+        |> Game.persist()
+
+      {:ok, view, html} = live(conn, "/games/#{@game_id}?follow=#{id}")
+      assert html =~ "LIVE"
+      Process.exit(context.game_server, :kill)
+      bot_server_url = "/bot_servers/#{id}/follow"
+      assert_redirect(view, ^bot_server_url)
     end
 
     test "when the game server dies, it will switch to the historical view",
