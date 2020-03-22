@@ -1,4 +1,4 @@
-<div class="score <%= @player %>">
+<div class="score player_<%= @player %>">
   <div class="bot-info">
     <img src="<%= @game_bot.bot.user.github_avatar_url %>">
     <div class="names">

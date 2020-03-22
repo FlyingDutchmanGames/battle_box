@@ -2,6 +2,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.{RobotGame, RobotGame.Logic}
   import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
+  import BattleBox.Games.RobotGame.EventHelpers
   import BattleBox.Games.RobotGameTest.Helpers
 
   test "you can't move to a location that is not adjacent" do
@@ -18,8 +19,8 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
     assert %{location: [0, 0]} =
              game
              |> Logic.calculate_turn(%{
-               "player_1" => [%{"type" => "move", "target" => [1, 1], "robot_id" => 1}],
-               "player_2" => []
+               1 => [%{"type" => "move", "target" => [1, 1], "robot_id" => 1}],
+               2 => []
              })
              |> RobotGame.get_robot(100)
   end
@@ -83,7 +84,10 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
     robot_spawns =
       graph_with_indexes
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
-      |> Enum.map(fn {loc, _} -> ["create_robot", "player_1", robot_id(loc), 50, loc] end)
+      |> Enum.map(fn {[x, y], _} ->
+        id = robot_id([x, y])
+        create_robot_effect(id, 1, 50, x, y)
+      end)
       |> Enum.map(fn effect -> %{effects: [effect]} end)
 
     initial_game =
@@ -96,7 +100,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
       |> Enum.map(fn {location, type} -> robot_move(location, type) end)
 
-    after_turn = Logic.calculate_turn(initial_game, %{"player_1" => moves, "player_2" => []})
+    after_turn = Logic.calculate_turn(initial_game, %{1 => moves, 2 => []})
 
     graph_with_indexes
     |> Enum.filter(fn {_, val} -> is_robot?(val) end)
@@ -205,5 +209,8 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
   defp is_robot?(val), do: val in ["▲", "▼", "◀", "▶", "←", "↑", "→", "↓", "🐢", "🤕"]
 
-  defp robot_id([x, y]), do: "#{x}, #{y}"
+  defp robot_id([x, y]) do
+    <<id::16>> = <<x::8, y::8>>
+    id
+  end
 end

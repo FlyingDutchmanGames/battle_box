@@ -1,4 +1,6 @@
 defmodule BattleBox.Games.RobotGameTest.Helpers do
+  import BattleBox.Games.RobotGame.EventHelpers
+
   def sigil_g(map, _modifiers) do
     graphs =
       map
@@ -15,11 +17,12 @@ defmodule BattleBox.Games.RobotGameTest.Helpers do
     graph_with_indexes
     |> Enum.reject(fn {_, val} -> val == "0" end)
     |> Enum.map(fn {location, val} ->
+      [x, y] = location
       {val, ""} = Integer.parse(val)
 
-      player_id = if rem(val, 2) == 1, do: "player_1", else: "player_2"
+      player_id = if rem(val, 2) == 1, do: 1, else: 2
 
-      %{cause: "test_helper", effects: [["create_robot", player_id, val * 100, 50, location]]}
+      %{cause: "test_helper", effects: [create_robot_effect(val * 100, player_id, 50, x, y)]}
     end)
   end
 end

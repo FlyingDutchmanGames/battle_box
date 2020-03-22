@@ -1,6 +1,7 @@
 defmodule BattleBox.Games.RobotGame.EventTest do
   alias BattleBox.Games.{RobotGame, RobotGame.Settings}
   use BattleBox.DataCase
+  import BattleBox.Games.RobotGame.EventHelpers
   import Ecto.Query, only: [from: 2]
 
   @robot_id 1
@@ -29,31 +30,31 @@ defmodule BattleBox.Games.RobotGame.EventTest do
       },
       %{turn: 1, seq_num: 1, cause: %{"type" => "guard", "robot_id" => @robot_id}, effects: []},
       # A little more realistic
-      %{turn: 1, seq_num: 1, cause: @move_move, effects: [["move", @robot_id, [0, 0]]]},
-      %{turn: 1, seq_num: 1, cause: @guard_move, effects: [["guard", @robot_id]]},
-      %{turn: 1, seq_num: 1, cause: @suicide_move, effects: [["remove_robot", @robot_id]]},
+      %{turn: 1, seq_num: 1, cause: @move_move, effects: [move_effect(@robot_id, 0, 0)]},
+      %{turn: 1, seq_num: 1, cause: @guard_move, effects: [guard_effect(@robot_id)]},
+      %{turn: 1, seq_num: 1, cause: @suicide_move, effects: [remove_robot_effect(@robot_id)]},
       %{turn: 1, seq_num: 1, cause: @noop_move, effects: []},
-      %{turn: 1, seq_num: 1, cause: @attack_move, effects: [["damage", @robot_id, 42]]},
+      %{turn: 1, seq_num: 1, cause: @attack_move, effects: [damage_effect(@robot_id, 20)]},
       # Robot creation
       %{
         turn: 1,
         seq_num: 1,
         cause: "spawn",
-        effects: [["create_robot", "player_1", @robot_id, 50, [0, 0]]]
+        effects: [create_robot_effect(@robot_id, 1, 50, 0, 0)]
       },
       # Multiple Effects
       %{
         turn: 1,
         seq_num: 1,
         cause: @attack_move,
-        effects: [["damage", @robot_id, 42], ["remove_robot", @robot_id]]
+        effects: [damage_effect(@robot_id, 42), remove_robot_effect(@robot_id)]
       },
       # Death
       %{
         turn: 1,
         seq_num: 1,
         cause: "death",
-        effects: [["remove_robot", 1]]
+        effects: [remove_robot_effect(@robot_id)]
       }
     ]
     |> Enum.each(fn event ->
