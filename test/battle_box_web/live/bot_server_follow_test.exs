@@ -72,5 +72,26 @@ defmodule BattleBoxWeb.BotsServerFollowTest do
       html = render(view)
       assert html =~ "Match Making"
     end
+
+    test "if the bot gets in a game it will issue a redirect to the game",
+         %{conn: conn} = context do
+      {:ok, view, html} = live(conn, "/bot_servers/#{@bot_server_id}/follow")
+      assert html =~ "Idle"
+
+      {:ok, bot_server2, _} =
+        GameEngine.start_bot(context.game_engine, %{
+          lobby: context.lobby,
+          bot: context.bot,
+          connection: self()
+        })
+
+      :ok = BotServer.match_make(context.bot_server)
+      :ok = BotServer.match_make(bot_server2)
+      :ok = GameEngine.force_match_make(context.game_engine)
+      Process.sleep(20)
+      %{game_id: game_id} = GameEngine.get_bot_server(context.game_engine, @bot_server_id)
+      game_url = "/games/#{game_id}?follow=#{@bot_server_id}"
+      assert_redirect(view, ^game_url)
+    end
   end
 end
