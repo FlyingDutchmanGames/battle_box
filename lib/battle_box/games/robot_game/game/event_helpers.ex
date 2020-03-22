@@ -21,8 +21,9 @@ defmodule BattleBox.Games.RobotGame.EventHelpers do
   @code_size 8
   @hp_size 16
   @robot_id_size 16
-  @robot_id_size 16
+  @player_id_size 16
   @location_size 16
+  @damage_amount_size 16
 
   defmacro rg_spawn() do
     quote do: <<unquote(@spawn)::unquote(@code_size)>>
@@ -68,6 +69,48 @@ defmodule BattleBox.Games.RobotGame.EventHelpers do
     quote do: <<
             unquote(@noop)::unquote(@code_size),
             unquote(robot_id)::unquote(@robot_id_size)
+          >>
+  end
+
+  defmacro move_effect(robot_id, x, y) do
+    quote do: <<
+            unquote(@effect_move)::unquote(@code_size),
+            unquote(robot_id)::unquote(@robot_id_size),
+            unquote(x)::unquote(@location_size),
+            unquote(y)::unquote(@location_size)
+          >>
+  end
+
+  defmacro damage_effect(robot_id, amount) do
+    quote do: <<
+            unquote(@effect_damage)::unquote(@code_size),
+            unquote(robot_id)::unquote(@robot_id_size),
+            unquote(amount)::unquote(@damage_amount_size)
+          >>
+  end
+
+  defmacro guard_effect(robot_id) do
+    quote do: <<
+            unquote(@effect_guard)::unquote(@code_size),
+            unquote(robot_id)::unquote(@robot_id_size)
+          >>
+  end
+
+  defmacro remove_robot_effect(robot_id) do
+    quote do: <<
+            unquote(@effect_remove_robot)::unquote(@code_size),
+            unquote(robot_id)::unquote(@robot_id_size)
+          >>
+  end
+
+  defmacro create_robot_effect(robot_id, player_id, hp, x, y) do
+    quote do: <<
+            unquote(@effect_create_robot)::unquote(@code_size),
+            unquote(robot_id)::unquote(@robot_id_size),
+            unquote(player_id)::unquote(@player_id_size),
+            unquote(hp)::unquote(@hp_size),
+            unquote(x)::unquote(@location_size),
+            unquote(y)::unquote(@location_size)
           >>
   end
 end
