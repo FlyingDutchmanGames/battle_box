@@ -1,0 +1,21 @@
+<script>window.useLiveView = true</script>
+<div class="bot-server-follow">
+  <div class="bot-server-info">
+    <div class="title">
+      <div style="margin-right: 10px;">Bot Server:</div>
+      <a href="<%= Routes.bot_path(@socket, :show, @bot_server.bot.id) %>"><%= @bot_server.bot.name %></a>
+      <div style="margin: 0px 10px;">/</div>
+      <pre><%= @bot_server.bot_server_id %></pre>
+    </div>
+  </div>
+  <%= case @bot_server.status do %>
+    <% status when status in [:options, :idle] -> %>
+      <div class="status">Idle 😴</div>
+    <% :match_making -> %>
+      <div class="status blinking">Match Making</div>
+    <% :game_acceptance -> %>
+      <div class="status">Game Starting</div>
+    <% status when status in [:moves_request, :playing] -> %>
+      <a href="<%= Routes.live_path(@socket, BattleBoxWeb.GameLive, @bot_server.game_id) %>"><div class="status blinking">In Game</div></a>
+  <% end %>
+</div>

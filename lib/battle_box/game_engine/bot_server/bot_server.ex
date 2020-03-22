@@ -27,7 +27,7 @@ defmodule BattleBox.GameEngine.BotServer do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
       name:
         {:via, Registry,
-         {config.names.bot_registry, data.bot_server_id, %{bot: bot, lobby: lobby}}}
+         {config.names.bot_registry, data.bot_server_id, %{bot: bot, lobby: lobby, game_id: nil}}}
     )
   end
 
@@ -173,10 +173,16 @@ defmodule BattleBox.GameEngine.BotServer do
     do: {:keep_state_and_data, {:reply, from, {:error, :invalid_moves_submission}}}
 
   def handle_event(:enter, _old_state, new_state, %{names: names} = data) do
-    metadata = %{status: new_state}
+    metadata = %{status: new_state, game_id: data[:game_info][:game_id]}
 
     {_, _} =
       Registry.update_value(names.bot_registry, data.bot_server_id, &Map.merge(&1, metadata))
+
+    :ok =
+      GameEngine.broadcast_bot_server_update(
+        names.game_engine,
+        Map.take(data, [:bot, :lobby, :bot_server_id])
+      )
 
     :keep_state_and_data
   end

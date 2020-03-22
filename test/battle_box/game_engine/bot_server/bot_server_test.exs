@@ -83,11 +83,25 @@ defmodule BattleBox.GameEngine.BotServerTest do
        %{p1_server: p1, p2_server: p2, bot: bot, lobby: lobby} = context do
     assert Registry.count(context.bot_registry) == 2
 
-    assert [{^p1, %{bot: ^bot, lobby: ^lobby}}] =
+    assert [{^p1, %{bot: ^bot, lobby: ^lobby, game_id: nil}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)
 
-    assert [{^p2, %{bot: ^bot, lobby: ^lobby}}] =
+    assert [{^p2, %{bot: ^bot, lobby: ^lobby, game_id: nil}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p2.bot_server_id)
+  end
+
+  test "the bot server broadcasts updates", context do
+    id = context.init_opts_p1.bot_server_id
+
+    GameEngine.subscribe_to_bot_server_events(
+      context.game_engine,
+      id,
+      [:bot_server_update]
+    )
+
+    :ok = BotServer.match_make(context.p1_server)
+
+    assert_receive {:bot_server_update, ^id}
   end
 
   describe "Matchmaking in a lobby" do
@@ -206,6 +220,9 @@ defmodule BattleBox.GameEngine.BotServerTest do
       assert_receive {:p2_connection,
                       {:moves_request,
                        %{game_id: ^game_id, maximum_time: ^max, minimum_time: ^min}}}
+
+      assert [{_pid, %{game_id: ^game_id}}] =
+               Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)
     end
   end
 
