@@ -5,7 +5,7 @@
 V1
 ====
 [ ] Styling
-  [ ] Pick some colors
+  [x] Pick some colors
   [x] Pick a font
   [x] Rebrand everything to botskrieg
   [ ] Bots Live Page
@@ -14,7 +14,7 @@ V1
   [ ] Lobbies
   [ ] Games
 [ ] Live Games Page
-  [ ] Show winner (fix winner bug?)
+  [ ] Show winner
   [ ] Show moves
     [ ] Move
     [ ] Guard
