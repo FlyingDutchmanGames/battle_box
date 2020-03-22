@@ -10,6 +10,7 @@
           <div class="bot-server">
             <div>ID: <%= bot_server.bot_server_id %></div>
             <div>Lobby <%= bot_server.lobby.name %></div>
+            <a href="<%= Routes.live_path(@socket, BattleBoxWeb.BotServerFollow, bot_server.bot_server_id) %>">Follow</a>
           </div>
         <% end %>
       </div>
