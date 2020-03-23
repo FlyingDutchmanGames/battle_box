@@ -5,7 +5,7 @@
 
 <div class="robot-game" phx-window-keyup="change_turn">
   <div class="game-header">
-    <%= render("score.html", player: 1, score: p1_score, game_bot: game_bot_1) %>
+    <%= render("score.html", player: 1, score: p1_score, game_bot: game_bot_1, socket: @socket) %>
     <div class="title-section">
       <div class="title">Botskrieg</div>
       <div class="flex-center-row-space-evenly" style="width: 100%; padding-bottom: 5px;">
@@ -20,7 +20,7 @@
         <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
       </div>
     </div>
-    <%= render("score.html", player: 2, score: p2_score, game_bot: game_bot_2) %>
+    <%= render("score.html", player: 2, score: p2_score, game_bot: game_bot_2, socket: @socket) %>
   </div>
 
   <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>

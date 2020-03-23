@@ -2,8 +2,8 @@
   <div class="bot-info">
     <img src="<%= @game_bot.bot.user.github_avatar_url %>">
     <div class="names">
-      <div style="font-size: 0.3em;"><%= @game_bot.bot.user.github_login_name %></div>
-      <div><%= @game_bot.bot.name %></div>
+      <a href="<%= Routes.user_path(@socket, :show, @game_bot.bot.user.id) %>"><div style="font-size: 0.3em; color: white;"><%= @game_bot.bot.user.github_login_name %></div></a>
+      <a href="<%= Routes.bot_path(@socket, :show, @game_bot.bot.id) %>"><div style="color: white;"><%= @game_bot.bot.name %></div></a>
     </div>
   </div>
   <div style="font-size: 2em;"><%= @score %></div>
