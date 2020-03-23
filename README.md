@@ -40,7 +40,7 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
      (stdlib 3.11.2) proc_lib.erl:249: :proc_lib.init_p_do_apply/3
 ```
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
-[ ] Bot Server Follow Flow
+[x] Bot Server Follow Flow
 [ ] Make sure user input can't cause a game to crash
 [ ] More Efficent Robot Game Representation
   [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
