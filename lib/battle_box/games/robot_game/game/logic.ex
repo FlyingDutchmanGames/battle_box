@@ -1,11 +1,12 @@
 defmodule BattleBox.Games.RobotGame.Logic do
+  import BattleBox.Games.RobotGame.EventHelpers
   import BattleBox.Games.RobotGame
 
-  def calculate_turn(game, %{"player_1" => player_1_moves, "player_2" => player_2_moves}) do
+  def calculate_turn(game, %{1 => player_1_moves, 2 => player_2_moves}) do
     moves =
       Enum.concat(
-        validate_moves(game, player_1_moves, "player_1"),
-        validate_moves(game, player_2_moves, "player_2")
+        validate_moves(game, player_1_moves, 1),
+        validate_moves(game, player_2_moves, 2)
       )
 
     movements =
@@ -36,12 +37,9 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     game = put_events(game, events)
 
-    game =
-      if spawning_round?(game),
-        do: put_events(game, generate_spawn_events(game)),
-        else: game
+    game = if spawning_round?(game), do: do_spawn(game), else: game
 
-    deaths = for %{id: id, hp: hp} <- robots(game), hp <= 0, do: ["remove_robot", id]
+    deaths = for %{id: id, hp: hp} <- robots(game), hp <= 0, do: remove_robot_effect(id)
 
     game =
       if deaths != [],
@@ -56,13 +54,13 @@ defmodule BattleBox.Games.RobotGame.Logic do
     complete_turn(game)
   end
 
-  defp generate_guard_event(move), do: %{cause: move, effects: [["guard", move["robot_id"]]]}
+  defp generate_guard_event(move), do: %{cause: move, effects: [guard_effect(move["robot_id"])]}
 
   defp generate_movement_event(game, move, movements, guard_locations) do
     effects =
       case calc_movement(game, move, movements) do
-        {:move, target, robot} ->
-          [["move", robot.id, target]]
+        {:move, [x, y], robot} ->
+          [move_effect(robot.id, x, y)]
 
         {:no_move, reason, robot} ->
           case reason do
@@ -70,10 +68,10 @@ defmodule BattleBox.Games.RobotGame.Logic do
               []
 
             :invalid_terrain ->
-              [["damage", robot.id, collision_damage(game)]]
+              [damage_effect(robot.id, collision_damage(game))]
 
             :contention ->
-              [["damage", robot.id, collision_damage(game)]]
+              [damage_effect(robot.id, collision_damage(game))]
 
             {:collision, other_robot} ->
               other_robot_damage =
@@ -82,8 +80,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
                   else: collision_damage(game)
 
               [
-                ["damage", robot.id, collision_damage(game)],
-                ["damage", other_robot.id, other_robot_damage]
+                damage_effect(robot.id, collision_damage(game)),
+                damage_effect(other_robot.id, other_robot_damage)
               ]
           end
       end
@@ -109,10 +107,10 @@ defmodule BattleBox.Games.RobotGame.Logic do
           []
 
         %{target_space_occupant: other_robot, guarded?: true} when not is_nil(other_robot) ->
-          [["damage", other_robot.id, guarded_attack_damage(game)]]
+          [damage_effect(other_robot.id, guarded_attack_damage(game))]
 
         %{target_space_occupant: other_robot, guarded?: false} when not is_nil(other_robot) ->
-          [["damage", other_robot.id, attack_damage(game)]]
+          [damage_effect(other_robot.id, attack_damage(game))]
       end
 
     %{cause: move, effects: effects}
@@ -131,13 +129,13 @@ defmodule BattleBox.Games.RobotGame.Logic do
             do: guarded_suicide_damage(game),
             else: suicide_damage(game)
 
-        ["damage", affected_robot_id, damage]
+        damage_effect(affected_robot_id, damage)
       end)
 
-    %{cause: move, effects: [["remove_robot", robot.id] | damage_effects]}
+    %{cause: move, effects: [remove_robot_effect(robot.id) | damage_effects]}
   end
 
-  defp generate_spawn_events(game) do
+  defp do_spawn(game) do
     spawn_locations =
       spawns(game)
       |> Enum.shuffle()
@@ -145,19 +143,19 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     {game, spawned_robots} =
       spawn_locations
-      |> Enum.zip(Stream.cycle(["player_1", "player_2"]))
-      |> Enum.reduce({game, []}, fn {spawn_location, player_id}, {game, spawned_robots} ->
+      |> Enum.zip(Stream.cycle([1, 2]))
+      |> Enum.reduce({game, []}, fn {[x, y], player_id}, {game, spawned_robots} ->
         {game, robot_id} = next_robot_id(game)
-        event = ["create_robot", player_id, robot_id, game.settings.robot_hp, spawn_location]
+        event = create_robot_effect(robot_id, player_id, game.settings.robot_hp, x, y)
         {game, [event | spawned_robots]}
       end)
 
     destroyed_robots =
       robots(game)
       |> Enum.filter(fn robot -> robot.location in spawn_locations end)
-      |> Enum.map(fn robot -> ["remove_robot", robot.id] end)
+      |> Enum.map(fn robot -> remove_robot_effect(robot.id) end)
 
-    [%{cause: "spawn", effects: destroyed_robots ++ spawned_robots}]
+    put_events(game, [%{cause: "spawn", effects: destroyed_robots ++ spawned_robots}])
   end
 
   defp calc_movement(game, move, movements, stuck_robots \\ []) do

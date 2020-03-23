@@ -1,20 +1,35 @@
 defmodule BattleBoxWeb.GameLive do
-  alias BattleBoxWeb.{PageView, RobotGameView}
+  alias BattleBoxWeb.{BotServerFollow, PageView, RobotGameView}
   use BattleBoxWeb, :live_view
   alias BattleBox.{Repo, Game, GameEngine, GameEngine.GameServer}
 
   def mount(%{"game_id" => game_id} = params, _session, socket) do
-    if connected?(socket) do
-      GameEngine.subscribe_to_game_events(game_engine(), game_id, [:game_update])
-    end
-
     case get_game(game_id) do
       nil ->
         {:ok, assign(socket, :not_found, true)}
 
-      game ->
-        turn = box_turn_number(game, params["turn"])
-        {:ok, assign(socket, game: game, turn: turn)}
+      {game_source, game} ->
+        if connected?(socket) do
+          GameEngine.subscribe_to_game_events(game_engine(), game_id, [:game_update])
+
+          case game_source do
+            {:live, pid} ->
+              Process.monitor(pid)
+
+            _ ->
+              send(self(), :redirect_if_following)
+              nil
+          end
+        end
+
+        {:ok,
+         assign(
+           socket,
+           game: game,
+           follow: params["follow"],
+           turn: box_turn_number(game, params["turn"]),
+           game_source: game_source
+         )}
     end
   end
 
@@ -49,9 +64,25 @@ defmodule BattleBoxWeb.GameLive do
     {:noreply, socket}
   end
 
+  def handle_info(
+        :redirect_if_following,
+        %{assigns: %{game_source: :historical, follow: bot_server_id}} = socket
+      )
+      when not is_nil(bot_server_id) do
+    {:noreply, redirect(socket, to: Routes.live_path(socket, BotServerFollow, bot_server_id))}
+  end
+
+  def handle_info(:redirect_if_following, socket), do: {:noreply, socket}
+
   def handle_info({:game_update, id}, %{assigns: %{game: %{id: id}}} = socket) do
-    game = get_game(id)
-    {:noreply, assign(socket, game: game, turn: game.robot_game.turn)}
+    {game_source, game} = get_game(id)
+    {:noreply, assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
+  end
+
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
+    send(self(), :redirect_if_following)
+    {game_source, game} = get_game(socket.assigns.game.id)
+    {:noreply, assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
   end
 
   def render(%{not_found: true}), do: PageView.render("not_found.html", message: "Game not found")
@@ -71,15 +102,18 @@ defmodule BattleBoxWeb.GameLive do
   defp get_game(game_id) do
     case GameEngine.get_game_server(game_engine(), game_id) do
       nil ->
-        game =
+        result =
           Game.get_by_id(game_id)
           |> Repo.preload(robot_game: [:settings], game_bots: [bot: :user])
 
-        if not is_nil(game), do: update_in(game.robot_game, &BattleBoxGame.initialize/1)
+        case result do
+          nil -> nil
+          game -> {:historical, Game.initialize(game)}
+        end
 
       %{pid: pid} ->
         {:ok, game} = GameServer.get_game(pid)
-        game
+        {{:live, pid}, game}
     end
   end
 end

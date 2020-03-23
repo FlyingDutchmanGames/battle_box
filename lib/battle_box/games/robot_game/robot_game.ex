@@ -1,4 +1,5 @@
 defmodule BattleBox.Games.RobotGame do
+  import BattleBox.Games.RobotGame.EventHelpers
   alias BattleBox.{Repo, Game}
   alias __MODULE__.{Settings, Settings.DamageModifier}
   alias __MODULE__.Event
@@ -29,7 +30,7 @@ defmodule BattleBox.Games.RobotGame do
 
   def db_name, do: "robot_game"
   def settings_module, do: Settings
-  def players_for_settings(_), do: ["player_1", "player_2"]
+  def players_for_settings(_), do: [1, 2]
 
   def get_by_id_with_settings(id),
     do: Repo.preload(get_by_id(id), :settings) |> set_robots_at_turn
@@ -38,7 +39,7 @@ defmodule BattleBox.Games.RobotGame do
   def get_by_id(_), do: nil
 
   def disqualify(game, player) do
-    winner = %{"player_1" => "player_2", "player_2" => "player_1"}[player]
+    winner = %{1 => 2, 2 => 1}[player]
     Map.put(game, :winner, winner)
   end
 
@@ -55,10 +56,10 @@ defmodule BattleBox.Games.RobotGame do
       scores = score(game)
 
       winner =
-        case {scores["player_1"], scores["player_2"]} do
+        case {scores[1], scores[2]} do
           {p1, p2} when p1 == p2 -> nil
-          {p1, p2} when p1 > p2 -> "player_1"
-          {p1, p2} when p1 < p2 -> "player_2"
+          {p1, p2} when p1 > p2 -> 1
+          {p1, p2} when p1 < p2 -> 2
         end
 
       %{game | winner: winner}
@@ -91,25 +92,25 @@ defmodule BattleBox.Games.RobotGame do
 
   def apply_effect_to_robots(robots, effect) do
     case effect do
-      ["move", robot_id, location] ->
+      move_effect(robot_id, x, y) ->
         Enum.map(robots, fn
-          %{id: ^robot_id} = robot -> put_in(robot.location, location)
+          %{id: ^robot_id} = robot -> put_in(robot.location, [x, y])
           robot -> robot
         end)
 
-      ["damage", robot_id, amount] ->
+      damage_effect(robot_id, amount) ->
         Enum.map(robots, fn
           %{id: ^robot_id, hp: hp} = robot -> %{robot | hp: hp - amount}
           robot -> robot
         end)
 
-      ["guard", _robot_id] ->
+      guard_effect(_robot_id) ->
         robots
 
-      ["create_robot", player_id, robot_id, hp, location] ->
-        [%{player_id: player_id, location: location, id: robot_id, hp: hp} | robots]
+      create_robot_effect(robot_id, player_id, hp, x, y) ->
+        [%{player_id: player_id, location: [x, y], id: robot_id, hp: hp} | robots]
 
-      ["remove_robot", robot_id] ->
+      remove_robot_effect(robot_id) ->
         Enum.reject(robots, fn robot -> robot.id == robot_id end)
     end
   end
@@ -139,7 +140,7 @@ defmodule BattleBox.Games.RobotGame do
       robots_at_turn(game, turn)
       |> Enum.frequencies_by(fn robot -> robot.player_id end)
 
-    Map.merge(%{"player_1" => 0, "player_2" => 0}, robot_score)
+    Map.merge(%{1 => 0, 2 => 0}, robot_score)
   end
 
   def dimensions(game), do: Settings.Terrain.dimensions(game.settings.terrain)
@@ -185,7 +186,7 @@ defmodule BattleBox.Games.RobotGame do
 
   def moves_requests(game) do
     request = %{robots: robots(game), turn: game.turn}
-    Map.new(["player_1", "player_2"], fn player -> {player, request} end)
+    Map.new([1, 2], fn player -> {player, request} end)
   end
 
   def settings(game) do

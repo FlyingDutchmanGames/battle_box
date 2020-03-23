@@ -12,7 +12,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       game = RobotGame.new(settings: %{terrain: test_terrain, spawn_per_player: 1})
 
       assert length(RobotGame.robots(game)) == 0
-      game = Logic.calculate_turn(game, %{"player_1" => [], "player_2" => []})
+      game = Logic.calculate_turn(game, %{1 => [], 2 => []})
       assert length(RobotGame.robots(game)) == 2
 
       assert [[0, 0], [1, 1]] ==
@@ -20,8 +20,14 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
                |> Enum.map(&Map.get(&1, :location))
                |> Enum.sort()
 
-      assert ["player_1", "player_2"] ==
+      assert [1, 2] ==
                Enum.map(RobotGame.robots(game), &Map.get(&1, :player_id)) |> Enum.sort()
+
+      assert 2 ==
+               RobotGame.robots(game)
+               |> Enum.map(&Map.get(&1, :id))
+               |> Enum.uniq()
+               |> length
     end
 
     test "it will destroy an existing robot on a spawn point" do
@@ -34,7 +40,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       robots =
         RobotGame.new(settings: %{terrain: test_terrain, spawn_per_player: 1})
         |> RobotGame.put_events(test_robots_spawn)
-        |> Logic.calculate_turn(%{"player_1" => [], "player_2" => []})
+        |> Logic.calculate_turn(%{1 => [], 2 => []})
         |> RobotGame.robots()
 
       assert length(robots) == 2

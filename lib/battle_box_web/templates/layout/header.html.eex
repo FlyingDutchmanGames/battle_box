@@ -1,13 +1,22 @@
 <div class="header">
-  <div class="logo">BATTLE BOX</div>
+  <a href="/"><div class="logo">Botskrieg</div></a>
   <div class="spacer"></div>
   <%= if @user do %>
-    <a style="text-decoration: none;" href="<%= Routes.user_path(@conn, :show, @user.id) %>">
+    <div class="nav-item">
+      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.BotsLive, @user.id) %>">Bots</a>
+    </div>
+    <div class="nav-item">
+      <a href="<%= Routes.user_lobby_path(@conn, :index, @user.id) %>">Lobbies</a>
+    </div>
+    <a href="<%= Routes.user_path(@conn, :show, @user.id) %>">
       <div class="user">
         <div class="name"><%= @user.name %></div>
         <img src="<%= @user.github_avatar_url %>">
       </div>
     </a>
+    <div class="nav-item">
+      <a href="<%= Routes.logout_path(@conn, :logout) %>" title="logout" sytle="font-weight: bold;">x</a>
+    </div>
   <% else %>
     <div class="github-login">
       <a href="<%= Routes.github_login_path(@conn, :github_login) %>">Login With Github</a>

@@ -1,22 +1,26 @@
 <% %{row_max: rows, row_min: 0, col_max: cols, col_min: 0} = RobotGame.dimensions(@game.robot_game) %>
-<% %{"player_1" => p1_score, "player_2" => p2_score} = RobotGame.score_at_turn(@game.robot_game, @turn) %>
+<% %{1 => p1_score, 2 => p2_score} = RobotGame.score_at_turn(@game.robot_game, @turn) %>
+<% game_bot_1 = Enum.find(@game.game_bots, fn bot -> bot.player == 1 end) %>
+<% game_bot_2 = Enum.find(@game.game_bots, fn bot -> bot.player == 2 end) %>
 
 <div class="robot-game" phx-window-keyup="change_turn">
   <div class="game-header">
-    <div class="score player_1">
-      <div class="number"><%= p1_score %></div>
-      <div class="player-name">Player 1</div>
-    </div>
-
+    <%= render("score.html", player: 1, score: p1_score, game_bot: game_bot_1) %>
     <div class="title-section">
-      <div class="title">Robot Game</div>
-      <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
+      <div class="title">Botskrieg</div>
+      <div class="flex-center-row-space-evenly" style="width: 100%; padding-bottom: 5px;">
+        <%= if match?({:live, _}, @game_source) do %>
+          <div class="game-source-badge live">
+            <div class="live-dot blinking"></div>
+            <div>LIVE</div>
+          </div>
+        <% else %>
+          <div title="<%= @game.inserted_at %>"class="game-source-badge recorded"><div><%= humanize_seconds_ago(@game.inserted_at) %></div></div>
+        <% end %>
+        <div class="turns"><%= "TURN: #{@turn} / #{@game.robot_game.turn}" %></div>
+      </div>
     </div>
-
-    <div class="score player_2">
-      <div class="number"><%= p2_score %></div>
-      <div class="player-name">Player 2</div>
-    </div>
+    <%= render("score.html", player: 2, score: p2_score, game_bot: game_bot_2) %>
   </div>
 
   <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>
@@ -29,7 +33,7 @@
 
     <%= for robot <- RobotGame.robots_at_turn(@game.robot_game, @turn) do %>
       <% [row, col] = robot.location %>
-      <div class='<%= "robot #{robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'><%= robot.hp %></div>
+      <div class='<%= "robot player_#{robot.player_id}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'><%= robot.hp %></div>
     <% end %>
   </div>
 </div>

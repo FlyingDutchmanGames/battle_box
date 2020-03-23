@@ -20,6 +20,14 @@ defmodule BattleBox.GameEngine.PubSub do
     end)
   end
 
+  def broadcast_bot_server_update(game_engine, %{lobby: _, bot: _, bot_server_id: id}) do
+    Registry.dispatch(registry_name(game_engine), "bot_server:#{id}", fn entries ->
+      for {pid, events} <- entries,
+          :bot_server_update in events,
+          do: send(pid, {:bot_server_update, id})
+    end)
+  end
+
   def broadcast_game_start(game_engine, %{id: game_id} = game) when not is_nil(game_id) do
     lobby_id = get_lobby_id(game)
 
@@ -58,6 +66,13 @@ defmodule BattleBox.GameEngine.PubSub do
 
   def subscribe_to_game_events(game_engine, game_id, events) do
     {:ok, _pid} = Registry.register(registry_name(game_engine), "game:#{game_id}", events)
+    :ok
+  end
+
+  def subscribe_to_bot_server_events(game_engine, bot_server_id, events) do
+    {:ok, _pid} =
+      Registry.register(registry_name(game_engine), "bot_server:#{bot_server_id}", events)
+
     :ok
   end
 

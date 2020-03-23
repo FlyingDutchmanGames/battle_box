@@ -1,9 +1,19 @@
 @import "../../deps/phoenix_live_view/assets/css/live_view.css";
 
+/* Palette URL: http://paletton.com/#uid=14N0u0ko8h1evqOjTlwtcb+BV7d */
+:root {
+  --primary-zero: #4A195A;
+  --primary-one: #7E508D;
+  --primary-two: #612E71;
+  --primary-three: #32083F;
+  --primary-four: #1D0126;
+}
+
 body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Ruda', sans-serif;
 }
 
 * {
@@ -12,4 +22,38 @@ body {
 
 .alert:empty {
   display: none;
+}
+
+a:link {
+  text-decoration: none;
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:active {
+  text-decoration: underline;
+}
+
+.flex-center-row-space-evenly {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+
+.blinking {
+  animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
 }
