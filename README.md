@@ -78,9 +78,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   [x] Key through turns, and have turns be sharable via url
   [ ] Changing a turn does not affect history api so its easier to use back button
 [ ] Game Engine Stats Server (# Live Games, # Most Active Lobby, # Connections)?
-[ ] Health Check
-  [ ] Server Health Check
-  [ ] Database Health Check (Through Server)
 
 Nice to Haves
 ======
@@ -135,3 +132,7 @@ Done
   [x] Show the (Live) Badge
   [x] Show if its recorded
   [x] Reload the page if there is a failure
+[x] Health Check
+  [x] Server Health Check
+  [x] Database Health Check (Through Server)
+
