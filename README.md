@@ -20,7 +20,6 @@ V1
     [ ] Guard
     [ ] Suicide
     [ ] Attack
-[x] Signout
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
   [ ] dealing with closed sockets
@@ -40,7 +39,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
      (stdlib 3.11.2) proc_lib.erl:249: :proc_lib.init_p_do_apply/3
 ```
 [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
-[x] Bot Server Follow Flow
 [ ] Make sure user input can't cause a game to crash
 [ ] More Efficent Robot Game Representation
   [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
@@ -103,12 +101,14 @@ Done
   [x] Show the bot servers active for each bot
 [x] switch game server to be 100% defdelegate
 [x] Hide `robot_game` from matchmaker logic and game server by putting it in `BattleBox.Game`
+[x] Bot Server Follow Flow
 [x] Make bot server announce bot server start
 [x] Pass the bot object into the matchmaker
 [x] Bot Server Registry Improvements
 [x] Client starts the convo
 [x] Length framed messages
 [x] Github actions Spec Suite
+[x] Signout
 [x] Switch to dockerized production app
   [x] Create a prod docker file
   [x] rebuild prod server from docker image
