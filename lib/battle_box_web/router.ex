@@ -27,6 +27,12 @@ defmodule BattleBoxWeb.Router do
     live("/users/:user_id/bots", BotsLive)
     live("/bot_servers/:bot_server_id/follow", BotServerFollow)
 
+    scope "/health" do
+      get "/", HealthController, :health
+      get "/database", HealthController, :db
+      get "/info", HealthController, :info
+    end
+
     scope "/auth" do
       get "/github/login", GithubLoginController, :github_login
       get "/github/callback", GithubLoginController, :github_callback
