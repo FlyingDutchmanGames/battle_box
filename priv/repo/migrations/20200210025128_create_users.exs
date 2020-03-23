@@ -13,5 +13,6 @@ defmodule BattleBox.Repo.Migrations.CreateUsers do
     end
 
     create index("users", [:github_id], unique: true)
+    create index("users", [:github_login_name], unique: true)
   end
 end
