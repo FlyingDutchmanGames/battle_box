@@ -55,6 +55,17 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                  connection: self()
                })
     end
+
+    test "starting a bot with a banned user fails", context do
+      {:ok, _user} = create_user(%{id: @user_id, is_banned: true})
+
+      assert {:error, :banned} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 token: context.bot.token,
+                 lobby_name: context.lobby.name,
+                 connection: self()
+               })
+    end
   end
 
   describe "getting bot servers from the registry" do

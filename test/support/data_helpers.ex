@@ -12,12 +12,14 @@ defmodule BattleBox.Test.DataHelpers do
   end
 
   def create_user(opts) do
-    user_id = opts[:user_id] || Ecto.UUID.generate()
+    user_id = opts[:user_id] || opts[:id] || Ecto.UUID.generate()
 
     User.changeset(%User{id: user_id}, %{
       github_id: 1,
       name: "NAME",
-      github_login_name: opts[:github_login_name] || "github_login_name:#{user_id}"
+      github_login_name: opts[:github_login_name] || "github_login_name:#{user_id}",
+      is_banned: opts[:is_banned] || false,
+      is_superadmin: opts[:is_superadmin] || false
     })
     |> Repo.insert()
   end

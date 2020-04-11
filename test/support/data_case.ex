@@ -24,6 +24,7 @@ defmodule BattleBox.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import BattleBox.DataCase
+      import BattleBox.Test.DataHelpers
     end
   end
 

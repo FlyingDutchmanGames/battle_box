@@ -49,6 +49,15 @@ defmodule BattleBox.Bot do
     Repo.get_by(__MODULE__, token: token)
   end
 
+  def banned?(bot) do
+    bot = Repo.preload(bot, :user)
+
+    case bot.user do
+      %User{is_banned: true} -> true
+      _ -> false
+    end
+  end
+
   def generate_token() do
     :crypto.strong_rand_bytes(20)
     |> Base.encode32()

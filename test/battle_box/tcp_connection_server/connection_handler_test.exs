@@ -101,6 +101,14 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert %{"error" => "lobby_not_found"} = Jason.decode!(msg)
     end
 
+    test "trying to join while your user is banned is an error", %{socket: socket, bot: bot} do
+      {:ok, _user} = create_user(%{id: @user_id, is_banned: true})
+      bot_connect_req = encode(%{"token" => bot.token, "lobby" => @lobby_name})
+      :ok = :gen_tcp.send(socket, bot_connect_req)
+      assert_receive {:tcp, ^socket, msg}
+      assert %{"error" => "banned"} = Jason.decode!(msg)
+    end
+
     test "you get notified if the player server dies and the connection closes",
          %{socket: socket} = context do
       :ok = :gen_tcp.send(socket, context.connection_request)

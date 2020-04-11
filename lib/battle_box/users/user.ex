@@ -12,7 +12,9 @@ defmodule BattleBox.User do
     :github_avatar_url,
     :github_html_url,
     :github_login_name,
-    :github_access_token
+    :github_access_token,
+    :is_superadmin,
+    :is_banned
   ]
 
   schema "users" do
@@ -22,6 +24,8 @@ defmodule BattleBox.User do
     field :github_html_url, :string
     field :github_login_name, :string
     field :github_access_token, :string
+    field :is_superadmin, :boolean, default: false
+    field :is_banned, :boolean, default: false
     has_many :bots, Bot
 
     timestamps()

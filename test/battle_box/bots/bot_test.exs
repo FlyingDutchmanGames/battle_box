@@ -65,4 +65,18 @@ defmodule BattleBox.BotTest do
                |> Repo.preload(:user)
     end
   end
+
+  describe "banned?" do
+    test "a bot without a user is not banned" do
+      refute Bot.banned?(%Bot{})
+    end
+
+    test "A bot with a user who isn't banned isn't banned" do
+      refute Bot.banned?(%Bot{user: %User{is_banned: false}})
+    end
+
+    test "A bot with a user who is banned is banned" do
+      assert Bot.banned?(%Bot{user: %User{is_banned: true}})
+    end
+  end
 end
