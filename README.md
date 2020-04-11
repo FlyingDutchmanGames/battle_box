@@ -28,8 +28,8 @@ V1
   [x] Rebrand everything to botskrieg
   [ ] Bots Live Page
 [ ] Top level navigation
-  [ ] Bots
-  [ ] Lobbies
+  [x] Bots
+  [x] Lobbies
   [ ] Games
 [ ] Live Games Page
   [ ] Show winner
@@ -40,7 +40,7 @@ V1
     [ ] Attack
 [ ] Deal with move timeouts
   [ ] We should tell people when they miss a timeout?
-  [ ] The GameEngine should pass `:timeout` and not `[]` when a player misses a timeout
+  [x] The GameEngine should pass `:timeout` and not `[]` when a player misses a timeout
   [ ] dealing with closed sockets
 ```
 GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d32873e4", %{game_id: nil, started_at: ~U[2020-03-11 05:15:3
@@ -76,7 +76,7 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   [ ] `/users/grantjamespowell/bots/foo`
   [ ] `/users/grantjamespowell/*`
   [ ] `/users/grantjamespowell/lobbies/foo`
-  [ ] `/lobbies/foo`
+  [ ] `/lobbies/foo/*`
 [ ] historical games page
   [ ] Get something in the page
   [ ] Efficent Pagination
@@ -98,6 +98,11 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   [x] Key through turns, and have turns be sharable via url
   [ ] Changing a turn does not affect history api so its easier to use back button
 [ ] Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
+[ ] BanHammer
+  [ ] Be able to stop a banned user from signing in
+  [ ] Banned Users can still sign out, and use the site like a non logged in user
+  [ ] Be able to alert a user that they are banned
+  [ ] Be able to stop bots from connecting if they belong to a banned user
 
 Nice to Haves
 ======
