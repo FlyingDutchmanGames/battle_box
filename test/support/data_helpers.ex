@@ -12,7 +12,7 @@ defmodule BattleBox.Test.DataHelpers do
   end
 
   def create_user(opts) do
-    user_id = opts[:user_id] || Ecto.UUID.generate()
+    user_id = opts[:user_id] || opts[:id] || Ecto.UUID.generate()
 
     User.changeset(%User{id: user_id}, %{
       github_id: 1,

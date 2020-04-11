@@ -16,11 +16,15 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
         %{connection: connection, lobby_name: lobby_name, token: token}
       ) do
     with {:lobby, %Lobby{} = lobby} <- {:lobby, Lobby.get_by_name(lobby_name)},
-         {:bot, %Bot{} = bot} <- {:bot, Bot.get_by_token(token)} do
+         {:bot, %Bot{} = bot} <- {:bot, Bot.get_by_token(token)},
+         {:banned?, false} <- {:banned?, Bot.banned?(bot)} do
       start_bot(game_engine, %{connection: connection, bot: bot, lobby: lobby})
     else
       {:bot, nil} ->
         {:error, :invalid_token}
+
+      {:banned?, true} ->
+        {:error, :banned}
 
       {:lobby, nil} ->
         {:error, :lobby_not_found}
