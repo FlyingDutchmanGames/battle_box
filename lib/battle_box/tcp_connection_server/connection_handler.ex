@@ -58,16 +58,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         :ok = send_to_socket(data, status_msg(data, :idle))
         {:next_state, :idle, data}
 
-      {:error, :invalid_token} ->
-        :ok = send_to_socket(data, encode_error("invalid_token"))
-        :keep_state_and_data
-
-      {:error, :banned} ->
-        :ok = send_to_socket(data, encode_error("banned"))
-        :keep_state_and_data
-
-      {:error, :lobby_not_found} ->
-        :ok = send_to_socket(data, encode_error("lobby_not_found"))
+      {:error, error} when error in [:invalid_token, :lobby_not_found, :banned] ->
+        :ok = send_to_socket(data, encode_error("#{error}"))
         :keep_state_and_data
     end
   end
