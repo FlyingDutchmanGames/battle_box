@@ -43,6 +43,8 @@ defmodule BattleBox.Games.RobotGame do
     Map.put(game, :winner, winner)
   end
 
+  def validate_moves(_game, :timeout, _player), do: []
+
   def validate_moves(game, moves, player) do
     moves
     |> Enum.uniq_by(fn move -> move["robot_id"] end)

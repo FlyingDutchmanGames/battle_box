@@ -165,7 +165,7 @@ defmodule BattleBox.GameEngine.BotServer do
   end
 
   def handle_event({:timeout, :max_time}, :max_time, :moves_request, data) do
-    data = submit_moves_to_game_server(data, [])
+    data = submit_moves_to_game_server(data, :timeout)
     {:next_state, :playing, data}
   end
 

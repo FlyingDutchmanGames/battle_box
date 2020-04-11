@@ -75,6 +75,10 @@ defmodule BattleBox.Games.RobotGame.GameTest do
                  2
                )
     end
+
+    test "it will convert a timeout to an empty list" do
+      assert [] == RobotGame.validate_moves(RobotGame.new(), :timeout, 1)
+    end
   end
 
   describe "over?" do

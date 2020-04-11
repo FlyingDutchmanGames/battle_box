@@ -165,7 +165,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
     assert_receive {:p2_connection, {:moves_request, %{request_id: id2}}}
     :ok = BotServer.submit_moves(context.p1_server, id1, [])
     :ok = BotServer.submit_moves(context.p2_server, id2, [])
-    # We don't get asked for more moves for at least 50 ms
+    # We don't get asked for more moves for at least 30 ms
     refute_receive {_, {:moves_request, %{}}}, 30
     # Then we get asked for moves
     assert_receive {:p1_connection, {:moves_request, %{}}}
