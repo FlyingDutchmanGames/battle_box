@@ -3,9 +3,9 @@ defmodule BattleBoxWeb.HealthController do
   alias BattleBox.Repo
 
   @sha (case(System.cmd("git", ["rev-parse", "HEAD"])) do
-    {sha, 0} -> String.trim(sha)
-    {_, _} -> "Unable to get version"
-  end)
+          {sha, 0} -> String.trim(sha)
+          {_, _} -> "Unable to get version"
+        end)
 
   def health(conn, _params) do
     conn

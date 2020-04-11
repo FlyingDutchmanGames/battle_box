@@ -14,11 +14,13 @@ defmodule BattleBoxWeb.HealthControllerTest do
 
   test "the info health check works", %{conn: conn} do
     conn = get(conn, "/health/info")
+
     assert %{
-      "status" => "OK",
-      "uptime_milliseconds" => uptime,
-      "sha" => sha
-    } = json_response(conn, 200)
+             "status" => "OK",
+             "uptime_milliseconds" => uptime,
+             "sha" => sha
+           } = json_response(conn, 200)
+
     assert is_integer(uptime)
     assert is_binary(sha)
   end
