@@ -8,4 +8,14 @@ defmodule BattleBoxWeb.PageController do
   def login(conn, _params) do
     render(conn, "login.html")
   end
+
+  def banned(conn, _params) do
+    render(conn, "banned.html")
+  end
+
+  def logout(conn, _params) do
+    conn
+    |> delete_session(:user_id)
+    |> redirect(to: Routes.page_path(conn, :index))
+  end
 end

@@ -15,7 +15,7 @@
       </div>
     </a>
     <div class="nav-item">
-      <a href="<%= Routes.logout_path(@conn, :logout) %>" title="logout" sytle="font-weight: bold;">x</a>
+      <a href="<%= Routes.page_path(@conn, :logout) %>" title="logout" sytle="font-weight: bold;">x</a>
     </div>
   <% else %>
     <div class="github-login">
