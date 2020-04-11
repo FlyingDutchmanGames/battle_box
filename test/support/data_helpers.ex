@@ -19,7 +19,7 @@ defmodule BattleBox.Test.DataHelpers do
       name: "NAME",
       github_login_name: opts[:github_login_name] || "github_login_name:#{user_id}",
       is_banned: opts[:is_banned] || false,
-      is_superadmin: opts[:is_superadmin] || false
+      is_admin: opts[:is_admin] || false
     })
     |> Repo.insert()
   end

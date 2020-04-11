@@ -21,13 +21,6 @@ defmodule BattleBoxWeb.Router do
     get "/", PageController, :index
     get "/login", PageController, :login
 
-    scope "/" do
-      pipe_through :require_logged_in
-
-      get "/banned", PageController, :banned
-      get "/logout", PageController, :logout
-    end
-
     live("/live_games", GamesLiveLive)
     live("/games/:game_id", GameLive)
     live("/users/:user_id/bots", BotsLive)
@@ -42,6 +35,13 @@ defmodule BattleBoxWeb.Router do
     scope "/auth" do
       get "/github/login", GithubLoginController, :github_login
       get "/github/callback", GithubLoginController, :github_callback
+    end
+
+    scope "/" do
+      pipe_through :require_logged_in
+
+      get "/banned", PageController, :banned
+      get "/logout", PageController, :logout
     end
 
     scope "/" do
@@ -65,6 +65,11 @@ defmodule BattleBoxWeb.Router do
     resources "/users", UserController, only: [:show] do
       resources "/lobbies", LobbyController, only: [:index]
     end
+
+    scope "/admin", Admin do
+      pipe_through :require_admin
+      live("/users", AdminUsers)
+    end
   end
 
   defp require_logged_in(conn, _) do
@@ -76,8 +81,15 @@ defmodule BattleBoxWeb.Router do
 
   defp require_not_banned(conn, _) do
     case conn.assigns.user do
-      %User{is_banned: true} -> conn |> redirect(to: "/banned") |> halt()
-      _ -> conn
+      %User{is_banned: false} -> conn
+      _ -> conn |> redirect(to: "/banned") |> halt()
+    end
+  end
+
+  defp require_admin(conn, _) do
+    case conn.assigns.user do
+      %User{is_admin: true} -> conn
+      _ -> conn |> redirect(to: "/") |> halt()
     end
   end
 

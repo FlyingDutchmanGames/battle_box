@@ -13,7 +13,7 @@ defmodule BattleBox.User do
     :github_html_url,
     :github_login_name,
     :github_access_token,
-    :is_superadmin,
+    :is_admin,
     :is_banned
   ]
 
@@ -24,7 +24,7 @@ defmodule BattleBox.User do
     field :github_html_url, :string
     field :github_login_name, :string
     field :github_access_token, :string
-    field :is_superadmin, :boolean, default: false
+    field :is_admin, :boolean, default: false
     field :is_banned, :boolean, default: false
     has_many :bots, Bot
 
