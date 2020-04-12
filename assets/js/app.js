@@ -5,6 +5,7 @@ import robot_game_css from "../css/robot_game.css"
 import game_css from "../css/game.css"
 import not_found_css from "../css/not_found.css"
 import bot_follow_css from "../css/bot_follow.css"
+import admin_css from "../css/admin.css"
 
 import {Socket as PhxSocket} from "phoenix"
 import LiveSocket from "phoenix_live_view"

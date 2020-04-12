@@ -9,8 +9,8 @@ defmodule BattleBox.Repo.Migrations.CreateUsers do
       add :github_html_url, :text
       add :github_login_name, :text
       add :github_access_token, :text
+      add :is_admin, :boolean, default: false
       add :is_banned, :boolean, default: false
-      add :is_superadmin, :boolean, default: false
       timestamps()
     end
 
