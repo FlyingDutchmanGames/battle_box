@@ -20,8 +20,8 @@ defmodule BattleBox.Game do
     Repo.get_by(__MODULE__, id: id)
   end
 
-  def calculate_turn(game, moves) do
-    game = update_in(game.robot_game, &BattleBoxGame.calculate_turn(&1, moves))
+  def calculate_turn(game, commands) do
+    game = update_in(game.robot_game, &BattleBoxGame.calculate_turn(&1, commands))
     scores = BattleBoxGame.score(game.robot_game)
     winner = BattleBoxGame.winner(game.robot_game)
 
@@ -47,8 +47,8 @@ defmodule BattleBox.Game do
     BattleBoxGame.winner(game.robot_game)
   end
 
-  def moves_requests(game) do
-    BattleBoxGame.moves_requests(game.robot_game)
+  def commands_requests(game) do
+    BattleBoxGame.commands_requests(game.robot_game)
   end
 
   def over?(game) do

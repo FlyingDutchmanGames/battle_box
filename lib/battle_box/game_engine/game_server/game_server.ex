@@ -18,8 +18,8 @@ defmodule BattleBox.GameEngine.GameServer do
     GenStateMachine.cast(game_server, {:forfeit_game, player})
   end
 
-  def submit_moves(game_server, player, moves) when is_integer(player) do
-    GenStateMachine.cast(game_server, {:moves, player, moves})
+  def submit_commands(game_server, player, commands) when is_integer(player) do
+    GenStateMachine.cast(game_server, {:commands, player, commands})
   end
 
   def start_link(config, %{players: _, game: game} = data) do
@@ -50,8 +50,11 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:cast, {:accept_game, player}, :game_acceptance, data) do
     case data.acceptances do
-      [] -> {:keep_state, put_in(data.acceptances, [player])}
-      [_first_acceptance] -> {:next_state, :moves, data, {:next_event, :internal, :collect_moves}}
+      [] ->
+        {:keep_state, put_in(data.acceptances, [player])}
+
+      [_first_acceptance] ->
+        {:next_state, :commands, data, {:next_event, :internal, :collect_commands}}
     end
   end
 
@@ -71,38 +74,38 @@ defmodule BattleBox.GameEngine.GameServer do
     {:stop, :normal}
   end
 
-  def handle_event(:internal, :collect_moves, :moves, data) do
-    requests = Game.moves_requests(data.game)
+  def handle_event(:internal, :collect_commands, :commands, data) do
+    requests = Game.commands_requests(data.game)
 
     for {player, request} <- requests do
-      send(data.players[player], moves_request(data.game, player, request))
+      send(data.players[player], commands_request(data.game, player, request))
     end
 
-    moves = Map.new(requests, fn {player, _} -> {player, nil} end)
+    commands = Map.new(requests, fn {player, _} -> {player, nil} end)
 
-    {:keep_state, Map.put(data, :moves, moves)}
+    {:keep_state, Map.put(data, :commands, commands)}
   end
 
-  def handle_event(:cast, {:moves, player, moves}, :moves, data) do
-    moves = Map.put(data.moves, player, moves)
+  def handle_event(:cast, {:commands, player, commands}, :commands, data) do
+    commands = Map.put(data.commands, player, commands)
 
-    if Enum.all?(Map.values(moves)) do
-      data = update_in(data.game, &Game.calculate_turn(&1, moves))
+    if Enum.all?(Map.values(commands)) do
+      data = update_in(data.game, &Game.calculate_turn(&1, commands))
 
       if Game.over?(data.game),
         do: {:keep_state, data, {:next_event, :internal, :finalize}},
-        else: {:repeat_state, data, {:next_event, :internal, :collect_moves}}
+        else: {:repeat_state, data, {:next_event, :internal, :collect_commands}}
     else
-      {:keep_state, put_in(data.moves, moves)}
+      {:keep_state, put_in(data.commands, commands)}
     end
   end
 
-  def handle_event(:cast, {:forfeit_game, player}, :moves, data) do
+  def handle_event(:cast, {:forfeit_game, player}, :commands, data) do
     {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
      {:next_event, :internal, :finalize}}
   end
 
-  def handle_event(:info, {:DOWN, _, :process, pid, _}, :moves, data) do
+  def handle_event(:info, {:DOWN, _, :process, pid, _}, :commands, data) do
     {player, _} = Enum.find(data.players, fn {_player, player_pid} -> player_pid == pid end)
 
     {:keep_state, update_in(data.game, &Game.disqualify(&1, player)),
@@ -126,8 +129,8 @@ defmodule BattleBox.GameEngine.GameServer do
     :keep_state_and_data
   end
 
-  defp moves_request(game, player, request) do
-    {:moves_request,
+  defp commands_request(game, player, request) do
+    {:commands_request,
      %{
        game_id: game.id,
        game_state: request,

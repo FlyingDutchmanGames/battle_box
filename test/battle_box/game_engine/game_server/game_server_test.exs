@@ -129,7 +129,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     game_id = context.init_opts.game.id
 
     assert_receive {:player_1,
-                    {:moves_request,
+                    {:commands_request,
                      %{
                        game_id: ^game_id,
                        maximum_time: 1000,
@@ -139,7 +139,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
                      }}}
 
     assert_receive {:player_2,
-                    {:moves_request,
+                    {:commands_request,
                      %{
                        game_id: ^game_id,
                        maximum_time: 1000,
@@ -192,15 +192,15 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
     Enum.each(0..9, fn turn ->
       receive do
-        {:player_1, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
-          GameServer.submit_moves(pid, 1, [])
+        {:player_1, {:commands_request, %{game_state: %{turn: ^turn}}}} ->
+          GameServer.submit_commands(pid, 1, [])
       after
         100 -> raise "FAIL"
       end
 
       receive do:
-                ({:player_2, {:moves_request, %{game_state: %{turn: ^turn}}}} ->
-                   GameServer.submit_moves(pid, 2, []))
+                ({:player_2, {:commands_request, %{game_state: %{turn: ^turn}}}} ->
+                   GameServer.submit_commands(pid, 2, []))
     end)
 
     assert_receive {:player_1, {:game_over, %{game_id: ^game_id}}}
