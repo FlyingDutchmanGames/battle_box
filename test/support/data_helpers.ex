@@ -11,11 +11,11 @@ defmodule BattleBox.Test.DataHelpers do
     |> put_session(:user_id, user.id)
   end
 
-  def create_user(opts) do
+  def create_user(opts \\ %{}) do
     user_id = opts[:user_id] || opts[:id] || Ecto.UUID.generate()
 
     User.changeset(%User{id: user_id}, %{
-      github_id: 1,
+      github_id: :erlang.unique_integer([:positive]),
       name: "NAME",
       github_login_name: opts[:github_login_name] || "github_login_name:#{user_id}",
       is_banned: opts[:is_banned] || false,
