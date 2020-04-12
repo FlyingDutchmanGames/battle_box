@@ -6,7 +6,7 @@ defmodule BattleBoxWeb.UserRedirectController do
   end
 
   def bots(%{assigns: %{user: user}} = conn, _params) do
-    redirect(conn, to: Routes.live_path(conn, BattleBoxWeb.BotsLive, user.id))
+    redirect(conn, to: Routes.live_path(conn, BattleBoxWeb.Bots, user.id))
   end
 
   def users(%{assigns: %{user: user}} = conn, _params) do

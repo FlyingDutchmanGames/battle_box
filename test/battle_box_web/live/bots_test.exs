@@ -1,4 +1,4 @@
-defmodule BattleBoxWeb.BotsLiveTest do
+defmodule BattleBoxWeb.BotsTest do
   use BattleBoxWeb.ConnCase
   import Phoenix.LiveViewTest
   alias BattleBox.{Lobby, Bot, GameEngine, GameEngineProvider.Mock}

@@ -41,7 +41,7 @@ defmodule BattleBoxWeb.Router do
 
     live("/live_games", GamesLiveLive)
     live("/games/:game_id", GameLive)
-    live("/users/:user_id/bots", BotsLive)
+    live("/users/:user_id/bots", Bots)
     live("/bot_servers/:bot_server_id/follow", BotServerFollow)
 
     scope "/" do
