@@ -1,4 +1,4 @@
-defmodule BattleBoxWeb.LobbyLive do
+defmodule BattleBoxWeb.Lobby do
   use BattleBoxWeb, :live_view
   alias BattleBox.{GameEngine, Lobby, Repo}
   alias BattleBoxWeb.{LobbyView, PageView}

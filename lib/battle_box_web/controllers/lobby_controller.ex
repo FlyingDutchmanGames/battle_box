@@ -24,7 +24,7 @@ defmodule BattleBoxWeb.LobbyController do
       {:ok, lobby} ->
         conn
         |> put_flash(:info, "Lobby")
-        |> redirect(to: Routes.live_path(conn, BattleBoxWeb.LobbyLive, lobby.id))
+        |> redirect(to: Routes.live_path(conn, BattleBoxWeb.Lobby, lobby.id))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
