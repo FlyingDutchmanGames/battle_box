@@ -25,7 +25,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
         user_id: @user_id,
         name: "LOBBY NAME",
         game_type: RobotGame,
-        move_time_minimum_ms: 10
+        command_time_minimum_ms: 10
       })
 
     %{lobby: lobby, bot: bot}
@@ -151,7 +151,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   test "Your commands aren't submitted until after the lobby.minimum_time", context do
-    Lobby.changeset(context.lobby, %{move_time_minimum_ms: 30})
+    Lobby.changeset(context.lobby, %{command_time_minimum_ms: 30})
     |> Repo.update!()
 
     :ok = BotServer.match_make(context.p1_server)

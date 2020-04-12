@@ -18,8 +18,8 @@ defmodule BattleBox.Lobby do
     :name,
     :game_type,
     :game_acceptance_time_ms,
-    :move_time_minimum_ms,
-    :move_time_maximum_ms,
+    :command_time_minimum_ms,
+    :command_time_maximum_ms,
     :user_id,
     :settings_id
   ]
@@ -28,8 +28,8 @@ defmodule BattleBox.Lobby do
     field :name, :string
     field :game_type, GameType
     field :game_acceptance_time_ms, :integer, default: 2000
-    field :move_time_minimum_ms, :integer, default: 250
-    field :move_time_maximum_ms, :integer, default: 1000
+    field :command_time_minimum_ms, :integer, default: 250
+    field :command_time_maximum_ms, :integer, default: 1000
     field :settings_id, :binary_id
     has_many :games, Game
     belongs_to :user, User

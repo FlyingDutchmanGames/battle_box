@@ -9,8 +9,8 @@ defmodule BattleBox.LobbyTest do
     test "the default game timeouts are correct" do
       lobby = %Lobby{name: "Grant's Test", game_type: RobotGame, user_id: @user_id}
       assert lobby.game_acceptance_time_ms == 2000
-      assert lobby.move_time_minimum_ms == 250
-      assert lobby.move_time_maximum_ms == 1000
+      assert lobby.command_time_minimum_ms == 250
+      assert lobby.command_time_maximum_ms == 1000
     end
 
     test "you can set a custom game acceptance timeout" do
@@ -19,15 +19,15 @@ defmodule BattleBox.LobbyTest do
           name: "Grant's Test",
           game_type: RobotGame,
           game_acceptance_time_ms: 42024,
-          move_time_minimum_ms: 1234,
-          move_time_maximum_ms: 5678,
+          command_time_minimum_ms: 1234,
+          command_time_maximum_ms: 5678,
           user_id: @user_id
         })
 
       retrieved_lobby = Lobby.get_by_name("Grant's Test")
       assert retrieved_lobby.game_acceptance_time_ms == 42024
-      assert retrieved_lobby.move_time_minimum_ms == 1234
-      assert retrieved_lobby.move_time_maximum_ms == 5678
+      assert retrieved_lobby.command_time_minimum_ms == 1234
+      assert retrieved_lobby.command_time_maximum_ms == 5678
     end
   end
 

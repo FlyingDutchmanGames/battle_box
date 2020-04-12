@@ -134,8 +134,8 @@ defmodule BattleBox.GameEngine.GameServer do
      %{
        game_id: game.id,
        game_state: request,
-       minimum_time: game.lobby.move_time_minimum_ms,
-       maximum_time: game.lobby.move_time_maximum_ms,
+       minimum_time: game.lobby.command_time_minimum_ms,
+       maximum_time: game.lobby.command_time_maximum_ms,
        player: player
      }}
   end

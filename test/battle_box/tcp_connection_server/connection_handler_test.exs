@@ -33,7 +33,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         name: @lobby_name,
         game_type: RobotGame,
         user_id: @user_id,
-        move_time_minimum_ms: 1
+        command_time_minimum_ms: 1
       })
 
     {:ok, bot} =
