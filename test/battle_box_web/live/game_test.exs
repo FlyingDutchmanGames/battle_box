@@ -110,8 +110,8 @@ defmodule BattleBoxWeb.GameTest do
       assert html =~ "TURN: 0 / 0"
 
       Enum.each(1..9, fn _ ->
-        :ok = GameServer.submit_moves(context.game_server, 1, [])
-        :ok = GameServer.submit_moves(context.game_server, 2, [])
+        :ok = GameServer.submit_commands(context.game_server, 1, [])
+        :ok = GameServer.submit_commands(context.game_server, 2, [])
       end)
 
       Process.sleep(10)

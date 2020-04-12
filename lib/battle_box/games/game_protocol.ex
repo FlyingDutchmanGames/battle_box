@@ -11,8 +11,8 @@ defprotocol BattleBoxGame do
   @spec settings(struct()) :: map()
   def settings(game)
 
-  @spec moves_requests(struct()) :: map()
-  def moves_requests(game)
+  @spec commands_requests(struct()) :: map()
+  def commands_requests(game)
 
   @spec calculate_turn(struct(), %{binary => any}) :: struct()
   def calculate_turn(game, moves)

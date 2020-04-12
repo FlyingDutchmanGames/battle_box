@@ -95,20 +95,20 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     end
   end
 
-  def handle_event(:info, {:moves_request, request}, :playing, data) do
-    :ok = send_to_socket(data, moves_request(request))
-    data = Map.put(data, :moves_request, request)
+  def handle_event(:info, {:commands_request, request}, :playing, data) do
+    :ok = send_to_socket(data, commands_request(request))
+    data = Map.put(data, :commands_request, request)
     {:keep_state, data}
   end
 
   def handle_event(
         :internal,
-        %{"action" => "send_moves", "request_id" => request_id, "moves" => moves},
+        %{"action" => "send_commands", "request_id" => request_id, "commands" => commands},
         :playing,
-        %{moves_request: %{request_id: request_id}} = data
+        %{commands_request: %{request_id: request_id}} = data
       ) do
-    :ok = BotServer.submit_moves(data.bot_server, request_id, moves)
-    data = Map.drop(data, [:moves_request])
+    :ok = BotServer.submit_commands(data.bot_server, request_id, commands)
+    data = Map.drop(data, [:commands_request])
     {:keep_state, data}
   end
 
@@ -157,8 +157,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     })
   end
 
-  defp moves_request(request) do
-    encode(%{"request_type" => "moves_request", "moves_request" => request})
+  defp commands_request(request) do
+    encode(%{"request_type" => "commands_request", "commands_request" => request})
   end
 
   defp game_request(game_info) do
