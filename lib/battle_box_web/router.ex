@@ -68,7 +68,7 @@ defmodule BattleBoxWeb.Router do
 
     scope "/admin", Admin do
       pipe_through :require_admin
-      live("/users", AdminUsers)
+      live("/users", Users)
     end
   end
 

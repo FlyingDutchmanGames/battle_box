@@ -81,4 +81,9 @@ defmodule BattleBox.User do
   end
 
   def get_by_id(_), do: nil
+
+  def set_ban_status(%__MODULE__{} = user, status) do
+    changeset = change(user, is_banned: status)
+    Repo.update(changeset)
+  end
 end

@@ -1,0 +1,39 @@
+<script>window.useLiveView = true</script>
+<div style="display: flex; flex-flow: column nowrap; align-items: center;">
+  <h1>Users</h1>
+  <table class="admin-users">
+    <tr>
+      <th></th>
+      <th>Admin?</th>
+      <th>Name</th>
+      <th>Github</th>
+      <th>Joined At</th>
+      <th>Banned?</th>
+    </tr>
+
+    <%= for user <- @users do %>
+      <tr>
+        <td><img src="<%= user.github_avatar_url %>"></td>
+        <td><div class="center-items"><%= user.is_admin %><div></td>
+        <td><div class="center-items"><a href="<%= Routes.user_path(@socket, :show, user.id) %>"><%= user.name %></a></div></td>
+        <td><a href="<%= user.github_html_url %>"><%= user.github_login_name %></a></td>
+        <td><%= user.inserted_at %></td>
+        <td>
+          <form phx-change="adjust_ban">
+            <%= if user.is_banned do %>
+            <label class="switch">
+              <input type="checkbox" name="unban[<%= user.id %>]"checked>
+              <span class="slider round"></span>
+            </label>
+          <% else %>
+            <label class="switch">
+              <input type="checkbox" name="ban[<%= user.id %>]">
+              <span class="slider round"></span>
+            </label>
+          <% end %>
+          </form>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>
