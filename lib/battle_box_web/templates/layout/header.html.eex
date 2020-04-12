@@ -3,7 +3,7 @@
   <div class="spacer"></div>
   <%= if @user do %>
     <div class="nav-item">
-      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.BotsLive, @user.id) %>">Bots</a>
+      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @user.id) %>">Bots</a>
     </div>
     <div class="nav-item">
       <a href="<%= Routes.user_lobby_path(@conn, :index, @user.id) %>">Lobbies</a>

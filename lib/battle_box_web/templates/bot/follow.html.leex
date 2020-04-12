@@ -16,6 +16,6 @@
     <% :game_acceptance -> %>
       <div class="status">Game Starting</div>
     <% status when status in [:moves_request, :playing] -> %>
-      <a href="<%= Routes.live_path(@socket, BattleBoxWeb.GameLive, @bot_server.game_id) %>"><div class="status blinking">In Game</div></a>
+      <a href="<%= Routes.live_path(@socket, BattleBoxWeb.Game, @bot_server.game_id) %>"><div class="status blinking">In Game</div></a>
   <% end %>
 </div>

@@ -12,7 +12,7 @@ defmodule BattleBoxWeb.UserController do
         conn
         |> put_status(404)
         |> put_view(PageView)
-        |> render("not_found.html", message: "Bot not found")
+        |> render("not_found.html", message: "User not found")
     end
   end
 end

@@ -1,4 +1,4 @@
-defmodule BattleBoxWeb.GameLive do
+defmodule BattleBoxWeb.Game do
   alias BattleBoxWeb.{BotServerFollow, PageView, RobotGameView}
   use BattleBoxWeb, :live_view
   alias BattleBox.{Repo, Game, GameEngine, GameEngine.GameServer}

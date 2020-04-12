@@ -21,10 +21,12 @@ defmodule BattleBoxWeb.Router do
     get "/", PageController, :index
     get "/login", PageController, :login
 
-    live("/live_games", GamesLiveLive)
-    live("/games/:game_id", GameLive)
-    live("/users/:user_id/bots", BotsLive)
-    live("/bot_servers/:bot_server_id/follow", BotServerFollow)
+    scope "/" do
+      pipe_through :require_logged_in
+
+      get "/banned", PageController, :banned
+      get "/logout", PageController, :logout
+    end
 
     scope "/health" do
       get "/", HealthController, :health
@@ -37,18 +39,14 @@ defmodule BattleBoxWeb.Router do
       get "/github/callback", GithubLoginController, :github_callback
     end
 
-    scope "/" do
-      pipe_through :require_logged_in
-
-      get "/banned", PageController, :banned
-      get "/logout", PageController, :logout
-    end
+    live("/games/:game_id", Game)
+    live("/users/:user_id/bots", Bots)
+    live("/bot_servers/:bot_server_id/follow", BotServerFollow)
 
     scope "/" do
       pipe_through :require_logged_in
       pipe_through :require_not_banned
 
-      get "/connections", UserRedirectController, :connections
       get "/lobbies", UserRedirectController, :lobbies
       get "/bots", UserRedirectController, :bots
       get "/me", UserRedirectController, :users
@@ -57,10 +55,8 @@ defmodule BattleBoxWeb.Router do
       resources "/lobbies", LobbyController, only: [:create, :new]
     end
 
-    live("/lobbies/:lobby_id", LobbyLive)
+    live("/lobbies/:lobby_id", Lobby)
     resources "/bots", BotController, only: [:show]
-
-    live("/users/:user_id/connections", ConnectionsLive)
 
     resources "/users", UserController, only: [:show] do
       resources "/lobbies", LobbyController, only: [:index]
