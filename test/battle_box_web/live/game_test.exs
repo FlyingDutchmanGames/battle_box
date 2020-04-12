@@ -1,4 +1,4 @@
-defmodule BattleBoxWeb.GameLiveTest do
+defmodule BattleBoxWeb.GameTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 

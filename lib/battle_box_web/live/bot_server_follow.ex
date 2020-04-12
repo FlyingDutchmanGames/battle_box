@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.BotServerFollow do
   use BattleBoxWeb, :live_view
-  alias BattleBoxWeb.{GameLive, BotView, PageView}
+  alias BattleBoxWeb.{Game, BotView, PageView}
   alias BattleBox.GameEngine
 
   def mount(%{"bot_server_id" => bot_server_id}, _session, socket) do
@@ -44,7 +44,7 @@ defmodule BattleBoxWeb.BotServerFollow do
       game_id ->
         {:noreply,
          redirect(socket,
-           to: Routes.live_path(socket, GameLive, game_id, follow: bot_server.bot_server_id)
+           to: Routes.live_path(socket, Game, game_id, follow: bot_server.bot_server_id)
          )}
     end
   end
