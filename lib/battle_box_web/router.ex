@@ -21,10 +21,12 @@ defmodule BattleBoxWeb.Router do
     get "/", PageController, :index
     get "/login", PageController, :login
 
-    live("/live_games", GamesLiveLive)
-    live("/games/:game_id", GameLive)
-    live("/users/:user_id/bots", BotsLive)
-    live("/bot_servers/:bot_server_id/follow", BotServerFollow)
+    scope "/" do
+      pipe_through :require_logged_in
+
+      get "/banned", PageController, :banned
+      get "/logout", PageController, :logout
+    end
 
     scope "/health" do
       get "/", HealthController, :health
@@ -37,12 +39,10 @@ defmodule BattleBoxWeb.Router do
       get "/github/callback", GithubLoginController, :github_callback
     end
 
-    scope "/" do
-      pipe_through :require_logged_in
-
-      get "/banned", PageController, :banned
-      get "/logout", PageController, :logout
-    end
+    live("/live_games", GamesLiveLive)
+    live("/games/:game_id", GameLive)
+    live("/users/:user_id/bots", BotsLive)
+    live("/bot_servers/:bot_server_id/follow", BotServerFollow)
 
     scope "/" do
       pipe_through :require_logged_in
