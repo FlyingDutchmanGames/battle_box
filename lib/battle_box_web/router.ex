@@ -39,7 +39,6 @@ defmodule BattleBoxWeb.Router do
       get "/github/callback", GithubLoginController, :github_callback
     end
 
-    live("/live_games", GamesLiveLive)
     live("/games/:game_id", Game)
     live("/users/:user_id/bots", Bots)
     live("/bot_servers/:bot_server_id/follow", BotServerFollow)
