@@ -103,9 +103,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 
 - [ ] Matchmaker page
 - [ ] Handle when connection is closed on trying to send from connection server
-- [ ] Admin
-  - [ ] List all users (paginated?)
-  - [ ] Apply a ban to a user
 - [ ] A decent bot implmentation for testing
 - [ ] Connection Debugger (this has some issues due to amount of messages...)
 - [ ] Element Storybook
@@ -162,4 +159,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   - [x] Banned Users can still sign out, and use the site like a non logged in user
   - [x] Be able to alert a user that they are banned
   - [x] Be able to stop bots from connecting if they belong to a banned user
-
+- [x] Admin
+  - [x] List all users (paginated?)
+  - [x] Apply a ban to a user
