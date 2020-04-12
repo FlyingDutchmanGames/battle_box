@@ -48,7 +48,6 @@ defmodule BattleBoxWeb.Router do
       pipe_through :require_logged_in
       pipe_through :require_not_banned
 
-      get "/connections", UserRedirectController, :connections
       get "/lobbies", UserRedirectController, :lobbies
       get "/bots", UserRedirectController, :bots
       get "/me", UserRedirectController, :users
@@ -59,8 +58,6 @@ defmodule BattleBoxWeb.Router do
 
     live("/lobbies/:lobby_id", LobbyLive)
     resources "/bots", BotController, only: [:show]
-
-    live("/users/:user_id/connections", ConnectionsLive)
 
     resources "/users", UserController, only: [:show] do
       resources "/lobbies", LobbyController, only: [:index]

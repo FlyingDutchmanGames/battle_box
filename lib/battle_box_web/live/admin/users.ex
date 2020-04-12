@@ -4,7 +4,7 @@ defmodule BattleBoxWeb.Admin.Users do
   alias BattleBox.{Repo, User}
   import Ecto.Query, only: [from: 2]
 
-  def mount(params, session, socket) do
+  def mount(_params, _session, socket) do
     users = Repo.all(from user in User, select: user)
     {:ok, assign(socket, users: users)}
   end
