@@ -109,6 +109,7 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 - [ ] Concurrent connection limiter
 - [ ] Downloads controller, and `as_downloadable` as part of the game protocol
 - [ ] Google Analytics on the github page
+- [ ] Terrain Editor
 
 ### Done
 
