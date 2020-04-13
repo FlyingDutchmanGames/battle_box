@@ -59,3 +59,12 @@
   width: 30px;
   height: 30px;
 }
+
+.header .logout-button {
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  border: none;
+  background-color: transparent;
+  font-size: 18px;
+}

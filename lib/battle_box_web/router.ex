@@ -25,7 +25,7 @@ defmodule BattleBoxWeb.Router do
       pipe_through :require_logged_in
 
       get "/banned", PageController, :banned
-      get "/logout", PageController, :logout
+      post "/logout", PageController, :logout
     end
 
     scope "/health" do

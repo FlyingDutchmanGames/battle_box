@@ -60,6 +60,6 @@ defmodule BattleBoxWeb.BotControllerTest do
 
     html = html_response(conn, 200)
     {:ok, document} = Floki.parse_document(html)
-    assert [_form] = Floki.find(document, "form")
+    assert [_form] = Floki.find(document, "form:not(#logout)")
   end
 end

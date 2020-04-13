@@ -81,7 +81,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
    - [ ] Get something in the page
    - [ ] Efficent Pagination
    - [ ] Filter by (lobby id, user id, bot id)
-   - [ ] Arrow key navigation through pages
  - [ ] live games page (Probably works via the historical game pages html/css?)
  - [ ] Static Site
   - [ ] Wire protocol docs
@@ -97,7 +96,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 - [ ] Visualize games better (include moves and historical turns)
   - [x] Key through turns, and have turns be sharable via url
   - [ ] Changing a turn does not affect history api so its easier to use back button
-- [ ] CSRF protect logout
 
 ### Nice to Haves
 
@@ -167,3 +165,4 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   - [x] List all users (paginated?)
   - [x] Apply a ban to a user
 - [x] Change `move` to `command` for refering to what the bot sends to the server
+- [x] CSRF protect logout
