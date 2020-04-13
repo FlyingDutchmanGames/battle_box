@@ -1,20 +1,17 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
-  use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
+  use GenStateMachine, callback_mode: [:handle_event_function], restart: :temporary
   alias BattleBox.{GameEngine, GameEngine.BotServer}
   import BattleBox.TcpConnectionServer.Message
   @behaviour :ranch_protocol
 
   def start_link(ref, _socket, transport, data) do
-    data =
-      Map.merge(data, %{
-        connection_id: Ecto.UUID.generate(),
-        ranch_ref: ref,
-        transport: transport
-      })
+    data = Map.put_new(data, :connection_id, Ecto.UUID.generate())
+    data = Map.merge(data, %{ranch_ref: ref, transport: transport})
 
     GenStateMachine.start_link(__MODULE__, data,
       name:
-        {:via, Registry, {data.names.connection_registry, data.connection_id, initial_metadata()}}
+        {:via, Registry,
+         {data.names.connection_registry, data.connection_id, %{started_at: DateTime.utc_now()}}}
     )
   end
 
@@ -32,7 +29,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   def handle_event(:info, {:tcp_closed, _socket}, _state, _data), do: {:stop, :normal}
   def handle_event(:info, {:tcp_error, _socket, _reason}, _state, _data), do: {:stop, :normal}
 
-  def handle_event(:info, {:tcp, socket, bytes}, _state, %{socket: socket} = data) do
+  def handle_event(:info, {:tcp, socket, bytes}, _state, data) do
     :ok = data.transport.setopts(socket, active: :once)
 
     case Jason.decode(bytes) do
@@ -49,8 +46,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     case GameEngine.start_bot(data.names.game_engine, %{
            token: token,
            lobby_name: lobby_name,
-           connection: self(),
-           connection_id: data.connection_id
+           connection: self()
          }) do
       {:ok, bot_server, %{user_id: user_id}} ->
         Process.monitor(bot_server)
@@ -59,7 +55,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         {:next_state, :idle, data}
 
       {:error, error} when error in [:invalid_token, :lobby_not_found, :banned] ->
-        :ok = send_to_socket(data, encode_error("#{error}"))
+        :ok = send_to_socket(data, encode_error(error))
         :keep_state_and_data
     end
   end
@@ -135,12 +131,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     {:stop, :normal}
   end
 
-  def handle_event(:enter, _old_state, new_state, %{connection_id: id, names: names} = data) do
-    metadata = %{status: new_state, game_id: data[:game_info][:game_id], user_id: data[:user_id]}
-    {_, _} = Registry.update_value(names.connection_registry, id, &Map.merge(&1, metadata))
-    :keep_state_and_data
-  end
-
   def handle_event(:internal, _msg, _state, data) do
     :ok = send_to_socket(data, encode_error("invalid_msg_sent"))
     :keep_state_and_data
@@ -151,10 +141,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   defp game_over(result) do
-    encode(%{
-      "info" => "game_over",
-      "result" => result
-    })
+    encode(%{"info" => "game_over", "result" => result})
   end
 
   defp commands_request(request) do
@@ -166,19 +153,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     encode(%{"game_info" => game_info, "request_type" => "game_request"})
   end
 
-  defp game_cancelled(game_id),
-    do: encode(%{info: "game_cancelled", game_id: game_id})
-
-  defp status_msg(data, status),
-    do: encode(%{status: status, connection_id: data.connection_id})
-
-  defp initial_metadata,
-    do: %{
-      game_id: nil,
-      user_id: nil,
-      status: :unauthed,
-      started_at: DateTime.utc_now()
-    }
+  defp game_cancelled(game_id), do: encode(%{info: "game_cancelled", game_id: game_id})
+  defp status_msg(data, status), do: encode(%{status: status, connection_id: data.connection_id})
 
   defp send_to_socket(data, msg) do
     :ok = data.transport.send(data.socket, msg)
