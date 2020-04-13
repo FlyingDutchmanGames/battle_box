@@ -35,7 +35,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     bot_supervisor = GameEngine.names(game_engine).bot_supervisor
     opts = Map.put_new(opts, :bot_server_id, Ecto.UUID.generate())
     {:ok, bot_server} = DynamicSupervisor.start_child(bot_supervisor, {BotServer, opts})
-    {:ok, bot_server, %{user_id: bot.user_id}}
+    {:ok, bot_server, %{user_id: bot.user_id, bot_server_id: opts.bot_server_id}}
   end
 
   def get_bot_servers_with_user_id(game_engine, user_id) do

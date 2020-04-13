@@ -1,8 +1,8 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase
   alias BattleBox.{Bot, GameEngine, TcpConnectionServer, Lobby}
-  import GameEngine, only: [get_connection: 2]
   alias BattleBox.Games.RobotGame
+  import BattleBox.GameEngine, only: [get_connection: 2]
   import BattleBox.TcpConnectionServer.Message
 
   @ip {127, 0, 0, 1}
@@ -56,12 +56,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     :ok = :gen_tcp.send(socket, context.connection_request)
     assert_receive {:tcp, ^socket, msg}
     assert %{"connection_id" => connection_id} = Jason.decode!(msg)
-
-    assert %{
-             status: :idle,
-             started_at: started_at
-           } = get_connection(context.game_engine, connection_id)
-
+    assert %{started_at: started_at} = get_connection(context.game_engine, connection_id)
     assert DateTime.diff(DateTime.utc_now(), started_at) < 2
   end
 
@@ -82,16 +77,18 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       %{socket: socket}
     end
 
-    test "you can join", %{socket: socket, bot: %{token: token}} = context do
+    test "you can join", %{socket: socket, bot: %{token: token}} do
       bot_connect_req = encode(%{"token" => token, "lobby" => @lobby_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
 
-      assert %{"status" => "idle", "connection_id" => connection_id} = Jason.decode!(msg)
-
-      assert %{status: :idle, user_id: @user_id} =
-               get_connection(context.game_engine, connection_id)
+      assert %{
+               "status" => "idle",
+               "connection_id" => connection_id,
+               "bot_server_id" => <<_::288>>,
+               "user_id" => @user_id
+             } = Jason.decode!(msg)
     end
 
     test "trying to join a lobby that doesn't exist is an error", %{socket: socket, bot: bot} do
@@ -153,9 +150,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert_receive {:tcp, ^socket, resp}
 
       %{"status" => "match_making"} = Jason.decode!(resp)
-
-      assert %{status: :match_making} =
-               get_connection(context.game_engine, context.p1.connection_id)
     end
 
     test "two players can get matched to a game",
@@ -177,11 +171,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                },
                "request_type" => "game_request"
              } = Jason.decode!(game_request)
-
-      Process.sleep(10)
-
-      assert %{status: :game_acceptance, game_id: ^game_id} =
-               get_connection(context.game_engine, context.p1.connection_id)
     end
   end
 
@@ -211,9 +200,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert_receive {:tcp, ^p1, game_cancelled}
       assert %{"game_id" => ^game_id, "info" => "game_cancelled"} = Jason.decode!(game_cancelled)
-
-      assert %{game_id: nil, status: :idle} =
-               get_connection(context.game_engine, context.p1.connection_id)
     end
 
     test "if one accepts and the other rejects the game is cancelled",
@@ -264,9 +250,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                "request_type" => "commands_request",
                "commands_request" => %{"game_id" => ^game_id}
              } = Jason.decode!(move_req)
-
-      assert %{game_id: ^game_id, status: :playing} =
-               get_connection(context.game_engine, context.p1.connection_id)
     end
   end
 
@@ -300,8 +283,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       Map.merge(players, %{game_id: game_id})
     end
 
-    test "playing the game",
-         %{p1: %{socket: p1}, p2: %{socket: p2}, game_id: game_id} = context do
+    test "playing the game", %{p1: %{socket: p1}, p2: %{socket: p2}, game_id: game_id} do
       Enum.each(0..99, fn _turn ->
         assert_receive {:tcp, ^p1, commands_request}
 
@@ -323,9 +305,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{"info" => "game_over", "result" => %{"winner" => _, "game_id" => ^game_id}} =
                Jason.decode!(game_over)
-
-      assert %{game_id: nil, status: :idle} =
-               get_connection(context.game_engine, context.p1.connection_id)
     end
   end
 
