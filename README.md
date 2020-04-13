@@ -97,8 +97,7 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 - [ ] Visualize games better (include moves and historical turns)
   - [x] Key through turns, and have turns be sharable via url
   - [ ] Changing a turn does not affect history api so its easier to use back button
-- [ ] Change `move` to `command` for refering to what the bot sends to the server
-- [ ] `mix battle_box.swarm {optional credentials file}` task to run a swarm against a botskrieg server for regression testing
+- [ ] CSRF protect logout
 
 ### Nice to Haves
 
@@ -113,6 +112,7 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 - [ ] Terrain Editor
 - [ ] Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
 - [ ] Build TicTacToe as proof of game engine extendability
+- [ ] `mix battle_box.swarm {optional credentials file}` task to run a swarm against a botskrieg server for regression testing
 
 ### Done
 
@@ -166,3 +166,4 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 - [x] Admin
   - [x] List all users (paginated?)
   - [x] Apply a ban to a user
+- [x] Change `move` to `command` for refering to what the bot sends to the server
