@@ -13,6 +13,12 @@ defmodule BattleBoxWeb.PageControllerTest do
     assert html =~ Routes.github_login_path(conn, :github_login)
   end
 
+  test "POST /logout", %{conn: conn} do
+    conn = signin(conn)
+    conn = post(conn, "/logout")
+    assert redirected_to(conn, 302) =~ "/"
+  end
+
   describe "banned" do
     test "If you're not logged in, you get redirected to the login page", %{conn: conn} do
       conn = get(conn, "/banned")
