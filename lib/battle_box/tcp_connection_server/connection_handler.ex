@@ -48,9 +48,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
            lobby_name: lobby_name,
            connection: self()
          }) do
-      {:ok, bot_server, %{user_id: user_id}} ->
+      {:ok, bot_server, %{user_id: _, bot_server_id: _} = bot_server_info} ->
         Process.monitor(bot_server)
-        data = Map.merge(data, %{user_id: user_id, bot_server: bot_server})
+        data = data |> Map.put(:bot_server, bot_server) |> Map.merge(bot_server_info)
         :ok = send_to_socket(data, status_msg(data, :idle))
         {:next_state, :idle, data}
 
@@ -154,7 +154,15 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   end
 
   defp game_cancelled(game_id), do: encode(%{info: "game_cancelled", game_id: game_id})
-  defp status_msg(data, status), do: encode(%{status: status, connection_id: data.connection_id})
+
+  defp status_msg(data, status),
+    do:
+      encode(%{
+        status: status,
+        connection_id: data.connection_id,
+        user_id: data.user_id,
+        bot_server_id: data.bot_server_id
+      })
 
   defp send_to_socket(data, msg) do
     :ok = data.transport.send(data.socket, msg)
