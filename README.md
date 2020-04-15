@@ -71,12 +71,11 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   - [x] Add score to in game server registry metadata
   - [ ] Link to historical games
 - [ ] url identifiers
+   - [ ] `/bots/foo`
+   - [ ] `/lobbies/foo`
    - [ ] `/users/grantjamespowell`
    - [ ] `/users/grantjamespowell/bots`
-   - [ ] `/users/grantjamespowell/bots/foo`
-   - [ ] `/users/grantjamespowell/*`
-   - [ ] `/users/grantjamespowell/lobbies/foo`
-   - [ ] `/lobbies/foo/*`
+   - [ ] `/users/grantjamespowell/lobbies`
 - [ ] historical games page
    - [ ] Get something in the page
    - [ ] Efficent Pagination
