@@ -75,4 +75,13 @@ defmodule BattleBox.LobbyTest do
       %{id: <<_::288>>, attack_damage: _, terrain: _} = Lobby.get_settings(lobby)
     end
   end
+
+  describe "get_by_identifier" do
+    test "with a uuid && name" do
+      {:ok, lobby} = Lobby.create(%{name: "foo", game_type: "robot_game", user_id: @user_id})
+      nil = Lobby.get_by_identifier(nil)
+      %{name: "foo"} = Lobby.get_by_identifier(lobby.id)
+      %{name: "foo"} = Lobby.get_by_identifier(lobby.name)
+    end
+  end
 end
