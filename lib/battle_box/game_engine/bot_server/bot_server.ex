@@ -74,15 +74,11 @@ defmodule BattleBox.GameEngine.BotServer do
       )
       when response in [:accept_game, :reject_game] do
     case response do
-      :accept_game ->
-        :ok = GameServer.accept_game(game_info.game_server, game_info.player)
-        {:next_state, :playing, data, {:reply, from, :ok}}
-
-      :reject_game ->
-        :ok = GameServer.reject_game(game_info.game_server, game_info.player)
-        {:ok, data} = teardown_game(game_id, data)
-        {:next_state, :options, data, {:reply, from, :ok}}
+      :accept_game -> :ok = GameServer.accept_game(game_info.game_server, game_info.player)
+      :reject_game -> :ok = GameServer.reject_game(game_info.game_server, game_info.player)
     end
+
+    {:next_state, :playing, data, {:reply, from, :ok}}
   end
 
   def handle_event({:call, from}, {response, _game_id}, _state, _data)
