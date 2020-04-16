@@ -15,7 +15,7 @@ defmodule BattleBoxWeb.BotControllerTest do
     conn =
       conn
       |> signin(user_id: @user_id)
-      |> get("/bots/#{bot.id}")
+      |> get("/bots/#{bot.name}")
 
     assert html_response(conn, 200) =~ "TEST_NAME"
     assert html_response(conn, 200) =~ bot.token

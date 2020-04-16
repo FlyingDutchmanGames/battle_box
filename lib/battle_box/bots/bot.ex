@@ -26,8 +26,8 @@ defmodule BattleBox.Bot do
     bot
     |> cast(params, @params)
     |> validate_required(@params)
-    |> validate_length(:name, min: 3, max: 50)
-    |> unique_constraint(:name, name: "bots_user_id_name_index")
+    |> validate_length(:name, min: 3, max: 20)
+    |> unique_constraint(:name)
     |> unique_constraint(:token)
   end
 
@@ -39,10 +39,6 @@ defmodule BattleBox.Bot do
   def with_user_id(query \\ nil, user_id) do
     query = query || base()
     from bot in query, where: bot.user_id == ^user_id
-  end
-
-  def get_by_id(id) do
-    Repo.get_by(__MODULE__, id: id)
   end
 
   def get_by_token(token) do
@@ -66,5 +62,17 @@ defmodule BattleBox.Bot do
 
   defp base do
     from bot in __MODULE__, as: :bot
+  end
+
+  def get_by_identifier(nil), do: nil
+  def get_by_identifier(<<_::288>> = uuid), do: get_by_id(uuid)
+  def get_by_identifier(name), do: get_by_name(name)
+
+  def get_by_name(name) do
+    Repo.get_by(__MODULE__, name: name)
+  end
+
+  def get_by_id(id) do
+    Repo.get_by(__MODULE__, id: id)
   end
 end

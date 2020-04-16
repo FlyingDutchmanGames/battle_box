@@ -21,9 +21,9 @@ defmodule BattleBox.BotTest do
       refute changeset.valid?
     end
 
-    test "Name may not be longer than 50" do
-      name = :crypto.strong_rand_bytes(26) |> Base.encode16()
-      assert String.length(name) > 50
+    test "Name may not be longer than 20" do
+      name = :crypto.strong_rand_bytes(11) |> Base.encode16()
+      assert String.length(name) > 20
       changeset = Bot.changeset(%Bot{}, %{name: name, user_id: @user_id})
       refute changeset.valid?
     end
@@ -31,13 +31,7 @@ defmodule BattleBox.BotTest do
 
   describe "getting a bot" do
     setup do
-      {:ok, user} =
-        User.changeset(%User{
-          id: @user_id,
-          github_id: 1,
-          name: "TEST"
-        })
-        |> Repo.insert()
+      {:ok, user} = create_user(id: @user_id)
 
       {:ok, bot} =
         Bot.changeset(%Bot{}, %{
@@ -63,6 +57,12 @@ defmodule BattleBox.BotTest do
       assert %Bot{id: ^id, user: %{id: ^user_id}} =
                Bot.get_by_id(id)
                |> Repo.preload(:user)
+    end
+
+    test "you can use the by identifier", %{bot: %{id: id} = bot} do
+      assert nil == Bot.get_by_identifier(nil)
+      assert %{id: ^id} = Bot.get_by_identifier(id)
+      assert %{id: ^id} = Bot.get_by_identifier(bot.name)
     end
   end
 

@@ -1,6 +1,5 @@
 defmodule BattleBoxWeb.UserControllerTest do
   use BattleBoxWeb.ConnCase
-  alias BattleBox.{User, Repo}
 
   @fetched_user_id Ecto.UUID.generate()
 
@@ -10,13 +9,8 @@ defmodule BattleBoxWeb.UserControllerTest do
   end
 
   test "you can view a user", %{conn: conn} do
-    Repo.insert!(%User{
-      id: @fetched_user_id,
-      github_id: 5432,
-      github_avatar_url: "https://test.com"
-    })
-
+    {:ok, _user} = create_user(id: @fetched_user_id)
     conn = get(conn, "/users/#{@fetched_user_id}")
-    assert html_response(conn, 200) =~ "https://test.com"
+    assert html_response(conn, 200) =~ @fetched_user_id
   end
 end

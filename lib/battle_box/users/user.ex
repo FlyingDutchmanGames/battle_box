@@ -34,7 +34,7 @@ defmodule BattleBox.User do
   def changeset(user, params \\ %{}) do
     user
     |> cast(params, @params)
-    |> validate_required([:name, :github_id])
+    |> validate_required([:name, :github_id, :github_login_name])
     |> unique_constraint(:github_id)
   end
 
@@ -81,6 +81,14 @@ defmodule BattleBox.User do
   end
 
   def get_by_id(_), do: nil
+
+  def get_by_identifier(nil), do: nil
+  def get_by_identifier(<<_::288>> = uuid), do: get_by_id(uuid)
+  def get_by_identifier(name), do: get_by_github_login_name(name)
+
+  def get_by_github_login_name(login_name) do
+    Repo.get_by(__MODULE__, github_login_name: login_name)
+  end
 
   def set_ban_status(%__MODULE__{} = user, status) do
     changeset = change(user, is_banned: status)

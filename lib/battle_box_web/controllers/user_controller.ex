@@ -4,7 +4,7 @@ defmodule BattleBoxWeb.UserController do
   alias BattleBox.User
 
   def show(conn, %{"id" => id}) do
-    case User.get_by_id(id) do
+    case User.get_by_identifier(id) do
       %User{} = user ->
         render(conn, "show.html", fetched_user: user)
 

@@ -6,27 +6,27 @@ defmodule BattleBoxWeb.UserRedirectControllerTest do
   test "it will redirect you to your user's lobbies", %{conn: conn} do
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user_id: @user_id, github_login_name: "FOO")
       |> get("/lobbies")
 
-    assert redirected_to(conn, 302) =~ "/users/#{@user_id}/lobbies"
+    assert redirected_to(conn, 302) =~ "/users/FOO/lobbies"
   end
 
   test "it will redirect you to your user's bots", %{conn: conn} do
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user_id: @user_id, github_login_name: "BAR")
       |> get("/bots")
 
-    assert redirected_to(conn, 302) =~ "/users/#{@user_id}/bots"
+    assert redirected_to(conn, 302) =~ "/users/BAR/bots"
   end
 
   test "it will redirect you to the user", %{conn: conn} do
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user_id: @user_id, github_login_name: "BAZ")
       |> get("/me")
 
-    assert redirected_to(conn, 302) =~ "/users/#{@user_id}"
+    assert redirected_to(conn, 302) =~ "/users/BAZ"
   end
 end

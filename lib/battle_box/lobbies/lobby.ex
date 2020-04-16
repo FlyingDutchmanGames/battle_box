@@ -83,6 +83,10 @@ defmodule BattleBox.Lobby do
     from lobby in query, where: lobby.user_id == ^user_id
   end
 
+  def get_by_identifier(nil), do: nil
+  def get_by_identifier(<<_::288>> = uuid), do: get_by_id(uuid)
+  def get_by_identifier(name), do: get_by_name(name)
+
   def get_by_name(name) do
     Repo.get_by(__MODULE__, name: name)
   end

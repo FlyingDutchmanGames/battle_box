@@ -3,9 +3,9 @@ defmodule BattleBoxWeb.Lobby do
   alias BattleBox.{GameEngine, Lobby, Repo}
   alias BattleBoxWeb.{LobbyView, PageView}
 
-  def mount(%{"lobby_id" => lobby_id}, _session, socket) do
+  def mount(%{"id" => id}, _session, socket) do
     lobby =
-      Lobby.get_by_id(lobby_id)
+      Lobby.get_by_identifier(id)
       |> Repo.preload(:user)
 
     case lobby do
@@ -13,7 +13,7 @@ defmodule BattleBoxWeb.Lobby do
         {:ok, assign(socket, :not_found, true)}
 
       lobby ->
-        GameEngine.subscribe_to_lobby_events(game_engine(), lobby_id, [
+        GameEngine.subscribe_to_lobby_events(game_engine(), lobby.id, [
           :game_start,
           :game_update
         ])
