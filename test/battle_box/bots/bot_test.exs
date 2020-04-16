@@ -21,9 +21,9 @@ defmodule BattleBox.BotTest do
       refute changeset.valid?
     end
 
-    test "Name may not be longer than 50" do
-      name = :crypto.strong_rand_bytes(26) |> Base.encode16()
-      assert String.length(name) > 50
+    test "Name may not be longer than 20" do
+      name = :crypto.strong_rand_bytes(11) |> Base.encode16()
+      assert String.length(name) > 20
       changeset = Bot.changeset(%Bot{}, %{name: name, user_id: @user_id})
       refute changeset.valid?
     end

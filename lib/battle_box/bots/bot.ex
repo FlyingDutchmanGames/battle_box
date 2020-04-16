@@ -26,8 +26,8 @@ defmodule BattleBox.Bot do
     bot
     |> cast(params, @params)
     |> validate_required(@params)
-    |> validate_length(:name, min: 3, max: 50)
-    |> unique_constraint(:name, name: "bots_user_id_name_index")
+    |> validate_length(:name, min: 3, max: 20)
+    |> unique_constraint(:name)
     |> unique_constraint(:token)
   end
 
