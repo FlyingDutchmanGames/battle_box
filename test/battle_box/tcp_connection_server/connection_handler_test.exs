@@ -16,7 +16,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   end
 
   setup %{game_engine: game_engine, test: name} do
-    ranch_name = :"#{name}1"
+    ranch_name = :"#{name}-ranch"
 
     {:ok, _} =
       Supervisor.start_link(
@@ -281,6 +281,19 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       :ok = :gen_tcp.send(p2, encode(accept_game))
 
       Map.merge(players, %{game_id: game_id})
+    end
+
+    test "commands with the wrong id get the messages that they were invalid", %{
+      p1: %{socket: p1}
+    } do
+      assert_receive {:tcp, ^p1, commands_request}
+      incorrect_request_id = Ecto.UUID.generate()
+      %{"commands_request" => _} = Jason.decode!(commands_request)
+      :ok = :gen_tcp.send(p1, empty_commands_msg(incorrect_request_id))
+      assert_receive {:tcp, ^p1, error}
+
+      assert %{"error" => "invalid_commands_submission", "request_id" => ^incorrect_request_id} =
+               Jason.decode!(error)
     end
 
     test "playing the game", %{p1: %{socket: p1}, p2: %{socket: p2}, game_id: game_id} do

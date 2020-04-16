@@ -41,23 +41,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Deal with move timeouts
   - [ ] We should tell people when they miss a timeout?
   - [x] The GameEngine should pass `:timeout` and not `[]` when a player misses a timeout
-  - [ ] dealing with closed sockets
-```
-GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d32873e4", %{game_id: nil, started_at: ~U[2020-03-11 05:15:3
- ** (MatchError) no match of right hand side value: {:error, :closed}
-     (battle_box 0.1.0) lib/battle_box/tcp_connection_server/connection_handler.ex:188: BattleBox.TcpConnectionServer.ConnectionHandler.send_to_socket/2
-     (battle_box 0.1.0) lib/battle_box/tcp_connection_server/connection_handler.ex:149: BattleBox.TcpConnectionServer.ConnectionHandler.handle_event/4
-     (stdlib 3.11.2) gen_statem.erl:1161: :gen_statem.loop_state_callback/11
-     (stdlib 3.11.2) proc_lib.erl:249: :proc_lib.init_p_do_apply/3
-```
-- [ ] deal with invalid moves submission
-```
- ** (MatchError) no match of right hand side value: {:error, :invalid_moves_submission}
-     (battle_box 0.1.0) lib/battle_box/tcp_connection_server/connection_handler.ex:114: BattleBox.TcpConnectionServer.ConnectionHandler.handle_event/4
-     (stdlib 3.11.2) gen_statem.erl:1161: :gen_statem.loop_state_callback/11
-     (stdlib 3.11.2) proc_lib.erl:249: :proc_lib.init_p_do_apply/3
-```
-- [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 - [ ] Make sure user input can't cause a game to crash
 - [ ] More Efficent Robot Game Representation
   - [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
@@ -89,6 +72,7 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 - [ ] Visualize games better (include moves and historical turns)
   - [x] Key through turns, and have turns be sharable via url
   - [ ] Changing a turn does not affect history api so its easier to use back button
+- [ ] Terrain as binary
 
 ### Nice to Haves
 
@@ -104,6 +88,8 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
 - [ ] Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
 - [ ] Build TicTacToe as proof of game engine extendability
 - [ ] `mix battle_box.swarm {optional credentials file}` task to run a swarm against a botskrieg server for regression testing
+- [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
+- [ ] Pass timing info to the game so it can do move timing
 
 ### Done
 
@@ -165,3 +151,4 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
    - [x] `/users/grantjamespowell`
    - [x] `/users/grantjamespowell/bots`
    - [x] `/users/grantjamespowell/lobbies`
+- [x] deal with invalid moves submission

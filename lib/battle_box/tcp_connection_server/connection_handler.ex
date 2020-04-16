@@ -80,20 +80,15 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
       )
       when action in ["accept_game", "reject_game"] do
     case action do
-      "accept_game" ->
-        :ok = BotServer.accept_game(data.bot_server, id)
-        {:next_state, :playing, data}
-
-      "reject_game" ->
-        :ok = BotServer.reject_game(data.bot_server, id)
-        send_to_socket(data, game_cancelled(id))
-        {:next_state, :idle, data}
+      "accept_game" -> :ok = BotServer.accept_game(data.bot_server, id)
+      "reject_game" -> :ok = BotServer.reject_game(data.bot_server, id)
     end
+
+    {:next_state, :playing, data}
   end
 
   def handle_event(:info, {:commands_request, request}, :playing, data) do
     :ok = send_to_socket(data, commands_request(request))
-    data = Map.put(data, :commands_request, request)
     {:keep_state, data}
   end
 
@@ -101,19 +96,20 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
         :internal,
         %{"action" => "send_commands", "request_id" => request_id, "commands" => commands},
         :playing,
-        %{commands_request: %{request_id: request_id}} = data
-      ) do
-    :ok = BotServer.submit_commands(data.bot_server, request_id, commands)
-    data = Map.drop(data, [:commands_request])
-    {:keep_state, data}
-  end
-
-  def handle_event(
-        :info,
-        {:game_over, %{game_id: game_id} = result},
-        _,
         data
       ) do
+    case BotServer.submit_commands(data.bot_server, request_id, commands) do
+      :ok ->
+        {:keep_state, data}
+
+      {:error, :invalid_commands_submission} ->
+        error = encode_error("invalid_commands_submission", %{"request_id" => request_id})
+        :ok = send_to_socket(data, error)
+        {:keep_state, data}
+    end
+  end
+
+  def handle_event(:info, {:game_over, %{game_id: game_id} = result}, _, data) do
     :ok = send_to_socket(data, game_over(result))
     {:ok, data} = teardown_game(data, game_id)
     {:next_state, :idle, data}
@@ -139,30 +135,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   defp teardown_game(data, _game_id) do
     {:ok, Map.drop(data, [:game_info])}
   end
-
-  defp game_over(result) do
-    encode(%{"info" => "game_over", "result" => result})
-  end
-
-  defp commands_request(request) do
-    encode(%{"request_type" => "commands_request", "commands_request" => request})
-  end
-
-  defp game_request(game_info) do
-    game_info = Map.take(game_info, [:acceptance_time, :game_id, :player])
-    encode(%{"game_info" => game_info, "request_type" => "game_request"})
-  end
-
-  defp game_cancelled(game_id), do: encode(%{info: "game_cancelled", game_id: game_id})
-
-  defp status_msg(data, status),
-    do:
-      encode(%{
-        status: status,
-        connection_id: data.connection_id,
-        user_id: data.user_id,
-        bot_server_id: data.bot_server_id
-      })
 
   defp send_to_socket(data, msg) do
     :ok = data.transport.send(data.socket, msg)
