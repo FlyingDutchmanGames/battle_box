@@ -64,6 +64,12 @@ defmodule BattleBox.BotTest do
                Bot.get_by_id(id)
                |> Repo.preload(:user)
     end
+
+    test "you can use the by identifier", %{bot: %{id: id} = bot} do
+      assert nil == Bot.get_by_identifier(nil)
+      assert %{id: ^id} = Bot.get_by_identifier(id)
+      assert %{id: ^id} = Bot.get_by_identifier(bot.name)
+    end
   end
 
   describe "banned?" do

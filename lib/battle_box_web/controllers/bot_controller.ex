@@ -23,7 +23,7 @@ defmodule BattleBoxWeb.BotController do
   end
 
   def show(conn, %{"id" => id}) do
-    case Bot.get_by_id(id) do
+    case Bot.get_by_identifier(id) do
       %Bot{} = bot ->
         render(conn, "show.html", bot: bot)
 

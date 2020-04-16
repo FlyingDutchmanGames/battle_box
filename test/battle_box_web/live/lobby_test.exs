@@ -44,7 +44,7 @@ defmodule BattleBoxWeb.LobbyTest do
   end
 
   test "it can show a lobby", %{conn: conn} = context do
-    {:ok, _view, html} = live(conn, "/lobbies/#{context.lobby.id}")
+    {:ok, _view, html} = live(conn, "/lobbies/#{context.lobby.name}")
     assert html =~ "#{context.user.github_login_name} / #{context.lobby.name}"
   end
 

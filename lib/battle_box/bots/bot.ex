@@ -41,10 +41,6 @@ defmodule BattleBox.Bot do
     from bot in query, where: bot.user_id == ^user_id
   end
 
-  def get_by_id(id) do
-    Repo.get_by(__MODULE__, id: id)
-  end
-
   def get_by_token(token) do
     Repo.get_by(__MODULE__, token: token)
   end
@@ -66,5 +62,17 @@ defmodule BattleBox.Bot do
 
   defp base do
     from bot in __MODULE__, as: :bot
+  end
+
+  def get_by_identifier(nil), do: nil
+  def get_by_identifier(<<_::288>> = uuid), do: get_by_id(uuid)
+  def get_by_identifier(name), do: get_by_name(name)
+
+  def get_by_name(name) do
+    Repo.get_by(__MODULE__, name: name)
+  end
+
+  def get_by_id(id) do
+    Repo.get_by(__MODULE__, id: id)
   end
 end

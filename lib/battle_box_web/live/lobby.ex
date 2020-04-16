@@ -3,9 +3,9 @@ defmodule BattleBoxWeb.Lobby do
   alias BattleBox.{GameEngine, Lobby, Repo}
   alias BattleBoxWeb.{LobbyView, PageView}
 
-  def mount(%{"lobby_identifier" => lobby_identifier}, _session, socket) do
+  def mount(%{"id" => id}, _session, socket) do
     lobby =
-      Lobby.get_by_identifier(lobby_identifier)
+      Lobby.get_by_identifier(id)
       |> Repo.preload(:user)
 
     case lobby do
