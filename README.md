@@ -70,12 +70,6 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   - [x] Show Live Games
   - [x] Add score to in game server registry metadata
   - [ ] Link to historical games
-- [ ] url identifiers
-   - [ ] `/bots/foo`
-   - [ ] `/lobbies/foo`
-   - [ ] `/users/grantjamespowell`
-   - [ ] `/users/grantjamespowell/bots`
-   - [ ] `/users/grantjamespowell/lobbies`
 - [ ] historical games page
    - [ ] Get something in the page
    - [ ] Efficent Pagination
@@ -165,3 +159,9 @@ GenStateMachine {GameEngine.Connection.Registry, "4ce89f99-075b-4f2a-bf3c-5ed1d3
   - [x] Apply a ban to a user
 - [x] Change `move` to `command` for refering to what the bot sends to the server
 - [x] CSRF protect logout
+- [x] url identifiers
+   - [x] `/bots/foo`
+   - [x] `/lobbies/foo`
+   - [x] `/users/grantjamespowell`
+   - [x] `/users/grantjamespowell/bots`
+   - [x] `/users/grantjamespowell/lobbies`
