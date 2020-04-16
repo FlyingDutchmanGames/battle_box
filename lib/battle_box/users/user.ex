@@ -80,7 +80,13 @@ defmodule BattleBox.User do
     Repo.get_by(__MODULE__, id: id)
   end
 
-  def get_by_id(_), do: nil
+  def get_by_identifier(nil), do: nil
+  def get_by_identifier(<<_::288>> = uuid), do: get_by_id(uuid)
+  def get_by_identifier(name), do: get_by_github_login_name(name)
+
+  def get_by_github_login_name(login_name) do
+    Repo.get_by(__MODULE__, github_login_name: login_name)
+  end
 
   def set_ban_status(%__MODULE__{} = user, status) do
     changeset = change(user, is_banned: status)

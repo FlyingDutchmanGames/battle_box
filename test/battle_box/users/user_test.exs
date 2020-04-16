@@ -52,4 +52,11 @@ defmodule BattleBox.UserTest do
       assert user.is_banned
     end
   end
+
+  test "you can get by identifier" do
+    {:ok, %{id: id} = user} = create_user(%{})
+    assert nil == User.get_by_identifier(nil)
+    assert %{id: ^id} = User.get_by_identifier(user.id)
+    assert %{id: ^id} = User.get_by_identifier(user.github_login_name)
+  end
 end
