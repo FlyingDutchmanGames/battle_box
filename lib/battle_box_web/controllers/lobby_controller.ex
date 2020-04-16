@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.LobbyController do
   use BattleBoxWeb, :controller
-  alias BattleBox.{Lobby, Repo}
+  alias BattleBox.{Lobby, Repo, User}
 
   def new(conn, _params) do
     changeset = Lobby.changeset(%Lobby{})
@@ -8,8 +8,11 @@ defmodule BattleBoxWeb.LobbyController do
   end
 
   def index(conn, %{"user_id" => user_id}) do
-    lobbies = Lobby.with_user_id(user_id) |> Repo.all()
-    render(conn, "index.html", lobbies: lobbies)
+    case User.get_by_identifier(user_id) do
+      %User{id: id} ->
+        lobbies = Lobby.with_user_id(id) |> Repo.all()
+        render(conn, "index.html", lobbies: lobbies)
+    end
   end
 
   def create(%{assigns: %{user: user}} = conn, %{"lobby" => lobby}) do
@@ -24,7 +27,7 @@ defmodule BattleBoxWeb.LobbyController do
       {:ok, lobby} ->
         conn
         |> put_flash(:info, "Lobby")
-        |> redirect(to: Routes.live_path(conn, BattleBoxWeb.Lobby, lobby.id))
+        |> redirect(to: Routes.live_path(conn, BattleBoxWeb.Lobby, lobby.name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)

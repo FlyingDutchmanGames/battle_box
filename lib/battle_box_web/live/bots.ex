@@ -3,9 +3,9 @@ defmodule BattleBoxWeb.Bots do
   alias BattleBoxWeb.{BotView, PageView}
   alias BattleBox.{GameEngine, User, Bot, Repo}
 
-  def mount(%{"user_id" => user_id}, _session, socket) do
-    case User.get_by_id(user_id) do
-      %User{} = user ->
+  def mount(%{"user_id" => user_identifier}, _session, socket) do
+    case User.get_by_identifier(user_identifier) do
+      %User{id: user_id} = user ->
         bots = bots_for_user(user_id)
         bot_servers = bot_servers_for_user(user_id)
 

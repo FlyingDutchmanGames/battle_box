@@ -31,13 +31,7 @@ defmodule BattleBox.BotTest do
 
   describe "getting a bot" do
     setup do
-      {:ok, user} =
-        User.changeset(%User{
-          id: @user_id,
-          github_id: 1,
-          name: "TEST"
-        })
-        |> Repo.insert()
+      {:ok, user} = create_user(id: @user_id)
 
       {:ok, bot} =
         Bot.changeset(%Bot{}, %{

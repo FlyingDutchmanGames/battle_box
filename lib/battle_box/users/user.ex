@@ -34,7 +34,7 @@ defmodule BattleBox.User do
   def changeset(user, params \\ %{}) do
     user
     |> cast(params, @params)
-    |> validate_required([:name, :github_id])
+    |> validate_required([:name, :github_id, :github_login_name])
     |> unique_constraint(:github_id)
   end
 
@@ -79,6 +79,8 @@ defmodule BattleBox.User do
   def get_by_id(<<_::288>> = id) do
     Repo.get_by(__MODULE__, id: id)
   end
+
+  def get_by_id(_), do: nil
 
   def get_by_identifier(nil), do: nil
   def get_by_identifier(<<_::288>> = uuid), do: get_by_id(uuid)

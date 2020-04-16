@@ -3,12 +3,12 @@
   <div class="spacer"></div>
   <%= if @user do %>
     <div class="nav-item">
-      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @user.id) %>">Bots</a>
+      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @user.github_login_name) %>">Bots</a>
     </div>
     <div class="nav-item">
-      <a href="<%= Routes.user_lobby_path(@conn, :index, @user.id) %>">Lobbies</a>
+      <a href="<%= Routes.user_lobby_path(@conn, :index, @user.github_login_name) %>">Lobbies</a>
     </div>
-    <a href="<%= Routes.user_path(@conn, :show, @user.id) %>">
+    <a href="<%= Routes.user_path(@conn, :show, @user.github_login_name) %>">
       <div class="user">
         <div class="name"><%= @user.name %></div>
         <img src="<%= @user.github_avatar_url %>">

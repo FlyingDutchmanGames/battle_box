@@ -27,7 +27,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
       |> post("/lobbies", %{"lobby" => %{"name" => "FOO"}})
 
     assert "/lobbies/" <> id = redirected_to(conn, 302)
-    assert %Lobby{user_id: @user_id} = Lobby.get_by_id(id)
+    assert %Lobby{user_id: @user_id} = Lobby.get_by_identifier(id)
   end
 
   test "creating a lobby with the same name as an existing lobby is an error", %{conn: conn} do
