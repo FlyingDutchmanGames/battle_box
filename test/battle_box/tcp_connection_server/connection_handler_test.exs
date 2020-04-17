@@ -3,7 +3,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   alias BattleBox.{Bot, GameEngine, TcpConnectionServer, Lobby}
   alias BattleBox.Games.RobotGame
   import BattleBox.GameEngine, only: [get_connection: 2]
-  import BattleBox.TcpConnectionServer.Message
+  import BattleBox.Connection.Message
 
   @ip {127, 0, 0, 1}
   @bot_name "BOT_NAME"

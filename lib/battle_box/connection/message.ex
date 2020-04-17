@@ -1,4 +1,4 @@
-defmodule BattleBox.TcpConnectionServer.Message do
+defmodule BattleBox.Connection.Message do
   def game_over(result) do
     encode(%{"info" => "game_over", "result" => result})
   end
@@ -28,6 +28,40 @@ defmodule BattleBox.TcpConnectionServer.Message do
   def encode_error(error_msg, additional \\ %{}) do
     error = Map.merge(%{error: error_msg}, additional)
     encode(error)
+  end
+
+  defmacro bot_token_auth(token, lobby_name) do
+    quote do
+      %{"token" => unquote(token), "lobby" => unquote(lobby_name)}
+    end
+  end
+
+  defmacro start_match_making do
+    quote do
+      %{"action" => "start_match_making"}
+    end
+  end
+
+  defmacro accept_game(game_id) do
+    quote do
+      %{"action" => "accept_game", "game_id" => unquote(game_id)}
+    end
+  end
+
+  defmacro reject_game(game_id) do
+    quote do
+      %{"action" => "reject_game", "game_id" => unquote(game_id)}
+    end
+  end
+
+  defmacro sent_commands(request_id, commands) do
+    quote do
+      %{
+        "action" => "send_commands",
+        "request_id" => unquote(request_id),
+        "commands" => unquote(commands)
+      }
+    end
   end
 
   def encode(msg), do: Jason.encode!(msg)
