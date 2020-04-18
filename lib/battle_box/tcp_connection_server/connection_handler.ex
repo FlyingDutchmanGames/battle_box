@@ -1,7 +1,7 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
   use GenStateMachine, callback_mode: [:handle_event_function], restart: :temporary
   alias BattleBox.{GameEngine, GameEngine.BotServer}
-  import BattleBox.TcpConnectionServer.Message
+  import BattleBox.Connection.Message
   @behaviour :ranch_protocol
 
   def start_link(ref, _socket, transport, data) do
@@ -42,7 +42,33 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     end
   end
 
-  def handle_event(:internal, %{"token" => token, "lobby" => lobby_name}, :unauthed, data) do
+  def handle_event(:info, {:game_request, game_info}, :match_making, data) do
+    :ok = send_to_socket(data, game_request(game_info))
+    {:next_state, :game_acceptance, data}
+  end
+
+  def handle_event(:info, {:commands_request, request}, :playing, data) do
+    :ok = send_to_socket(data, commands_request(request))
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:game_over, result}, _, data) do
+    :ok = send_to_socket(data, game_over(result))
+    {:next_state, :idle, data}
+  end
+
+  def handle_event(:info, {:game_cancelled, id}, _state, data) do
+    :ok = send_to_socket(data, game_cancelled(id))
+    {:next_state, :idle, data}
+  end
+
+  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{bot_server: pid} = data) do
+    :ok = send_to_socket(data, encode_error("bot_instance_failure"))
+    :ok = data.transport.close(data.socket)
+    {:stop, :normal}
+  end
+
+  def handle_event(:internal, bot_token_auth(token, lobby_name), :unauthed, data) do
     case GameEngine.start_bot(data.names.game_engine, %{
            token: token,
            lobby_name: lobby_name,
@@ -60,44 +86,23 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     end
   end
 
-  def handle_event(:internal, %{"action" => "start_match_making"}, :idle, data) do
+  def handle_event(:internal, start_match_making(), :idle, data) do
     :ok = BotServer.match_make(data.bot_server)
     :ok = send_to_socket(data, status_msg(data, :match_making))
     {:next_state, :match_making, data}
   end
 
-  def handle_event(:info, {:game_request, game_info}, :match_making, data) do
-    :ok = send_to_socket(data, game_request(game_info))
-    data = Map.put(data, :game_info, game_info)
-    {:next_state, :game_acceptance, data}
-  end
-
-  def handle_event(
-        :internal,
-        %{"action" => action, "game_id" => id},
-        :game_acceptance,
-        %{game_info: %{game_id: id}} = data
-      )
-      when action in ["accept_game", "reject_game"] do
-    case action do
-      "accept_game" -> :ok = BotServer.accept_game(data.bot_server, id)
-      "reject_game" -> :ok = BotServer.reject_game(data.bot_server, id)
-    end
-
+  def handle_event(:internal, accept_game(id), :game_acceptance, data) do
+    :ok = BotServer.accept_game(data.bot_server, id)
     {:next_state, :playing, data}
   end
 
-  def handle_event(:info, {:commands_request, request}, :playing, data) do
-    :ok = send_to_socket(data, commands_request(request))
-    {:keep_state, data}
+  def handle_event(:internal, reject_game(id), :game_acceptance, data) do
+    :ok = BotServer.reject_game(data.bot_server, id)
+    {:next_state, :playing, data}
   end
 
-  def handle_event(
-        :internal,
-        %{"action" => "send_commands", "request_id" => request_id, "commands" => commands},
-        :playing,
-        data
-      ) do
+  def handle_event(:internal, sent_commands(request_id, commands), :playing, data) do
     case BotServer.submit_commands(data.bot_server, request_id, commands) do
       :ok ->
         {:keep_state, data}
@@ -109,31 +114,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     end
   end
 
-  def handle_event(:info, {:game_over, %{game_id: game_id} = result}, _, data) do
-    :ok = send_to_socket(data, game_over(result))
-    {:ok, data} = teardown_game(data, game_id)
-    {:next_state, :idle, data}
-  end
-
-  def handle_event(:info, {:game_cancelled, id}, _state, %{game_info: %{game_id: id}} = data) do
-    :ok = send_to_socket(data, game_cancelled(id))
-    {:ok, data} = teardown_game(data, id)
-    {:next_state, :idle, data}
-  end
-
-  def handle_event(:info, {:DOWN, _, _, pid, _}, _state, %{bot_server: pid} = data) do
-    :ok = send_to_socket(data, encode_error("bot_instance_failure"))
-    :ok = data.transport.close(data.socket)
-    {:stop, :normal}
-  end
-
   def handle_event(:internal, _msg, _state, data) do
     :ok = send_to_socket(data, encode_error("invalid_msg_sent"))
     :keep_state_and_data
-  end
-
-  defp teardown_game(data, _game_id) do
-    {:ok, Map.drop(data, [:game_info])}
   end
 
   defp send_to_socket(data, msg) do
