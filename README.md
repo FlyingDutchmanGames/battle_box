@@ -153,3 +153,25 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
    - [x] `/users/grantjamespowell/bots`
    - [x] `/users/grantjamespowell/lobbies`
 - [x] deal with invalid moves submission
+
+### Useful SQL
+
+Find number of game bots for a user
+```
+ select users.github_login_name, count(*) from game_bots join bots on bots.id = game_bots.bot_id join users on users.id = bots.user_id group by users.id order by count desc;
+```
+
+Number of bots per user
+```
+select github_login_name, count(*) from bots join users on bots.user_id = users.id group by users.id order by count desc;
+```
+
+Number of lobbies per user
+```
+select github_login_name, count(*) from lobbies join users on lobbies.user_id = users.id group by users.id order by count desc;
+```
+
+Number of games per lobby
+```
+select lobbies.name, count(*) from games join lobbies on games.lobby_id = lobbies.id group by lobbies.id order by count desc;
+```
