@@ -73,7 +73,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
   - [x] Key through turns, and have turns be sharable via url
   - [ ] Changing a turn does not affect history api so its easier to use back button
 - [ ] Terrain as binary
-- [ ] Make Github Name not required (github doesn't require it)
 
 ### Nice to Haves
 
@@ -153,6 +152,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
    - [x] `/users/grantjamespowell/bots`
    - [x] `/users/grantjamespowell/lobbies`
 - [x] deal with invalid moves submission
+- [x] Make Github Name not required (github doesn't require it)
 
 ### Useful SQL
 
