@@ -10,7 +10,7 @@
     </div>
     <a href="<%= Routes.user_path(@conn, :show, @user.github_login_name) %>">
       <div class="user">
-        <div class="name"><%= @user.name %></div>
+        <div class="name"><%= @user.github_login_name %></div>
         <img src="<%= @user.github_avatar_url %>">
       </div>
     </a>

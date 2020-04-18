@@ -28,13 +28,13 @@ defmodule BattleBox.UserTest do
     test "it will upsert the row if its called twice", context do
       assert {:ok, _} = User.upsert_from_github(context.user_from_github)
       user = User.get_by_github_id(context.user_from_github["id"])
-      assert user.name == "Grant Powell"
+      assert user.github_login_name == "GrantJamesPowell"
 
       assert {:ok, user2} =
-               User.upsert_from_github(%{context.user_from_github | "name" => "pass"})
+               User.upsert_from_github(%{context.user_from_github | "login" => "pass"})
 
       assert user2.id == user.id
-      assert user2.name == "pass"
+      assert user2.github_login_name == "pass"
     end
   end
 
