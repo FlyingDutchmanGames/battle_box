@@ -7,23 +7,17 @@ defmodule BattleBox.User do
   @foreign_key_type :binary_id
 
   @params [
-    :name,
     :github_id,
     :github_avatar_url,
-    :github_html_url,
     :github_login_name,
-    :github_access_token,
     :is_admin,
     :is_banned
   ]
 
   schema "users" do
-    field :name, :string
     field :github_id, :integer
     field :github_avatar_url, :string
-    field :github_html_url, :string
     field :github_login_name, :string
-    field :github_access_token, :string
     field :is_admin, :boolean, default: false
     field :is_banned, :boolean, default: false
     has_many :bots, Bot
@@ -34,27 +28,21 @@ defmodule BattleBox.User do
   def changeset(user, params \\ %{}) do
     user
     |> cast(params, @params)
-    |> validate_required([:name, :github_id, :github_login_name])
+    |> validate_required([:github_id, :github_avatar_url, :github_login_name])
     |> unique_constraint(:github_id)
   end
 
   def upsert_from_github(user_data) do
     %{
       "avatar_url" => github_avatar_url,
-      "html_url" => github_html_url,
       "id" => github_id,
-      "login" => github_login_name,
-      "name" => name,
-      "access_token" => token
+      "login" => github_login_name
     } = user_data
 
     changeset(%__MODULE__{}, %{
-      name: name,
       github_avatar_url: github_avatar_url,
-      github_html_url: github_html_url,
       github_id: github_id,
-      github_login_name: github_login_name,
-      github_access_token: token
+      github_login_name: github_login_name
     })
     |> Repo.insert(
       returning: true,
@@ -62,9 +50,7 @@ defmodule BattleBox.User do
       on_conflict:
         {:replace,
          [
-           :name,
            :github_avatar_url,
-           :github_html_url,
            :github_id,
            :github_login_name,
            :updated_at

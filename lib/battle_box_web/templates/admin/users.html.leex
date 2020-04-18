@@ -6,7 +6,6 @@
       <th></th>
       <th>Admin?</th>
       <th>Name</th>
-      <th>Github</th>
       <th>Joined At</th>
       <th>Banned?</th>
     </tr>
@@ -15,8 +14,7 @@
       <tr>
         <td><img src="<%= user.github_avatar_url %>"></td>
         <td><div class="center-items"><%= user.is_admin %><div></td>
-        <td><div class="center-items"><a href="<%= Routes.user_path(@socket, :show, user.id) %>"><%= user.name %></a></div></td>
-        <td><a href="<%= user.github_html_url %>"><%= user.github_login_name %></a></td>
+        <td><div class="center-items"><a href="<%= Routes.user_path(@socket, :show, user.id) %>"><%= user.github_login_name %></a></div></td>
         <td><%= user.inserted_at %></td>
         <td>
           <form phx-change="adjust_ban">

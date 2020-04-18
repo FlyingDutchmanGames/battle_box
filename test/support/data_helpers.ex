@@ -16,7 +16,7 @@ defmodule BattleBox.Test.DataHelpers do
 
     User.changeset(%User{id: user_id}, %{
       github_id: :erlang.unique_integer([:positive]),
-      name: "NAME",
+      github_avatar_url: "http://not-real.com",
       github_login_name: opts[:github_login_name] || "github_login_name:#{user_id}",
       is_banned: opts[:is_banned] || false,
       is_admin: opts[:is_admin] || false
