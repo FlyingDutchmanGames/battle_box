@@ -207,7 +207,7 @@ defmodule BattleBox.Games.RobotGame do
       ])
 
     terrain = Base.encode64(game.settings.terrain)
-    Map.put(base_settings, :terrain, terrain)
+    Map.put(base_settings, :terrain_base64, terrain)
   end
 
   def events_for_turn(game, turn) do
