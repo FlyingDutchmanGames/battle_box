@@ -196,15 +196,18 @@ defmodule BattleBox.Games.RobotGame do
   end
 
   def settings(game) do
-    Map.take(game.settings, [
-      :spawn_every,
-      :spawn_per_player,
-      :robot_hp,
-      :max_turns,
-      :attack_damage,
-      :collision_damage
-      # :terrain,
-    ])
+    base_settings =
+      Map.take(game.settings, [
+        :spawn_every,
+        :spawn_per_player,
+        :robot_hp,
+        :max_turns,
+        :attack_damage,
+        :collision_damage
+      ])
+
+    terrain = Base.encode64(game.settings.terrain)
+    Map.put(base_settings, :terrain, terrain)
   end
 
   def events_for_turn(game, turn) do
