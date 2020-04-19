@@ -18,6 +18,7 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
       add :collision_damage, :jsonb, null: false
       add :suicide_damage, :jsonb, null: false
       add :max_turns, :integer, null: false
+      add :terrain, :binary, null: false
     end
   end
 end

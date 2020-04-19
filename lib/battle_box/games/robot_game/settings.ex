@@ -15,10 +15,10 @@ defmodule BattleBox.Games.RobotGame.Settings do
     field :attack_damage, DamageModifier, default: %{min: 8, max: 10}
     field :collision_damage, DamageModifier, default: 5
     field :suicide_damage, DamageModifier, default: 15
+    field :terrain, :binary, default: Terrain.default()
 
     field :persistent?, :boolean, default: true, virtual: true
     field :spawn_enabled, :boolean, default: true, virtual: true
-    field :terrain, :any, default: Terrain.default(), virtual: true
   end
 
   def changeset(settings, params \\ %{}) do
@@ -30,7 +30,8 @@ defmodule BattleBox.Games.RobotGame.Settings do
       :max_turns,
       :attack_damage,
       :collision_damage,
-      :suicide_damage
+      :suicide_damage,
+      :terrain
     ])
   end
 

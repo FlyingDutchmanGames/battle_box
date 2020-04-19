@@ -46,7 +46,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
   - [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
   - [x] break out the live game data from the live game metadata, most places (lobby live) only need live game metadad
   - [x] Binary representation of robot game events
-  - [ ] Binary representation of terrain (would be nice if was a literal)
+  - [x] Binary representation of terrain (would be nice if was a literal)
   - [ ] limit memory usage of game servers (they're currently at 2 mbs)
   - [ ] Manual GC?
 - [ ] Lobby Page
@@ -72,8 +72,9 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Visualize games better (include moves and historical turns)
   - [x] Key through turns, and have turns be sharable via url
   - [ ] Changing a turn does not affect history api so its easier to use back button
-- [ ] Terrain as binary
 - [ ] Fix the min/max time messages after a game cancel in the bot server
+- [ ] Remove row-min/max from terrain, because everything must be 0 indexed
+- [ ] Include the terrain in game settings on startup
 
 ### Nice to Haves
 
@@ -154,6 +155,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
    - [x] `/users/grantjamespowell/lobbies`
 - [x] deal with invalid moves submission
 - [x] Make Github Name not required (github doesn't require it)
+- [x] Terrain as binary
 
 ### Useful SQL
 

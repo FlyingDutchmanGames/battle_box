@@ -2,6 +2,7 @@
 <% %{1 => p1_score, 2 => p2_score} = RobotGame.score_at_turn(@game.robot_game, @turn) %>
 <% game_bot_1 = Enum.find(@game.game_bots, fn bot -> bot.player == 1 end) %>
 <% game_bot_2 = Enum.find(@game.game_bots, fn bot -> bot.player == 2 end) %>
+<% terrain = @game.robot_game.settings.terrain %>
 
 <div class="robot-game" phx-window-keyup="change_turn">
   <div class="game-header">
@@ -24,10 +25,9 @@
   </div>
 
   <div class="robot-game-board" style='<%= "grid-template: repeat(#{rows}, max-content) / repeat(#{cols}, max-content)" %>'>
-    <%= for {location, terrain_type} <- @game.robot_game.settings.terrain do %>
-      <% [row, col] = location %>
-      <div class='<%= "terrain #{terrain_type}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
-        <%= terrain_number(location) %>
+    <%= for row <- 0..(Terrain.rows(terrain) - 1), col <- 0..(Terrain.cols(terrain) - 1) do %>
+      <div class='<%= "terrain #{Terrain.at_location(terrain, [row, col])}" %>' style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>'>
+        <%= terrain_number([row, col]) %>
       </div>
     <% end %>
 

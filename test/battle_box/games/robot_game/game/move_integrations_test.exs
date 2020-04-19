@@ -79,7 +79,23 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
           {col, col_num} <- Enum.with_index(row),
           do: {[row_num, col_num], col}
 
-    terrain = Map.new(graph_with_indexes, fn {loc, val} -> {loc, terrain_val(val)} end)
+    rows = length(graphs)
+    cols = graphs |> Enum.map(&length/1) |> Enum.max()
+    terrain_header = <<rows::8, cols::8>>
+
+    terrain_data =
+      graphs
+      |> List.flatten()
+      |> Enum.map(fn
+        "0" -> 0
+        "1" -> 1
+        "2" -> 2
+        "3" -> 3
+        _ -> 1
+      end)
+      |> Enum.map(&<<&1::8>>)
+
+    terrain = IO.iodata_to_binary([terrain_header, terrain_data])
 
     robot_spawns =
       graph_with_indexes
@@ -154,16 +170,6 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   def validate_did_not_move(initial_game, after_turn, robot_id) do
     assert RobotGame.get_robot(initial_game, robot_id).location ==
              RobotGame.get_robot(after_turn, robot_id).location
-  end
-
-  defp terrain_val(val) do
-    case val do
-      "0" -> :inaccessible
-      "1" -> :normal
-      "2" -> :spawn
-      "3" -> :obstacle
-      _ -> :normal
-    end
   end
 
   defp robot_move(location, type) do
