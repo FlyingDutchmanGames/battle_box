@@ -172,16 +172,6 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
              RobotGame.get_robot(after_turn, robot_id).location
   end
 
-  defp terrain_val(val) do
-    case val do
-      "0" -> :inaccessible
-      "1" -> :normal
-      "2" -> :spawn
-      "3" -> :obstacle
-      _ -> :normal
-    end
-  end
-
   defp robot_move(location, type) do
     case type do
       "🐢" ->

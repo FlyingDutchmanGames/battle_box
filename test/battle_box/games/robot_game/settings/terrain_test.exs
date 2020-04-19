@@ -15,17 +15,13 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
 
   describe "getting spaces" do
     test "you can get spaces by type" do
-      assert Terrain.normal(@test_terrain) == [[0, 0], [1, 1]]
-      assert Terrain.spawn(@test_terrain) == [[2, 2], [3, 3]]
-      assert Terrain.obstacle(@test_terrain) == [[4, 4], [5, 5]]
+      assert Terrain.normal(@test_terrain) == [[0, 2], [0, 3]]
+      assert Terrain.spawn(@test_terrain) == [[0, 4], [0, 5]]
+      assert Terrain.obstacle(@test_terrain) == [[0, 6], [0, 7]]
     end
   end
 
   describe "dimensions" do
-    test "the dimensions of an empty map are nil" do
-      assert nil == Terrain.dimensions(%{})
-    end
-
     test "the dimensions of a one square map are 0s" do
       assert %{
                row_min: 0,
