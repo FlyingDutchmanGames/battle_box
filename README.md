@@ -73,6 +73,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
   - [x] Key through turns, and have turns be sharable via url
   - [ ] Changing a turn does not affect history api so its easier to use back button
 - [ ] Terrain as binary
+- [ ] Fix the min/max time messages after a game cancel in the bot server
 
 ### Nice to Haves
 
