@@ -1,5 +1,6 @@
 defmodule BattleBox.GameEngine.GameServerTest do
   alias BattleBox.{Game, Lobby, GameEngine, GameEngine.GameServer, Games.RobotGame}
+  alias BattleBox.Games.RobotGame.Settings.Terrain
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
@@ -73,7 +74,8 @@ defmodule BattleBox.GameEngine.GameServerTest do
         robot_hp: game.robot_game.settings.robot_hp,
         attack_damage: game.robot_game.settings.attack_damage,
         collision_damage: game.robot_game.settings.collision_damage,
-        max_turns: game.robot_game.settings.max_turns
+        max_turns: game.robot_game.settings.max_turns,
+        terrain: Base.encode64(Terrain.default())
       }
     }
 
