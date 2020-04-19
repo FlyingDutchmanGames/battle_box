@@ -4,7 +4,7 @@
 <div class="games">
   <%= for game <- @live_games do %>
     <div class="game">
-      <h3>Game: <a href='<%= Routes.live_path(@socket, BattleBoxWeb.Game, game.game_id)%>'><%= game.game_id %></a></h3>
+      <h3><a href='<%= Routes.live_path(@socket, BattleBoxWeb.Game, game.game_id)%>'><%= game_bots_to_game_name(game.game.game_bots) %></a></h3>
       <%= for bot <- game.game.game_bots do %>
         <h4>Score <%= bot.player %>: <%= bot.score %></h2>
       <% end %>
