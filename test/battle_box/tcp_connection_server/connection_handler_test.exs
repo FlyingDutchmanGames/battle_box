@@ -167,7 +167,16 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert %{
                "game_info" => %{
                  "game_id" => <<_::288>> = game_id,
-                 "player" => _
+                 "player" => _,
+                 "settings" => %{
+                   "attack_damage" => _,
+                   "collision_damage" => _,
+                   "max_turns" => _,
+                   "robot_hp" => _,
+                   "spawn_every" => _,
+                   "spawn_per_player" => _,
+                   "terrain_base64" => _
+                 }
                },
                "request_type" => "game_request"
              } = Jason.decode!(game_request)
