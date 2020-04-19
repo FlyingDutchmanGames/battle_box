@@ -38,9 +38,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
     - [ ] Guard
     - [ ] Suicide
     - [ ] Attack
-- [ ] Deal with move timeouts
-  - [ ] We should tell people when they miss a timeout?
-  - [x] The GameEngine should pass `:timeout` and not `[]` when a player misses a timeout
 - [ ] Make sure user input can't cause a game to crash
 - [ ] More Efficent Robot Game Representation
   - [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
@@ -156,6 +153,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [x] Make Github Name not required (github doesn't require it)
 - [x] Terrain as binary
 - [x] Include the terrain in game settings on startup
+- [x] The GameEngine should pass `:timeout` and not `[]` when a player misses a timeout
 
 ### Useful SQL
 

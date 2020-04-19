@@ -75,7 +75,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
         attack_damage: game.robot_game.settings.attack_damage,
         collision_damage: game.robot_game.settings.collision_damage,
         max_turns: game.robot_game.settings.max_turns,
-        terrain: Base.encode64(Terrain.default())
+        terrain_base64: Base.encode64(Terrain.default())
       }
     }
 
