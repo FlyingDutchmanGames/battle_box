@@ -8,7 +8,7 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain.Helpers do
       |> Enum.map(&Enum.reject(&1, fn grapheme -> String.trim(grapheme) == "" end))
 
     rows = length(graphs)
-    cols = graphs |> Enum.map(&length/1) |> Enum.max()
+    cols = graphs |> Enum.map(&length/1) |> Enum.max(fn -> 0 end)
 
     header = <<rows::8, cols::8>>
 
