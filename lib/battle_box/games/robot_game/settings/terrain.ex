@@ -3,6 +3,25 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
 
   defdelegate default, to: Default
 
+  def at_location(terrain, [row, col]) do
+    <<rows::8, cols::8, data::binary>> = terrain
+
+    on_board? = row >= 0 && col >= 0 && row <= rows - 1 && col <= cols - 1
+
+    if on_board? do
+      offset = row * cols + col
+
+      case :binary.at(data, offset) do
+        0 -> :inaccessible
+        1 -> :normal
+        2 -> :spawn
+        3 -> :obstacle
+      end
+    else
+      :inaccessible
+    end
+  end
+
   def spawn(terrain), do: get_type(terrain, :spawn)
   def normal(terrain), do: get_type(terrain, :normal)
   def invalid(terrain), do: get_type(terrain, :invalid)

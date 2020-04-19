@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame do
   import BattleBox.Games.RobotGame.EventHelpers
   alias BattleBox.{Repo, Game}
-  alias __MODULE__.{Settings, Settings.DamageModifier}
+  alias __MODULE__.{Settings, Settings.Terrain, Settings.DamageModifier}
   alias __MODULE__.Event
   use Ecto.Schema
   import Ecto.Changeset
@@ -165,17 +165,21 @@ defmodule BattleBox.Games.RobotGame do
   def get_robot_at_location(robots, location) when is_list(robots),
     do: Enum.find(robots, fn robot -> robot.location == location end)
 
-  def available_adjacent_locations(game, location) do
-    Enum.filter(adjacent_locations(location), &(game.settings.terrain[&1] in [:normal, :spawn]))
+  def available_adjacent_locations(%{settings: %{terrain: terrain}}, location) do
+    location
+    |> adjacent_locations
+    |> Enum.filter(&(Terrain.at_location(terrain, &1) in [:spawn, :normal]))
   end
 
-  def adjacent_locations([row, col]),
-    do: [
+  def adjacent_locations([row, col]) do
+    [
       [row + 1, col],
       [row - 1, col],
       [row, col + 1],
       [row, col - 1]
     ]
+    |> Enum.filter(fn [row, col] -> row >= 0 && col >= 0 end)
+  end
 
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
   def attack_damage(game), do: DamageModifier.calc_damage(game.settings.attack_damage)

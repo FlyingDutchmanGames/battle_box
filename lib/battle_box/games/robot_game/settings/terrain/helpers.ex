@@ -7,21 +7,18 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain.Helpers do
       |> Enum.reject(fn x -> x == [] end)
       |> Enum.map(&Enum.reject(&1, fn grapheme -> String.trim(grapheme) == "" end))
 
-    graph_with_indexes =
-      for {row, row_num} <- Enum.with_index(graphs),
-          {col, col_num} <- Enum.with_index(row),
-          do: {[row_num, col_num], col}
+    rows = length(graphs)
+    cols = graphs |> Enum.map(&length/1) |> Enum.max()
 
-    Map.new(graph_with_indexes, fn {loc, val} -> {loc, terrain_val(val)} end)
-  end
+    header = <<rows::8, cols::8>>
 
-  defp terrain_val(val) do
-    case val do
-      "0" -> :inaccessible
-      "1" -> :normal
-      "2" -> :spawn
-      "3" -> :obstacle
-      _ -> :normal
-    end
+    terrain_data =
+      graphs
+      |> List.flatten()
+      |> Enum.map(&String.to_integer/1)
+      |> Enum.map(&<<&1::8>>)
+
+    [header, terrain_data]
+    |> IO.iodata_to_binary()
   end
 end
