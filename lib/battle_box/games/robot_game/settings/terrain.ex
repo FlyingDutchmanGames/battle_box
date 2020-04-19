@@ -3,9 +3,11 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
 
   defdelegate default, to: Default
 
+  def rows(<<rows::8, _cols::8, _::binary>>), do: rows
+  def cols(<<_rows::8, cols::8, _::binary>>), do: cols
+
   def at_location(terrain, [row, col]) do
     <<rows::8, cols::8, data::binary>> = terrain
-
     on_board? = row >= 0 && col >= 0 && row <= rows - 1 && col <= cols - 1
 
     if on_board? do
@@ -22,27 +24,31 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
     end
   end
 
-  def spawn(terrain), do: get_type(terrain, :spawn)
-  def normal(terrain), do: get_type(terrain, :normal)
-  def invalid(terrain), do: get_type(terrain, :invalid)
-  def obstacle(terrain), do: get_type(terrain, :obstacle)
+  def inaccessible(terrain), do: get_type(terrain, 0)
+  def normal(terrain), do: get_type(terrain, 1)
+  def spawn(terrain), do: get_type(terrain, 2)
+  def obstacle(terrain), do: get_type(terrain, 3)
 
-  def dimensions(terrain) when terrain == %{}, do: nil
-
-  def dimensions(terrain) do
-    {row_nums, col_nums} =
-      terrain
-      |> Map.keys()
-      |> Enum.map(&List.to_tuple/1)
-      |> Enum.unzip()
-
+  def dimensions(<<rows::8, cols::8, _::binary>>) do
     %{
-      row_min: Enum.min(row_nums),
-      row_max: Enum.max(row_nums),
-      col_min: Enum.min(col_nums),
-      col_max: Enum.max(col_nums)
+      row_min: 0,
+      row_max: rows - 1,
+      col_min: 0,
+      col_max: cols - 1
     }
   end
 
-  defp get_type(terrain, type), do: for({loc, ^type} <- terrain, do: loc)
+  defp get_type(terrain, type) do
+    <<_rows::8, cols::8, terrain_data::binary>> = terrain
+
+    for(<<terrain_val <- terrain_data>>, do: terrain_val)
+    |> Enum.with_index()
+    |> Enum.filter(fn {terrain_val, _offset} -> terrain_val == type end)
+    |> Enum.map(fn {_, offset} ->
+      row = Integer.floor_div(offset, cols)
+      col = rem(offset, cols)
+
+      [row, col]
+    end)
+  end
 end

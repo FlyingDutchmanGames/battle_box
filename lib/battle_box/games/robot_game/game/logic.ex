@@ -1,6 +1,7 @@
 defmodule BattleBox.Games.RobotGame.Logic do
   import BattleBox.Games.RobotGame.EventHelpers
-  import BattleBox.Games.RobotGame
+  import BattleBox.Games.{RobotGame, RobotGame.EventHelpers}
+  alias BattleBox.Games.RobotGame.Settings.Terrain
 
   def calculate_turn(game, %{1 => player_1_moves, 2 => player_2_moves}) do
     moves =
@@ -165,7 +166,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     space_info = %{
       move_target_adjacent?: move["target"] in adjacent_locations(robot.location),
-      valid_terrain?: game.settings.terrain[move["target"]] in [:normal, :spawn],
+      valid_terrain?:
+        Terrain.at_location(game.settings.terrain, move["target"]) in [:normal, :spawn],
       contention?: length(moves_to_location) > 1,
       current_occupant: robot_currently_at_location,
       current_occupant_in_stuck_robots?:
