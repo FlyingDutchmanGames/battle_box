@@ -74,7 +74,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
   - [ ] Changing a turn does not affect history api so its easier to use back button
 - [ ] Fix the min/max time messages after a game cancel in the bot server
 - [ ] Remove row-min/max from terrain, because everything must be 0 indexed
-- [ ] Include the terrain in game settings on startup
 
 ### Nice to Haves
 
@@ -156,6 +155,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [x] deal with invalid moves submission
 - [x] Make Github Name not required (github doesn't require it)
 - [x] Terrain as binary
+- [x] Include the terrain in game settings on startup
 
 ### Useful SQL
 
