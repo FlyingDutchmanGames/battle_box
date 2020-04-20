@@ -1,5 +1,5 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
-  use GenStateMachine, callback_mode: [:handle_event_function], restart: :temporary
+  use GenServer, restart: :temporary
   import BattleBox.Connection.Message
   alias BattleBox.Connection.Logic
   @behaviour :ranch_protocol
@@ -8,7 +8,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
     data = Map.put_new(data, :connection_id, Ecto.UUID.generate())
     data = Map.merge(data, %{ranch_ref: ref, transport: transport})
 
-    GenStateMachine.start_link(__MODULE__, data,
+    GenServer.start_link(__MODULE__, data,
       name:
         {:via, Registry,
          {data.names.connection_registry, data.connection_id, %{started_at: DateTime.utc_now()}}}
@@ -17,47 +17,45 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandler do
 
   def init(data) do
     data = Logic.init(data)
-    {:ok, :running, data, {:next_event, :internal, :initialize}}
+    {:ok, data, {:continue, :initialize_tcp_connection}}
   end
 
-  def handle_event(:internal, :initialize, _, data) do
+  def handle_continue(:initialize_tcp_connection, data) do
     {:ok, socket} = :ranch.handshake(data.ranch_ref)
     data = Map.put(data, :socket, socket)
     :ok = data.transport.setopts(socket, active: :once, packet: 2, keepalive: true, recbuf: 65536)
-    {:keep_state, data}
+    {:noreply, data}
   end
 
-  def handle_event(:info, {:tcp_closed, _socket}, _state, _data), do: {:stop, :normal}
-  def handle_event(:info, {:tcp_error, _socket, _reason}, _state, _data), do: {:stop, :normal}
+  def handle_info({:tcp_closed, _socket}, data), do: {:stop, :normal, data}
+  def handle_info({:tcp_error, _socket, _reason}, data), do: {:stop, :normal, data}
 
-  def handle_event(:info, {:tcp, socket, bytes}, _state, data) do
+  def handle_info({:tcp, socket, bytes}, data) do
     :ok = data.transport.setopts(socket, active: :once)
 
     case Jason.decode(bytes) do
       {:ok, msg} ->
-        {:keep_state_and_data, {:next_event, :internal, msg}}
+        handle_msg({:client, msg}, data)
 
       {:error, %Jason.DecodeError{}} ->
-        :ok = send_to_socket(data, encode_error("invalid_json"))
-        :keep_state_and_data
+        :ok = data.transport.send(data.socket, encode_error("invalid_json"))
+        {:noreply, data}
     end
   end
 
-  def handle_event(_, msg, _state, data) do
+  def handle_info(msg, data), do: handle_msg({:system, msg}, data)
+
+  defp handle_msg(msg, data) do
     {data, actions, continue?} = Logic.handle_message(msg, data)
 
     Enum.each(actions, fn
-      {:send, msg} -> send_to_socket(data, msg)
+      {:send, msg} -> data.transport.send(data.socket, msg)
       {:monitor, pid} -> Process.monitor(pid)
     end)
 
     case continue? do
-      :continue -> {:keep_state, data}
-      :stop -> {:stop, :normal}
+      :continue -> {:noreply, data}
+      :stop -> {:stop, :normal, data}
     end
-  end
-
-  defp send_to_socket(data, msg) do
-    :ok = data.transport.send(data.socket, msg)
   end
 end
