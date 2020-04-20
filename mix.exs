@@ -48,7 +48,8 @@ defmodule BattleBox.MixProject do
       {:gen_state_machine, "~> 2.0"},
       {:httpoison, "~> 1.6"},
       {:bypass, "~> 1.0", only: :test},
-      {:observer_cli, "~> 1.5"}
+      {:observer_cli, "~> 1.5"},
+      {:gun, "~> 1.3", only: [:dev, :test]},
     ]
   end
 
