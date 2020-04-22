@@ -20,7 +20,8 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 
 ## SETUP
 
-1.) Get your credentials in github and make a `dev.secret.exs` based on `dev.secret.exs.example`
+1.) Get your credentials in github and make a `dev.secret.exs` based on `dev.secret.exs.example` 
+  * Use `http://localhost:4000/auth/github/callback` as your callback url
 
 ## TODO
 
