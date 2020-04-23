@@ -98,13 +98,13 @@ defmodule BattleBox.GameEngine.BotServer do
       ) do
     send(data.connection, {:game_cancelled, data.game_info.game_id})
     {:ok, data} = teardown_game(data.game_info.game_id, data)
-    {:next_state, :options, data}
+    {:next_state, :options, data, cancel_move_timeout_actions()}
   end
 
   def handle_event(:info, {:game_cancelled, id} = msg, _, %{game_info: %{game_id: id}} = data) do
     send(data.connection, msg)
     {:ok, data} = teardown_game(id, data)
-    {:next_state, :options, data}
+    {:next_state, :options, data, cancel_move_timeout_actions()}
   end
 
   def handle_event(:info, {:game_cancelled, _id}, _state, _data), do: :keep_state_and_data
@@ -125,10 +125,7 @@ defmodule BattleBox.GameEngine.BotServer do
     data = Map.put(data, :min_time_met, false)
 
     {:keep_state, data,
-     [
-       {{:timeout, :min_time}, commands_request.minimum_time, :min_time},
-       {{:timeout, :max_time}, commands_request.maximum_time, :max_time}
-     ]}
+     move_timeout_actions(commands_request.minimum_time, commands_request.maximum_time)}
   end
 
   def handle_event(
@@ -140,12 +137,7 @@ defmodule BattleBox.GameEngine.BotServer do
     if data[:min_time_met] do
       data = submit_commands_to_game_server(data, commands)
 
-      {:next_state, :playing, data,
-       [
-         {:reply, from, :ok},
-         {{:timeout, :min_time}, :cancel},
-         {{:timeout, :max_time}, :cancel}
-       ]}
+      {:next_state, :playing, data, [{:reply, from, :ok} | cancel_move_timeout_actions()]}
     else
       {:keep_state, Map.put(data, :commands, commands), {:reply, from, :ok}}
     end
@@ -158,7 +150,7 @@ defmodule BattleBox.GameEngine.BotServer do
         %{commands: commands} = data
       ) do
     data = submit_commands_to_game_server(data, commands)
-    {:next_state, :playing, data, {{:timeout, :max_time}, :cancel}}
+    {:next_state, :playing, data, cancel_move_timeout_actions()}
   end
 
   def handle_event({:timeout, :min_time}, :min_time, :commands_request, data) do
@@ -196,7 +188,7 @@ defmodule BattleBox.GameEngine.BotServer do
       ) do
     {:ok, data} = teardown_game(game_id, data)
     send(data.connection, msg)
-    {:next_state, :options, data}
+    {:next_state, :options, data, cancel_move_timeout_actions()}
   end
 
   defp setup_game(data, game_info) do
@@ -223,5 +215,19 @@ defmodule BattleBox.GameEngine.BotServer do
       )
 
     Map.drop(data, [:commands, :commands_request, :min_time_met])
+  end
+
+  defp move_timeout_actions(min_time, max_time) do
+    [
+      {{:timeout, :min_time}, min_time, :min_time},
+      {{:timeout, :max_time}, max_time, :max_time}
+    ]
+  end
+
+  defp cancel_move_timeout_actions do
+    [
+      {{:timeout, :min_time}, :cancel},
+      {{:timeout, :max_time}, :cancel}
+    ]
   end
 end

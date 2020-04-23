@@ -255,6 +255,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
     test "game server dies => game cancelled notification", %{game_id: game_id} = context do
       # Bot 1 in the "playing" state after submitting his commands
       # Bot 2 in the commands input state, waiting on his commands
+      %{p1_server: p1_server} = context
       assert_receive {:p1_connection, {:commands_request, %{request_id: id}}}
       :ok = BotServer.submit_commands(context.p1_server, id, [])
 
@@ -263,6 +264,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
 
       assert_receive {:p1_connection, {:game_cancelled, ^game_id}}
       assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
+      refute_receive {:DOWN, _ref, :process, ^p1_server, _}
     end
 
     test "other player dies => you get a game over notification", %{game_id: game_id} = context do
