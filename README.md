@@ -74,7 +74,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Visualize games better (include moves and historical turns)
   - [x] Key through turns, and have turns be sharable via url
   - [ ] Changing a turn does not affect history api so its easier to use back button
-- [ ] Fix the min/max time messages after a game cancel in the bot server
 - [ ] Remove row-min/max from terrain, because everything must be 0 indexed
 - [ ] Enforce ASCII < 12 chars no spaces/special in names of everythin
 
@@ -160,6 +159,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [x] Terrain as binary
 - [x] Include the terrain in game settings on startup
 - [x] The GameEngine should pass `:timeout` and not `[]` when a player misses a timeout
+- [x] Fix the min/max time messages after a game cancel in the bot server
 
 ### Useful SQL
 
