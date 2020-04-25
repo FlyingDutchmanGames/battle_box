@@ -135,7 +135,7 @@ defmodule BattleBoxWeb.GameTest do
       assert html =~ "LIVE"
       Process.exit(context.game_server, :kill)
       bot_server_url = "/bot_servers/#{id}/follow"
-      assert_redirect(view, ^bot_server_url)
+           assert_redirect(view, bot_server_url)
     end
 
     test "when the game server dies, it will switch to the historical view",

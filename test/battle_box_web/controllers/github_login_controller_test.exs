@@ -1,7 +1,6 @@
 defmodule BattleBoxWeb.GithubLoginControllerTest do
   use BattleBoxWeb.ConnCase
   alias BattleBox.User
-  import Plug.Test, only: [init_test_session: 2]
 
   test "GET /auth/github/login", %{conn: conn} do
     conn = get(conn, "/auth/github/login")
