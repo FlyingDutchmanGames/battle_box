@@ -127,7 +127,7 @@ defmodule BattleBox.Games.RobotGame do
 
     opts = Enum.into(opts, %{})
     opts = Map.put_new(opts, :id, Ecto.UUID.generate())
-    opts = Map.merge(opts, %{settings: settings})
+    opts = Map.merge(opts, %{settings: settings, settings_id: settings.id})
 
     %__MODULE__{}
     |> Map.merge(opts)
