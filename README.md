@@ -77,6 +77,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Remove row-min/max from terrain, because everything must be 0 indexed
 - [ ] Enforce ASCII < 12 chars no spaces/special in names of everythin
 - [ ] Make the end turns the number of turns in the game
+- [ ] Switch bot tokens to user tokens
 
 ### Nice to Haves
 
