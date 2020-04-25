@@ -3,7 +3,8 @@ defmodule BattleBoxWeb.ConnCase do
 
   using do
     quote do
-      use Phoenix.ConnTest
+      import Plug.Conn
+      import Phoenix.ConnTest
       alias BattleBoxWeb.Router.Helpers, as: Routes
       import BattleBox.Test.DataHelpers
       alias BattleBox.Repo

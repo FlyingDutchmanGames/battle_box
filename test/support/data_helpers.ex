@@ -1,14 +1,13 @@
 defmodule BattleBox.Test.DataHelpers do
   alias BattleBox.{User, Repo}
-  import Plug.Test, only: [init_test_session: 2]
-  import Plug.Conn
+  import Phoenix.ConnTest
 
   def signin(conn, opts \\ %{}) do
     {:ok, user} = create_user(opts)
 
     conn
     |> init_test_session(token: "foo")
-    |> put_session(:user_id, user.id)
+    |> Plug.Conn.put_session(:user_id, user.id)
   end
 
   def create_user(opts \\ %{}) do

@@ -7,14 +7,23 @@ import not_found_css from "../css/not_found.css"
 import bot_follow_css from "../css/bot_follow.css"
 import admin_css from "../css/admin.css"
 
-import {Socket as PhxSocket} from "phoenix"
-import LiveSocket from "phoenix_live_view"
+import "phoenix_html"
+import {Socket} from "phoenix"
+import NProgress from "nprogress"
+import {LiveSocket} from "phoenix_live_view"
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
+let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
 
-if(window.useLiveView) {
-  // only connect to liveView if the page uses it
-  let liveSocket = new LiveSocket("/live", PhxSocket, {params: {_csrf_token: csrfToken}});
-  liveSocket.connect()
-}
+// Show progress bar on live navigation and form submits
+window.addEventListener("phx:page-loading-start", info => NProgress.start())
+window.addEventListener("phx:page-loading-stop", info => NProgress.done())
+
+// connect if there are any LiveViews on the page
+liveSocket.connect()
+
+// expose liveSocket on window for web console debug logs and latency simulation:
+// >> liveSocket.enableDebug()
+// >> liveSocket.enableLatencySim(1000)
+window.liveSocket = liveSocket
 

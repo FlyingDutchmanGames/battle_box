@@ -91,7 +91,7 @@ defmodule BattleBoxWeb.BotsServerFollowTest do
       Process.sleep(20)
       %{game_id: game_id} = GameEngine.get_bot_server(context.game_engine, @bot_server_id)
       game_url = "/games/#{game_id}?follow=#{@bot_server_id}"
-      assert_redirect(view, ^game_url)
+      assert_redirect(view, game_url)
     end
   end
 end
