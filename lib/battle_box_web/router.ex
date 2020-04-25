@@ -10,6 +10,7 @@ defmodule BattleBoxWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_user
+    plug :put_root_layout, {BattleBoxWeb.LayoutView, :root}
   end
 
   pipeline :api do
