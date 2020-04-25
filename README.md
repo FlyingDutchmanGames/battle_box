@@ -78,9 +78,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Enforce ASCII < 12 chars no spaces/special in names of everythin
 - [ ] Make the end turns the number of turns in the game
 - [ ] Switch bot tokens to user tokens
-- [ ] Add `.tool-versions` file
-- [ ] Phoenix 1.5 upgrade
-  - [ ] Live dashboard with auth done via `user.is_admin`
 
 ### Nice to Haves
 
@@ -165,6 +162,8 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [x] Include the terrain in game settings on startup
 - [x] The GameEngine should pass `:timeout` and not `[]` when a player misses a timeout
 - [x] Fix the min/max time messages after a game cancel in the bot server
+- [x] Phoenix 1.5 upgrade
+  - [x] Live dashboard with auth done via `user.is_admin`
 
 ### Useful SQL
 
