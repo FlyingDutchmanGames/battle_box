@@ -79,6 +79,8 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Make the end turns the number of turns in the game
 - [ ] Switch bot tokens to user tokens
 - [ ] Add `.tool-versions` file
+- [ ] Phoenix 1.5 upgrade
+  - [ ] Live dashboard with auth done via `user.is_admin`
 
 ### Nice to Haves
 
