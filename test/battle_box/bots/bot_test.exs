@@ -72,11 +72,11 @@ defmodule BattleBox.BotTest do
     end
 
     test "A bot with a user who isn't banned isn't banned" do
-      refute Bot.banned?(%Bot{user: %User{is_banned: false}})
+      refute Bot.banned?(%Bot{user: %User{is_banned: false, id: @user_id}, user_id: @user_id})
     end
 
     test "A bot with a user who is banned is banned" do
-      assert Bot.banned?(%Bot{user: %User{is_banned: true}})
+      assert Bot.banned?(%Bot{user: %User{is_banned: true, id: @user_id}, user_id: @user_id})
     end
   end
 end
