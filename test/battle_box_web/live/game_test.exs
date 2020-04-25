@@ -56,7 +56,7 @@ defmodule BattleBoxWeb.GameTest do
       Game.new(lobby: context.lobby, robot_game: RobotGame.new(), game_bots: context.game_bots)
       |> Game.persist()
 
-    assert {:error, %{redirect: "/bot_servers/#{bot_server_id}/follow"}} ==
+    assert {:error, {:redirect, %{to: "/bot_servers/#{bot_server_id}/follow"}}} ==
              live(conn, "/games/#{id}?follow=#{bot_server_id}")
   end
 
