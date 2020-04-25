@@ -13,6 +13,10 @@ defmodule BattleBoxWeb.Endpoint do
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
+  plug Phoenix.LiveDashboard.RequestLogger,
+    param_key: "request_logger",
+    cookie_key: "request_logger"
+
   plug Plug.Static,
     at: "/",
     from: :battle_box,
