@@ -78,6 +78,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Enforce ASCII < 12 chars no spaces/special in names of everythin
 - [ ] Make the end turns the number of turns in the game
 - [ ] Switch bot tokens to user tokens
+- [ ] Add `.tool-versions` file
 
 ### Nice to Haves
 
