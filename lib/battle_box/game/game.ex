@@ -83,8 +83,15 @@ defmodule BattleBox.Game do
   def new(opts \\ %{}) do
     opts = Enum.into(opts, %{})
 
+    lobby_id =
+      case opts do
+        %{lobby_id: lobby_id} -> lobby_id
+        %{lobby: %{id: lobby_id}} -> lobby_id
+        _ -> nil
+      end
+
     opts =
-      Map.merge(%{game_bots: []}, opts)
+      Map.merge(%{game_bots: [], lobby_id: lobby_id}, opts)
       |> Map.put_new(:id, Ecto.UUID.generate())
 
     Map.merge(%__MODULE__{}, opts)
