@@ -7,6 +7,7 @@ defmodule BattleBox.Application do
       BattleBox.Repo,
       {Phoenix.PubSub, [name: BattleBox.PubSub, adapter: Phoenix.PubSub.PG2]},
       BattleBoxWeb.Endpoint,
+      BattleBoxWeb.Telemetry,
       {BattleBox.TcpConnectionServer, port: tcp_connection_server_port()}
     ]
 

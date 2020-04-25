@@ -164,6 +164,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [x] Fix the min/max time messages after a game cancel in the bot server
 - [x] Phoenix 1.5 upgrade
   - [x] Live dashboard with auth done via `user.is_admin`
+  - [x] Basic Telemetry
 
 ### Useful SQL
 
