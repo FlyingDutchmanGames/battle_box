@@ -3,6 +3,9 @@ defmodule BattleBoxWeb.Router do
   import Phoenix.LiveDashboard.Router
   alias BattleBox.User
 
+  @game_types Application.get_env(:battle_box, BattleBox.GameEngine)[:games] ||
+                raise("Must set the :battle_box, BattleBox.GameEngine, :games config value")
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -11,6 +14,16 @@ defmodule BattleBoxWeb.Router do
     plug :put_secure_browser_headers
     plug :fetch_user
     plug :put_root_layout, {BattleBoxWeb.LayoutView, :root}
+  end
+
+  scope "/" do
+    pipe_through :browser
+
+    for game <- @game_types, route <- game.routes() do
+      case route do
+        {:live, path, module} -> live("/#{game.db_name}#{path}", module)
+      end
+    end
   end
 
   pipeline :api do

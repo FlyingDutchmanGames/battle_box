@@ -1,7 +1,7 @@
 defmodule BattleBox.Games.RobotGame do
   import BattleBox.Games.RobotGame.EventHelpers
   alias BattleBox.{Repo, Game}
-  alias __MODULE__.{Settings, Settings.Terrain, Settings.DamageModifier}
+  alias __MODULE__.{Web, Settings, Settings.Terrain, Settings.DamageModifier}
   alias __MODULE__.Event
   use Ecto.Schema
   import Ecto.Changeset
@@ -29,6 +29,13 @@ defmodule BattleBox.Games.RobotGame do
   end
 
   def db_name, do: "robot_game"
+
+  def routes do
+    [
+      {:live, "/game_mode_editor", Web.GameModeEditor}
+    ]
+  end
+
   def settings_module, do: Settings
   def players_for_settings(_), do: [1, 2]
 

@@ -1,0 +1,38 @@
+<h1>RobotGame Game Mode Editor</h1>
+
+<form phx-change="validate" phx-submit="save" style="display: flex; flex-flow: column nowrap;">
+  <div>
+    <label for="settings_spawn_every">Spawn every</label>
+    <input id="settings_spawn_every" name="settings[spawn_every]" type="number" value="10">
+  </div>
+
+  <div>
+    <label for="settings_spawn_per_player">Spawn per player</label>
+    <input id="settings_spawn_per_player" name="settings[spawn_per_player]" type="number" value="5">
+  </div>
+
+  <div>
+    <label for="settings_robot_hp">Robot hp</label>
+    <input id="settings_robot_hp" name="settings[robot_hp]" type="number" value="50">
+  </div>
+
+  <div>
+    <label for="settings_max_turns">Max turns</label>
+    <input id="settings_max_turns" name="settings[max_turns]" type="number" value="100">
+  </div>
+
+  <div>
+    <label for="settings_attack_damage">Attack damage</label>
+  </div>
+
+  <div>
+    <label for="settings_collision_damage">Collision damage</label>
+  </div>
+
+  <div>
+    <label for="settings_suicide_damage">Suicide damage</label>
+  </div>
+  <div>
+    <button type="submit">Create</button>
+  </div>
+</form>
