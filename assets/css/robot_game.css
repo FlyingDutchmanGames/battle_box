@@ -113,6 +113,14 @@
   background-color: red;
 }
 
+.robot-game-board .robot .action.guard {
+  width: 35px;
+  height: 30px;
+  position: absolute;
+  border: dotted 5px darkgreen;
+  border-radius: 10px;
+}
+
 .robot-game-board .robot .action.move {
   background-color: blue;
 }
