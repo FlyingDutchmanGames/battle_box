@@ -71,6 +71,9 @@ defmodule BattleBoxWeb.RobotGameView do
       %{"target" => target, "type" => type} ->
         direction = move_direction(current_location, target)
         "#{type} #{direction}"
+
+      %{"type" => type} ->
+        type
     end
   end
 
