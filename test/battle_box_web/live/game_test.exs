@@ -103,7 +103,7 @@ defmodule BattleBoxWeb.GameTest do
       assert html =~ "TURN: 0 / 0"
     end
 
-    test "it will update when the game updates (and go to the most recent move)",
+    test "it will update when the game updates (and go to the most recent completed move)",
          %{conn: conn} = context do
       {:ok, view, html} = live(conn, "/games/#{@game_id}")
       Process.link(view.pid)
@@ -115,7 +115,7 @@ defmodule BattleBoxWeb.GameTest do
       end)
 
       Process.sleep(10)
-      assert %{"turn" => "9"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 9/, render(view))
+      assert %{"turn" => "8"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 9/, render(view))
     end
 
     test "if you're following a bot server if and the game server dies you get redirected",
