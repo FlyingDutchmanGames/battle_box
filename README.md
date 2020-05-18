@@ -78,7 +78,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Enforce ASCII < 12 chars no spaces/special in names of everythin
 - [ ] Make the end turns the number of turns in the game
 - [ ] Switch bot tokens to user tokens
-- [ ] Have the game table have all the data about the game
 
 ### Nice to Haves
 
@@ -96,8 +95,10 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] `mix battle_box.swarm {optional credentials file}` task to run a swarm against a botskrieg server for regression testing
 - [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 - [ ] Pass timing info to the game so it can do move timing
+- [ ] Make all tests async by passing the ecto sandbox to all of the game engine
 
 ### Done
+- [x] Have the game table have all the data about the game
 
 ### Useful SQL
 
