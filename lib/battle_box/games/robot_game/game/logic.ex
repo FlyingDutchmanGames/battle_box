@@ -140,14 +140,14 @@ defmodule BattleBox.Games.RobotGame.Logic do
     spawn_locations =
       spawns(game)
       |> Enum.shuffle()
-      |> Enum.take(game.settings.spawn_per_player * 2)
+      |> Enum.take(game.spawn_per_player * 2)
 
     {game, spawned_robots} =
       spawn_locations
       |> Enum.zip(Stream.cycle([1, 2]))
       |> Enum.reduce({game, []}, fn {[x, y], player_id}, {game, spawned_robots} ->
         {game, robot_id} = next_robot_id(game)
-        event = create_robot_effect(robot_id, player_id, game.settings.robot_hp, x, y)
+        event = create_robot_effect(robot_id, player_id, game.robot_hp, x, y)
         {game, [event | spawned_robots]}
       end)
 
@@ -166,8 +166,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     space_info = %{
       move_target_adjacent?: move["target"] in adjacent_locations(robot.location),
-      valid_terrain?:
-        Terrain.at_location(game.settings.terrain, move["target"]) in [:normal, :spawn],
+      valid_terrain?: Terrain.at_location(game.terrain, move["target"]) in [:normal, :spawn],
       contention?: length(moves_to_location) > 1,
       current_occupant: robot_currently_at_location,
       current_occupant_in_stuck_robots?:

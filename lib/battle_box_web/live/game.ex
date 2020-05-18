@@ -109,7 +109,7 @@ defmodule BattleBoxWeb.Game do
       nil ->
         result =
           Game.get_by_id(game_id)
-          |> Repo.preload(robot_game: [:settings], game_bots: [bot: :user])
+          |> Repo.preload([:robot_game, game_bots: [bot: :user]])
 
         case result do
           nil -> nil
