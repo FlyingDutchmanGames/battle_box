@@ -78,7 +78,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Enforce ASCII < 12 chars no spaces/special in names of everythin
 - [ ] Make the end turns the number of turns in the game
 - [ ] Switch bot tokens to user tokens
-- [ ] Httpoison => Mojito
 - [ ] Upgrade phoenix/liveview
 
 ### Nice to Haves
@@ -101,6 +100,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 
 ### Done
 - [x] Have the game table have all the data about the game
+- [x] Httpoison => ~Mojito~ Gun
 
 ### Useful SQL
 
