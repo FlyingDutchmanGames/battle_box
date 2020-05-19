@@ -66,7 +66,21 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     [%{game: game}] =
       make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], lobby.id)
 
-    assert game.robot_game.settings.id == Lobby.get_settings(lobby).id
+    from_lobby = [
+      :spawn_every,
+      :spawn_per_player,
+      :robot_hp,
+      :max_turns,
+      :attack_damage,
+      :collision_damage,
+      :suicide_damage,
+      :terrain,
+      :persistent?,
+      :spawn_enabled
+    ]
+
+    assert Map.take(game.robot_game, from_lobby) ==
+             Map.take(Lobby.get_settings(lobby), from_lobby)
   end
 
   test "the games it makes are persistable", %{lobby: %{id: lobby_id}, bot: bot} do

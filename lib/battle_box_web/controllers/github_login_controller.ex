@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.GithubLoginController do
   use BattleBoxWeb, :controller
-  alias BattleBox.User
+  alias BattleBox.{User, Utilities.HTTP}
 
   def github_login(conn, _params) do
     state = make_state()
@@ -24,20 +24,26 @@ defmodule BattleBoxWeb.GithubLoginController do
     else
       {1, false} ->
         raise "Invalid state param in github callback"
+
+      {3, {:error, :timeout}} ->
+        raise "Timeout trying to get user"
     end
   end
 
   defp get_user(access_token) do
     response =
-      HTTPoison.get(github_api_user_url(), [
-        {"Authorization", "token #{access_token}"},
-        {"Content-Type", "application/json"},
-        {"Accept", "application/json"}
+      HTTP.get(github_api_user_url(), [
+        {"authorization", "token #{access_token}"},
+        {"user-agent", "botskrieg"},
+        {"accept", "application/json"}
       ])
 
     case response do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+      {:ok, %HTTP.Response{status_code: 200, body: body}} ->
         {:ok, %{"id" => _, "name" => _}} = Jason.decode(body)
+
+      {:error, :timeout} ->
+        {:error, :timeout}
     end
   end
 
@@ -51,12 +57,17 @@ defmodule BattleBoxWeb.GithubLoginController do
       })
 
     response =
-      HTTPoison.post(github_access_token_url(), body, [
-        {"Content-Type", "application/json"},
-        {"Accept", "application/json"}
-      ])
+      HTTP.post(
+        github_access_token_url(),
+        [
+          {"accept", "application/json"},
+          {"content-type", "application/json"},
+          {"user-agent", "botskrieg"}
+        ],
+        body
+      )
 
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- response,
+    with {:ok, %{status_code: 200, body: body}} <- response,
          {:ok, %{"access_token" => access_token}} <- Jason.decode(body) do
       {:ok, access_token}
     else
@@ -82,8 +93,7 @@ defmodule BattleBoxWeb.GithubLoginController do
 
   defp make_state do
     :crypto.strong_rand_bytes(32)
-    |> Base.encode16()
-    |> String.downcase()
+    |> Base.encode16(case: :lower)
   end
 
   defp github_authorization_url, do: "#{github_base_url()}/login/oauth/authorize"

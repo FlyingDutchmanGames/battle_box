@@ -102,3 +102,47 @@
 
 .robot-game-board .robot.player_1 { background-color: #ffcccc; border-color: #990000; }
 .robot-game-board .robot.player_2 { background-color: #cce6ff; border-color: #0059b3; }
+
+.robot-game-board .robot .action {
+  width: 5px;
+  height: 10px;
+  position: absolute;
+}
+
+.robot-game-board .robot .action.attack {
+  background-color: red;
+}
+
+.robot-game-board .robot .action.guard {
+  width: 35px;
+  height: 30px;
+  position: absolute;
+  border: dotted 5px darkgreen;
+  border-radius: 10px;
+}
+
+.robot-game-board .robot .action.move {
+  background-color: blue;
+}
+
+.robot-game-board .robot .action.failed-move {
+  background-color: grey;
+}
+
+.robot-game-board .robot .action.up {
+  margin-top: -12px;
+}
+
+.robot-game-board .robot .action.down {
+  margin-top: 12px;
+}
+
+.robot-game-board .robot .action.right {
+  margin-left: 12px;
+  transform: rotate(90deg);
+}
+
+.robot-game-board .robot .action.left {
+  margin-left: -12px;
+  transform: rotate(270deg);
+}

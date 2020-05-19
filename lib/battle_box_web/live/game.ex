@@ -9,18 +9,24 @@ defmodule BattleBoxWeb.Game do
         {:ok, assign(socket, :not_found, true)}
 
       {game_source, game} ->
-        if connected?(socket) do
-          GameEngine.subscribe_to_game_events(game_engine(), game_id, [:game_update])
+        socket =
+          if connected?(socket) do
+            GameEngine.subscribe_to_game_events(game_engine(), game_id, [:game_update])
 
-          case game_source do
-            {:live, pid} ->
-              Process.monitor(pid)
+            case {game_source, params["follow"]} do
+              {{:live, pid}, _} ->
+                Process.monitor(pid)
+                socket
 
-            _ ->
-              send(self(), :redirect_if_following)
-              nil
+              {:historical, nil} ->
+                socket
+
+              {:historical, bot_server_id} when not is_nil(bot_server_id) ->
+                redirect(socket, to: Routes.live_path(socket, BotServerFollow, bot_server_id))
+            end
+          else
+            socket
           end
-        end
 
         {:ok,
          assign(
@@ -64,25 +70,24 @@ defmodule BattleBoxWeb.Game do
     {:noreply, socket}
   end
 
-  def handle_info(
-        :redirect_if_following,
-        %{assigns: %{game_source: :historical, follow: bot_server_id}} = socket
-      )
-      when not is_nil(bot_server_id) do
-    {:noreply, redirect(socket, to: Routes.live_path(socket, BotServerFollow, bot_server_id))}
-  end
-
-  def handle_info(:redirect_if_following, socket), do: {:noreply, socket}
-
   def handle_info({:game_update, id}, %{assigns: %{game: %{id: id}}} = socket) do
     {game_source, game} = get_game(id)
-    {:noreply, assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
+
+    {:noreply,
+     assign(socket, game: game, turn: game.robot_game.turn - 1, game_source: game_source)}
   end
 
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
-    send(self(), :redirect_if_following)
     {game_source, game} = get_game(socket.assigns.game.id)
-    {:noreply, assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
+
+    case socket.assigns.follow do
+      nil ->
+        {:noreply,
+         assign(socket, game: game, turn: game.robot_game.turn, game_source: game_source)}
+
+      bot_server_id ->
+        {:noreply, redirect(socket, to: Routes.live_path(socket, BotServerFollow, bot_server_id))}
+    end
   end
 
   def render(%{not_found: true}), do: PageView.render("not_found.html", message: "Game not found")
@@ -104,7 +109,7 @@ defmodule BattleBoxWeb.Game do
       nil ->
         result =
           Game.get_by_id(game_id)
-          |> Repo.preload(robot_game: [:settings], game_bots: [bot: :user])
+          |> Repo.preload([:robot_game, game_bots: [bot: :user]])
 
         case result do
           nil -> nil

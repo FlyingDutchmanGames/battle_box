@@ -12,7 +12,7 @@ config :battle_box, BattleBoxWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "iqMVNVqymVOjR5Q0XCxRoPlRjEItL+0+DFCcLtW6YlNJ7Wc/zgoiUiudgVeEm2UY",
   render_errors: [view: BattleBoxWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: BattleBox.PubSub, adapter: Phoenix.PubSub.PG2],
+  pubsub_server: BattleBox.PubSub,
   live_view: [
     signing_salt: "SECRET_SALT"
   ]

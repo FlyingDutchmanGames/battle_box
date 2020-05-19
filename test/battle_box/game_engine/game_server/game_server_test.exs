@@ -69,12 +69,12 @@ defmodule BattleBox.GameEngine.GameServerTest do
       game_id: game.id,
       accept_time: 2000,
       settings: %{
-        spawn_every: game.robot_game.settings.spawn_every,
-        spawn_per_player: game.robot_game.settings.spawn_per_player,
-        robot_hp: game.robot_game.settings.robot_hp,
-        attack_damage: game.robot_game.settings.attack_damage,
-        collision_damage: game.robot_game.settings.collision_damage,
-        max_turns: game.robot_game.settings.max_turns,
+        spawn_every: game.robot_game.spawn_every,
+        spawn_per_player: game.robot_game.spawn_per_player,
+        robot_hp: game.robot_game.robot_hp,
+        attack_damage: game.robot_game.attack_damage,
+        collision_damage: game.robot_game.collision_damage,
+        max_turns: game.robot_game.max_turns,
         terrain_base64: Base.encode64(Terrain.default())
       }
     }

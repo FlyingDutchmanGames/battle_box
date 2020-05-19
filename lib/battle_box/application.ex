@@ -5,9 +5,10 @@ defmodule BattleBox.Application do
     children = [
       BattleBox.GameEngine,
       BattleBox.Repo,
-      {BattleBox.TcpConnectionServer, port: tcp_connection_server_port()},
+      {Phoenix.PubSub, [name: BattleBox.PubSub, adapter: Phoenix.PubSub.PG2]},
       BattleBoxWeb.Endpoint,
-      BattleBoxWeb.Presence
+      BattleBoxWeb.Telemetry,
+      {BattleBox.TcpConnectionServer, port: tcp_connection_server_port()}
     ]
 
     opts = [strategy: :one_for_one, name: BattleBox.Supervisor]

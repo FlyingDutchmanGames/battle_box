@@ -11,8 +11,22 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     test "you can override any top level key" do
       assert %{turn: 42} = RobotGame.new(turn: 42)
 
-      assert %{settings: %{suicide_damage: 15, robot_hp: 42}} =
-               RobotGame.new(settings: %{suicide_damage: 15, robot_hp: 42})
+      assert %{
+               suicide_damage: 15,
+               robot_hp: 42,
+               spawn_every: 45,
+               max_turns: 400,
+               collision_damage: 4
+             } =
+               RobotGame.new(%{
+                 settings: %{
+                   suicide_damage: 15,
+                   robot_hp: 42,
+                   spawn_every: 45,
+                   max_turns: 400,
+                   collision_damage: 4
+                 }
+               })
     end
 
     test "it will auto generate an id if one isn't provided" do
@@ -254,8 +268,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = RobotGame.new()
       damage = RobotGame.attack_damage(game)
 
-      assert damage >= game.settings.attack_damage.min &&
-               damage <= game.settings.attack_damage.max
+      assert damage >= game.attack_damage.min &&
+               damage <= game.attack_damage.max
     end
 
     test "guarded attack damage is 50% of regular damage rounding down to the integer" do

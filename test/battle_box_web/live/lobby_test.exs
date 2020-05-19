@@ -53,6 +53,7 @@ defmodule BattleBoxWeb.LobbyTest do
       :ok = BotServer.match_make(context.bot_server_1)
       :ok = BotServer.match_make(context.bot_server_2)
       :ok = GameEngine.force_match_make(context.game_engine)
+      Process.sleep(10)
       {:ok, _view, html} = live(conn, "/lobbies/#{context.lobby.id}")
       {:ok, document} = Floki.parse_document(html)
       assert [_] = Floki.find(document, ".game")

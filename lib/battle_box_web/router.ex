@@ -1,5 +1,6 @@
 defmodule BattleBoxWeb.Router do
   use BattleBoxWeb, :router
+  import Phoenix.LiveDashboard.Router
   alias BattleBox.User
 
   pipeline :browser do
@@ -9,6 +10,7 @@ defmodule BattleBoxWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_user
+    plug :put_root_layout, {BattleBoxWeb.LayoutView, :root}
   end
 
   pipeline :api do
@@ -65,6 +67,7 @@ defmodule BattleBoxWeb.Router do
     scope "/admin", Admin do
       pipe_through :require_admin
       live("/users", Users)
+      live_dashboard "/dashboard", metrics: BattleBoxWeb.Telemetry
     end
   end
 
