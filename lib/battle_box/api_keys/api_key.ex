@@ -33,7 +33,7 @@ defmodule BattleBox.ApiKey do
   def mark_used!(%__MODULE__{} = api_key) do
     api_key
     |> change(last_used: now())
-    |> Repo.update!()
+    |> Repo.update()
   end
 
   def gen_token do
