@@ -1,6 +1,6 @@
 defmodule BattleBox.User do
   use Ecto.Schema
-  alias BattleBox.{Repo, Bot}
+  alias BattleBox.{Repo, Bot, ApiKey}
   import Ecto.Changeset
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -21,6 +21,7 @@ defmodule BattleBox.User do
     field :is_admin, :boolean, default: false
     field :is_banned, :boolean, default: false
     has_many :bots, Bot
+    has_many :api_keys, ApiKey
 
     timestamps()
   end
