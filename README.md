@@ -36,13 +36,6 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
   - [x] Bots
   - [x] Lobbies
   - [ ] Games
-- [ ] Live Games Page
-   - [ ] Show winner
-   - [ ] Show moves
-    - [ ] Move
-    - [ ] Guard
-    - [ ] Suicide
-    - [ ] Attack
 - [ ] Make sure user input can't cause a game to crash
 - [ ] More Efficent Robot Game Representation
   - [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
@@ -79,6 +72,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Make the end turns the number of turns in the game
 - [ ] Switch bot tokens to user tokens
 - [ ] Upgrade phoenix/liveview
+- [ ] Terrain Editor
 
 ### Nice to Haves
 
@@ -90,17 +84,23 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Concurrent connection limiter
 - [ ] Downloads controller, and `as_downloadable` as part of the game protocol
 - [ ] Google Analytics on the github page
-- [ ] Terrain Editor
 - [ ] Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
 - [ ] Build TicTacToe as proof of game engine extendability
 - [ ] `mix battle_box.swarm {optional credentials file}` task to run a swarm against a botskrieg server for regression testing
 - [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 - [ ] Pass timing info to the game so it can do move timing
 - [ ] Make all tests async by passing the ecto sandbox to all of the game engine
+- [ ] WebSocket Interface
 
 ### Done
 - [x] Have the game table have all the data about the game
 - [x] Httpoison => ~Mojito~ Gun
+- [x] Live Games Page
+   - [x] Show moves
+    - [x] Move
+    - [x] Guard
+    - [x] Suicide
+    - [x] Attack
 
 ### Useful SQL
 
