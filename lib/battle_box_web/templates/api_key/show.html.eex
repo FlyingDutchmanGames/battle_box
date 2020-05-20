@@ -1,0 +1,10 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      <a href="<%= Routes.api_key_path(@conn, :index) %>">API Keys</a>
+      / <%= @api_key.name %>
+    </div>
+  </div>
+  <p>Record this token, it won't be available again!<p>
+  <div style="font-size: 3em;"><%= @api_key.token %></div>
+</div>
