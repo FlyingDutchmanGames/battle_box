@@ -25,8 +25,4 @@ defmodule BattleBox.Bot do
   def get_by_name(name) do
     Repo.get_by(__MODULE__, name: name)
   end
-
-  def get_by_id(id) do
-    Repo.get_by(__MODULE__, id: id)
-  end
 end
