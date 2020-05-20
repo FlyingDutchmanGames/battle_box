@@ -1,6 +1,7 @@
 defmodule BattleBox.ApiKey do
-  alias BattleBox.{Repo, User}
+  alias BattleBox.{Repo, User, Bot}
   import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
   use Ecto.Schema
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -27,11 +28,30 @@ defmodule BattleBox.ApiKey do
     |> put_change(:hashed_token, hash(token))
   end
 
-  def from_token(token) do
+  def authenticate_bot(token, bot_name) do
+    from_token(token)
+    |> Repo.preload(user: [bots: from(bot in Bot, where: bot.name == ^bot_name)])
+    |> case do
+      nil ->
+        {:error, :invalid_token}
+
+      %__MODULE__{user: %User{is_banned: true}} ->
+        {:error, :banned}
+
+      %__MODULE__{user: %User{bots: []}} ->
+        {:error, :bot_not_found}
+
+      %__MODULE__{user: %User{bots: [%Bot{} = bot]}} = key ->
+        mark_used!(key)
+        {:ok, bot}
+    end
+  end
+
+  defp from_token(token) do
     Repo.get_by(__MODULE__, hashed_token: hash(token))
   end
 
-  def mark_used!(%__MODULE__{} = api_key) do
+  defp mark_used!(%__MODULE__{} = api_key) do
     api_key
     |> change(last_used: now())
     |> Repo.update()

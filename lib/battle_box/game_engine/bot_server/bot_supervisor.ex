@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
   use DynamicSupervisor
-  alias BattleBox.{Bot, Lobby, GameEngine, GameEngine.BotServer}
+  alias BattleBox.{ApiKey, Bot, Lobby, GameEngine, GameEngine.BotServer}
 
   def start_link(%{names: names} = opts) do
     DynamicSupervisor.start_link(__MODULE__, opts, name: names.bot_supervisor)
@@ -13,18 +13,14 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
 
   def start_bot(
         game_engine,
-        %{connection: connection, lobby_name: lobby_name, token: token}
+        %{connection: connection, lobby_name: lobby_name, token: token, bot_name: bot_name}
       ) do
-    with {:lobby, %Lobby{} = lobby} <- {:lobby, Lobby.get_by_name(lobby_name)},
-         {:bot, %Bot{} = bot} <- {:bot, Bot.get_by_token(token)},
-         {:banned?, false} <- {:banned?, Bot.banned?(bot)} do
+    with {:ok, bot} <- ApiKey.authenticate_bot(token, bot_name),
+         {:lobby, %Lobby{} = lobby} <- {:lobby, Lobby.get_by_name(lobby_name)} do
       start_bot(game_engine, %{connection: connection, bot: bot, lobby: lobby})
     else
-      {:bot, nil} ->
-        {:error, :invalid_token}
-
-      {:banned?, true} ->
-        {:error, :banned}
+      {:error, reason} when reason in [:invalid_token, :bot_not_found, :banned] ->
+        {:error, reason}
 
       {:lobby, nil} ->
         {:error, :lobby_not_found}
