@@ -1,6 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase
-  alias BattleBox.{Bot, GameEngine, TcpConnectionServer, Lobby}
+  alias BattleBox.{ApiKey, Bot, User, GameEngine, TcpConnectionServer, Lobby}
   alias BattleBox.Games.RobotGame
   import BattleBox.GameEngine, only: [get_connection: 2]
   import BattleBox.Connection.Message
@@ -28,6 +28,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   end
 
   setup do
+    {:ok, user} = create_user(id: @user_id)
+
     {:ok, lobby} =
       Lobby.create(%{
         name: @lobby_name,
@@ -37,15 +39,24 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       })
 
     {:ok, bot} =
-      Bot.changeset(%Bot{}, %{name: @bot_name, user_id: @user_id})
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: @bot_name})
       |> Repo.insert()
 
-    %{lobby: lobby, bot: bot}
+    {:ok, key} =
+      user
+      |> Ecto.build_assoc(:api_keys)
+      |> ApiKey.changeset(%{name: "TEST KEY"})
+      |> Repo.insert()
+
+    %{user: user, lobby: lobby, bot: bot, key: key}
   end
 
   setup context do
     %{
-      connection_request: encode(%{"token" => context.bot.token, "lobby" => context.lobby.name}),
+      connection_request:
+        encode(%{"token" => context.key.token, "lobby" => context.lobby.name, "bot" => @bot_name}),
       start_matchmaking_request: encode(%{"action" => "start_match_making"})
     }
   end
@@ -77,8 +88,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       %{socket: socket}
     end
 
-    test "you can join", %{socket: socket, bot: %{token: token}} do
-      bot_connect_req = encode(%{"token" => token, "lobby" => @lobby_name})
+    test "you can join", %{socket: socket, key: %{token: token}} do
+      bot_connect_req = encode(%{"token" => token, "lobby" => @lobby_name, "bot" => @bot_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
@@ -91,16 +102,25 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
              } = Jason.decode!(msg)
     end
 
-    test "trying to join a lobby that doesn't exist is an error", %{socket: socket, bot: bot} do
-      bot_connect_req = encode(%{"token" => bot.token, "lobby" => "FAKE"})
+    test "trying to join a lobby that doesn't exist is an error", %{
+      socket: socket,
+      bot: bot,
+      key: key
+    } do
+      bot_connect_req = encode(%{"token" => key.token, "lobby" => "FAKE", "bot" => bot.name})
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => "lobby_not_found"} = Jason.decode!(msg)
     end
 
-    test "trying to join while your user is banned is an error", %{socket: socket, bot: bot} do
-      {:ok, _user} = create_user(%{id: @user_id, is_banned: true})
-      bot_connect_req = encode(%{"token" => bot.token, "lobby" => @lobby_name})
+    test "trying to join while your user is banned is an error", %{
+      socket: socket,
+      bot: bot,
+      key: key,
+      user: user
+    } do
+      User.set_ban_status(user, true)
+      bot_connect_req = encode(%{"token" => key.token, "lobby" => @lobby_name, "bot" => bot.name})
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => "banned"} = Jason.decode!(msg)
@@ -123,7 +143,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     end
 
     test "if you try to join as a bot that doesn't exist it fails", %{socket: socket} = context do
-      bot_connect_req = encode(%{"token" => "FAKE", "lobby" => context.lobby.name})
+      bot_connect_req =
+        encode(%{"token" => "FAKE", "lobby" => context.lobby.name, "bot" => @bot_name})
+
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => "invalid_token"} = Jason.decode!(msg)
@@ -134,7 +156,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     setup context do
       for player <- [:p1, :p2] do
         {:ok, socket} = connect(context.port)
-        join_request = encode(%{"token" => context.bot.token, "lobby" => context.lobby.name})
+
+        join_request =
+          encode(%{
+            "token" => context.key.token,
+            "lobby" => context.lobby.name,
+            "bot" => @bot_name
+          })
 
         :ok = :gen_tcp.send(socket, join_request)
         assert_receive {:tcp, ^socket, msg}
@@ -187,7 +215,14 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     setup context do
       for player <- [:p1, :p2] do
         {:ok, socket} = connect(context.port)
-        join_request = encode(%{"token" => context.bot.token, "lobby" => context.lobby.name})
+
+        join_request =
+          encode(%{
+            "token" => context.key.token,
+            "lobby" => context.lobby.name,
+            "bot" => @bot_name
+          })
+
         :ok = :gen_tcp.send(socket, join_request)
         assert_receive {:tcp, ^socket, msg}
         %{"connection_id" => connection_id} = Jason.decode!(msg)
@@ -268,7 +303,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         for player <- [:p1, :p2] do
           {:ok, socket} = connect(context.port)
 
-          join_request = encode(%{"token" => context.bot.token, "lobby" => context.lobby.name})
+          join_request =
+            encode(%{
+              "token" => context.key.token,
+              "lobby" => context.lobby.name,
+              "bot" => context.bot.name
+            })
+
           :ok = :gen_tcp.send(socket, join_request)
           assert_receive {:tcp, ^socket, msg}
           %{"connection_id" => connection_id} = Jason.decode!(msg)

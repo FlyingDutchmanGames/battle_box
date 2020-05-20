@@ -36,10 +36,11 @@ defmodule BattleBox.Connection.Logic do
     {data, [{:send, encode_error("bot_instance_failure")}], :stop}
   end
 
-  def handle_client(bot_token_auth(token, lobby_name), %{state: :unauthed} = data) do
+  def handle_client(bot_token_auth(token, bot_name, lobby_name), %{state: :unauthed} = data) do
     case GameEngine.start_bot(data.names.game_engine, %{
            token: token,
            lobby_name: lobby_name,
+           bot_name: bot_name,
            connection: self()
          }) do
       {:ok, bot_server, %{user_id: _, bot_server_id: _} = bot_server_info} ->
