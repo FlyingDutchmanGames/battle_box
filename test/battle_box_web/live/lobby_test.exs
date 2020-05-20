@@ -19,7 +19,12 @@ defmodule BattleBoxWeb.LobbyTest do
   setup context do
     {:ok, user} = create_user(user_id: @user_id)
     {:ok, lobby} = Lobby.create(%{name: "TEST LOBBY", game_type: "robot_game", user_id: @user_id})
-    {:ok, bot} = Bot.create(%{user_id: @user_id, name: "TEST BOT"})
+
+    {:ok, bot} =
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Repo.insert()
 
     {:ok, bot_server_1, _} =
       GameEngine.start_bot(context.game_engine, %{

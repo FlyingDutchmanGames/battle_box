@@ -38,11 +38,17 @@ defmodule BattleBoxWeb.BotControllerTest do
       |> post("/bots", %{"bot" => %{"name" => "FOO"}})
 
     assert "/bots/" <> id = redirected_to(conn, 302)
-    assert %Bot{user_id: @user_id} = Bot.get_by_id(id)
+    assert %Bot{user_id: @user_id} = Repo.get(Bot, id)
   end
 
   test "trying to create a bot with a name that exists is an error", %{conn: conn} do
-    Bot.changeset(%Bot{}, %{name: "FOO", user_id: @user_id}) |> Repo.insert!()
+    {:ok, user} = create_user(id: @user_id)
+
+    {:ok, bot} =
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Repo.insert()
 
     conn =
       conn

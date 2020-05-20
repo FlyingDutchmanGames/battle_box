@@ -18,11 +18,13 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
   end
 
   setup do
+    {:ok, user} = create_user()
+
     {:ok, bot} =
-      Bot.create(%{
-        user_id: Ecto.UUID.generate(),
-        name: "FOO"
-      })
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "FOO"})
+      |> Repo.insert()
 
     {:ok, lobby} =
       Lobby.create(%{

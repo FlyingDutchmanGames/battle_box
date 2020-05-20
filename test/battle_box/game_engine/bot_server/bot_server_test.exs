@@ -14,11 +14,13 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   setup do
+    {:ok, user} = create_user(id: @user_id)
+
     {:ok, bot} =
-      Bot.create(%{
-        user_id: @user_id,
-        name: "BOT_NAME"
-      })
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Repo.insert()
 
     {:ok, lobby} =
       Lobby.create(%{

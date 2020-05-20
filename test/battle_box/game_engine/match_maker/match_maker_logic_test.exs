@@ -5,11 +5,13 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   setup do
+    {:ok, user} = create_user()
+
     {:ok, bot} =
-      Bot.create(%{
-        name: "FOO",
-        user_id: Ecto.UUID.generate()
-      })
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Repo.insert()
 
     {:ok, lobby} =
       Lobby.create(%{
