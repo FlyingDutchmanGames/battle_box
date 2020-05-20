@@ -23,10 +23,10 @@ defmodule BattleBoxWeb.BotsTest do
       })
 
     {:ok, bot} =
-      Bot.create(%{
-        user_id: @user_id,
-        name: "TEST BOT"
-      })
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Repo.insert()
 
     %{bot: bot, user: user, lobby: lobby}
   end

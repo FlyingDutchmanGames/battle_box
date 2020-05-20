@@ -3,7 +3,17 @@ defmodule BattleBox.Test.DataHelpers do
   import Phoenix.ConnTest
 
   def signin(conn, opts \\ %{}) do
-    {:ok, user} = create_user(opts)
+    opts = Enum.into(opts, %{})
+
+    user =
+      case opts do
+        %{user: user} ->
+          user
+
+        %{} ->
+          {:ok, user} = create_user(opts)
+          user
+      end
 
     conn
     |> init_test_session(token: "foo")

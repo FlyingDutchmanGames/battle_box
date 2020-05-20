@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
-  alias BattleBox.{GameEngine, Bot, Lobby, GameEngine.BotServer.BotSupervisor}
+  alias BattleBox.{GameEngine, ApiKey, Bot, User, Lobby, GameEngine.BotServer.BotSupervisor}
   use BattleBox.DataCase, async: true
 
   @user_id Ecto.UUID.generate()
@@ -10,9 +10,22 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
   end
 
   setup do
-    {:ok, bot} = Bot.create(%{name: "FOO", user_id: @user_id})
+    {:ok, user} = create_user(id: @user_id)
+
+    {:ok, key} =
+      user
+      |> Ecto.build_assoc(:api_keys)
+      |> ApiKey.changeset(%{name: "TEST KEY"})
+      |> Repo.insert()
+
+    {:ok, bot} =
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Repo.insert()
+
     {:ok, lobby} = Lobby.create(%{name: "BAR", user_id: @user_id, game_type: "robot_game"})
-    %{lobby: lobby, bot: bot}
+    %{lobby: lobby, bot: bot, key: key, user: user}
   end
 
   test "you can start the supervisor server", %{bot_supervisor: bot_supervisor} do
@@ -20,10 +33,11 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
   end
 
   describe "starting a bot" do
-    test "you can start a bot with a lobby name and a token", context do
+    test "you can start a bot with a bot name, lobby name, and a token", context do
       assert {:ok, server, %{user_id: @user_id, bot_server_id: <<_::288>>}} =
                BotSupervisor.start_bot(context.game_engine, %{
-                 token: context.bot.token,
+                 token: context.key.token,
+                 bot_name: context.bot.name,
                  lobby_name: context.lobby.name,
                  connection: self()
                })
@@ -42,6 +56,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
       assert {:error, :invalid_token} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: "ABCDEF",
+                 bot_name: context.bot.name,
                  lobby_name: context.lobby.name,
                  connection: self()
                })
@@ -50,18 +65,20 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     test "starting a bot with an invalid lobby name yields an error", context do
       assert {:error, :lobby_not_found} =
                BotSupervisor.start_bot(context.game_engine, %{
-                 token: context.bot.token,
+                 token: context.key.token,
+                 bot_name: context.bot.name,
                  lobby_name: "FAKE LOBBY",
                  connection: self()
                })
     end
 
     test "starting a bot with a banned user fails", context do
-      {:ok, _user} = create_user(%{id: @user_id, is_banned: true})
+      {:ok, _user} = User.set_ban_status(context.user, true)
 
       assert {:error, :banned} =
                BotSupervisor.start_bot(context.game_engine, %{
-                 token: context.bot.token,
+                 token: context.key.token,
+                 bot_name: context.bot.name,
                  lobby_name: context.lobby.name,
                  connection: self()
                })

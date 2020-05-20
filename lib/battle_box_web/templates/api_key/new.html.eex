@@ -1,0 +1,19 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      <a href="<%= Routes.api_key_path(@conn, :index) %>">API Keys</a>
+      / Create
+    </div>
+  </div>
+
+  <form class="new_public_key" id="new_key" action="/keys" method="post">
+    <input name="_csrf_token" type="hidden" value="<%= Plug.CSRFProtection.get_csrf_token() %>">
+
+    <div class="form-group">
+      <label for="api_key_name">Name:</label>
+      <input maxlength="30" required class="form-control" type="text" name="api_key[name]" id="api_key_title">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create API Key</button>
+  </form>
+</div>

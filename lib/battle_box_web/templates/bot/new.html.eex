@@ -1,6 +1,16 @@
-<h1>Create a bot</h1>
-<%= form_for @changeset, Routes.bot_path(@conn, :create), fn f -> %>
-  <label>Name: <%= text_input f, :name %></label><br>
-  <%= error_tag f, :name %>
-  <%= submit "Submit" %>
-<% end %>
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @user.id) %>">Bots</a>
+      / Create
+    </div>
+  </div>
+  <%= form_for @changeset, Routes.bot_path(@conn, :create), fn f -> %>
+    <div class="form-group">
+      <label>Name: <%= text_input f, :name, class: "form-control" %></label><br>
+      <%= error_tag f, :name %>
+    </div>
+
+    <%= submit "Create Bot", class: "btn btn-primary" %>
+  <% end %>
+</div>

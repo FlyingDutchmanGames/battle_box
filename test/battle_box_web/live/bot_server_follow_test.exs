@@ -24,10 +24,10 @@ defmodule BattleBoxWeb.BotsServerFollowTest do
       })
 
     {:ok, bot} =
-      Bot.create(%{
-        user_id: @user_id,
-        name: "TEST BOT"
-      })
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Repo.insert()
 
     {:ok, bot_server, _} =
       GameEngine.start_bot(context.game_engine, %{

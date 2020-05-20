@@ -30,9 +30,9 @@ defmodule BattleBox.Connection.Message do
     encode(error)
   end
 
-  defmacro bot_token_auth(token, lobby_name) do
+  defmacro bot_token_auth(token, bot_name, lobby_name) do
     quote do
-      %{"token" => unquote(token), "lobby" => unquote(lobby_name)}
+      %{"token" => unquote(token), "bot" => unquote(bot_name), "lobby" => unquote(lobby_name)}
     end
   end
 

@@ -5,16 +5,16 @@ defmodule BattleBoxWeb.Bots do
 
   def mount(%{"user_id" => user_identifier}, _session, socket) do
     case User.get_by_identifier(user_identifier) do
-      %User{id: user_id} = user ->
-        bots = bots_for_user(user_id)
-        bot_servers = bot_servers_for_user(user_id)
+      %User{} = user ->
+        user = Repo.preload(user, :bots)
+        bot_servers = bot_servers_for_user(user.id)
 
         if connected?(socket) do
           for %{pid: pid} <- bot_servers, do: Process.monitor(pid)
-          GameEngine.subscribe_to_user_events(game_engine(), user_id, [:bot_server_start])
+          GameEngine.subscribe_to_user_events(game_engine(), user.id, [:bot_server_start])
         end
 
-        {:ok, assign(socket, user: user, bots: bots, bot_servers: bot_servers)}
+        {:ok, assign(socket, user: user, bot_servers: bot_servers)}
 
       nil ->
         {:ok, assign(socket, not_found: true)}

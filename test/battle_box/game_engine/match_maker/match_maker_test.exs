@@ -10,11 +10,13 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
   end
 
   setup do
+    {:ok, user} = create_user(id: @user_id)
+
     {:ok, bot} =
-      Bot.create(%{
-        name: "FOO",
-        user_id: @user_id
-      })
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "FOO"})
+      |> Repo.insert()
 
     %{bot: bot}
   end

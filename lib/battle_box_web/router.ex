@@ -49,10 +49,11 @@ defmodule BattleBoxWeb.Router do
       pipe_through :require_logged_in
       pipe_through :require_not_banned
 
-      get "/lobbies", UserRedirectController, :lobbies
-      get "/bots", UserRedirectController, :bots
       get "/me", UserRedirectController, :users
+      get "/bots", UserRedirectController, :bots
+      get "/lobbies", UserRedirectController, :lobbies
 
+      resources "/keys", ApiKeyController
       resources "/bots", BotController, only: [:create, :new]
       resources "/lobbies", LobbyController, only: [:create, :new]
     end
