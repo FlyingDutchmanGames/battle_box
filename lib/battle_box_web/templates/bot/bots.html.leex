@@ -3,7 +3,7 @@
 <h1>User: <%= @user.github_login_name %></h1>
 <a href="<%= Routes.bot_path(BattleBoxWeb.Endpoint, :new) %>">New Bot</a>
 <div class="bots">
-  <%= for bot <- @bots do %>
+  <%= for bot <- @user.bots do %>
     <div class="bot">
       <div>Name: <a href="<%= Routes.bot_path(BattleBoxWeb.Endpoint, :show, bot.name) %>"><%= bot.name %></a></div>
       <div class="bot-servers">

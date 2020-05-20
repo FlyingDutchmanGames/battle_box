@@ -10,7 +10,7 @@
     <input name="_csrf_token" type="hidden" value="<%= Plug.CSRFProtection.get_csrf_token() %>">
 
     <div class="form-group">
-      <label for="api_key_title">Name:</label>
+      <label for="api_key_name">Name:</label>
       <input maxlength="30" required class="form-control" type="text" name="api_key[name]" id="api_key_title">
     </div>
 

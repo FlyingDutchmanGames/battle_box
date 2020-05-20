@@ -8,7 +8,9 @@ defmodule BattleBoxWeb.ApiKeyController do
   end
 
   def delete(%{assigns: %{user: user}} = conn, %{"id" => id}) do
-    api_key = Repo.one(from api_key in ApiKey, where: api_key.user_id == ^user.id and api_key.id == ^id)
+    api_key =
+      Repo.one(from api_key in ApiKey, where: api_key.user_id == ^user.id and api_key.id == ^id)
+
     {:ok, _key} = Repo.delete(api_key)
     redirect(conn, to: Routes.api_key_path(conn, :index))
   end
