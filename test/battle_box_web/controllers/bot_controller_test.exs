@@ -4,21 +4,24 @@ defmodule BattleBoxWeb.BotControllerTest do
 
   @user_id Ecto.UUID.generate()
 
-  test "you can view a bot", %{conn: conn} do
-    bot =
-      Bot.changeset(%Bot{}, %{
-        name: "TEST_NAME",
-        user_id: @user_id
-      })
-      |> Repo.insert!(returning: true)
+  setup do
+    {:ok, user} = create_user(id: @user_id)
+    %{user: user}
+  end
+
+  test "you can view a bot", %{conn: conn, user: user} do
+    {:ok, bot} =
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{"name" => "TEST_NAME"})
+      |> Repo.insert()
 
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user: user)
       |> get("/bots/#{bot.name}")
 
     assert html_response(conn, 200) =~ "TEST_NAME"
-    assert html_response(conn, 200) =~ bot.token
   end
 
   test "trying to view a non existant bot is a not found 404", %{conn: conn} do
@@ -31,37 +34,35 @@ defmodule BattleBoxWeb.BotControllerTest do
     assert "/login" <> id = redirected_to(conn, 302)
   end
 
-  test "you can create a bot", %{conn: conn} do
+  test "you can create a bot", %{conn: conn, user: user} do
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user: user)
       |> post("/bots", %{"bot" => %{"name" => "FOO"}})
 
-    assert "/bots/" <> id = redirected_to(conn, 302)
-    assert %Bot{user_id: @user_id} = Repo.get(Bot, id)
+    assert "/bots/" <> name = redirected_to(conn, 302)
+    assert %Bot{user_id: @user_id} = Repo.get_by(Bot, name: name)
   end
 
-  test "trying to create a bot with a name that exists is an error", %{conn: conn} do
-    {:ok, user} = create_user(id: @user_id)
-
-    {:ok, bot} =
+  test "trying to create a bot with a name that exists is an error", %{conn: conn, user: user} do
+    {:ok, _bot} =
       user
       |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Bot.changeset(%{name: "FOO"})
       |> Repo.insert()
 
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user: user)
       |> post("/bots", %{"bot" => %{"name" => "FOO"}})
 
     assert html_response(conn, 200) =~ "has already been taken"
   end
 
-  test "theres a form to create a new bot", %{conn: conn} do
+  test "theres a form to create a new bot", %{conn: conn, user: user} do
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user: user)
       |> get("/bots/new")
 
     html = html_response(conn, 200)

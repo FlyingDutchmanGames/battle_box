@@ -19,7 +19,7 @@ defmodule BattleBoxWeb.BotController do
       {:ok, bot} ->
         conn
         |> put_flash(:info, "Bot created")
-        |> redirect(to: Routes.live_path(conn, :show, bot.name))
+        |> redirect(to: Routes.bot_path(conn, :show, bot.name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
