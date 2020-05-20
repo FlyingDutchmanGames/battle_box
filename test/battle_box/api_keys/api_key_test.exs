@@ -1,12 +1,26 @@
 defmodule BattleBox.ApiKeyTest do
   use BattleBox.DataCase
-  alias BattleBox.{ApiKey, Repo}
-  import Ecto.Changeset
+  alias BattleBox.{ApiKey, Bot, User, Repo}
 
   @user_id Ecto.UUID.generate()
-  @some_time_in_the_past NaiveDateTime.utc_now()
-                         |> NaiveDateTime.add(-1_000_000_000)
-                         |> NaiveDateTime.truncate(:second)
+
+  setup do
+    {:ok, user} = create_user(id: @user_id)
+
+    {:ok, key} =
+      user
+      |> Ecto.build_assoc(:api_keys)
+      |> ApiKey.changeset(%{name: "TEST"})
+      |> Repo.insert()
+
+    {:ok, bot} =
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "BOT"})
+      |> Repo.insert()
+
+    %{key: key, bot: bot, user: user}
+  end
 
   describe "validations" do
     test "Name must be greater than 1" do
@@ -23,14 +37,6 @@ defmodule BattleBox.ApiKeyTest do
   end
 
   describe "Token Manipulation" do
-    setup do
-      {:ok, key} =
-        ApiKey.changeset(%ApiKey{user_id: @user_id}, %{name: "TEST"})
-        |> Repo.insert()
-
-      %{key: key}
-    end
-
     test "it generates a token, a hashed token, and no last used value", %{key: key} do
       assert key.last_used == nil
       assert byte_size(key.hashed_token) == 32
@@ -42,17 +48,32 @@ defmodule BattleBox.ApiKeyTest do
       from_token = ApiKey.from_token(key.token)
       assert key.id == from_token.id
       assert nil == ApiKey.from_token("some random number")
+      assert nil == ApiKey.from_token(key.hashed_token)
+    end
+  end
+
+  describe "authenticate_bot" do
+    test "a valid token and bot work, and it updates the last_used field", %{
+      key: key,
+      bot: %{id: id, name: name}
+    } do
+      assert key.last_used == nil
+      assert {:ok, %{id: ^id}} = ApiKey.authenticate_bot(key.token, name)
+      key = Repo.get(ApiKey, key.id)
+      assert NaiveDateTime.diff(NaiveDateTime.utc_now(), key.last_used) < 2
     end
 
-    test "you can mark the updated time", %{key: key} do
-      {:ok, key} =
-        change(key, last_used: @some_time_in_the_past)
-        |> Repo.update()
+    test "A banned user is banned", %{key: key, bot: bot, user: user} do
+      {:ok, _user} = User.set_ban_status(user, true)
+      assert {:error, :banned} = ApiKey.authenticate_bot(key.token, bot.name)
+    end
 
-      assert key.last_used == @some_time_in_the_past
-      {:ok, key} = ApiKey.mark_used!(key)
-      assert key.last_used != @some_time_in_the_past
-      assert NaiveDateTime.diff(NaiveDateTime.utc_now(), key.last_used) < 2
+    test "A non existant bot doesnt work", %{key: key} do
+      assert {:error, :bot_not_found} = ApiKey.authenticate_bot(key.token, "SOME BOT")
+    end
+
+    test "an invalid token doesn't work" do
+      assert {:error, :invalid_token} = ApiKey.authenticate_bot("INVALID_TOKEN", "SOME BOT")
     end
   end
 end

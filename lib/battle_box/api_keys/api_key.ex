@@ -47,7 +47,7 @@ defmodule BattleBox.ApiKey do
     end
   end
 
-  defp from_token(token) do
+  def from_token(token) do
     Repo.get_by(__MODULE__, hashed_token: hash(token))
   end
 
