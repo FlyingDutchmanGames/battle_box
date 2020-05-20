@@ -11,7 +11,7 @@ defmodule BattleBox.ApiKey do
     field :name, :binary
     field :token, :string, virtual: true
     field :hashed_token, :binary
-    field :last_used, :naive_datetime, autogenerate: {__MODULE__, :now, []}
+    field :last_used, :naive_datetime
     belongs_to :user, User
     timestamps()
   end
@@ -21,7 +21,8 @@ defmodule BattleBox.ApiKey do
 
     api_key
     |> cast(params, [:name])
-    |> validate_length(:name, min: 3, max: 30)
+    |> validate_required(:name)
+    |> validate_length(:name, max: 30)
     |> put_change(:token, token)
     |> put_change(:hashed_token, hash(token))
   end

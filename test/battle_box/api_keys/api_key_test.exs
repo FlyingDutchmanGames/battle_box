@@ -9,8 +9,8 @@ defmodule BattleBox.ApiKeyTest do
                          |> NaiveDateTime.truncate(:second)
 
   describe "validations" do
-    test "Name must be greater than 3" do
-      changeset = ApiKey.changeset(%ApiKey{}, %{name: "AA"})
+    test "Name must be greater than 1" do
+      changeset = ApiKey.changeset(%ApiKey{}, %{name: ""})
       refute changeset.valid?
     end
 
@@ -31,8 +31,8 @@ defmodule BattleBox.ApiKeyTest do
       %{key: key}
     end
 
-    test "it generates a token, a hashed token, and marks the last used value", %{key: key} do
-      assert %NaiveDateTime{} = key.last_used
+    test "it generates a token, a hashed token, and no last used value", %{key: key} do
+      assert key.last_used == nil
       assert byte_size(key.hashed_token) == 32
       assert byte_size(key.token) == 26
       assert :crypto.hash(:sha256, key.token) == key.hashed_token

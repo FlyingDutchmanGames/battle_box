@@ -6,7 +6,7 @@ defmodule BattleBox.Repo.Migrations.CreateApiKeys do
       add :name, :text, null: false
       add :hashed_token, :bytea, null: false
       add :user_id, :uuid, null: false
-      add :last_used, :timestamp, null: false
+      add :last_used, :timestamp
       timestamps()
     end
 
