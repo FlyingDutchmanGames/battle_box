@@ -41,12 +41,7 @@ defmodule BattleBoxWeb.Bots do
     BotView.render("bots.html", assigns)
   end
 
-  def bots_for_user(user_id) do
-    Bot.with_user_id(user_id)
-    |> Repo.all()
-  end
-
-  def bot_servers_for_user(user_id) do
+  defp bot_servers_for_user(user_id) do
     GameEngine.get_bot_servers_with_user_id(game_engine(), user_id)
   end
 end
