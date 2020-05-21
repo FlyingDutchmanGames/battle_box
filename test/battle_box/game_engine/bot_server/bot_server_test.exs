@@ -22,6 +22,8 @@ defmodule BattleBox.GameEngine.BotServerTest do
       |> Bot.changeset(%{name: "TEST BOT"})
       |> Repo.insert()
 
+    bot = Repo.preload(bot, :user)
+
     {:ok, lobby} =
       Lobby.create(%{
         user_id: @user_id,

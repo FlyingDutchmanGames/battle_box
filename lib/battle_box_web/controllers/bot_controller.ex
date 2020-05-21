@@ -17,18 +17,16 @@ defmodule BattleBoxWeb.BotController do
 
     case result do
       {:ok, bot} ->
-        conn
-        |> put_flash(:info, "Bot created")
-        |> redirect(to: Routes.bot_path(conn, :show, bot.name))
+        redirect(conn, to: Routes.user_bot_path(conn, :show, user.id, bot.name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
   end
 
-  def show(conn, %{"id" => name}) do
+  def show(conn, %{"user_id" => user_id, "id" => name}) do
     bot =
-      Bot.get_by_name(name)
+      Repo.get_by(Bot, user_id: user_id, name: name)
       |> Repo.preload(:user)
 
     case bot do

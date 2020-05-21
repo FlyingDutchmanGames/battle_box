@@ -21,8 +21,4 @@ defmodule BattleBox.Bot do
     |> validate_length(:name, max: 20)
     |> unique_constraint(:name)
   end
-
-  def get_by_name(name) do
-    Repo.get_by(__MODULE__, name: name)
-  end
 end

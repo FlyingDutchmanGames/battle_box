@@ -59,9 +59,9 @@ defmodule BattleBoxWeb.Router do
     end
 
     live("/lobbies/:id", Lobby)
-    resources "/bots", BotController, only: [:show]
 
     resources "/users", UserController, only: [:show] do
+      resources "/bots", BotController, only: [:show]
       resources "/lobbies", LobbyController, only: [:index]
     end
 
