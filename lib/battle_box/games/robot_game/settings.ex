@@ -42,8 +42,4 @@ defmodule BattleBox.Games.RobotGame.Settings do
     %__MODULE__{}
     |> Map.merge(opts)
   end
-
-  def get_by_id(id) do
-    Repo.get_by(__MODULE__, id: id)
-  end
 end

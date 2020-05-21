@@ -1,10 +1,24 @@
-<h1>Lobbies</h1>
-<a href="<%= Routes.lobby_path(@conn, :new) %>">New Lobby</a>
-<div class="lobbies">
-<%= for lobby <- @lobbies do %>
-  <div class="lobby" style="border: 1px solid black; padding: 10px; margin: 10px;">
-    <div class="name">Name: <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, lobby.name) %>"><%= lobby.name %></a></div>
-    <div class="id">ID:<%= lobby.id %></div>
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">Lobbies</div>
+    <%= if @current_user.id == @user.id do %>
+      <div class="subhead-action">
+        <a href="<%= Routes.lobby_path(@conn, :new) %>" class="btn btn-primary">New Lobby</a>
+      </div>
+    <% end %>
   </div>
-<% end %>
+  <div class="box">
+    <%= for lobby <- @user.lobbies do %>
+      <div class="box-row">
+        <div class="box-details">
+          <div style="font-weight: bolder; padding-bottom: 10px;">Name: <%= lobby.name %></div>
+          <div>Type: <%= lobby.game_type.title %></div>
+          <div>Created: <%= humanize_seconds_ago(lobby.inserted_at) %></div>
+        </div>
+        <div>
+          <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, lobby.name) %>" class="btn">Watch Live 👀</a>
+        </div>
+      </div>
+    <% end %>
+  </div>
 </div>

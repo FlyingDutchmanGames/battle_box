@@ -9,10 +9,11 @@ defmodule BattleBoxWeb.LobbyController do
   end
 
   def index(conn, %{"user_id" => user_name}) do
-    case Repo.get_by(User, user_name: user_name) do
-      %User{id: id} ->
-        lobbies = Lobby.with_user_id(id) |> Repo.all()
-        render(conn, "index.html", lobbies: lobbies)
+    Repo.get_by(User, user_name: user_name)
+    |> Repo.preload(:lobbies)
+    |> case do
+      %User{} = user ->
+        render(conn, "index.html", user: user)
 
       nil ->
         conn
@@ -22,19 +23,14 @@ defmodule BattleBoxWeb.LobbyController do
     end
   end
 
-  def create(%{assigns: %{current_user: user}} = conn, %{"lobby" => lobby}) do
-    params =
-      Map.merge(lobby, %{
-        "user_id" => user.id,
-        "game_type" => "robot_game",
-        "game_acceptance_time_ms" => 1000
-      })
-
-    case Lobby.create(params) do
+  def create(%{assigns: %{current_user: user}} = conn, %{"lobby" => params}) do
+    user
+    |> Ecto.build_assoc(:lobbies)
+    |> Lobby.changeset(params)
+    |> Repo.insert()
+    |> case do
       {:ok, lobby} ->
-        conn
-        |> put_flash(:info, "Lobby")
-        |> redirect(to: Routes.live_path(conn, BattleBoxWeb.Lobby, lobby.name))
+        redirect(conn, to: Routes.user_lobby_path(conn, :index, user.user_name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)

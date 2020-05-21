@@ -1,6 +1,20 @@
-<h1>Create a lobby</h1>
-<%= form_for @changeset, Routes.lobby_path(@conn, :create), fn f -> %>
-  <label>Name: <%= text_input f, :name %></label><br>
-  <%= error_tag f, :name %>
-  <%= submit "Submit" %>
-<% end %>
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, @current_user.id) %>">Lobbies</a>
+      / Create
+    </div>
+  </div>
+  <%= form_for @changeset, Routes.lobby_path(@conn, :create), fn f -> %>
+    <div class="form-group">
+      <label>Name: <%= text_input f, :name, class: "form-control" %></label><br>
+      <%= error_tag f, :name %>
+    </div>
+    <div class="form-group">
+      <label>Game Type: <%= select(f, :game_type, Enum.map(game_types, &{&1.title, &1.db_name}), class: "form-control") %></label>
+      <%= error_tag f, :game_type %>
+    </div>
+
+    <%= submit "Create Lobby", class: "btn btn-primary" %>
+  <% end %>
+</div>

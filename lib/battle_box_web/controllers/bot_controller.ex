@@ -9,13 +9,11 @@ defmodule BattleBoxWeb.BotController do
   end
 
   def create(%{assigns: %{current_user: user}} = conn, %{"bot" => params}) do
-    result =
-      user
-      |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(params)
-      |> Repo.insert()
-
-    case result do
+    user
+    |> Ecto.build_assoc(:bots)
+    |> Bot.changeset(params)
+    |> Repo.insert()
+    |> case do
       {:ok, bot} ->
         redirect(conn, to: Routes.user_bot_path(conn, :show, user.user_name, bot.name))
 

@@ -36,6 +36,7 @@ defmodule BattleBox.Games.RobotGame do
     cast(game, params, [:turn, :events])
   end
 
+  def title, do: "Robot Game"
   def db_name, do: "robot_game"
   def settings_module, do: Settings
   def players_for_settings(_), do: [1, 2]

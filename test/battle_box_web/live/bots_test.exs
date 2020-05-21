@@ -16,11 +16,10 @@ defmodule BattleBoxWeb.BotsTest do
     {:ok, user} = create_user(%{user_id: @user_id})
 
     {:ok, lobby} =
-      Lobby.create(%{
-        user_id: @user_id,
-        name: "LOBBY NAME",
-        game_type: "robot_game"
-      })
+      user
+      |> Ecto.build_assoc(:lobbies)
+      |> Lobby.changeset(name: "LOBBY NAME", game_type: "robot_game")
+      |> Repo.insert()
 
     {:ok, bot} =
       user

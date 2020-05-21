@@ -55,7 +55,7 @@ defmodule BattleBoxWeb.Router do
 
       resources "/keys", ApiKeyController
       resources "/bots", BotController, only: [:create, :new]
-      resources "/lobbies", LobbyController, only: [:create, :new]
+      resources "/lobbies", LobbyController, only: [:new, :index, :create]
     end
 
     live("/lobbies/:id", Lobby)
