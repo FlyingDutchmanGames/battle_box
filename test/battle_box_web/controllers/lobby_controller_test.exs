@@ -78,7 +78,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
       conn =
         conn
-        |> get("/users/#{user.github_login_name}/lobbies")
+        |> get("/users/#{user.user_name}/lobbies")
 
       html = html_response(conn, 200)
       {:ok, document} = Floki.parse_document(html)

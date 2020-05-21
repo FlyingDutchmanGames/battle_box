@@ -106,17 +106,17 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 
 Find number of game bots for a user
 ```
- select users.github_login_name, count(*) from game_bots join bots on bots.id = game_bots.bot_id join users on users.id = bots.user_id group by users.id order by count desc;
+ select users.user_name, count(*) from game_bots join bots on bots.id = game_bots.bot_id join users on users.id = bots.user_id group by users.id order by count desc;
 ```
 
 Number of bots per user
 ```
-select github_login_name, count(*) from bots join users on bots.user_id = users.id group by users.id order by count desc;
+select user_name, count(*) from bots join users on bots.user_id = users.id group by users.id order by count desc;
 ```
 
 Number of lobbies per user
 ```
-select github_login_name, count(*) from lobbies join users on lobbies.user_id = users.id group by users.id order by count desc;
+select user_name, count(*) from lobbies join users on lobbies.user_id = users.id group by users.id order by count desc;
 ```
 
 Number of games per lobby
