@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
   use DynamicSupervisor
-  alias BattleBox.{ApiKey, Bot, Lobby, GameEngine, GameEngine.BotServer}
+  alias BattleBox.{ApiKey, Bot, Lobby, Repo, GameEngine, GameEngine.BotServer}
 
   def start_link(%{names: names} = opts) do
     DynamicSupervisor.start_link(__MODULE__, opts, name: names.bot_supervisor)
@@ -30,6 +30,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
   def start_bot(game_engine, %{lobby: %Lobby{}, bot: %Bot{} = bot, connection: _} = opts) do
     bot_supervisor = GameEngine.names(game_engine).bot_supervisor
     opts = Map.put_new(opts, :bot_server_id, Ecto.UUID.generate())
+    opts = update_in(opts.bot, fn bot -> Repo.preload(bot, :user) end)
     {:ok, bot_server} = DynamicSupervisor.start_child(bot_supervisor, {BotServer, opts})
     {:ok, bot_server, %{user_id: bot.user_id, bot_server_id: opts.bot_server_id}}
   end

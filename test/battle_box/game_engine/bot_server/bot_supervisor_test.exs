@@ -18,11 +18,12 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
       |> ApiKey.changeset(%{name: "TEST KEY"})
       |> Repo.insert()
 
-    {:ok, bot} =
+    bot =
       user
       |> Ecto.build_assoc(:bots)
       |> Bot.changeset(%{name: "TEST BOT"})
-      |> Repo.insert()
+      |> Repo.insert!()
+      |> Repo.preload(:user)
 
     {:ok, lobby} = Lobby.create(%{name: "BAR", user_id: @user_id, game_type: "robot_game"})
     %{lobby: lobby, bot: bot, key: key, user: user}

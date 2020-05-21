@@ -9,6 +9,6 @@ defmodule BattleBox.Repo.Migrations.CreateBots do
     end
 
     create index("bots", [:name], unique: true)
-    create index("bots", [:user_id])
+    create index("bots", [:user_id, :name], unique: true)
   end
 end

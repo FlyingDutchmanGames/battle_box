@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.Bots do
   use BattleBoxWeb, :live_view
   alias BattleBoxWeb.{BotView, PageView}
-  alias BattleBox.{GameEngine, User, Bot, Repo}
+  alias BattleBox.{GameEngine, User, Repo}
 
   def mount(%{"user_id" => user_identifier}, _session, socket) do
     case User.get_by_identifier(user_identifier) do

@@ -20,7 +20,6 @@ defmodule BattleBox.GameTest do
 
   test "new/1 creates one" do
     assert %Game{game_bots: [], lobby_id: nil} = Game.new()
-
     assert %Game{game_bots: [], lobby_id: @lobby_id} = Game.new(lobby_id: @lobby_id)
   end
 end

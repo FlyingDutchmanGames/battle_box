@@ -16,16 +16,13 @@ defmodule BattleBoxWeb.BotControllerTest do
       |> Bot.changeset(%{"name" => "TEST_NAME"})
       |> Repo.insert()
 
-    conn =
-      conn
-      |> signin(user: user)
-      |> get("/bots/#{bot.name}")
+    conn = get(conn, "/users/#{@user_id}/bots/#{bot.name}")
 
     assert html_response(conn, 200) =~ "TEST_NAME"
   end
 
   test "trying to view a non existant bot is a not found 404", %{conn: conn} do
-    conn = conn |> get("/bots/#{Ecto.UUID.generate()}")
+    conn = conn |> get("/users/#{@user_id}/bots/non-sense-name")
     assert html_response(conn, 404) =~ "Not Found"
   end
 
@@ -40,8 +37,8 @@ defmodule BattleBoxWeb.BotControllerTest do
       |> signin(user: user)
       |> post("/bots", %{"bot" => %{"name" => "FOO"}})
 
-    assert "/bots/" <> name = redirected_to(conn, 302)
-    assert %Bot{user_id: @user_id} = Repo.get_by(Bot, name: name)
+    assert "/users/" <> @user_id <> "/bots/" <> name = redirected_to(conn, 302)
+    assert %Bot{} = Repo.get_by(Bot, name: name, user_id: @user_id)
   end
 
   test "trying to create a bot with a name that exists is an error", %{conn: conn, user: user} do

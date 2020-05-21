@@ -3,7 +3,7 @@
   <div class="bot-server-info">
     <div class="title">
       <div style="margin-right: 10px;">Bot Server:</div>
-      <a href="<%= Routes.bot_path(@socket, :show, @bot_server.bot.id) %>"><%= @bot_server.bot.name %></a>
+      <a href="<%= Routes.user_bot_path(@socket, :show, @bot_server.bot.user.github_login_name, @bot_server.bot.id) %>"><%= @bot_server.bot.name %></a>
       <div style="margin: 0px 10px;">/</div>
       <pre><%= @bot_server.bot_server_id %></pre>
     </div>
