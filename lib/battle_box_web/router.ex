@@ -73,21 +73,21 @@ defmodule BattleBoxWeb.Router do
   end
 
   defp require_logged_in(conn, _) do
-    case conn.assigns.user do
+    case conn.assigns.current_user do
       %User{} -> conn
       nil -> conn |> redirect(to: "/login") |> halt()
     end
   end
 
   defp require_not_banned(conn, _) do
-    case conn.assigns.user do
+    case conn.assigns.current_user do
       %User{is_banned: false} -> conn
       _ -> conn |> redirect(to: "/banned") |> halt()
     end
   end
 
   defp require_admin(conn, _) do
-    case conn.assigns.user do
+    case conn.assigns.current_user do
       %User{is_admin: true} -> conn
       _ -> conn |> redirect(to: "/") |> halt()
     end
@@ -96,10 +96,10 @@ defmodule BattleBoxWeb.Router do
   defp fetch_user(conn, _) do
     with id when not is_nil(id) <- get_session(conn, "user_id"),
          %User{} = user <- User.get_by_id(id) do
-      assign(conn, :user, user)
+      assign(conn, :current_user, user)
     else
       _ ->
-        assign(conn, :user, nil)
+        assign(conn, :current_user, nil)
     end
   end
 end

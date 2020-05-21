@@ -1,20 +1,20 @@
 <div class="header">
   <a href="/"><div class="logo">Botskrieg</div></a>
   <div class="spacer"></div>
-  <%= if @user do %>
+  <%= if @current_user do %>
     <div class="nav-item">
-      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @user.github_login_name) %>">Bots</a>
+      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @current_user.github_login_name) %>">Bots</a>
     </div>
     <div class="nav-item">
-      <a href="<%= Routes.user_lobby_path(@conn, :index, @user.github_login_name) %>">Lobbies</a>
+      <a href="<%= Routes.user_lobby_path(@conn, :index, @current_user.github_login_name) %>">Lobbies</a>
     </div>
     <div class="nav-item">
       <a href="<%= Routes.api_key_path(@conn, :index) %>">Keys</a>
     </div>
-    <a href="<%= Routes.user_path(@conn, :show, @user.github_login_name) %>">
+    <a href="<%= Routes.user_path(@conn, :show, @current_user.github_login_name) %>">
       <div class="user">
-        <div class="name"><%= @user.github_login_name %></div>
-        <img src="<%= @user.github_avatar_url %>">
+        <div class="name"><%= @current_user.github_login_name %></div>
+        <img src="<%= @current_user.github_avatar_url %>">
       </div>
     </a>
     <div class="nav-item">

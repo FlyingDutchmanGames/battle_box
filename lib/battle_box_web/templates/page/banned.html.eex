@@ -1,4 +1,4 @@
-<%= if @user.is_banned do %>
+<%= if @current_user.is_banned do %>
   <div class="not-found-container">
     <div class="title">👨‍⚖️</div>
     <div class="message">You've been banned</div>

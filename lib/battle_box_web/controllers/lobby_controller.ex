@@ -15,7 +15,7 @@ defmodule BattleBoxWeb.LobbyController do
     end
   end
 
-  def create(%{assigns: %{user: user}} = conn, %{"lobby" => lobby}) do
+  def create(%{assigns: %{current_user: user}} = conn, %{"lobby" => lobby}) do
     params =
       Map.merge(lobby, %{
         "user_id" => user.id,

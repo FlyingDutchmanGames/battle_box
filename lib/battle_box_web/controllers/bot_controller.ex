@@ -8,7 +8,7 @@ defmodule BattleBoxWeb.BotController do
     render(conn, "new.html", changeset: changeset)
   end
 
-  def create(%{assigns: %{user: user}} = conn, %{"bot" => params}) do
+  def create(%{assigns: %{current_user: user}} = conn, %{"bot" => params}) do
     result =
       user
       |> Ecto.build_assoc(:bots)

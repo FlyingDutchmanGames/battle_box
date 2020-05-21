@@ -7,7 +7,7 @@ defmodule BattleBoxWeb.ApiKeyController do
     render(conn, "new.html")
   end
 
-  def delete(%{assigns: %{user: user}} = conn, %{"id" => id}) do
+  def delete(%{assigns: %{current_user: user}} = conn, %{"id" => id}) do
     api_key =
       Repo.one(from api_key in ApiKey, where: api_key.user_id == ^user.id and api_key.id == ^id)
 
@@ -15,7 +15,7 @@ defmodule BattleBoxWeb.ApiKeyController do
     redirect(conn, to: Routes.api_key_path(conn, :index))
   end
 
-  def create(%{assigns: %{user: user}} = conn, %{"api_key" => params}) do
+  def create(%{assigns: %{current_user: user}} = conn, %{"api_key" => params}) do
     {:ok, api_key} =
       user
       |> Ecto.build_assoc(:api_keys)
@@ -25,7 +25,7 @@ defmodule BattleBoxWeb.ApiKeyController do
     render(conn, "show.html", api_key: api_key)
   end
 
-  def index(%{assigns: %{user: user}} = conn, _params) do
+  def index(%{assigns: %{current_user: user}} = conn, _params) do
     user = Repo.preload(user, :api_keys)
     render(conn, "index.html", user: user)
   end
