@@ -4,7 +4,7 @@ defmodule BattleBoxWeb.UserController do
   alias BattleBox.{Repo, User}
 
   def show(conn, %{"id" => user_name}) do
-    case Repo.get_by(User, github_login_name: user_name) do
+    case Repo.get_by(User, user_name: user_name) do
       %User{} = user ->
         render(conn, "show.html", fetched_user: user)
 

@@ -1,7 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @bot.user.github_login_name) %>">Bots</a>
+      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @bot.user.user_name) %>">Bots</a>
       / <%= @bot.name %>
     </div>
   </div>

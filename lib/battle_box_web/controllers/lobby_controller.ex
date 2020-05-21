@@ -9,7 +9,7 @@ defmodule BattleBoxWeb.LobbyController do
   end
 
   def index(conn, %{"user_id" => user_name}) do
-    case Repo.get_by(User, github_login_name: user_name) do
+    case Repo.get_by(User, user_name: user_name) do
       %User{id: id} ->
         lobbies = Lobby.with_user_id(id) |> Repo.all()
         render(conn, "index.html", lobbies: lobbies)

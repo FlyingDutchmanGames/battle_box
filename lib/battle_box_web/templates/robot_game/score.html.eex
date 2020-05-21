@@ -1,9 +1,9 @@
 <div class="score player_<%= @player %>">
   <div class="bot-info">
-    <img src="<%= @game_bot.bot.user.github_avatar_url %>">
+    <img src="<%= @game_bot.bot.user.avatar_url %>">
     <div class="names">
-      <a href="<%= Routes.user_path(@socket, :show, @game_bot.bot.user.github_login_name) %>"><div style="font-size: 0.3em; color: white;"><%= @game_bot.bot.user.github_login_name %></div></a>
-      <a href="<%= Routes.user_bot_path(@socket, :show, @game_bot.bot.user.github_login_name, @game_bot.bot.name) %>"><div style="color: white;"><%= @game_bot.bot.name %></div></a>
+      <a href="<%= Routes.user_path(@socket, :show, @game_bot.bot.user.user_name) %>"><div style="font-size: 0.3em; color: white;"><%= @game_bot.bot.user.user_name %></div></a>
+      <a href="<%= Routes.user_bot_path(@socket, :show, @game_bot.bot.user.user_name, @game_bot.bot.name) %>"><div style="color: white;"><%= @game_bot.bot.name %></div></a>
     </div>
   </div>
   <div style="font-size: 2em;"><%= @score %></div>

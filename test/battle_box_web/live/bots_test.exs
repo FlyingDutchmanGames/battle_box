@@ -37,7 +37,7 @@ defmodule BattleBoxWeb.BotsTest do
   end
 
   test "it will render a players bots", %{conn: conn, user: user} do
-    {:ok, _view, html} = live(conn, "/users/#{user.github_login_name}/bots")
+    {:ok, _view, html} = live(conn, "/users/#{user.user_name}/bots")
     assert html =~ "TEST BOT"
   end
 
@@ -50,7 +50,7 @@ defmodule BattleBoxWeb.BotsTest do
         connection: self()
       })
 
-    {:ok, _view, html} = live(conn, "/users/#{user.github_login_name}/bots")
+    {:ok, _view, html} = live(conn, "/users/#{user.user_name}/bots")
     {:ok, document} = Floki.parse_document(html)
     assert [bot] = Floki.find(document, ".bot-server")
     assert Floki.text(bot) =~ "LOBBY NAME"
@@ -65,7 +65,7 @@ defmodule BattleBoxWeb.BotsTest do
         connection: self()
       })
 
-    {:ok, view, html} = live(conn, "/users/#{user.github_login_name}/bots")
+    {:ok, view, html} = live(conn, "/users/#{user.user_name}/bots")
     {:ok, document} = Floki.parse_document(html)
     assert [bot] = Floki.find(document, ".bot-server")
     assert Floki.text(bot) =~ "LOBBY NAME"
@@ -77,7 +77,7 @@ defmodule BattleBoxWeb.BotsTest do
   end
 
   test "if a bot server joins its reflected on the page", %{conn: conn, user: user} = context do
-    {:ok, view, html} = live(conn, "/users/#{user.github_login_name}/bots")
+    {:ok, view, html} = live(conn, "/users/#{user.user_name}/bots")
     {:ok, document} = Floki.parse_document(html)
     assert [] = Floki.find(document, ".bot-server")
 

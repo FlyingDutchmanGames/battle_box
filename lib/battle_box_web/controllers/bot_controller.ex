@@ -17,7 +17,7 @@ defmodule BattleBoxWeb.BotController do
 
     case result do
       {:ok, bot} ->
-        redirect(conn, to: Routes.user_bot_path(conn, :show, user.github_login_name, bot.name))
+        redirect(conn, to: Routes.user_bot_path(conn, :show, user.user_name, bot.name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
@@ -25,7 +25,7 @@ defmodule BattleBoxWeb.BotController do
   end
 
   def show(conn, %{"user_id" => user_name, "id" => name}) do
-    with %User{} = user <- Repo.get_by(User, github_login_name: user_name),
+    with %User{} = user <- Repo.get_by(User, user_name: user_name),
          %Bot{} = bot <- Repo.get_by(Bot, name: name, user_id: user.id) do
       bot = Repo.preload(bot, :user)
       render(conn, "show.html", bot: bot)

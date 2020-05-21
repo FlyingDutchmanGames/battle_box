@@ -1,5 +1,5 @@
 <div>User</div>
-<img style="width: 60px; height: 60px;" src="<%= @fetched_user.github_avatar_url %>">
-<div>Name: <%= @fetched_user.github_login_name %></div>
-<a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @fetched_user.github_login_name) %>">bots</a><br>
-<a href="<%= Routes.user_lobby_path(@conn, :index, @fetched_user.github_login_name) %>">lobbies</a>
+<img style="width: 60px; height: 60px;" src="<%= @fetched_user.avatar_url %>">
+<div>Name: <%= @fetched_user.user_name %></div>
+<a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @fetched_user.user_name) %>">bots</a><br>
+<a href="<%= Routes.user_lobby_path(@conn, :index, @fetched_user.user_name) %>">lobbies</a>
