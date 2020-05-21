@@ -4,7 +4,12 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
   @user_id Ecto.UUID.generate()
 
-  test "you can view a lobby", %{conn: conn} do
+  setup do
+    {:ok, user} = create_user(id: @user_id)
+    %{user: user}
+  end
+
+  test "you can view a lobby", %{conn: conn, user: user} do
     {:ok, lobby} =
       Lobby.create(%{
         name: "TEST_NAME",
@@ -14,37 +19,40 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user: user)
       |> get("/lobbies/#{lobby.id}")
 
     assert html_response(conn, 200) =~ "TEST_NAME"
   end
 
-  test "you can create a lobby", %{conn: conn} do
+  test "you can create a lobby", %{conn: conn, user: user} do
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user: user)
       |> post("/lobbies", %{"lobby" => %{"name" => "FOO"}})
 
     assert "/lobbies/" <> id = redirected_to(conn, 302)
     assert %Lobby{user_id: @user_id} = Lobby.get_by_identifier(id)
   end
 
-  test "creating a lobby with the same name as an existing lobby is an error", %{conn: conn} do
+  test "creating a lobby with the same name as an existing lobby is an error", %{
+    conn: conn,
+    user: user
+  } do
     {:ok, _} = Lobby.create(%{name: "FOO", user_id: @user_id, game_type: "robot_game"})
 
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user: user)
       |> post("/lobbies", %{"lobby" => %{"name" => "FOO"}})
 
     assert html_response(conn, 200) =~ "has already been taken"
   end
 
-  test "theres a form to create a new lobby", %{conn: conn} do
+  test "theres a form to create a new lobby", %{conn: conn, user: user} do
     conn =
       conn
-      |> signin(user_id: @user_id)
+      |> signin(user: user)
       |> get("/lobbies/new")
 
     html = html_response(conn, 200)
@@ -53,7 +61,12 @@ defmodule BattleBoxWeb.LobbyControllerTest do
   end
 
   describe "lobbies index" do
-    test "it will show a user's lobbies", %{conn: conn} do
+    test "it will 404 if the user isn't found", %{conn: conn} do
+      conn = get(conn, "/users/FAKE_USER_NAME/lobbies")
+      assert html_response(conn, 404) =~ "User (FAKE_USER_NAME) not found"
+    end
+
+    test "it will show a user's lobbies", %{conn: conn, user: user} do
       for i <- [1, 2, 3] do
         {:ok, _} =
           Lobby.create(%{
@@ -65,8 +78,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
       conn =
         conn
-        |> signin(user_id: @user_id)
-        |> get("/users/#{@user_id}/lobbies")
+        |> get("/users/#{user.github_login_name}/lobbies")
 
       html = html_response(conn, 200)
       {:ok, document} = Floki.parse_document(html)

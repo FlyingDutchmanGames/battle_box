@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.Admin.UsersTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.User
+  alias BattleBox.{User, Repo}
 
   test "if you're not signed in you can't see that page", %{conn: conn} do
     conn = get(conn, "/admin/users")
@@ -39,12 +39,12 @@ defmodule BattleBoxWeb.Admin.UsersTest do
       {:ok, view, _html} = live(conn, "/admin/users")
       render_change(view, "adjust_ban", %{"_target" => ["ban", user.id]})
 
-      user = User.get_by_id(user.id)
+      user = Repo.get(User, user.id)
       assert user.is_banned
 
       render_change(view, "adjust_ban", %{"_target" => ["unban", user.id]})
 
-      user = User.get_by_id(user.id)
+      user = Repo.get(User, user.id)
       refute user.is_banned
     end
   end
