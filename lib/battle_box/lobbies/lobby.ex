@@ -27,6 +27,10 @@ defmodule BattleBox.Lobby do
     has_many :games, Game
     belongs_to :user, User
 
+    for game_type <- @game_types do
+      has_one(game_type.settings_module.name, game_type.settings_module)
+    end
+
     timestamps()
   end
 

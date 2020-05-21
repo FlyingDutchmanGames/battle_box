@@ -1,13 +1,17 @@
 defmodule BattleBox.Games.RobotGame.Settings do
+  alias BattleBox.{Repo, Lobby}
   alias __MODULE__.{Terrain, DamageModifier}
   use Ecto.Schema
   import Ecto.Changeset
-  alias BattleBox.Repo
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  def name, do: :robot_game_settings
+
   schema "robot_game_settings" do
+    belongs_to :lobby, Lobby
+
     field :spawn_every, :integer, default: 10
     field :spawn_per_player, :integer, default: 5
     field :robot_hp, :integer, default: 50
@@ -19,6 +23,8 @@ defmodule BattleBox.Games.RobotGame.Settings do
 
     field :persistent?, :boolean, default: true, virtual: true
     field :spawn_enabled, :boolean, default: true, virtual: true
+
+    timestamps()
   end
 
   def changeset(settings, params \\ %{}) do
@@ -33,13 +39,5 @@ defmodule BattleBox.Games.RobotGame.Settings do
       :suicide_damage,
       :terrain
     ])
-  end
-
-  def new(opts \\ []) do
-    opts = Enum.into(opts, %{})
-    opts = Map.put_new(opts, :id, Ecto.UUID.generate())
-
-    %__MODULE__{}
-    |> Map.merge(opts)
   end
 end
