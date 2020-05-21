@@ -1,6 +1,6 @@
 defmodule BattleBox.UserTest do
   use BattleBox.DataCase
-  alias BattleBox.User
+  alias BattleBox.{User, Repo}
 
   setup do
     %{
@@ -15,10 +15,6 @@ defmodule BattleBox.UserTest do
     }
   end
 
-  test "get_by_id with a non uuid arg is nil and not an error" do
-    assert nil == User.get_by_id("ABCDEFGHI")
-  end
-
   describe "upsert_from_github" do
     test "if there is nothing in the db it succeeds", context do
       assert {:ok, user} = User.upsert_from_github(context.user_from_github)
@@ -27,7 +23,7 @@ defmodule BattleBox.UserTest do
 
     test "it will upsert the row if its called twice", context do
       assert {:ok, _} = User.upsert_from_github(context.user_from_github)
-      user = User.get_by_github_id(context.user_from_github["id"])
+      user = Repo.get_by(User, github_id: context.user_from_github["id"])
       assert user.github_login_name == "GrantJamesPowell"
 
       assert {:ok, user2} =
@@ -44,19 +40,12 @@ defmodule BattleBox.UserTest do
       assert user.is_banned
 
       {:ok, _user} = User.set_ban_status(user, false)
-      user = User.get_by_id(user.id)
+      user = Repo.get(User, user.id)
       refute user.is_banned
 
       {:ok, _user} = User.set_ban_status(user, true)
-      user = User.get_by_id(user.id)
+      user = Repo.get(User, user.id)
       assert user.is_banned
     end
-  end
-
-  test "you can get by identifier" do
-    {:ok, %{id: id} = user} = create_user(%{})
-    assert nil == User.get_by_identifier(nil)
-    assert %{id: ^id} = User.get_by_identifier(user.id)
-    assert %{id: ^id} = User.get_by_identifier(user.github_login_name)
   end
 end

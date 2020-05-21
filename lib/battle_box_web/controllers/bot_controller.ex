@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.BotController do
   use BattleBoxWeb, :controller
   alias BattleBoxWeb.PageView
-  alias BattleBox.{Repo, Bot}
+  alias BattleBox.{Repo, Bot, User}
 
   def new(conn, _params) do
     changeset = Bot.changeset(%Bot{})
@@ -17,22 +17,19 @@ defmodule BattleBoxWeb.BotController do
 
     case result do
       {:ok, bot} ->
-        redirect(conn, to: Routes.user_bot_path(conn, :show, user.id, bot.name))
+        redirect(conn, to: Routes.user_bot_path(conn, :show, user.github_login_name, bot.name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
   end
 
-  def show(conn, %{"user_id" => user_id, "id" => name}) do
-    bot =
-      Repo.get_by(Bot, user_id: user_id, name: name)
-      |> Repo.preload(:user)
-
-    case bot do
-      %Bot{} = bot ->
-        render(conn, "show.html", bot: bot)
-
+  def show(conn, %{"user_id" => user_name, "id" => name}) do
+    with %User{} = user <- Repo.get_by(User, github_login_name: user_name),
+         %Bot{} = bot <- Repo.get_by(Bot, name: name, user_id: user.id) do
+      bot = Repo.preload(bot, :user)
+      render(conn, "show.html", bot: bot)
+    else
       nil ->
         conn
         |> put_status(404)

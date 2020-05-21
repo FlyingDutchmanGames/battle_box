@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.Router do
   use BattleBoxWeb, :router
   import Phoenix.LiveDashboard.Router
-  alias BattleBox.User
+  alias BattleBox.{Repo, User}
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -95,7 +95,7 @@ defmodule BattleBoxWeb.Router do
 
   defp fetch_user(conn, _) do
     with id when not is_nil(id) <- get_session(conn, "user_id"),
-         %User{} = user <- User.get_by_id(id) do
+         %User{} = user <- Repo.get(User, id) do
       assign(conn, :current_user, user)
     else
       _ ->
