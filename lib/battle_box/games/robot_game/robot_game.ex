@@ -5,6 +5,7 @@ defmodule BattleBox.Games.RobotGame do
   alias __MODULE__.Settings.{Terrain, DamageModifier}
   use Ecto.Schema
   import Ecto.Changeset
+  import __MODULE__.Settings.SharedSettings
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -13,14 +14,6 @@ defmodule BattleBox.Games.RobotGame do
     field :turn, :integer, default: 0
     field :events, {:array, Event}, default: []
     belongs_to :game, Game
-    field :spawn_every, :integer
-    field :spawn_per_player, :integer
-    field :robot_hp, :integer
-    field :max_turns, :integer
-    field :attack_damage, DamageModifier
-    field :collision_damage, DamageModifier
-    field :suicide_damage, DamageModifier
-    field :terrain, :binary
 
     field :persistent?, :boolean, default: true, virtual: true
     field :spawn_enabled, :boolean, default: true, virtual: true
@@ -29,6 +22,7 @@ defmodule BattleBox.Games.RobotGame do
     field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
     field :robot_id_seq, :integer, default: 0, virtual: true
 
+    shared_robot_game_settings_schema_fields()
     timestamps()
   end
 
@@ -129,9 +123,9 @@ defmodule BattleBox.Games.RobotGame do
   def new(opts \\ []) do
     settings =
       case opts[:settings] do
-        nil -> Settings.new()
+        nil -> %Settings{}
         %Settings{} = settings -> settings
-        %{} = settings -> Settings.new(settings)
+        %{} = settings -> Map.merge(%Settings{}, settings)
       end
       |> Map.take([
         :spawn_every,

@@ -24,6 +24,7 @@ defmodule BattleBox.Lobby do
     field :game_acceptance_time_ms, :integer, default: 2000
     field :command_time_minimum_ms, :integer, default: 250
     field :command_time_maximum_ms, :integer, default: 1000
+
     has_many :games, Game
     belongs_to :user, User
 
@@ -41,6 +42,7 @@ defmodule BattleBox.Lobby do
     |> validate_inclusion(:game_type, @game_types)
     |> validate_length(:name, max: 50)
     |> unique_constraint(:name)
+    |> cast_assoc(:robot_game_settings)
   end
 
   def game_types, do: @game_types
