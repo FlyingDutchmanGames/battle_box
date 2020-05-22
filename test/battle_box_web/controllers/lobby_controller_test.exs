@@ -10,12 +10,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
   end
 
   test "you can view a lobby", %{conn: conn, user: user} do
-    {:ok, lobby} =
-      Lobby.create(%{
-        name: "TEST_NAME",
-        user_id: @user_id,
-        game_type: "robot_game"
-      })
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "TEST_NAME")
 
     conn =
       conn
@@ -39,7 +34,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
     conn: conn,
     user: user
   } do
-    {:ok, _} = Lobby.create(%{name: "FOO", user_id: @user_id, game_type: "robot_game"})
+    {:ok, _} = robot_game_lobby(user: user, lobby_name: "FOO")
 
     conn =
       conn
@@ -68,12 +63,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
     test "it will show a user's lobbies", %{conn: conn, user: user} do
       for i <- [1, 2, 3] do
-        {:ok, _} =
-          Lobby.create(%{
-            name: "TEST_NAME#{i}",
-            user_id: @user_id,
-            game_type: BattleBox.Games.RobotGame
-          })
+        {:ok, _} = robot_game_lobby(user: user, name: "TEST NAME#{i}")
       end
 
       conn =

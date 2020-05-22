@@ -45,5 +45,12 @@ defmodule BattleBox.Lobby do
     |> cast_assoc(:robot_game_settings)
   end
 
+  def get_settings(lobby) do
+    Repo.preload(lobby, :robot_game_settings)
+    |> case do
+      %{robot_game_settings: robot_game_settings} -> robot_game_settings
+    end
+  end
+
   def game_types, do: @game_types
 end

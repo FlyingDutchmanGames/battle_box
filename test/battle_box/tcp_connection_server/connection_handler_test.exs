@@ -31,12 +31,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     {:ok, user} = create_user(id: @user_id)
 
     {:ok, lobby} =
-      Lobby.create(%{
-        name: @lobby_name,
-        game_type: RobotGame,
-        user_id: @user_id,
-        command_time_minimum_ms: 1
-      })
+      robot_game_lobby(user: user, lobby_name: @lobby_name, command_time_minimum_ms: 1)
 
     {:ok, bot} =
       user

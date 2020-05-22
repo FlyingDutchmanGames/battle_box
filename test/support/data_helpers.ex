@@ -43,7 +43,9 @@ defmodule BattleBox.Test.DataHelpers do
       |> Lobby.changeset(%{
         "name" => opts[:lobby_name] || "LOBBY NAME",
         "game_type" => "robot_game",
+        "command_time_minimum_ms" => opts[:command_time_minimum_ms] || 20,
         "robot_game_settings" => %{}
       })
+      |> Repo.insert()
   end
 end

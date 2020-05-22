@@ -13,12 +13,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       |> Bot.changeset(%{name: "TEST BOT"})
       |> Repo.insert()
 
-    {:ok, lobby} =
-      Lobby.create(%{
-        name: "TEST LOBBY",
-        game_type: "robot_game",
-        user_id: Ecto.UUID.generate()
-      })
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "TEST LOBBY")
 
     %{bot: bot, lobby: lobby}
   end

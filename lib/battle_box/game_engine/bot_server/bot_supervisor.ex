@@ -16,7 +16,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
         %{connection: connection, lobby_name: lobby_name, token: token, bot_name: bot_name}
       ) do
     with {:ok, bot} <- ApiKey.authenticate_bot(token, bot_name),
-         {:lobby, %Lobby{} = lobby} <- {:lobby, Lobby.get_by_name(lobby_name)} do
+         {:lobby, %Lobby{} = lobby} <- {:lobby, Repo.get_by(Lobby, name: lobby_name)} do
       start_bot(game_engine, %{connection: connection, bot: bot, lobby: lobby})
     else
       {:error, reason} when reason in [:invalid_token, :bot_not_found, :banned] ->

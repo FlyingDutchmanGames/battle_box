@@ -24,13 +24,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
 
     bot = Repo.preload(bot, :user)
 
-    {:ok, lobby} =
-      Lobby.create(%{
-        user_id: @user_id,
-        name: "LOBBY NAME",
-        game_type: RobotGame,
-        command_time_minimum_ms: 10
-      })
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "Lobby name")
 
     %{lobby: lobby, bot: bot}
   end
