@@ -9,8 +9,7 @@ defmodule BattleBoxWeb.GameTest do
     Game,
     GameEngine,
     GameEngine.GameServer,
-    Games.RobotGame,
-    Lobby
+    Games.RobotGame
   }
 
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]

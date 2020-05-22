@@ -39,7 +39,7 @@ defmodule BattleBox.LobbyTest do
   end
 
   describe "validations" do
-    test "Name must not be blank", %{user: user} do
+    test "Name must not be blank" do
       changeset = Lobby.changeset(%Lobby{}, %{name: ""})
       assert changeset.errors[:name] == {"can't be blank", [validation: :required]}
     end

@@ -1,7 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">Lobbies</div>
-    <%= if @current_user.id == @user.id do %>
+    <%= if @current_user && @current_user.id == @user.id do %>
       <div class="subhead-action">
         <a href="<%= Routes.lobby_path(@conn, :new) %>" class="btn btn-primary">New Lobby</a>
       </div>
@@ -9,9 +9,9 @@
   </div>
   <div class="box">
     <%= for lobby <- @user.lobbies do %>
-      <div class="box-row">
+      <div class="box-row lobby">
         <div class="box-details">
-          <div style="font-weight: bolder; padding-bottom: 10px;">Name: <%= lobby.name %></div>
+          <div class="name" style="font-weight: bolder; padding-bottom: 10px;">Name: <%= lobby.name %></div>
           <div>Type: <%= lobby.game_type.title %></div>
           <div>Created: <%= humanize_seconds_ago(lobby.inserted_at) %></div>
         </div>

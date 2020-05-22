@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.Router do
   use BattleBoxWeb, :router
-  import Phoenix.LiveDashboard.Router
   alias BattleBox.{Repo, User}
+  import Phoenix.LiveDashboard.Router
 
   pipeline :browser do
     plug :accepts, ["html"]

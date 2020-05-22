@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.GameServerTest do
-  alias BattleBox.{Game, Lobby, GameEngine, GameEngine.GameServer, Games.RobotGame}
+  alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame}
   alias BattleBox.Games.RobotGame.Settings.Terrain
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
@@ -135,7 +135,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
                      %{
                        game_id: ^game_id,
                        maximum_time: 1000,
-                       minimum_time: 250,
+                       minimum_time: 20,
                        game_state: %{robots: [], turn: 0},
                        player: 1
                      }}}
@@ -145,7 +145,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
                      %{
                        game_id: ^game_id,
                        maximum_time: 1000,
-                       minimum_time: 250,
+                       minimum_time: 20,
                        game_state: %{robots: [], turn: 0},
                        player: 2
                      }}}

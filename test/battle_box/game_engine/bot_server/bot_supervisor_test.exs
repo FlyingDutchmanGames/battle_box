@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
-  alias BattleBox.{GameEngine, ApiKey, Bot, User, Lobby, GameEngine.BotServer.BotSupervisor}
+  alias BattleBox.{GameEngine, ApiKey, Bot, User, GameEngine.BotServer.BotSupervisor}
   use BattleBox.DataCase, async: true
 
   @user_id Ecto.UUID.generate()

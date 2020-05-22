@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{GameEngine, Repo, Bot, Lobby, Games.RobotGame}
+  alias BattleBox.{GameEngine, Repo, Bot, Lobby}
   alias BattleBox.GameEngine.{MatchMaker, BotServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 

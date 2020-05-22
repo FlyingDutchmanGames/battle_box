@@ -1,7 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase
-  alias BattleBox.{ApiKey, Bot, User, GameEngine, TcpConnectionServer, Lobby}
-  alias BattleBox.Games.RobotGame
+  alias BattleBox.{ApiKey, Bot, User, GameEngine, TcpConnectionServer}
   import BattleBox.GameEngine, only: [get_connection: 2]
   import BattleBox.Connection.Message
 
