@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
-  alias BattleBox.{GameEngine, ApiKey, Bot, User, Lobby, GameEngine.BotServer.BotSupervisor}
+  alias BattleBox.{GameEngine, ApiKey, Bot, User, GameEngine.BotServer.BotSupervisor}
   use BattleBox.DataCase, async: true
 
   @user_id Ecto.UUID.generate()
@@ -25,7 +25,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
       |> Repo.insert!()
       |> Repo.preload(:user)
 
-    {:ok, lobby} = Lobby.create(%{name: "BAR", user_id: @user_id, game_type: "robot_game"})
+    {:ok, lobby} = robot_game_lobby(%{user: user, name: "BAR"})
     %{lobby: lobby, bot: bot, key: key, user: user}
   end
 

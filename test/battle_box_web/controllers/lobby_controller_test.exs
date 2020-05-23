@@ -1,6 +1,5 @@
 defmodule BattleBoxWeb.LobbyControllerTest do
   use BattleBoxWeb.ConnCase, async: false
-  alias BattleBox.Lobby
 
   @user_id Ecto.UUID.generate()
 
@@ -10,17 +9,12 @@ defmodule BattleBoxWeb.LobbyControllerTest do
   end
 
   test "you can view a lobby", %{conn: conn, user: user} do
-    {:ok, lobby} =
-      Lobby.create(%{
-        name: "TEST_NAME",
-        user_id: @user_id,
-        game_type: "robot_game"
-      })
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "TEST_NAME")
 
     conn =
       conn
       |> signin(user: user)
-      |> get("/lobbies/#{lobby.id}")
+      |> get("/lobbies/#{lobby.name}")
 
     assert html_response(conn, 200) =~ "TEST_NAME"
   end
@@ -29,22 +23,23 @@ defmodule BattleBoxWeb.LobbyControllerTest do
     conn =
       conn
       |> signin(user: user)
-      |> post("/lobbies", %{"lobby" => %{"name" => "FOO"}})
+      |> post("/lobbies", %{"lobby" => %{"name" => "FOO", "game_type" => "robot_game"}})
 
-    assert "/lobbies/" <> id = redirected_to(conn, 302)
-    assert %Lobby{user_id: @user_id} = Lobby.get_by_identifier(id)
+    url = redirected_to(conn, 302)
+    %{"user" => user_name} = Regex.named_captures(~r/\/users\/(?<user>.*)\/lobbies/, url)
+    assert URI.encode_www_form(user.user_name) == user_name
   end
 
   test "creating a lobby with the same name as an existing lobby is an error", %{
     conn: conn,
     user: user
   } do
-    {:ok, _} = Lobby.create(%{name: "FOO", user_id: @user_id, game_type: "robot_game"})
+    {:ok, _lobby} = robot_game_lobby(user: user, lobby_name: "FOO")
 
     conn =
       conn
       |> signin(user: user)
-      |> post("/lobbies", %{"lobby" => %{"name" => "FOO"}})
+      |> post("/lobbies", %{"lobby" => %{"name" => "FOO", "game_type" => "robot_game"}})
 
     assert html_response(conn, 200) =~ "has already been taken"
   end
@@ -68,12 +63,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
     test "it will show a user's lobbies", %{conn: conn, user: user} do
       for i <- [1, 2, 3] do
-        {:ok, _} =
-          Lobby.create(%{
-            name: "TEST_NAME#{i}",
-            user_id: @user_id,
-            game_type: BattleBox.Games.RobotGame
-          })
+        {:ok, _} = robot_game_lobby(user: user, lobby_name: "TEST_NAME#{i}")
       end
 
       conn =

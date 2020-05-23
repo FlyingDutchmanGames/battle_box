@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.MatchMakerServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Bot, Lobby, GameEngine}
+  alias BattleBox.{Bot, GameEngine}
   alias BattleBox.GameEngine.{MatchMaker, MatchMakerServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -26,14 +26,9 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
       |> Bot.changeset(%{name: "FOO"})
       |> Repo.insert()
 
-    {:ok, lobby} =
-      Lobby.create(%{
-        name: "TEST LOBBY",
-        game_type: "robot_game",
-        user_id: Ecto.UUID.generate()
-      })
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "TEST LOBBY")
 
-    %{lobby: lobby, bot: bot}
+    %{lobby: lobby, bot: bot, user: user}
   end
 
   test "you can start it", names do
@@ -60,16 +55,11 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
   end
 
   test "it will not match up two players in different lobbies",
-       %{lobby: lobby, bot: bot} = names do
+       %{lobby: lobby, bot: bot, user: user} = names do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
 
-    {:ok, lobby2} =
-      Lobby.create(%{
-        name: "TEST LOBBY 2",
-        game_type: "robot_game",
-        user_id: Ecto.UUID.generate()
-      })
+    {:ok, lobby2} = robot_game_lobby(user: user, lobby_name: "TEST LOBBY 2")
 
     :ok = MatchMaker.join_queue(names.game_engine, lobby.id, bot, player_1_pid)
     :ok = MatchMaker.join_queue(names.game_engine, lobby2.id, bot, player_2_pid)

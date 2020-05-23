@@ -5,7 +5,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
   def make_matches([_], _), do: []
 
   def make_matches(enqueued_players, lobby_id) do
-    %Lobby{} = lobby = Lobby.get_by_id(lobby_id)
+    %Lobby{} = lobby = Repo.get(Lobby, lobby_id)
     settings = Lobby.get_settings(lobby)
     players = lobby.game_type.players_for_settings(settings)
 

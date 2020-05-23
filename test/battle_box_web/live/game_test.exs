@@ -9,8 +9,7 @@ defmodule BattleBoxWeb.GameTest do
     Game,
     GameEngine,
     GameEngine.GameServer,
-    Games.RobotGame,
-    Lobby
+    Games.RobotGame
   }
 
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
@@ -20,7 +19,7 @@ defmodule BattleBoxWeb.GameTest do
 
   setup do
     {:ok, user} = create_user(%{user_id: @user_id})
-    {:ok, lobby} = Lobby.create(%{name: "TEST LOBBY", game_type: RobotGame, user_id: @user_id})
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "TEST LOBBY")
 
     {:ok, bot} =
       user

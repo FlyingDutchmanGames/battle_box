@@ -17,7 +17,7 @@
         <form action="/keys/<%= api_key.id %>" method="post">
           <input name="_csrf_token" type="hidden" value="<%= Plug.CSRFProtection.get_csrf_token() %>">
           <input type="hidden" name="_method" value="delete">
-          <button type="submit" class="btn btn-danger btn-block mt-3">Revoke</button>
+          <button type="submit" class="btn btn-danger">Revoke</button>
         </form>
       </div>
     <% end %>

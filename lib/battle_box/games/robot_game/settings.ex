@@ -1,24 +1,21 @@
 defmodule BattleBox.Games.RobotGame.Settings do
-  alias __MODULE__.{Terrain, DamageModifier}
+  alias BattleBox.{Repo, Lobby}
+  import __MODULE__.SharedSettings
   use Ecto.Schema
   import Ecto.Changeset
-  alias BattleBox.Repo
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
+  def name, do: :robot_game_settings
+
   schema "robot_game_settings" do
-    field :spawn_every, :integer, default: 10
-    field :spawn_per_player, :integer, default: 5
-    field :robot_hp, :integer, default: 50
-    field :max_turns, :integer, default: 100
-    field :attack_damage, DamageModifier, default: %{min: 8, max: 10}
-    field :collision_damage, DamageModifier, default: 5
-    field :suicide_damage, DamageModifier, default: 15
-    field :terrain, :binary, default: Terrain.default()
+    belongs_to :lobby, Lobby
 
     field :persistent?, :boolean, default: true, virtual: true
     field :spawn_enabled, :boolean, default: true, virtual: true
+    shared_robot_game_settings_schema_fields()
+    timestamps()
   end
 
   def changeset(settings, params \\ %{}) do
@@ -33,17 +30,5 @@ defmodule BattleBox.Games.RobotGame.Settings do
       :suicide_damage,
       :terrain
     ])
-  end
-
-  def new(opts \\ []) do
-    opts = Enum.into(opts, %{})
-    opts = Map.put_new(opts, :id, Ecto.UUID.generate())
-
-    %__MODULE__{}
-    |> Map.merge(opts)
-  end
-
-  def get_by_id(id) do
-    Repo.get_by(__MODULE__, id: id)
   end
 end

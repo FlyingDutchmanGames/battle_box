@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.BotsServerFollowTest do
   use BattleBoxWeb.ConnCase
   import Phoenix.LiveViewTest
-  alias BattleBox.{GameEngine, GameEngine.BotServer, Lobby, Bot, GameEngineProvider.Mock}
+  alias BattleBox.{GameEngine, GameEngine.BotServer, Bot, GameEngineProvider.Mock}
 
   @bot_server_id Ecto.UUID.generate()
   @user_id Ecto.UUID.generate()
@@ -16,12 +16,7 @@ defmodule BattleBoxWeb.BotsServerFollowTest do
   setup context do
     {:ok, user} = create_user(%{user_id: @user_id})
 
-    {:ok, lobby} =
-      Lobby.create(%{
-        user_id: @user_id,
-        name: "LOBBY NAME",
-        game_type: "robot_game"
-      })
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "LOBBY NAME")
 
     {:ok, bot} =
       user

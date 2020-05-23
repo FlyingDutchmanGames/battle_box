@@ -58,7 +58,7 @@ defmodule BattleBox.Games.RobotGame.EventTest do
       }
     ]
     |> Enum.each(fn event ->
-      game = RobotGame.new(settings: Settings.new(), events: [event]) |> RobotGame.changeset()
+      game = RobotGame.new(settings: %Settings{}, events: [event]) |> RobotGame.changeset()
 
       {:ok, game} = Repo.insert(game)
 

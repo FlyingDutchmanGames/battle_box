@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.LobbyTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-  alias BattleBox.{Bot, Lobby, GameEngine, GameEngine.BotServer}
+  alias BattleBox.{Bot, GameEngine, GameEngine.BotServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @user_id Ecto.UUID.generate()
@@ -18,7 +18,7 @@ defmodule BattleBoxWeb.LobbyTest do
 
   setup context do
     {:ok, user} = create_user(user_id: @user_id)
-    {:ok, lobby} = Lobby.create(%{name: "TEST LOBBY", game_type: "robot_game", user_id: @user_id})
+    {:ok, lobby} = robot_game_lobby(%{lobby_name: "TEST LOBBY", user: user})
 
     {:ok, bot} =
       user
@@ -55,11 +55,15 @@ defmodule BattleBoxWeb.LobbyTest do
 
   describe "live games" do
     test "it will show live games in the lobby", %{conn: conn} = context do
+      Process.link(context.bot_server_1)
+      Process.link(context.bot_server_2)
+
       :ok = BotServer.match_make(context.bot_server_1)
       :ok = BotServer.match_make(context.bot_server_2)
       :ok = GameEngine.force_match_make(context.game_engine)
-      Process.sleep(10)
-      {:ok, _view, html} = live(conn, "/lobbies/#{context.lobby.id}")
+
+      Process.sleep(100)
+      {:ok, _view, html} = live(conn, "/lobbies/#{context.lobby.name}")
       {:ok, document} = Floki.parse_document(html)
       assert [_] = Floki.find(document, ".game")
     end
@@ -68,7 +72,7 @@ defmodule BattleBoxWeb.LobbyTest do
       :ok = BotServer.match_make(context.bot_server_1)
       :ok = BotServer.match_make(context.bot_server_2)
       :ok = GameEngine.force_match_make(context.game_engine)
-      {:ok, view, html} = live(conn, "/lobbies/#{context.lobby.id}")
+      {:ok, view, html} = live(conn, "/lobbies/#{context.lobby.name}")
       {:ok, document} = Floki.parse_document(html)
       assert [_] = Floki.find(document, ".game")
       Process.exit(context.bot_server_1, :kill)
@@ -78,7 +82,7 @@ defmodule BattleBoxWeb.LobbyTest do
     end
 
     test "it will add newly started games to the page", %{conn: conn} = context do
-      {:ok, view, html} = live(conn, "/lobbies/#{context.lobby.id}")
+      {:ok, view, html} = live(conn, "/lobbies/#{context.lobby.name}")
       {:ok, document} = Floki.parse_document(html)
       assert [] == Floki.find(document, ".game")
 
