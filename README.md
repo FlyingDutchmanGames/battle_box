@@ -27,52 +27,39 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 
 ### V1
 
-- [ ] Styling
-  - [x] Pick some colors
-  - [x] Pick a font
-  - [x] Rebrand everything to botskrieg
-  - [ ] Bots Live Page
-- [ ] Top level navigation
-  - [x] Bots
-  - [x] Lobbies
-  - [ ] Games
-- [ ] Make sure user input can't cause a game to crash
-- [ ] More Efficent Robot Game Representation
-  - [x] Super high memory usage in lobby liveview, likely due to pulling multiple games into memory
-  - [x] break out the live game data from the live game metadata, most places (lobby live) only need live game metadad
-  - [x] Binary representation of robot game events
-  - [x] Binary representation of terrain (would be nice if was a literal)
-  - [ ] limit memory usage of game servers (they're currently at 2 mbs)
-  - [ ] Manual GC?
-- [ ] Lobby Page
-  - [x] Show Live Games
-  - [x] Add score to in game server registry metadata
-  - [ ] Link to historical games
-- [ ] historical games page
-   - [ ] Get something in the page
-   - [ ] Efficent Pagination
-   - [ ] Filter by (lobby id, user id, bot id)
- - [ ] live games page (Probably works via the historical game pages html/css?)
- - [ ] Static Site
-  - [ ] Wire protocol docs
-  - [ ] Robot game rules docs
-- [ ] Lobby settings passed correctly
-  - [ ] bot self play allowed toggle
-  - [ ] user self play allowed toggle
-  - [x] Delay moves until alloted time/submit as fast as possible setting
-  - [x] write move timeout ms onto the lobby settings
-- [ ] Bot Info Page
+#### Bots
+#### Lobbies
+- [ ] Robot Game Settings
+  - [ ] Terrain Editor
+- [ ] bot self play allowed toggle
+- [ ] user self play allowed toggle
+#### Games
+- [ ] Historical Games Filtered/Paginated by [user, bot, lobby]
+- [ ] Live Games that meet the same criteria
+#### Clients
 - [ ] BattleBox Elixir Client
 - [ ] BattleBox Python Client
-- [ ] Visualize games better (include moves and historical turns)
-  - [x] Key through turns, and have turns be sharable via url
-  - [ ] Changing a turn does not affect history api so its easier to use back button
-- [ ] Remove row-min/max from terrain, because everything must be 0 indexed
-- [ ] Enforce ASCII < 12 chars no spaces/special in names of everythin
-- [ ] Make the end turns the number of turns in the game
+- [ ] Make sure user input can't cause a game to crash
+- [ ] WebSocket interface
+#### Robot Game Representation
+- [ ] limit memory usage of game servers (they're currently at 2 mbs)
+- [ ] Manual GC?
+#### Static Site
+- [ ] Wire protocol docs
+- [ ] Robot game rules docs
 - [ ] Switch bot tokens to user tokens
-- [ ] Upgrade phoenix/liveview
-- [ ] Terrain Editor
+#### Robot Game
+- [ ] More efficent game visualizer
+- [ ] Make the end turns the number of turns in the game
+- [ ] Remove row-min/max from terrain, because everything must be 0 indexed
+#### General
+- Upgrade phoenix/liveview
+- Impersonation
+- Concurrent connection limiter
+- Enforce ASCII < 12 chars no spaces/special in names of everything
+  - [ ] User.username
+  - [ ] Lobby.name
+  - [ ] Bot.name
 
 ### Nice to Haves
 
@@ -80,27 +67,13 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Handle when connection is closed on trying to send from connection server
 - [ ] A decent bot implmentation for testing
 - [ ] Connection Debugger (this has some issues due to amount of messages...)
-- [ ] Element Storybook
-- [ ] Concurrent connection limiter
 - [ ] Downloads controller, and `as_downloadable` as part of the game protocol
 - [ ] Google Analytics on the github page
 - [ ] Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
 - [ ] Build TicTacToe as proof of game engine extendability
 - [ ] `mix battle_box.swarm {optional credentials file}` task to run a swarm against a botskrieg server for regression testing
-- [ ] Get factory bot for elixir installed and working (its becoming too hard to mock data)
 - [ ] Pass timing info to the game so it can do move timing
 - [ ] Make all tests async by passing the ecto sandbox to all of the game engine
-- [ ] WebSocket Interface
-
-### Done
-- [x] Have the game table have all the data about the game
-- [x] Httpoison => ~Mojito~ Gun
-- [x] Live Games Page
-   - [x] Show moves
-    - [x] Move
-    - [x] Guard
-    - [x] Suicide
-    - [x] Attack
 
 ### Useful SQL
 
