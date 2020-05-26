@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Game, Bot, Lobby, Repo}
+  alias BattleBox.{Bot, Lobby, Repo}
   import BattleBox.GameEngine.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 

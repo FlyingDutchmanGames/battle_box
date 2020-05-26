@@ -49,6 +49,7 @@ defmodule BattleBoxWeb.GameTest do
     {:ok, %{id: id}} =
       %Game{
         lobby: context.lobby,
+        lobby_id: context.lobby.id,
         game_type: RobotGame,
         robot_game: robot_game,
         game_bots: context.game_bots
@@ -65,6 +66,7 @@ defmodule BattleBoxWeb.GameTest do
     {:ok, %{id: id}} =
       %Game{
         lobby: context.lobby,
+        lobby_id: context.lobby.id,
         game_type: RobotGame,
         robot_game: %RobotGame{},
         game_bots: context.game_bots
@@ -96,6 +98,7 @@ defmodule BattleBoxWeb.GameTest do
           game: %Game{
             id: @game_id,
             lobby: lobby,
+            lobby_id: lobby.id,
             game_bots: game_bots,
             game_type: RobotGame,
             robot_game: %RobotGame{}
@@ -141,6 +144,7 @@ defmodule BattleBoxWeb.GameTest do
         %Game{
           id: @game_id,
           lobby: context.lobby,
+          lobby_id: context.lobby.id,
           game_type: RobotGame,
           robot_game: %RobotGame{},
           game_bots: context.game_bots
@@ -164,6 +168,7 @@ defmodule BattleBoxWeb.GameTest do
       {:ok, _} =
         %Game{
           lobby: context.lobby,
+          lobby_id: context.lobby.id,
           robot_game: robot_game,
           game_bots: context.game_bots,
           game_type: RobotGame,

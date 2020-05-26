@@ -22,6 +22,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
         game: %Game{
           id: Ecto.UUID.generate(),
           lobby: lobby,
+          lobby_id: lobby.id,
           game_type: RobotGame,
           game_bots: [],
           robot_game: %RobotGame{}
@@ -188,8 +189,11 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
     game = %Game{
+      id: Ecto.UUID.generate(),
       lobby: context.lobby,
+      lobby_id: context.lobby.id,
       game_type: RobotGame,
+      game_bots: [],
       robot_game: %RobotGame{max_turns: 10}
     }
 
@@ -210,7 +214,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
         {:player_1, {:commands_request, %{game_state: %{turn: ^turn}}}} ->
           GameServer.submit_commands(pid, 1, [])
       after
-        100 -> raise "FAIL"
+        100 -> raise "FAIL FOR TURN #{turn}"
       end
 
       receive do:
