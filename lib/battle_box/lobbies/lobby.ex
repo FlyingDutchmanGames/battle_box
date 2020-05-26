@@ -1,14 +1,25 @@
 defmodule BattleBox.Lobby do
+  defmodule GameType do
+    use Ecto.Type
+    import BattleBox.InstalledGames
+
+    def type, do: :string
+
+    for game <- installed_games() do
+      def cast(unquote("#{game.name}")), do: {:ok, unquote(game)}
+      def cast(unquote(game)), do: {:ok, unquote(game)}
+      def load(unquote("#{game.name}")), do: {:ok, unquote(game)}
+      def dump(unquote(game)), do: {:ok, unquote("#{game.name}")}
+    end
+  end
+
   use Ecto.Schema
   import Ecto.Changeset
+  import BattleBox.InstalledGames
   alias BattleBox.{Repo, User, Game}
-  alias __MODULE__.GameType
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
-
-  @game_types Application.get_env(:battle_box, BattleBox.GameEngine)[:games] ||
-                raise("Must set the :battle_box, BattleBox.GameEngine, :games config value")
 
   @params [
     :name,
@@ -20,15 +31,16 @@ defmodule BattleBox.Lobby do
 
   schema "lobbies" do
     field :name, :string
-    field :game_type, GameType
     field :game_acceptance_time_ms, :integer, default: 2000
     field :command_time_minimum_ms, :integer, default: 250
     field :command_time_maximum_ms, :integer, default: 1000
 
+    field :game_type, GameType
+
     has_many :games, Game
     belongs_to :user, User
 
-    for game_type <- @game_types do
+    for game_type <- installed_games() do
       has_one(game_type.settings_module.name, game_type.settings_module)
     end
 
@@ -39,7 +51,7 @@ defmodule BattleBox.Lobby do
     lobby
     |> cast(params, @params)
     |> validate_required(@params)
-    |> validate_inclusion(:game_type, @game_types)
+    |> validate_inclusion(:game_type, installed_games())
     |> validate_length(:name, max: 50)
     |> unique_constraint(:name)
     |> cast_assoc(:robot_game_settings)
@@ -51,6 +63,4 @@ defmodule BattleBox.Lobby do
       %{robot_game_settings: robot_game_settings} -> robot_game_settings
     end
   end
-
-  def game_types, do: @game_types
 end

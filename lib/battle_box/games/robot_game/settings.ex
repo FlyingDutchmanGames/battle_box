@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.Settings do
-  alias BattleBox.{Repo, Lobby}
+  alias BattleBox.Lobby
   import __MODULE__.SharedSettings
   use Ecto.Schema
   import Ecto.Changeset
@@ -16,6 +16,19 @@ defmodule BattleBox.Games.RobotGame.Settings do
     field :spawn_enabled, :boolean, default: true, virtual: true
     shared_robot_game_settings_schema_fields()
     timestamps()
+  end
+
+  def shared_fields do
+    [
+      :spawn_every,
+      :spawn_per_player,
+      :robot_hp,
+      :max_turns,
+      :attack_damage,
+      :collision_damage,
+      :suicide_damage,
+      :terrain
+    ]
   end
 
   def changeset(settings, params \\ %{}) do

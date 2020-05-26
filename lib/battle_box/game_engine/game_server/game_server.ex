@@ -113,7 +113,7 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event(:internal, :finalize, _state, %{game: game} = data) do
-    {:ok, game} = Game.persist(game)
+    {:ok, game} = Repo.insert(game)
 
     for {_player, pid} <- data.players do
       send(pid, game_over_message(game))

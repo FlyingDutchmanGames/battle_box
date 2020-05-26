@@ -15,8 +15,18 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
     %{
       init_opts: %{
-        players: %{1 => named_proxy(:player_1), 2 => named_proxy(:player_2)},
-        game: Game.new(lobby: lobby, robot_game: RobotGame.new())
+        players: %{
+          1 => named_proxy(:player_1),
+          2 => named_proxy(:player_2)
+        },
+        game: %Game{
+          id: Ecto.UUID.generate(),
+          lobby: lobby,
+          lobby_id: lobby.id,
+          game_type: RobotGame,
+          game_bots: [],
+          robot_game: %RobotGame{}
+        }
       },
       lobby: lobby
     }
@@ -178,7 +188,14 @@ defmodule BattleBox.GameEngine.GameServerTest do
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
-    game = Game.new(lobby: context.lobby, robot_game: RobotGame.new(settings: %{max_turns: 10}))
+    game = %Game{
+      id: Ecto.UUID.generate(),
+      lobby: context.lobby,
+      lobby_id: context.lobby.id,
+      game_type: RobotGame,
+      game_bots: [],
+      robot_game: %RobotGame{max_turns: 10}
+    }
 
     {:ok, pid} = GameEngine.start_game(context.game_engine, %{context.init_opts | game: game})
 
@@ -197,7 +214,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
         {:player_1, {:commands_request, %{game_state: %{turn: ^turn}}}} ->
           GameServer.submit_commands(pid, 1, [])
       after
-        100 -> raise "FAIL"
+        100 -> raise "FAIL FOR TURN #{turn}"
       end
 
       receive do:
@@ -209,7 +226,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     assert_receive {:player_2, {:game_over, %{game_id: ^game_id}}}
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
 
-    loaded_game = Game.get_by_id(game_id)
+    loaded_game = Repo.get(Game, game_id)
     refute is_nil(loaded_game)
   end
 end

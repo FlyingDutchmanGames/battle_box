@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Game, Bot, Lobby, Repo}
+  alias BattleBox.{Bot, Lobby, Repo}
   import BattleBox.GameEngine.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -72,7 +72,6 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       :collision_damage,
       :suicide_damage,
       :terrain,
-      :persistent?,
       :spawn_enabled
     ]
 
@@ -93,7 +92,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
         lobby_id
       )
 
-    {:ok, game} = Game.persist(game)
+    {:ok, game} = Repo.insert(game)
     game = Repo.preload(game, [:game_bots])
     assert %{lobby_id: lobby_id} = game
 

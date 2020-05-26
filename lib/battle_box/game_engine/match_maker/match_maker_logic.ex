@@ -1,6 +1,5 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
   alias BattleBox.{Repo, Lobby, Game, GameBot}
-  alias BattleBox.Games.RobotGame
 
   def make_matches([_], _), do: []
 
@@ -17,17 +16,24 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
       game_bots =
         for {player, %{bot: bot}} <- chunk do
           bot = Repo.preload(bot, :user)
-          GameBot.new(player: player, bot: bot)
+          %GameBot{player: player, bot: bot}
         end
 
       player_pid_mapping = Map.new(for {player, %{pid: pid}} <- chunk, do: {player, pid})
 
+      game_data =
+        struct(lobby.game_type)
+        |> Map.merge(Map.take(settings, lobby.game_type.settings_module.shared_fields()))
+
       game =
-        Game.new(
+        %Game{
+          id: Ecto.UUID.generate(),
           lobby: lobby,
-          game_bots: game_bots,
-          robot_game: RobotGame.new(settings: settings)
-        )
+          lobby_id: lobby.id,
+          game_type: lobby.game_type,
+          game_bots: game_bots
+        }
+        |> Map.put(lobby.game_type.name, game_data)
 
       %{game: game, players: player_pid_mapping}
     end)
