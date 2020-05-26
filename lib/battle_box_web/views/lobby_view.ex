@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.LobbyView do
   use BattleBoxWeb, :view
-  import BattleBox.GameType
+  import BattleBox.InstalledGames
 
   def game_bots_to_game_name(game_bots) do
     game_bots

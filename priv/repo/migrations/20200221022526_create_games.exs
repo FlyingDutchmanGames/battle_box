@@ -4,15 +4,15 @@ defmodule BattleBox.Repo.Migrations.CreateGames do
   def change do
     create table("games") do
       add :lobby_id, :uuid
+      add :game_type, :text, null: false
       timestamps()
     end
 
     create table("game_bots") do
       add :game_id, :uuid, null: false
-      add :game_type, :text, null: false
       add :bot_id, :uuid, null: false
       add :player, :integer, null: false
-      add :score, :integer, null: false, default: 0
+      add :score, :integer, null: false
       add :winner, :bool, null: false, default: false
       timestamps()
     end

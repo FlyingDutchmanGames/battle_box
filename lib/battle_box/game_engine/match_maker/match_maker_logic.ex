@@ -16,17 +16,19 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
       game_bots =
         for {player, %{bot: bot}} <- chunk do
           bot = Repo.preload(bot, :user)
-          GameBot.new(player: player, bot: bot)
+          %GameBot{player: player, bot: bot}
         end
 
       player_pid_mapping = Map.new(for {player, %{pid: pid}} <- chunk, do: {player, pid})
+      game_data = struct(lobby.game_type, settings)
 
       game =
-        Game.new(
+        %Game{
           lobby: lobby,
-          game_bots: game_bots,
-          robot_game: RobotGame.new(settings: settings)
-        )
+          # game_type: lobby.game_type,
+          game_bots: game_bots
+        }
+        |> Map.put(lobby.game_type.name, game_data)
 
       %{game: game, players: player_pid_mapping}
     end)

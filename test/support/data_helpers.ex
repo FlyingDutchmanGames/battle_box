@@ -35,17 +35,14 @@ defmodule BattleBox.Test.DataHelpers do
   end
 
   def robot_game_lobby(opts \\ %{}) do
-    user = opts[:user] || create_user()
-
-    {:ok, lobby} =
-      user
-      |> Ecto.build_assoc(:lobbies)
-      |> Lobby.changeset(%{
-        "name" => opts[:lobby_name] || "LOBBY NAME",
-        "game_type" => "robot_game",
-        "command_time_minimum_ms" => opts[:command_time_minimum_ms] || 20,
-        "robot_game_settings" => %{}
-      })
-      |> Repo.insert()
+    (opts[:user] || create_user())
+    |> Ecto.build_assoc(:lobbies)
+    |> Lobby.changeset(%{
+      "name" => opts[:lobby_name] || "LOBBY NAME",
+      "game_type" => "robot_game",
+      "command_time_minimum_ms" => opts[:command_time_minimum_ms] || 20,
+      "robot_game_settings" => %{}
+    })
+    |> Repo.insert()
   end
 end

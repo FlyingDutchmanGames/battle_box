@@ -1,18 +1,20 @@
 defmodule BattleBox.Game do
   use Ecto.Schema
   import Ecto.Changeset
-  alias BattleBox.{GameType, Repo, Lobby, Bot, GameBot}
+  import BattleBox.InstalledGames
+  alias BattleBox.{Repo, Lobby, Bot, GameBot}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
   schema "games" do
-    # field :game_type, GameType
     belongs_to :lobby, Lobby
     has_many :game_bots, GameBot
     many_to_many :bots, Bot, join_through: "game_bots"
 
-    for game_type <- GameType.game_types() do
+    field :game_type, BattleBox.GameType
+
+    for game_type <- installed_games() do
       has_one(game_type.name, game_type)
     end
 
@@ -41,7 +43,7 @@ defmodule BattleBox.Game do
   def changeset(game, params \\ %{}) do
     game
     |> cast(params, :game_type)
-    |> validate_inclusion(:game_type, GameType.game_types())
+    |> validate_inclusion(:game_type, installed_games())
     |> cast_assoc(:game_bots)
     |> cast_assoc(game.game_type.name)
   end

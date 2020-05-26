@@ -30,7 +30,6 @@ defmodule BattleBox.Games.RobotGame do
 
   def title, do: "Robot Game"
   def name, do: :robot_game
-  def db_name, do: "robot_game"
   def settings_module, do: Settings
   def players_for_settings(_), do: [1, 2]
 

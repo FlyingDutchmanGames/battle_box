@@ -1,5 +1,5 @@
 defmodule BattleBox.Games.RobotGame.Settings do
-  alias BattleBox.{Repo, Lobby}
+  alias BattleBox.Lobby
   import __MODULE__.SharedSettings
   use Ecto.Schema
   import Ecto.Changeset
