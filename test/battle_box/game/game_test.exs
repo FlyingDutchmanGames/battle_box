@@ -6,6 +6,7 @@ defmodule BattleBox.GameTest do
 
   test "you can persist them" do
     assert {:ok, _game} =
-             %Game{game_type: "robot_game", lobby_id: @lobby_id, game_bots: []} |> Repo.insert()
+             %Game{game_type: BattleBox.Games.RobotGame, lobby_id: @lobby_id, game_bots: []}
+             |> Repo.insert()
   end
 end

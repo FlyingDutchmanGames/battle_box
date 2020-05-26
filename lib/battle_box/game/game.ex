@@ -91,7 +91,7 @@ defmodule BattleBox.Game do
   end
 
   def metadata_only(game) do
-    Map.drop(game, game.game_type.name)
+    Map.drop(game, [game.game_type.name])
   end
 
   defp update_game_data(game, fun) do

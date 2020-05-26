@@ -16,7 +16,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     %{
       init_opts: %{
         players: %{1 => named_proxy(:player_1), 2 => named_proxy(:player_2)},
-        game: Game.new(lobby: lobby, robot_game: RobotGame.new())
+        game: %Game{lobby: lobby, game_type: RobotGame, robot_game: %RobotGame{}}
       },
       lobby: lobby
     }
@@ -178,7 +178,11 @@ defmodule BattleBox.GameEngine.GameServerTest do
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
-    game = Game.new(lobby: context.lobby, robot_game: RobotGame.new(settings: %{max_turns: 10}))
+    game = %Game{
+      lobby: context.lobby,
+      game_type: RobotGame,
+      robot_game: %RobotGame{max_turns: 10}
+    }
 
     {:ok, pid} = GameEngine.start_game(context.game_engine, %{context.init_opts | game: game})
 

@@ -47,8 +47,13 @@ defmodule BattleBoxWeb.GameTest do
       |> RobotGame.complete_turn()
 
     {:ok, %{id: id}} =
-      Game.new(lobby: context.lobby, robot_game: robot_game, game_bots: context.game_bots)
-      |> Game.persist()
+      %Game{
+        lobby: context.lobby,
+        game_type: RobotGame,
+        robot_game: robot_game,
+        game_bots: context.game_bots
+      }
+      |> Repo.insert()
 
     {:ok, _view, html} = live(conn, "/games/#{id}")
     assert html =~ "TURN: 2 / 2"
@@ -58,8 +63,13 @@ defmodule BattleBoxWeb.GameTest do
     bot_server_id = Ecto.UUID.generate()
 
     {:ok, %{id: id}} =
-      Game.new(lobby: context.lobby, robot_game: %RobotGame{}, game_bots: context.game_bots)
-      |> Game.persist()
+      %Game{
+        lobby: context.lobby,
+        game_type: RobotGame,
+        robot_game: %RobotGame{},
+        game_bots: context.game_bots
+      }
+      |> Repo.insert()
 
     assert {:error, {:redirect, %{to: "/bot_servers/#{bot_server_id}/follow"}}} ==
              live(conn, "/games/#{id}?follow=#{bot_server_id}")
@@ -83,13 +93,13 @@ defmodule BattleBoxWeb.GameTest do
             1 => named_proxy(:player_1),
             2 => named_proxy(:player_2)
           },
-          game:
-            Game.new(
-              id: @game_id,
-              lobby: lobby,
-              game_bots: game_bots,
-              robot_game: RobotGame.new()
-            )
+          game: %Game{
+            id: @game_id,
+            lobby: lobby,
+            game_bots: game_bots,
+            game_type: RobotGame,
+            robot_game: %RobotGame{}
+          }
         })
 
       :ok = GameServer.accept_game(pid, 1)
@@ -128,13 +138,14 @@ defmodule BattleBoxWeb.GameTest do
       id = Ecto.UUID.generate()
 
       {:ok, _} =
-        Game.new(
+        %Game{
+          id: @game_id,
           lobby: context.lobby,
-          robot_game: RobotGame.new(),
-          game_bots: context.game_bots,
-          id: @game_id
-        )
-        |> Game.persist()
+          game_type: RobotGame,
+          robot_game: %RobotGame{},
+          game_bots: context.game_bots
+        }
+        |> Repo.insert()
 
       {:ok, view, html} = live(conn, "/games/#{@game_id}?follow=#{id}")
       assert html =~ "LIVE"
@@ -151,13 +162,14 @@ defmodule BattleBoxWeb.GameTest do
         |> RobotGame.complete_turn()
 
       {:ok, _} =
-        Game.new(
+        %Game{
           lobby: context.lobby,
           robot_game: robot_game,
           game_bots: context.game_bots,
+          game_type: RobotGame,
           id: @game_id
-        )
-        |> Game.persist()
+        }
+        |> Repo.insert()
 
       {:ok, view, html} = live(conn, "/games/#{@game_id}")
       assert html =~ "LIVE"
@@ -170,13 +182,13 @@ defmodule BattleBoxWeb.GameTest do
   describe "Arrow Keys let you change the turn you're viewing" do
     setup %{game_bots: game_bots} do
       robot_game =
-        RobotGame.new()
+        %RobotGame{}
         |> RobotGame.complete_turn()
         |> RobotGame.complete_turn()
 
       {:ok, %{id: id}} =
-        Game.new(robot_game: robot_game, game_bots: game_bots)
-        |> Game.persist()
+        %Game{robot_game: robot_game, game_bots: game_bots, game_type: RobotGame}
+        |> Repo.insert()
 
       %{game_id: id}
     end

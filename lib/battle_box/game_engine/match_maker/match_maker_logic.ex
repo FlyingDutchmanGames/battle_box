@@ -20,12 +20,15 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
         end
 
       player_pid_mapping = Map.new(for {player, %{pid: pid}} <- chunk, do: {player, pid})
-      game_data = struct(lobby.game_type, settings)
+
+      game_data =
+        struct(lobby.game_type)
+        |> Map.merge(Map.take(settings, lobby.game_type.settings_module.shared_fields()))
 
       game =
         %Game{
           lobby: lobby,
-          # game_type: lobby.game_type,
+          game_type: lobby.game_type,
           game_bots: game_bots
         }
         |> Map.put(lobby.game_type.name, game_data)

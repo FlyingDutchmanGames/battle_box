@@ -18,6 +18,19 @@ defmodule BattleBox.Games.RobotGame.Settings do
     timestamps()
   end
 
+  def shared_fields do
+    [
+      :spawn_every,
+      :spawn_per_player,
+      :robot_hp,
+      :max_turns,
+      :attack_damage,
+      :collision_damage,
+      :suicide_damage,
+      :terrain
+    ]
+  end
+
   def changeset(settings, params \\ %{}) do
     settings
     |> cast(params, [

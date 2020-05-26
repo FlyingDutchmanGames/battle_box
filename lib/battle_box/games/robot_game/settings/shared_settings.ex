@@ -1,17 +1,4 @@
 defmodule BattleBox.Games.RobotGame.Settings.SharedSettings do
-  def shared_robot_game_settings_fields do
-    [
-      :spawn_every,
-      :spawn_per_player,
-      :robot_hp,
-      :max_turns,
-      :attack_damage,
-      :collision_damage,
-      :suicide_damage,
-      :terrain
-    ]
-  end
-
   defmacro shared_robot_game_settings_schema_fields do
     quote do
       field :spawn_every, :integer, default: 10
