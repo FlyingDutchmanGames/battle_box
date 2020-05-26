@@ -27,6 +27,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
 
       game =
         %Game{
+          id: Ecto.UUID.generate(),
           lobby: lobby,
           game_type: lobby.game_type,
           game_bots: game_bots

@@ -15,8 +15,17 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
     %{
       init_opts: %{
-        players: %{1 => named_proxy(:player_1), 2 => named_proxy(:player_2)},
-        game: %Game{lobby: lobby, game_type: RobotGame, robot_game: %RobotGame{}}
+        players: %{
+          1 => named_proxy(:player_1),
+          2 => named_proxy(:player_2)
+        },
+        game: %Game{
+          id: Ecto.UUID.generate(),
+          lobby: lobby,
+          game_type: RobotGame,
+          game_bots: [],
+          robot_game: %RobotGame{}
+        }
       },
       lobby: lobby
     }
