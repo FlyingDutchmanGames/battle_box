@@ -1,4 +1,18 @@
 defmodule BattleBox.Game do
+  defmodule GameType do
+    use Ecto.Type
+    import BattleBox.InstalledGames
+
+    def type, do: :string
+
+    for game <- installed_games() do
+      def cast(unquote("#{game.name}")), do: {:ok, unquote(game)}
+      def cast(unquote(game)), do: {:ok, unquote(game)}
+      def load(unquote("#{game.name}")), do: {:ok, unquote(game)}
+      def dump(unquote(game)), do: {:ok, unquote("#{game.name}")}
+    end
+  end
+
   use Ecto.Schema
   import Ecto.Changeset
   import BattleBox.InstalledGames
@@ -12,7 +26,7 @@ defmodule BattleBox.Game do
     has_many :game_bots, GameBot
     many_to_many :bots, Bot, join_through: "game_bots"
 
-    field :game_type, BattleBox.GameType
+    field :game_type, GameType
 
     for game_type <- installed_games() do
       has_one(game_type.name, game_type)

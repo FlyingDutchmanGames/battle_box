@@ -1,4 +1,18 @@
 defmodule BattleBox.Lobby do
+  defmodule GameType do
+    use Ecto.Type
+    import BattleBox.InstalledGames
+
+    def type, do: :string
+
+    for game <- installed_games() do
+      def cast(unquote("#{game.name}")), do: {:ok, unquote(game)}
+      def cast(unquote(game)), do: {:ok, unquote(game)}
+      def load(unquote("#{game.name}")), do: {:ok, unquote(game)}
+      def dump(unquote(game)), do: {:ok, unquote("#{game.name}")}
+    end
+  end
+
   use Ecto.Schema
   import Ecto.Changeset
   import BattleBox.InstalledGames
@@ -21,7 +35,7 @@ defmodule BattleBox.Lobby do
     field :command_time_minimum_ms, :integer, default: 250
     field :command_time_maximum_ms, :integer, default: 1000
 
-    field :game_type, BattleBox.GameType
+    field :game_type, GameType
 
     has_many :games, Game
     belongs_to :user, User
