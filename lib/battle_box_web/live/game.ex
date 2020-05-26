@@ -108,7 +108,7 @@ defmodule BattleBoxWeb.Game do
     case GameEngine.get_game_server(game_engine(), game_id) do
       nil ->
         result =
-          Game.get_by_id(game_id)
+          Repo.get(Game, game_id)
           |> Repo.preload([:robot_game, game_bots: [bot: :user]])
 
         case result do

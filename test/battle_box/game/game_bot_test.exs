@@ -3,22 +3,15 @@ defmodule BattleBox.GameBotTest do
   alias BattleBox.{GameBot, Repo}
 
   @bot_id Ecto.UUID.generate()
-  @bbg_id Ecto.UUID.generate()
+  @game_id Ecto.UUID.generate()
 
   test "you can persist them" do
     changeset =
-      GameBot.changeset(%GameBot{}, %{
+      GameBot.changeset(%GameBot{bot_id: @bot_id, game_id: @game_id}, %{
         player: 32,
-        score: 0,
-        bot_id: @bot_id,
-        game_id: @bbg_id
+        score: 0
       })
 
     assert {:ok, _bot} = Repo.insert(changeset)
-  end
-
-  test "new/1 creates one" do
-    assert %GameBot{score: 10, player: 42, bot_id: @bot_id} =
-             GameBot.new(score: 10, player: 42, bot_id: @bot_id)
   end
 end

@@ -34,15 +34,15 @@ defmodule BattleBoxWeb.GameTest do
       user: user,
       bot: bot,
       game_bots: [
-        GameBot.new(player: 1, bot: bot),
-        GameBot.new(player: 2, bot: bot)
+        %GameBot{player: 1, bot: bot},
+        %GameBot{player: 2, bot: bot}
       ]
     }
   end
 
   test "it can display a game off disk", %{conn: conn} = context do
     robot_game =
-      RobotGame.new()
+      %RobotGame{}
       |> RobotGame.complete_turn()
       |> RobotGame.complete_turn()
 
@@ -58,7 +58,7 @@ defmodule BattleBoxWeb.GameTest do
     bot_server_id = Ecto.UUID.generate()
 
     {:ok, %{id: id}} =
-      Game.new(lobby: context.lobby, robot_game: RobotGame.new(), game_bots: context.game_bots)
+      Game.new(lobby: context.lobby, robot_game: %RobotGame{}, game_bots: context.game_bots)
       |> Game.persist()
 
     assert {:error, {:redirect, %{to: "/bot_servers/#{bot_server_id}/follow"}}} ==
@@ -146,7 +146,7 @@ defmodule BattleBoxWeb.GameTest do
     test "when the game server dies, it will switch to the historical view",
          %{conn: conn} = context do
       robot_game =
-        RobotGame.new()
+        %RobotGame{}
         |> RobotGame.complete_turn()
         |> RobotGame.complete_turn()
 

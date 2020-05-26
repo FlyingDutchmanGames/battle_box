@@ -17,13 +17,6 @@ defmodule BattleBox.GameBot do
 
   def changeset(bot, params \\ %{}) do
     bot
-    |> cast(params, [:score, :player, :winner, :bot_id, :game_id])
-  end
-
-  def new(opts) do
-    opts = Enum.into(opts, %{})
-
-    %__MODULE__{}
-    |> Map.merge(opts)
+    |> cast(params, [:score, :player, :winner])
   end
 end

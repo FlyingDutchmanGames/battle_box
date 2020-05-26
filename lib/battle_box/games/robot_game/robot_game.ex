@@ -15,12 +15,10 @@ defmodule BattleBox.Games.RobotGame do
     field :events, {:array, Event}, default: []
     belongs_to :game, Game
 
-    field :persistent?, :boolean, default: true, virtual: true
-    field :spawn_enabled, :boolean, default: true, virtual: true
-
     field :winner, :string, virtual: true
     field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
     field :robot_id_seq, :integer, default: 0, virtual: true
+    field :spawn_enabled, :boolean, default: true, virtual: true
 
     shared_robot_game_settings_schema_fields()
     timestamps()
@@ -31,15 +29,10 @@ defmodule BattleBox.Games.RobotGame do
   end
 
   def title, do: "Robot Game"
+  def name, do: :robot_game
   def db_name, do: "robot_game"
   def settings_module, do: Settings
   def players_for_settings(_), do: [1, 2]
-
-  def get_by_id_with_settings(id),
-    do: Repo.preload(get_by_id(id), :settings) |> set_robots_at_turn
-
-  def get_by_id(<<_::288>> = id), do: Repo.get_by(__MODULE__, id: id) |> set_robots_at_turn
-  def get_by_id(_), do: nil
 
   def disqualify(game, player) do
     winner = %{1 => 2, 2 => 1}[player]

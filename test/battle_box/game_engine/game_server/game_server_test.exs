@@ -209,7 +209,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     assert_receive {:player_2, {:game_over, %{game_id: ^game_id}}}
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
 
-    loaded_game = Game.get_by_id(game_id)
+    loaded_game = Repo.get(Game, game_id)
     refute is_nil(loaded_game)
   end
 end

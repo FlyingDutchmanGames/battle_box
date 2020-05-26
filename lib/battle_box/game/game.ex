@@ -1,29 +1,32 @@
 defmodule BattleBox.Game do
   use Ecto.Schema
   import Ecto.Changeset
-  alias BattleBox.{Repo, Lobby, Bot, GameBot}
-  alias BattleBox.Games.RobotGame
+  alias BattleBox.{GameType, Repo, Lobby, Bot, GameBot}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
   schema "games" do
+    # field :game_type, GameType
     belongs_to :lobby, Lobby
-    many_to_many :bots, Bot, join_through: "game_bots"
     has_many :game_bots, GameBot
-    has_one :robot_game, RobotGame
+    many_to_many :bots, Bot, join_through: "game_bots"
+
+    for game_type <- GameType.game_types() do
+      has_one(game_type.name, game_type)
+    end
 
     timestamps()
   end
 
-  def get_by_id(id) do
-    Repo.get_by(__MODULE__, id: id)
+  def game_data(game) do
+    Map.get(game, game.game_type.name)
   end
 
   def calculate_turn(game, commands) do
-    game = update_in(game.robot_game, &BattleBoxGame.calculate_turn(&1, commands))
-    scores = BattleBoxGame.score(game.robot_game)
-    winner = BattleBoxGame.winner(game.robot_game)
+    game = update_game_data(game, &BattleBoxGame.calculate_turn(&1, commands))
+    scores = score(game)
+    winner = winner(game)
 
     update_in(game.game_bots, fn bots ->
       for bot <- bots,
@@ -35,65 +38,52 @@ defmodule BattleBox.Game do
     end)
   end
 
+  def changeset(game, params \\ %{}) do
+    game
+    |> cast(params, :game_type)
+    |> validate_inclusion(:game_type, GameType.game_types())
+    |> cast_assoc(:game_bots)
+    |> cast_assoc(game.game_type.name)
+  end
+
   def initialize(game) do
-    update_in(game.robot_game, &BattleBoxGame.initialize/1)
+    update_game_data(game, &BattleBoxGame.initialize/1)
   end
 
   def score(game) do
-    BattleBoxGame.score(game.robot_game)
+    game |> game_data |> BattleBoxGame.score()
   end
 
   def winner(game) do
-    BattleBoxGame.winner(game.robot_game)
+    game |> game_data |> BattleBoxGame.winner()
   end
 
   def commands_requests(game) do
-    BattleBoxGame.commands_requests(game.robot_game)
+    game |> game_data |> BattleBoxGame.commands_requests()
   end
 
   def over?(game) do
-    BattleBoxGame.over?(game.robot_game)
+    game |> game_data |> BattleBoxGame.over?()
   end
 
   def disqualify(game, player) do
-    update_in(game.robot_game, &BattleBoxGame.disqualify(&1, player))
+    update_game_data(game, &BattleBoxGame.disqualify(&1, player))
   end
 
   def settings(game) do
-    BattleBoxGame.settings(game.robot_game)
+    game |> game_data() |> BattleBoxGame.settings()
   end
 
   def metadata_only(game) do
-    Map.drop(game, [:robot_game])
+    Map.drop(game, game.game_type.name)
   end
 
-  def persist(game) do
-    game
-    |> changeset
-    |> Repo.insert()
-  end
+  defp update_game_data(game, fun) do
+    new_game_data =
+      game
+      |> game_data()
+      |> fun.()
 
-  def changeset(game, params \\ %{}) do
-    game
-    |> cast(params, [:lobby_id])
-    |> cast_assoc(:game_bots)
-    |> cast_assoc(:robot_game)
-  end
-
-  def new(opts \\ %{}) do
-    opts = Enum.into(opts, %{})
-
-    lobby_id =
-      case opts do
-        %{lobby_id: lobby_id} -> lobby_id
-        %{lobby: %{id: lobby_id}} -> lobby_id
-        _ -> nil
-      end
-
-    opts =
-      Map.merge(%{game_bots: [], lobby_id: lobby_id}, opts)
-      |> Map.put_new(:id, Ecto.UUID.generate())
-
-    Map.merge(%__MODULE__{}, opts)
+    Map.put(game, game.game_type.name, new_game_data)
   end
 end

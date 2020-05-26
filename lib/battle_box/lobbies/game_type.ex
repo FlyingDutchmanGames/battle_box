@@ -1,4 +1,4 @@
-defmodule BattleBox.Lobby.GameType do
+defmodule BattleBox.GameType do
   use Ecto.Type
   def type, do: :string
 
@@ -13,4 +13,6 @@ defmodule BattleBox.Lobby.GameType do
     def load(unquote(string_type)), do: {:ok, unquote(game_type)}
     def dump(unquote(game_type)), do: {:ok, unquote(string_type)}
   end)
+
+  def game_types, do: @game_types
 end

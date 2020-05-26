@@ -9,6 +9,7 @@ defmodule BattleBox.Repo.Migrations.CreateGames do
 
     create table("game_bots") do
       add :game_id, :uuid, null: false
+      add :game_type, :text, null: false
       add :bot_id, :uuid, null: false
       add :player, :integer, null: false
       add :score, :integer, null: false, default: 0

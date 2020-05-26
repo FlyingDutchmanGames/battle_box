@@ -1,14 +1,10 @@
 defmodule BattleBox.Lobby do
   use Ecto.Schema
   import Ecto.Changeset
-  alias BattleBox.{Repo, User, Game}
-  alias __MODULE__.GameType
+  alias BattleBox.{GameType, Repo, User, Game}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
-
-  @game_types Application.get_env(:battle_box, BattleBox.GameEngine)[:games] ||
-                raise("Must set the :battle_box, BattleBox.GameEngine, :games config value")
 
   @params [
     :name,
@@ -28,7 +24,7 @@ defmodule BattleBox.Lobby do
     has_many :games, Game
     belongs_to :user, User
 
-    for game_type <- @game_types do
+    for game_type <- GameType.game_types() do
       has_one(game_type.settings_module.name, game_type.settings_module)
     end
 
@@ -39,7 +35,7 @@ defmodule BattleBox.Lobby do
     lobby
     |> cast(params, @params)
     |> validate_required(@params)
-    |> validate_inclusion(:game_type, @game_types)
+    |> validate_inclusion(:game_type, GameType.game_types())
     |> validate_length(:name, max: 50)
     |> unique_constraint(:name)
     |> cast_assoc(:robot_game_settings)
@@ -51,6 +47,4 @@ defmodule BattleBox.Lobby do
       %{robot_game_settings: robot_game_settings} -> robot_game_settings
     end
   end
-
-  def game_types, do: @game_types
 end

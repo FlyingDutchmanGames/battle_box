@@ -1,6 +1,5 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
   alias BattleBox.{Repo, Lobby, Game, GameBot}
-  alias BattleBox.Games.RobotGame
 
   def make_matches([_], _), do: []
 
