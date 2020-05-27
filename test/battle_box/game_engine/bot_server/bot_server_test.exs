@@ -136,7 +136,10 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   test "if you wait too long to accept, the game is cancelled", context do
-    Lobby.changeset(context.lobby, %{game_acceptance_time_ms: 1})
+
+    context.lobby
+    |> Lobby.changeset()
+    |> Ecto.Changeset.put_change(:game_acceptance_time_ms, 1)
     |> Repo.update!()
 
     :ok = BotServer.match_make(context.p1_server)
@@ -149,7 +152,9 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   test "Your commands aren't submitted until after the lobby.minimum_time", context do
-    Lobby.changeset(context.lobby, %{command_time_minimum_ms: 30})
+    context.lobby
+    |> Lobby.changeset()
+    |> Ecto.Changeset.put_change(:command_time_minimum_ms, 30)
     |> Repo.update!()
 
     :ok = BotServer.match_make(context.p1_server)
