@@ -136,7 +136,6 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   test "if you wait too long to accept, the game is cancelled", context do
-
     context.lobby
     |> Lobby.changeset()
     |> Ecto.Changeset.put_change(:game_acceptance_time_ms, 1)
