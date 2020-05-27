@@ -42,6 +42,7 @@ defmodule BattleBox.Games.RobotGame.Settings do
   schema "robot_game_settings" do
     belongs_to :lobby, Lobby
     field :spawn_enabled, :boolean, default: true, virtual: true
+    field :terrain_base64, :binary, default: Base.encode64(Terrain.default()), virtual: true
     __MODULE__.Shared.fields()
     timestamps()
   end
@@ -50,16 +51,33 @@ defmodule BattleBox.Games.RobotGame.Settings do
 
   def changeset(settings, params \\ %{}) do
     settings
-    |> cast(params, @shared_fields)
-    |> validate_required(@shared_fields)
+    |> cast(params, [:terrain_base64 | @shared_fields] -- [:terrain])
+    |> validate_required([:terrain_base64 | @shared_fields] -- [:terrain])
     |> validate_number(:spawn_every, greater_than_or_equal_to: 1)
     |> validate_number(:spawn_per_player, greater_than_or_equal_to: 1, less_than_or_equal_to: 20)
     |> validate_number(:robot_hp, greater_than_or_equal_to: 1, less_than_or_equal_to: 100)
     |> validate_number(:max_turns, greater_than_or_equal_to: 1, less_than_or_equal_to: 500)
-    |> validate_change(:terrain, fn :terrain, terrain ->
-      case Terrain.validate(terrain) do
-        :ok -> []
-        {:error, error_msg} -> [terrain: error_msg]
+    |> validate_change(:terrain_base64, fn :terrain_base64, terrain_base64 ->
+      with {:decode, {:ok, terrain}} <- {:decode, Base.decode64(terrain_base64)},
+           {:validate, :ok} <- {:validate, Terrain.validate(terrain)} do
+        []
+      else
+        {:decode, :error} -> [terrain_base64: "Invalid base64"]
+        {:validate, {:error, error_msg}} -> [terrain_base64: error_msg]
+      end
+    end)
+    |> prepare_changes(fn changeset ->
+      if get_change(changeset, :terrain_base64) do
+        {:ok, terrain} =
+          changeset
+          |> get_change(:terrain_base64)
+          |> Base.decode64()
+
+        changeset
+        |> delete_change(:terrain_base64)
+        |> put_change(:terrain, terrain)
+      else
+        changeset
       end
     end)
   end

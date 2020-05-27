@@ -25,7 +25,7 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
           attack_damage: nil,
           collision_damage: nil,
           suicide_damage: nil,
-          terrain: nil
+          terrain_base64: nil
         })
 
       assert Enum.sort(Keyword.keys(changeset.errors)) == [
@@ -36,7 +36,7 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
                :spawn_every,
                :spawn_per_player,
                :suicide_damage,
-               :terrain
+               :terrain_base64
              ]
     end
 
@@ -84,9 +84,9 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
       |> Enum.each(fn {terrain, error_msg} ->
         changeset =
           %Settings{}
-          |> Settings.changeset(%{terrain: terrain})
+          |> Settings.changeset(%{terrain_base64: Base.encode64(terrain)})
 
-        assert changeset.errors[:terrain] == error_msg
+        assert changeset.errors[:terrain_base64] == error_msg
       end)
     end
   end

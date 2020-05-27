@@ -2,7 +2,7 @@ defmodule BattleBox.Games.RobotGame do
   import BattleBox.Games.RobotGame.EventHelpers
   import Ecto.Changeset
   require __MODULE__.Settings.Shared
-  alias BattleBox.{Repo, Game}
+  alias BattleBox.Game
   alias __MODULE__.{Settings, Event}
   alias __MODULE__.Settings.{Terrain, DamageModifier}
   use Ecto.Schema
@@ -31,7 +31,6 @@ defmodule BattleBox.Games.RobotGame do
   def title, do: "Robot Game"
   def name, do: :robot_game
   def settings_module, do: Settings
-
   def players_for_settings(_), do: [1, 2]
 
   def disqualify(game, player) do

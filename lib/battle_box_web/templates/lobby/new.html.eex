@@ -57,8 +57,8 @@
         </div>
         
         <div class="form-group">
-          <label>Terrain: <%= textarea(robot_game_settings, :terrain, class: "form-control") %></label><br>
-          <%= error_tag robot_game_settings, :terrain %>
+          <label>Terrain Base64: <%= textarea(robot_game_settings, :terrain_base64, class: "form-control") %></label><br>
+          <%= error_tag robot_game_settings, :terrain_base64 %>
         </div>
       <% end %>
     </div>
