@@ -3,6 +3,27 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
 
   defdelegate default, to: Default
 
+  def validate(terrain) do
+    with {:size_header, <<rows::8, cols::8, data::binary>>} <- {:size_header, terrain},
+         {:size, rows, cols} when rows in 1..40 and cols in 1..40 <- {:size, rows, cols},
+         {:data_amount_correct, true} <- {:data_amount_correct, rows * cols == byte_size(data)},
+         {:illegal_bytes, []} <- {:illegal_bytes, for(<<i <- data>>, i > 3, do: i)} do
+      :ok
+    else
+      {:size_header, _} ->
+        {:error, "Illegal Size Header"}
+
+      {:size, _rows, _cols} ->
+        {:error, "Rows and cols must be between 1 and 40"}
+
+      {:data_amount_correct, false} ->
+        {:error, "Terrain data byte size must equal rows * cols"}
+
+      {:illegal_bytes, bytes} ->
+        {:error, "Terrain data must have bytes less than 3, but found bytes #{inspect(bytes)}"}
+    end
+  end
+
   def rows(<<rows::8, _cols::8, _::binary>>), do: rows
   def cols(<<_rows::8, cols::8, _::binary>>), do: cols
 

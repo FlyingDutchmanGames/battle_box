@@ -23,7 +23,9 @@ defmodule BattleBoxWeb.LobbyControllerTest do
     conn =
       conn
       |> signin(user: user)
-      |> post("/lobbies", %{"lobby" => %{"name" => "FOO", "game_type" => "robot_game"}})
+      |> post("/lobbies", %{
+        "lobby" => %{"name" => "FOO", "game_type" => "robot_game", "robot_game_settings" => %{}}
+      })
 
     url = redirected_to(conn, 302)
     %{"user" => user_name} = Regex.named_captures(~r/\/users\/(?<user>.*)\/lobbies/, url)
@@ -39,7 +41,9 @@ defmodule BattleBoxWeb.LobbyControllerTest do
     conn =
       conn
       |> signin(user: user)
-      |> post("/lobbies", %{"lobby" => %{"name" => "FOO", "game_type" => "robot_game"}})
+      |> post("/lobbies", %{
+        "lobby" => %{"name" => "FOO", "game_type" => "robot_game", "robot_game_settings" => %{}}
+      })
 
     assert html_response(conn, 200) =~ "has already been taken"
   end

@@ -2,76 +2,63 @@
 
 ## The OpenSource Bot Battle Platform
 
-### What is BattleBox?
-
-BattleBox has three pieces
-
-#### BattleBox Games
-
-A `BattleBox.Game` is a set of modules that implement the BattleBox Game Interface and Behaviour, and can be run by BattleBox Core.
-
-#### BattleBox Core
-
-A set of standalone libraries for running battlebox games. (Everything under the `BattleBox.GameEngine` module namespace)
-
-#### Botskrieg
-
-A Phoenix app that allows for UI and API driven use of the Game Engine
-
 ## SETUP
 
+0.) Setup a postgres database according to `dev.exs`
 1.) Get your credentials in github and make a `dev.secret.exs` based on `dev.secret.exs.example` 
   * Use `http://localhost:4000/auth/github/callback` as your callback url
+2.) `mix deps.get && mix ecto.setup`
 
 ## TODO
 
 ### V1
 
 #### Bots
+- Edit bots
+- Bot autocreate through use in interface
 #### Lobbies
-- [ ] Robot Game Settings
-  - [ ] Terrain Editor
-- [ ] bot self play allowed toggle
-- [ ] user self play allowed toggle
+- Edit lobbies
+- Robot Game Settings
+  - Terrain Editor
+- bot self play allowed toggle
+- user self play allowed toggle
+- add in server ais
+- Matchmaker queue live
+- set of default lobbies with interesting terrains and bots
 #### Games
-- [ ] Historical Games Filtered/Paginated by [user, bot, lobby]
-- [ ] Live Games that meet the same criteria
+- Historical Games Filtered/Paginated by [user, bot, lobby]
+- Live Games that meet the same criteria
 #### Clients
-- [ ] BattleBox Elixir Client
-- [ ] BattleBox Python Client
-- [ ] Make sure user input can't cause a game to crash
-- [ ] WebSocket interface
+- BattleBox Elixir Client
+- BattleBox Python Client
+- Make sure user input can't cause a game to crash
+- WebSocket interface
 #### Robot Game Representation
-- [ ] limit memory usage of game servers (they're currently at 2 mbs)
-- [ ] Manual GC?
+- limit memory usage of game servers (they're currently at 2 mbs)
+- Manual GC?
 #### Static Site
-- [ ] Wire protocol docs
-- [ ] Robot game rules docs
-- [ ] Switch bot tokens to user tokens
+- Wire protocol docs
+- Robot game rules docs
 #### Robot Game
-- [ ] More efficent game visualizer
-- [ ] Make the end turns the number of turns in the game
-- [ ] Remove row-min/max from terrain, because everything must be 0 indexed
+- More efficent game visualizer
+- Make the end turns the number of turns in the game
+- Remove row-min/max from terrain, because everything must be 0 indexed
+- Area conquer mode
 #### General
 - Upgrade phoenix/liveview
+- Handle when connection is closed on trying to send from connection server
+- Add footer on all pages
 - Impersonation
 - Concurrent connection limiter
 - Enforce ASCII < 12 chars no spaces/special in names of everything
-  - [ ] User.username
-  - [ ] Lobby.name
-  - [ ] Bot.name
+  - User.username
+  - Lobby.name
+  - Bot.name
 
 ### Nice to Haves
 
-- [ ] Matchmaker page
-- [ ] Handle when connection is closed on trying to send from connection server
-- [ ] A decent bot implmentation for testing
-- [ ] Connection Debugger (this has some issues due to amount of messages...)
-- [ ] Downloads controller, and `as_downloadable` as part of the game protocol
-- [ ] Google Analytics on the github page
 - [ ] Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
 - [ ] Build TicTacToe as proof of game engine extendability
-- [ ] `mix battle_box.swarm {optional credentials file}` task to run a swarm against a botskrieg server for regression testing
 - [ ] Pass timing info to the game so it can do move timing
 - [ ] Make all tests async by passing the ecto sandbox to all of the game engine
 

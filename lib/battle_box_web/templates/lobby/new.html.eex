@@ -1,20 +1,68 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, @current_user.id) %>">Lobbies</a>
+      <a href="<%= Routes.user_lobby_path(@conn, :index, @current_user.user_name) %>">Lobbies</a>
       / Create
     </div>
   </div>
+  <div style="font-weight: bold;">General Settings</div>
   <%= form_for @changeset, Routes.lobby_path(@conn, :create), fn f -> %>
     <div class="form-group">
       <label>Name: <%= text_input f, :name, class: "form-control" %></label><br>
       <%= error_tag f, :name %>
     </div>
+
     <div class="form-group">
       <label>Game Type: <%= select(f, :game_type, Enum.map(installed_games(), &{&1.title, &1.name}), class: "form-control") %></label>
       <%= error_tag f, :game_type %>
     </div>
 
+    <div class="form-group">
+      <label>Game Acceptance Time (ms): <%= number_input(f, :game_acceptance_time_ms, class: "form-control") %></label><br>
+      <%= error_tag f, :game_acceptance_time_ms %>
+    </div>
+
+    <div class="form-group">
+      <label>Minimum Command Time (ms): <%= number_input(f, :command_time_minimum_ms, class: "form-control") %></label><br>
+      <%= error_tag f, :command_time_minimum_ms %>
+    </div>
+
+    <div class="form-group">
+      <label>Maximum Command Time (ms): <%= number_input(f, :command_time_maximum_ms, class: "form-control") %></label><br>
+      <%= error_tag f, :command_time_maximum_ms %>
+    </div>
+
+    <hr>
+    <div>
+      <div style="font-weight: bold;">Robot Game Settings</div>
+      <%= inputs_for f, :robot_game_settings, fn robot_game_settings -> %>
+        <div class="form-group">
+          <label>Spawn Every: <%= number_input(robot_game_settings, :spawn_every, class: "form-control") %></label><br>
+          <%= error_tag robot_game_settings, :spawn_every %>
+        </div>
+
+        <div class="form-group">
+          <label>Spawn Per Player: <%= number_input(robot_game_settings, :spawn_per_player, class: "form-control") %></label><br>
+          <%= error_tag robot_game_settings, :spawn_per_player %>
+        </div>
+
+        <div class="form-group">
+          <label>Robot HP: <%= number_input(robot_game_settings, :robot_hp, class: "form-control") %></label><br>
+          <%= error_tag robot_game_settings, :robot_hp %>
+        </div>
+
+        <div class="form-group">
+          <label>Max Turns: <%= number_input(robot_game_settings, :max_turns, class: "form-control") %></label><br>
+          <%= error_tag robot_game_settings, :max_turns %>
+        </div>
+        
+        <div class="form-group">
+          <label>Terrain Base64: <%= textarea(robot_game_settings, :terrain_base64, class: "form-control") %></label><br>
+          <%= error_tag robot_game_settings, :terrain_base64 %>
+        </div>
+      <% end %>
+    </div>
+    <hr>
     <%= submit "Create Lobby", class: "btn btn-primary" %>
   <% end %>
 </div>

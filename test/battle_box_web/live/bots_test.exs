@@ -18,7 +18,7 @@ defmodule BattleBoxWeb.BotsTest do
     {:ok, lobby} =
       user
       |> Ecto.build_assoc(:lobbies)
-      |> Lobby.changeset(%{name: "LOBBY NAME", game_type: "robot_game"})
+      |> Lobby.changeset(%{name: "LOBBY NAME", game_type: "robot_game", robot_game_settings: %{}})
       |> Repo.insert()
 
     {:ok, bot} =

@@ -29,7 +29,7 @@ defmodule BattleBoxWeb.LobbyController do
     |> Lobby.changeset(params)
     |> Repo.insert()
     |> case do
-      {:ok, lobby} ->
+      {:ok, _lobby} ->
         redirect(conn, to: Routes.user_lobby_path(conn, :index, user.user_name))
 
       {:error, changeset} ->

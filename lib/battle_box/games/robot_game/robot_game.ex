@@ -1,11 +1,11 @@
 defmodule BattleBox.Games.RobotGame do
   import BattleBox.Games.RobotGame.EventHelpers
-  alias BattleBox.{Repo, Game}
+  import Ecto.Changeset
+  require __MODULE__.Settings.Shared
+  alias BattleBox.Game
   alias __MODULE__.{Settings, Event}
   alias __MODULE__.Settings.{Terrain, DamageModifier}
   use Ecto.Schema
-  import Ecto.Changeset
-  import __MODULE__.Settings.SharedSettings
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -20,7 +20,7 @@ defmodule BattleBox.Games.RobotGame do
     field :robot_id_seq, :integer, default: 0, virtual: true
     field :spawn_enabled, :boolean, default: true, virtual: true
 
-    shared_robot_game_settings_schema_fields()
+    Settings.Shared.fields()
     timestamps()
   end
 
@@ -31,7 +31,6 @@ defmodule BattleBox.Games.RobotGame do
   def title, do: "Robot Game"
   def name, do: :robot_game
   def settings_module, do: Settings
-
   def players_for_settings(_), do: [1, 2]
 
   def disqualify(game, player) do
@@ -129,7 +128,6 @@ defmodule BattleBox.Games.RobotGame do
         :collision_damage,
         :suicide_damage,
         :terrain,
-        :persistent?,
         :spawn_enabled
       ])
 
