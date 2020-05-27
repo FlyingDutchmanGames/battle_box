@@ -29,6 +29,7 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 
 #### Bots
 #### Lobbies
+- [ ] Lobby timing settings
 - [ ] Robot Game Settings
   - [ ] Terrain Editor
 - [ ] bot self play allowed toggle
@@ -47,13 +48,13 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 #### Static Site
 - [ ] Wire protocol docs
 - [ ] Robot game rules docs
-- [ ] Switch bot tokens to user tokens
 #### Robot Game
 - [ ] More efficent game visualizer
 - [ ] Make the end turns the number of turns in the game
 - [ ] Remove row-min/max from terrain, because everything must be 0 indexed
 #### General
 - Upgrade phoenix/liveview
+- Add footer on all pages
 - Impersonation
 - Concurrent connection limiter
 - Enforce ASCII < 12 chars no spaces/special in names of everything
@@ -66,12 +67,8 @@ A Phoenix app that allows for UI and API driven use of the Game Engine
 - [ ] Matchmaker page
 - [ ] Handle when connection is closed on trying to send from connection server
 - [ ] A decent bot implmentation for testing
-- [ ] Connection Debugger (this has some issues due to amount of messages...)
-- [ ] Downloads controller, and `as_downloadable` as part of the game protocol
-- [ ] Google Analytics on the github page
 - [ ] Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
 - [ ] Build TicTacToe as proof of game engine extendability
-- [ ] `mix battle_box.swarm {optional credentials file}` task to run a swarm against a botskrieg server for regression testing
 - [ ] Pass timing info to the game so it can do move timing
 - [ ] Make all tests async by passing the ecto sandbox to all of the game engine
 
