@@ -11,6 +11,8 @@ defmodule BattleBox.Lobby do
       def load(unquote("#{game.name}")), do: {:ok, unquote(game)}
       def dump(unquote(game)), do: {:ok, unquote("#{game.name}")}
     end
+
+    def cast(_), do: :error
   end
 
   use Ecto.Schema
@@ -36,7 +38,7 @@ defmodule BattleBox.Lobby do
     field :command_time_minimum_ms, :integer, default: 250
     field :command_time_maximum_ms, :integer, default: 1000
 
-    field :game_type, GameType
+    field :game_type, GameType, default: BattleBox.Games.RobotGame
 
     has_many :games, Game
     belongs_to :user, User
@@ -67,6 +69,7 @@ defmodule BattleBox.Lobby do
       less_than: seconds(10)
     )
     |> validate_command_time()
+    |> validate_game_settings()
     |> unique_constraint(:name)
   end
 
@@ -88,6 +91,11 @@ defmodule BattleBox.Lobby do
     else
       changeset
     end
+  end
+
+  defp validate_game_settings(changeset) do
+    game_type = get_field(changeset, :game_type)
+    cast_assoc(changeset, game_type.settings_module.name, required: true)
   end
 
   defp milliseconds(milliseconds), do: milliseconds
