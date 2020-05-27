@@ -14,6 +14,7 @@ defmodule BattleBox.Lobby do
   end
 
   use Ecto.Schema
+  import :timer, only: [seconds: 1]
   import Ecto.Changeset
   import BattleBox.InstalledGames
   alias BattleBox.{Repo, User, Game}
@@ -53,8 +54,20 @@ defmodule BattleBox.Lobby do
     |> validate_required(@params)
     |> validate_inclusion(:game_type, installed_games())
     |> validate_length(:name, max: 50)
+    |> validate_number(:game_acceptance_time_ms,
+      greater_than_or_equal_to: seconds(1),
+      less_than: seconds(10)
+    )
+    |> validate_number(:command_time_minimum_ms,
+      greater_than_or_equal_to: milliseconds(250),
+      less_than: seconds(1)
+    )
+    |> validate_number(:command_time_maximum_ms,
+      greater_than_or_equal_to: milliseconds(250),
+      less_than: seconds(10)
+    )
+    |> validate_command_time()
     |> unique_constraint(:name)
-    |> cast_assoc(:robot_game_settings)
   end
 
   def get_settings(lobby) do
@@ -63,4 +76,19 @@ defmodule BattleBox.Lobby do
       %{robot_game_settings: robot_game_settings} -> robot_game_settings
     end
   end
+
+  defp validate_command_time(changeset) do
+    if get_field(changeset, :command_time_minimum_ms) >=
+         get_field(changeset, :command_time_maximum_ms) do
+      add_error(
+        changeset,
+        :command_time_minimum_ms,
+        "Minimum command time must be less than maximum command time"
+      )
+    else
+      changeset
+    end
+  end
+
+  defp milliseconds(milliseconds), do: milliseconds
 end

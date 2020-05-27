@@ -108,6 +108,11 @@ a.btn {
   background-color: #fafbfc;
 }
 
+.form-group .help-block {
+  color: red;
+  font-weight: lighter;
+}
+
 .form-control:focus, .form-select:focus {
   border-color: #2188ff;
   outline: none;
