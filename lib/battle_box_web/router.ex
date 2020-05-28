@@ -56,7 +56,7 @@ defmodule BattleBoxWeb.Router do
       resources "/keys", ApiKeyController
       resources "/bots", BotController, only: [:create, :new]
 
-      resources "/lobbies", LobbyController, only: [:new, :index, :create] do
+      resources "/lobbies", LobbyController, only: [:new, :index, :create], param: "name" do
         resources "/games", GameController, only: [:index]
       end
     end
@@ -64,12 +64,9 @@ defmodule BattleBoxWeb.Router do
     live("/lobbies/:id", Lobby)
 
     resources "/users", UserController, only: [:show] do
-      resources "/games", GameController, only: [:index]
       resources "/lobbies", LobbyController, only: [:index]
 
-      resources "/bots", BotController, only: [:show] do
-        resources "/games", GameController, only: [:index]
-      end
+      resources "/bots", BotController, only: [:show]
     end
 
     scope "/admin", Admin do
