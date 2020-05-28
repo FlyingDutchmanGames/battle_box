@@ -15,15 +15,19 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
         game_engine,
         %{connection: connection, lobby_name: lobby_name, token: token, bot_name: bot_name}
       ) do
-    with {:ok, bot} <- ApiKey.authenticate_bot(token, bot_name),
+    with {:ok, user} <- ApiKey.authenticate(token),
+         {:ok, bot} <- Bot.get_or_create_by_name(user, bot_name),
          {:lobby, %Lobby{} = lobby} <- {:lobby, Repo.get_by(Lobby, name: lobby_name)} do
       start_bot(game_engine, %{connection: connection, bot: bot, lobby: lobby})
     else
-      {:error, reason} when reason in [:invalid_token, :bot_not_found, :banned] ->
-        {:error, reason}
-
       {:lobby, nil} ->
-        {:error, :lobby_not_found}
+        {:error, %{lobby: ["Lobby not found"]}}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:error, BattleBox.changeset_errors(changeset)}
+
+      {:error, errors} ->
+        {:error, errors}
     end
   end
 

@@ -1,6 +1,6 @@
 defmodule BattleBox.ApiKeyTest do
   use BattleBox.DataCase
-  alias BattleBox.{ApiKey, Bot, User, Repo}
+  alias BattleBox.{ApiKey, User, Repo}
 
   @user_id Ecto.UUID.generate()
 
@@ -13,13 +13,7 @@ defmodule BattleBox.ApiKeyTest do
       |> ApiKey.changeset(%{name: "TEST"})
       |> Repo.insert()
 
-    {:ok, bot} =
-      user
-      |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "BOT"})
-      |> Repo.insert()
-
-    %{key: key, bot: bot, user: user}
+    %{key: key, user: user}
   end
 
   describe "validations" do
@@ -43,37 +37,23 @@ defmodule BattleBox.ApiKeyTest do
       assert byte_size(key.token) == 26
       assert :crypto.hash(:sha256, key.token) == key.hashed_token
     end
-
-    test "you can get a token by its hash (and only its hash)", %{key: key} do
-      from_token = ApiKey.from_token(key.token)
-      assert key.id == from_token.id
-      assert nil == ApiKey.from_token("some random number")
-      assert nil == ApiKey.from_token(key.hashed_token)
-    end
   end
 
-  describe "authenticate_bot" do
-    test "a valid token and bot work, and it updates the last_used field", %{
-      key: key,
-      bot: %{id: id, name: name}
-    } do
+  describe "authenticate" do
+    test "a valid token works and it updates the last_used field", %{key: key, user: %{id: id}} do
       assert key.last_used == nil
-      assert {:ok, %{id: ^id}} = ApiKey.authenticate_bot(key.token, name)
+      assert {:ok, %{id: ^id}} = ApiKey.authenticate(key.token)
       key = Repo.get(ApiKey, key.id)
       assert NaiveDateTime.diff(NaiveDateTime.utc_now(), key.last_used) < 2
     end
 
-    test "A banned user is banned", %{key: key, bot: bot, user: user} do
+    test "A banned user is banned", %{key: key, user: user} do
       {:ok, _user} = User.set_ban_status(user, true)
-      assert {:error, :banned} = ApiKey.authenticate_bot(key.token, bot.name)
-    end
-
-    test "A non existant bot doesnt work", %{key: key} do
-      assert {:error, :bot_not_found} = ApiKey.authenticate_bot(key.token, "SOME BOT")
+      assert {:error, %{user: ["User is banned"]}} == ApiKey.authenticate(key.token)
     end
 
     test "an invalid token doesn't work" do
-      assert {:error, :invalid_token} = ApiKey.authenticate_bot("INVALID_TOKEN", "SOME BOT")
+      assert {:error, %{token: ["API Key Invalid"]}} == ApiKey.authenticate("INVALID_TOKEN")
     end
   end
 end
