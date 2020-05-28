@@ -52,7 +52,7 @@ defmodule BattleBox.Connection.Logic do
 
         {data, [{:monitor, bot_server}, {:send, status_msg(data, :idle)}], :continue}
 
-      {:error, error} when error in [:invalid_token, :lobby_not_found, :banned] ->
+      {:error, error} ->
         {data, [{:send, encode_error(error)}], :continue}
     end
   end

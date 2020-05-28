@@ -53,7 +53,7 @@ defmodule BattleBox.ApiKeyTest do
     end
 
     test "an invalid token doesn't work" do
-      assert {:error, %{token: ["API Key Invalid"]}} == ApiKey.authenticate("INVALID_TOKEN")
+      assert {:error, %{token: ["Invalid API Key"]}} == ApiKey.authenticate("INVALID_TOKEN")
     end
   end
 end

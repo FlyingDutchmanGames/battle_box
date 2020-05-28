@@ -55,6 +55,7 @@ defmodule BattleBox.BotTest do
         user
         |> Ecto.build_assoc(:bots)
         |> Bot.changeset(%{name: "foo"})
+        |> Repo.insert()
 
       {:ok, bot} = Bot.get_or_create_by_name(user, "foo")
 

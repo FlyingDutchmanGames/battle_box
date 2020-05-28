@@ -73,6 +73,29 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                })
     end
 
+    test "starting a bot that doesn't exist creates it", context do
+      assert {:ok, pid, _} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 token: context.key.token,
+                 bot_name: "new_name",
+                 lobby_name: context.lobby.name,
+                 connection: self()
+               })
+
+      assert %Bot{name: "new_name"} = Repo.get_by(Bot, name: "new_name")
+      assert Process.alive?(pid)
+    end
+
+    test "you can't start a bot with an illegal name", context do
+      assert {:error, %{name: ["should be at most 20 character(s)"]}} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 token: context.key.token,
+                 bot_name: "name_that_is_way_too_long_to_be_legal......................",
+                 lobby_name: context.lobby.name,
+                 connection: self()
+               })
+    end
+
     test "starting a bot with a banned user fails", context do
       {:ok, _user} = User.set_ban_status(context.user, true)
 
