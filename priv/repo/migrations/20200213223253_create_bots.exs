@@ -8,7 +8,6 @@ defmodule BattleBox.Repo.Migrations.CreateBots do
       timestamps()
     end
 
-    create index("bots", [:name], unique: true)
     create index("bots", [:user_id, :name], unique: true)
   end
 end

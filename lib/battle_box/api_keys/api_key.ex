@@ -28,27 +28,20 @@ defmodule BattleBox.ApiKey do
     |> put_change(:hashed_token, hash(token))
   end
 
-  def authenticate_bot(token, bot_name) do
-    from_token(token)
-    |> Repo.preload(user: [bots: from(bot in Bot, where: bot.name == ^bot_name)])
+  def authenticate(token) do
+    Repo.get_by(__MODULE__, hashed_token: hash(token))
+    |> Repo.preload(:user)
     |> case do
       nil ->
-        {:error, :invalid_token}
+        {:error, %{token: ["Invalid API Key"]}}
 
       %__MODULE__{user: %User{is_banned: true}} ->
-        {:error, :banned}
+        {:error, %{user: ["User is banned"]}}
 
-      %__MODULE__{user: %User{bots: []}} ->
-        {:error, :bot_not_found}
-
-      %__MODULE__{user: %User{bots: [%Bot{} = bot]}} = key ->
+      %__MODULE__{user: %User{} = user} = key ->
         mark_used!(key)
-        {:ok, bot}
+        {:ok, user}
     end
-  end
-
-  def from_token(token) do
-    Repo.get_by(__MODULE__, hashed_token: hash(token))
   end
 
   defp mark_used!(%__MODULE__{} = api_key) do

@@ -56,7 +56,7 @@ defmodule BattleBoxWeb.BotControllerTest do
       |> signin(user: user)
       |> post("/bots", %{"bot" => %{"name" => "FOO"}})
 
-    assert html_response(conn, 200) =~ "has already been taken"
+    assert html_response(conn, 200) =~ "Bot with that name already exists for your user"
   end
 
   test "theres a form to create a new bot", %{conn: conn, user: user} do
