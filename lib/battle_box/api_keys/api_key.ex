@@ -33,7 +33,7 @@ defmodule BattleBox.ApiKey do
     |> Repo.preload(:user)
     |> case do
       nil ->
-        {:error, %{token: ["API Key Invalid"]}}
+        {:error, %{token: ["Invalid API Key"]}}
 
       %__MODULE__{user: %User{is_banned: true}} ->
         {:error, %{user: ["User is banned"]}}

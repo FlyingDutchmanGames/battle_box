@@ -54,7 +54,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     end
 
     test "starting a bot with an invalid token yields an error", context do
-      assert {:error, :invalid_token} =
+      assert {:error, %{token: ["Invalid API Key"]}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: "ABCDEF",
                  bot_name: context.bot.name,
@@ -64,7 +64,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     end
 
     test "starting a bot with an invalid lobby name yields an error", context do
-      assert {:error, :lobby_not_found} =
+      assert {:error, %{lobby: ["Lobby not found"]}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: context.bot.name,
@@ -76,7 +76,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     test "starting a bot with a banned user fails", context do
       {:ok, _user} = User.set_ban_status(context.user, true)
 
-      assert {:error, :banned} =
+      assert {:error, %{user: ["User is banned"]}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: context.bot.name,
