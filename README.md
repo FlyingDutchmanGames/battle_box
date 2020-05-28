@@ -15,7 +15,7 @@
 
 #### Bots
 - Edit bots
-- Bot autocreate through use in interface
+- Bots index page revamped
 #### Lobbies
 - Edit lobbies
 - Robot Game Settings
@@ -25,8 +25,9 @@
 - add in server ais
 - Matchmaker queue live
 - set of default lobbies with interesting terrains and bots
+- Lobby Live page revamped
 #### Games
-- Historical Games Filtered/Paginated by [user, bot, lobby]
+- Historical Games Filtered/Paginated by [user, user + bot, lobby, all?]
 - Live Games that meet the same criteria
 #### Clients
 - BattleBox Elixir Client
@@ -44,6 +45,20 @@
 - Make the end turns the number of turns in the game
 - Remove row-min/max from terrain, because everything must be 0 indexed
 - Area conquer mode
+#### ELO rankings
+- Provide optional ELOs to lobbies
+#### Client
+- remake protocol from `lobby_name` => `lobby` `bot_name` => `bot` and make `bot` optional and default to `unnamed`
+- have a `use BattleBoxClient.Bot, game_type: RobotGame` macro
+  - MyBot.start(lobby, opts \\ %{})
+    - opts
+      - credential: "TOKEN"
+      - uri: "battleboxs://app.botskrieg.com:4242"
+  - Choose host / protocol
+    `opt passed to start/2` `$BATTLE_BOX_SERVER_URI` `Application.get_env(:battle_box_client, :server_uri)` `battleboxs://app.botskrieg.com:4242` 
+  - implicitly load one of (in order) `opt passed to start/2` `$BATTLE_BOX_CREDENTIALS`, `$BATTLE_BOX_CRENDENTIAL_FILE`, `.battle_box_crendentials` `throw error with helpful info`
+    - {"localhost": { "token": "asdbasdafsdfas"}, "app.botskrieg.com": {"token": "asdasdfas"}} <- creds format
+    - Load the credential for the host being connected to
 #### General
 - Upgrade phoenix/liveview
 - Handle when connection is closed on trying to send from connection server
