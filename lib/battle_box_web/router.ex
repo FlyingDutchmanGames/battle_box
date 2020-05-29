@@ -31,7 +31,6 @@ defmodule BattleBoxWeb.Router do
       resources "/games", GameController, only: [:index]
     end
 
-    live("/lobbies/:id", Lobby)
 
     resources "/users", UserController, only: [:show] do
       resources "/bots", BotController, only: [:show]
@@ -68,6 +67,8 @@ defmodule BattleBoxWeb.Router do
       get "/database", HealthController, :db
       get "/info", HealthController, :info
     end
+
+    live("/lobbies/:id", Lobby)
 
     scope "/admin", Admin do
       pipe_through :require_admin
