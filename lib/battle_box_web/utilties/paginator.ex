@@ -7,9 +7,10 @@ defmodule BattleBoxWeb.Utilites.Paginator do
   def paginate(query, params) do
     %{page: page, per_page: per_page} = pagination_info(params)
 
-    query
-    |> limit(^per_page)
-    |> offset(^((page - 1) * per_page))
+    offset =
+      query
+      |> limit(^per_page)
+      |> offset(^((page - 1) * per_page))
   end
 
   def pagination_info(params) do
