@@ -1,0 +1,24 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      Lobbies /
+      <a href='<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, @params["lobby_name"]) %>'><%= @params["lobby_name"] %></a>
+      / Past Games
+    </div>
+  </div>
+  <div class="box">
+    <%= for game <- @games do %>
+      <div class="box-row lobby">
+        <div class="box-details">
+          <div style="font-weight: bolder; padding-bottom: 10px;">ID: <%= game.id %></div>
+          <div>Lobby: <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, @params["lobby_name"]) %>"><%= game.lobby.name %></a></div>
+          <div>Type: <%= game.game_type.title %></div>
+          <div>Played: <%= humanize_seconds_ago(game.inserted_at) %></div>
+        </div>
+        <div>
+          <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Game, game.id) %>" class="btn">Watch Replay</a>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
