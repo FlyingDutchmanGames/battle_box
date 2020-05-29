@@ -38,9 +38,6 @@ defmodule BattleBoxWeb.Utilites.Paginator do
     %{page: page, per_page: per_page, adjacent_pages: adjacent_pages}
   end
 
-  defp adjacent_pages(page) do
-  end
-
   defp to_integer(str) when is_binary(str), do: String.to_integer(str)
   defp to_integer(num) when is_integer(num), do: num
 end

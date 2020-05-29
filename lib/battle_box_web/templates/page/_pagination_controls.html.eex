@@ -1,4 +1,4 @@
-<% %{page: current_page, per_page: per_page, adjacent_pages: adjacent_pages} = pagination_info(@params) %>
+<% %{page: current_page, adjacent_pages: adjacent_pages} = pagination_info(@params) %>
 <div class="paginate-container">
   <div class="pagination">
     <a style='<%= if current_page == 1, do: "pointer-events: none;" %>' href="<%= @to_page.(current_page - 1) %>" class='<%= if current_page == 1, do: "disabled" %>'>Previous</a>

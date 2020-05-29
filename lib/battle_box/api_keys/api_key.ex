@@ -1,7 +1,6 @@
 defmodule BattleBox.ApiKey do
-  alias BattleBox.{Repo, User, Bot}
+  alias BattleBox.{Repo, User}
   import Ecto.Changeset
-  import Ecto.Query, only: [from: 2]
   use Ecto.Schema
 
   @primary_key {:id, :binary_id, autogenerate: true}
