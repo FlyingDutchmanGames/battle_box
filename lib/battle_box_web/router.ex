@@ -31,7 +31,6 @@ defmodule BattleBoxWeb.Router do
       resources "/games", GameController, only: [:index]
     end
 
-
     resources "/users", UserController, only: [:show] do
       resources "/bots", BotController, only: [:show]
       resources "/lobbies", LobbyController, only: [:index]

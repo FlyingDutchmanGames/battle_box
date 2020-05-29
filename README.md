@@ -29,6 +29,7 @@
 #### Games
 - Historical Games Filtered/Paginated by [user, user + bot, lobby, all?]
 - Live Games that meet the same criteria
+- Better test the Game controller
 #### Clients
 - BattleBox Elixir Client
 - BattleBox Python Client
