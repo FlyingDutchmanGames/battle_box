@@ -185,3 +185,38 @@ a.btn {
   pointer-events: none;
 }
 
+.score {
+  margin: 0px 2px;
+  color: white;
+  border-radius: 10px;
+  padding: 5px 10px;
+  text-decoration: none;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.score .bot-info {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  color: white;
+}
+
+.score .names {
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 0px 10px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.score.player1 { background-color: #ff4943; }
+.score.player2 { background-color: #016dd6; }
+.score .bot-info img {
+  width: 30px;
+  border-radius: 5px;
+}

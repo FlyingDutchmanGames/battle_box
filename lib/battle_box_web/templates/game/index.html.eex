@@ -15,6 +15,20 @@
           <div>Type: <%= game.game_type.title %></div>
           <div>Played: <%= humanize_seconds_ago(game.inserted_at) %></div>
         </div>
+        <div class="scoreboard" style="display: flex; flex-flow: row wrap; margin-right: 20px;">
+          <%= for game_bot <- Enum.sort_by(game.game_bots, & &1.player) do %>
+            <div class="score player<%= game_bot.player %>">
+              <div class="bot-info">
+                <img src="<%= game_bot.bot.user.avatar_url %>">
+                <div class="names">
+                  <a href="<%= Routes.user_path(@conn, :show, game_bot.bot.user.user_name) %>"><div style="font-size: 0.3em; color: white;"><%= game_bot.bot.user.user_name %></div></a>
+                  <a href="<%= Routes.user_bot_path(@conn, :show, game_bot.bot.user.user_name, game_bot.bot.name) %>" style="color: white;"><div><%= game_bot.bot.name %></div></a>
+                </div>
+              </div>
+              <div style="font-size: 2em;"><%= game_bot.score %></div>
+            </div>
+          <% end %>
+        </div>
         <div>
           <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Game, game.id) %>" class="btn">Watch Replay</a>
         </div>
