@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.GameController do
   use BattleBoxWeb, :controller
   alias BattleBox.{Repo, Game}
-  import BattleBoxWeb.Utilites.Paginator, only: [paginate: 2]
+  import BattleBoxWeb.Utilites.Paginator, only: [paginate: 2, pagination_info: 1]
   import Ecto.Query
 
   def index(conn, params) do
@@ -13,7 +13,12 @@ defmodule BattleBoxWeb.GameController do
       |> preload(game_bots: [bot: :user])
       |> Repo.all()
 
-    render(conn, "index.html", games: games, params: params)
+    assigns =
+      params
+      |> pagination_info
+      |> Enum.into(games: games, params: params)
+
+    render(conn, "index.html", assigns)
   end
 
   defp filter_lobbies(query, %{"lobby_name" => lobby_name}) do

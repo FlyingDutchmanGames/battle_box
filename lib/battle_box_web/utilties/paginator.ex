@@ -5,14 +5,14 @@ defmodule BattleBoxWeb.Utilites.Paginator do
   @max_per_page 50
 
   def paginate(query, params) do
-    %{page: page, per_page: per_page} = parse_pagination_params(params)
+    %{page: page, per_page: per_page} = pagination_info(params)
 
     query
     |> limit(^per_page)
     |> offset(^((page - 1) * per_page))
   end
 
-  defp parse_pagination_params(params) do
+  def pagination_info(params) do
     page =
       case params["page"] do
         nil -> 1
@@ -28,7 +28,16 @@ defmodule BattleBoxWeb.Utilites.Paginator do
         _ -> @default_per_page
       end
 
-    %{page: page, per_page: per_page}
+    adjacent_pages =
+      case page do
+        page when page < 4 -> 1..7
+        page -> (page - 3)..(page + 3)
+      end
+
+    %{page: page, per_page: per_page, adjacent_pages: adjacent_pages}
+  end
+
+  defp adjacent_pages(page) do
   end
 
   defp to_integer(str) when is_binary(str), do: String.to_integer(str)

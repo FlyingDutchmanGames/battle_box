@@ -138,3 +138,49 @@ a.btn {
   margin-right: auto;
 }
 
+.paginate-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.pagination a {
+  color: var(--primary-three);
+  float: left;
+  padding: 7px 12px;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #e1e4e8;
+  text-decoration: none;
+}
+
+.pagination a:hover:not(.current) {
+  text-decoration: none;
+  background-color: #eff3f6;
+  border-color: #e1e4e8;
+}
+
+.pagination *:first-child {
+  margin-left: 0;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+.pagination *:last-child {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.pagination .current {
+  color: white;
+  background-color: var(--primary-three);
+}
+
+.pagination .disabled {
+  color: #d1d5da;
+  cursor: default;
+  background-color: #fafbfc;
+}
+

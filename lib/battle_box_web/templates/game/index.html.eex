@@ -21,4 +21,23 @@
       </div>
     <% end %>
   </div>
+
+  <% to_page = fn page -> Routes.lobby_game_path(@conn, :index, @params["lobby_name"], %{page: page, per_page: @per_page}) end %>
+  <% incomplete_page? = length(@games) < @per_page %>
+  <div class="paginate-container">
+    <div class="pagination">
+      <a href="<%= to_page.(@page - 1) %>" class='<%= if @page == 1, do: "disabled" %>'>Previous</a>
+      <%= for page <- @adjacent_pages do %>
+        <%= cond do %>
+          <% page < @page -> %>
+            <a href="<%= to_page.(page) %>"><%= page %></a>
+          <% page == @page -> %>
+            <a href="<%= to_page.(page) %>" class="current"><%= page %></a>
+          <% page > @page -> %>
+            <a href="<%= to_page.(page) %>" class='<%= if incomplete_page?, do: "disabled" %>'><%= page %></a>
+        <% end %>
+      <% end %>
+      <a href="<%= to_page.(@page + 1) %>" class='<%= if incomplete_page?, do: "disabled" %>'>Next</a>
+    </div>
+  </div>
 </div>

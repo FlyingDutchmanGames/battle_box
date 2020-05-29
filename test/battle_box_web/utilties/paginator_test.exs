@@ -6,6 +6,21 @@ defmodule BattleBoxWeb.Utilites.PaginatorTest do
 
   @user_id Ecto.UUID.generate()
 
+  test "pagination_info" do
+    assert %{adjacent_pages: 1..7, page: 1, per_page: 25} == pagination_info(%{})
+    assert %{adjacent_pages: 7..13, page: 10, per_page: 25} == pagination_info(%{"page" => 10})
+
+    assert %{adjacent_pages: 7..13, page: 10, per_page: 50} ==
+             pagination_info(%{"page" => 10, "per_page" => 50})
+
+    assert %{adjacent_pages: 7..13, page: 10, per_page: 25} ==
+             pagination_info(%{"page" => 10, "per_page" => 51})
+
+    assert %{adjacent_pages: 1..7, page: 3, per_page: 25} == pagination_info(%{"page" => 3})
+    assert %{adjacent_pages: 1..7, page: 4, per_page: 25} == pagination_info(%{"page" => 4})
+    assert %{adjacent_pages: 2..8, page: 5, per_page: 25} == pagination_info(%{"page" => 5})
+  end
+
   describe "paginate" do
     test "not asking for a page defaults to 1" do
       create_bots(6)
