@@ -16,7 +16,8 @@ defmodule BattleBoxWeb.GameController do
     assigns =
       params
       |> pagination_info
-      |> Enum.into(games: games, params: params)
+      |> Enum.into([])
+      |> Keyword.merge(games: games, params: params)
 
     render(conn, "index.html", assigns)
   end

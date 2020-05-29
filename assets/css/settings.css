@@ -182,5 +182,6 @@ a.btn {
   color: #d1d5da;
   cursor: default;
   background-color: #fafbfc;
+  pointer-events: none;
 }
 

@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   flex-flow: row nowrap;
-  margin: 10px;
+  margin: 10px 10px 10px auto;
 }
 
 .header .user {
