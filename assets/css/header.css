@@ -23,15 +23,15 @@
   font-size: 1.5em;
 }
 
-.header .spacer {
-  flex-grow: 1;
+.header .nav-item:first-of-type {
+  margin-left: auto;
 }
 
 .header .nav-item {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 15px;
+  margin-right: 20px;
   font-weight: lighter;
 }
 
@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   flex-flow: row nowrap;
-  margin: 10px;
+  margin: 10px 10px 10px auto;
 }
 
 .header .user {
@@ -58,6 +58,7 @@
 .header .user img {
   width: 30px;
   height: 30px;
+  border-radius: 5px;
 }
 
 .header .logout-button {

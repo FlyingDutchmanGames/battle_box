@@ -23,27 +23,18 @@ defmodule BattleBoxWeb.Router do
     get "/", PageController, :index
     get "/login", PageController, :login
 
-    scope "/" do
-      pipe_through :require_logged_in
-
-      get "/banned", PageController, :banned
-      post "/logout", PageController, :logout
-    end
-
-    scope "/health" do
-      get "/", HealthController, :health
-      get "/database", HealthController, :db
-      get "/info", HealthController, :info
-    end
-
-    scope "/auth" do
-      get "/github/login", GithubLoginController, :github_login
-      get "/github/callback", GithubLoginController, :github_callback
-    end
-
     live("/games/:game_id", Game)
     live("/users/:user_id/bots", Bots)
     live("/bot_servers/:bot_server_id/follow", BotServerFollow)
+
+    resources "/lobbies", LobbyController, only: [], param: "name" do
+      resources "/games", GameController, only: [:index]
+    end
+
+    resources "/users", UserController, only: [:show] do
+      resources "/bots", BotController, only: [:show]
+      resources "/lobbies", LobbyController, only: [:index]
+    end
 
     scope "/" do
       pipe_through :require_logged_in
@@ -55,18 +46,32 @@ defmodule BattleBoxWeb.Router do
 
       resources "/keys", ApiKeyController
       resources "/bots", BotController, only: [:create, :new]
-      resources "/lobbies", LobbyController, only: [:new, :index, :create]
+      resources "/lobbies", LobbyController, only: [:create, :new]
+    end
+
+    scope "/" do
+      pipe_through :require_logged_in
+
+      get "/banned", PageController, :banned
+      post "/logout", PageController, :logout
+    end
+
+    scope "/auth" do
+      get "/github/login", GithubLoginController, :github_login
+      get "/github/callback", GithubLoginController, :github_callback
+    end
+
+    scope "/health" do
+      get "/", HealthController, :health
+      get "/database", HealthController, :db
+      get "/info", HealthController, :info
     end
 
     live("/lobbies/:id", Lobby)
 
-    resources "/users", UserController, only: [:show] do
-      resources "/bots", BotController, only: [:show]
-      resources "/lobbies", LobbyController, only: [:index]
-    end
-
     scope "/admin", Admin do
       pipe_through :require_admin
+
       live("/users", Users)
       live_dashboard "/dashboard", metrics: BattleBoxWeb.Telemetry
     end

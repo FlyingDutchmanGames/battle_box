@@ -1,0 +1,41 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      Lobbies /
+      <a href='<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, @params["lobby_name"]) %>'><%= @params["lobby_name"] %></a>
+      / Past Games
+    </div>
+  </div>
+  <div class="box">
+    <%= for game <- @games do %>
+      <div class="box-row lobby">
+        <div class="box-details">
+          <div style="font-weight: bolder; padding-bottom: 10px;">ID: <%= game.id %></div>
+          <div>Lobby: <a href='<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, @params["lobby_name"]) %>'><%= game.lobby.name %></a></div>
+          <div>Type: <%= game.game_type.title %></div>
+          <div>Played: <%= humanize_seconds_ago(game.inserted_at) %></div>
+        </div>
+        <div class="scoreboard" style="display: flex; flex-flow: row wrap; margin-right: 20px;">
+          <%= for game_bot <- Enum.sort_by(game.game_bots, & &1.player) do %>
+            <div class="score player<%= game_bot.player %>">
+              <div class="bot-info">
+                <img src="<%= game_bot.bot.user.avatar_url %>">
+                <div class="names">
+                  <a href="<%= Routes.user_path(@conn, :show, game_bot.bot.user.user_name) %>"><div style="font-size: 0.3em; color: white;"><%= game_bot.bot.user.user_name %></div></a>
+                  <a href="<%= Routes.user_bot_path(@conn, :show, game_bot.bot.user.user_name, game_bot.bot.name) %>" style="color: white;"><div><%= game_bot.bot.name %></div></a>
+                </div>
+              </div>
+              <div style="font-size: 2em;"><%= game_bot.score %></div>
+            </div>
+          <% end %>
+        </div>
+        <div>
+          <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Game, game.id) %>" class="btn">Watch Replay</a>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% to_page = fn page -> Routes.lobby_game_path(@conn, :index, @params["lobby_name"], %{page: page, per_page: @per_page}) end %>
+  <%= BattleBoxWeb.PageView.render("_pagination_controls.html", to_page: to_page, incomplete_page?: length(@games) < @per_page, params: @params) %> 
+</div>

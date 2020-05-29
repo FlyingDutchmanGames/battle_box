@@ -29,6 +29,7 @@
 #### Games
 - Historical Games Filtered/Paginated by [user, user + bot, lobby, all?]
 - Live Games that meet the same criteria
+- Better test the Game controller
 #### Clients
 - BattleBox Elixir Client
 - BattleBox Python Client
@@ -65,7 +66,8 @@
 - Add footer on all pages
 - Impersonation
 - Concurrent connection limiter
-- Enforce ASCII < 12 chars no spaces/special in names of everything
+- switch all the params in the router from `id` => `name`
+- Enforce ASCII < 15 chars no spaces/special in names of everything (also use `citext`)
   - User.username
   - Lobby.name
   - Bot.name
