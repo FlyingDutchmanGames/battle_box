@@ -53,6 +53,11 @@ defmodule BattleBoxWeb.Utilites.PaginatorTest do
 
       assert length(test_pagination_params(%{"per_page" => 51})) == 25
     end
+
+    test "in the case of negative pages, it defaults to page one" do
+      create_bots(1)
+      assert ["A"] == test_pagination_params(%{"page" => -1})
+    end
   end
 
   defp create_bots(number) do

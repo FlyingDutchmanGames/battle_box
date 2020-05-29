@@ -17,7 +17,7 @@ defmodule BattleBoxWeb.Utilites.Paginator do
     page =
       case params["page"] do
         nil -> 1
-        page -> to_integer(page)
+        page -> max(1, to_integer(page))
       end
 
     per_page =
