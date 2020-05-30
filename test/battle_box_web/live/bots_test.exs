@@ -18,13 +18,13 @@ defmodule BattleBoxWeb.BotsTest do
     {:ok, lobby} =
       user
       |> Ecto.build_assoc(:lobbies)
-      |> Lobby.changeset(%{name: "LOBBY NAME", game_type: "robot_game", robot_game_settings: %{}})
+      |> Lobby.changeset(%{name: "test-lobby", game_type: "robot_game", robot_game_settings: %{}})
       |> Repo.insert()
 
     {:ok, bot} =
       user
       |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Bot.changeset(%{name: "test-bot"})
       |> Repo.insert()
 
     %{bot: bot, user: user, lobby: lobby}
@@ -37,7 +37,7 @@ defmodule BattleBoxWeb.BotsTest do
 
   test "it will render a players bots", %{conn: conn, user: user} do
     {:ok, _view, html} = live(conn, "/users/#{user.user_name}/bots")
-    assert html =~ "TEST BOT"
+    assert html =~ "test-bot"
   end
 
   test "it will show the bot servers that a player has active",
@@ -52,7 +52,7 @@ defmodule BattleBoxWeb.BotsTest do
     {:ok, _view, html} = live(conn, "/users/#{user.user_name}/bots")
     {:ok, document} = Floki.parse_document(html)
     assert [bot] = Floki.find(document, ".bot-server")
-    assert Floki.text(bot) =~ "LOBBY NAME"
+    assert Floki.text(bot) =~ "test-lobby"
   end
 
   test "if a bot server dies it will be removed from the page",
@@ -67,7 +67,7 @@ defmodule BattleBoxWeb.BotsTest do
     {:ok, view, html} = live(conn, "/users/#{user.user_name}/bots")
     {:ok, document} = Floki.parse_document(html)
     assert [bot] = Floki.find(document, ".bot-server")
-    assert Floki.text(bot) =~ "LOBBY NAME"
+    assert Floki.text(bot) =~ "test-lobby"
     Process.exit(bot_server_pid, :kill)
     Process.sleep(10)
     html = render(view)

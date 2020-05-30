@@ -9,14 +9,14 @@ defmodule BattleBoxWeb.LobbyControllerTest do
   end
 
   test "you can view a lobby", %{conn: conn, user: user} do
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "TEST_NAME")
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-name")
 
     conn =
       conn
       |> signin(user: user)
       |> get("/lobbies/#{lobby.name}")
 
-    assert html_response(conn, 200) =~ "TEST_NAME"
+    assert html_response(conn, 200) =~ "test-name"
   end
 
   test "you can create a lobby", %{conn: conn, user: user} do
@@ -67,7 +67,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
     test "it will show a user's lobbies", %{conn: conn, user: user} do
       for i <- [1, 2, 3] do
-        {:ok, _} = robot_game_lobby(user: user, lobby_name: "TEST_NAME#{i}")
+        {:ok, _} = robot_game_lobby(user: user, lobby_name: "test-name-#{i}")
       end
 
       conn =
@@ -77,7 +77,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
       html = html_response(conn, 200)
       {:ok, document} = Floki.parse_document(html)
 
-      assert ["Name: TEST_NAME1", "Name: TEST_NAME2", "Name: TEST_NAME3"] =
+      assert ["Name: test-name-1", "Name: test-name-2", "Name: test-name-3"] =
                Enum.sort(Floki.find(document, ".lobby .name") |> Enum.map(&Floki.text/1))
     end
   end

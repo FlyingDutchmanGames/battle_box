@@ -19,12 +19,12 @@ defmodule BattleBox.GameEngine.BotServerTest do
     {:ok, bot} =
       user
       |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Bot.changeset(%{name: "test-bot"})
       |> Repo.insert()
 
     bot = Repo.preload(bot, :user)
 
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "Lobby name")
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-lobby")
 
     %{lobby: lobby, bot: bot}
   end

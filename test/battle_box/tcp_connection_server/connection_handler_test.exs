@@ -5,8 +5,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   import BattleBox.Connection.Message
 
   @ip {127, 0, 0, 1}
-  @bot_name "BOT_NAME"
-  @lobby_name "LOBBY_NAME"
+  @bot_name "bot-name"
+  @lobby_name "lobby-name"
   @user_id Ecto.UUID.generate()
 
   setup %{test: name} do
@@ -41,7 +41,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     {:ok, key} =
       user
       |> Ecto.build_assoc(:api_keys)
-      |> ApiKey.changeset(%{name: "TEST KEY"})
+      |> ApiKey.changeset(%{name: "test-key"})
       |> Repo.insert()
 
     %{user: user, lobby: lobby, bot: bot, key: key}

@@ -39,7 +39,7 @@ defmodule BattleBox.Test.DataHelpers do
     |> Ecto.build_assoc(:lobbies)
     |> Map.put(:command_time_minimum_ms, opts[:command_time_minimum_ms] || 20)
     |> Lobby.changeset(%{
-      "name" => opts[:lobby_name] || "LOBBY NAME",
+      "name" => opts[:lobby_name] || "lobby-name",
       "game_type" => "robot_game",
       "robot_game_settings" => %{}
     })

@@ -13,12 +13,12 @@ defmodule BattleBoxWeb.BotControllerTest do
     {:ok, bot} =
       user
       |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{"name" => "TEST_NAME"})
+      |> Bot.changeset(%{"name" => "test-name"})
       |> Repo.insert()
 
     conn = get(conn, "/users/#{user.user_name}/bots/#{bot.name}")
 
-    assert html_response(conn, 200) =~ "TEST_NAME"
+    assert html_response(conn, 200) =~ "test-name"
   end
 
   test "trying to view a non existant bot is a not found 404", %{conn: conn} do

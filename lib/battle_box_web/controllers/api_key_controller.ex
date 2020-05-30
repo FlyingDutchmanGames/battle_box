@@ -4,7 +4,8 @@ defmodule BattleBoxWeb.ApiKeyController do
   import Ecto.Query, only: [from: 2]
 
   def new(conn, _params) do
-    render(conn, "new.html")
+    changeset = ApiKey.changeset(%ApiKey{})
+    render(conn, "new.html", changeset: changeset)
   end
 
   def delete(%{assigns: %{current_user: user}} = conn, %{"id" => id}) do
@@ -16,13 +17,14 @@ defmodule BattleBoxWeb.ApiKeyController do
   end
 
   def create(%{assigns: %{current_user: user}} = conn, %{"api_key" => params}) do
-    {:ok, api_key} =
-      user
-      |> Ecto.build_assoc(:api_keys)
-      |> ApiKey.changeset(params)
-      |> Repo.insert()
-
-    render(conn, "show.html", api_key: api_key)
+    user
+    |> Ecto.build_assoc(:api_keys)
+    |> ApiKey.changeset(params)
+    |> Repo.insert()
+    |> case do
+      {:ok, api_key} -> render(conn, "show.html", api_key: api_key)
+      {:error, changeset} -> render(conn, "new.html", changeset: changeset)
+    end
   end
 
   def index(%{assigns: %{current_user: user}} = conn, _params) do

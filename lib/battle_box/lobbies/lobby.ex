@@ -19,6 +19,7 @@ defmodule BattleBox.Lobby do
   import :timer, only: [seconds: 1]
   import Ecto.Changeset
   import BattleBox.InstalledGames
+  import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
   alias BattleBox.{Repo, User, Game}
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -55,7 +56,6 @@ defmodule BattleBox.Lobby do
     |> cast(params, @params)
     |> validate_required(@params)
     |> validate_inclusion(:game_type, installed_games())
-    |> validate_length(:name, max: 50)
     |> validate_number(:game_acceptance_time_ms,
       greater_than_or_equal_to: seconds(1),
       less_than: seconds(10)
@@ -70,6 +70,7 @@ defmodule BattleBox.Lobby do
     )
     |> validate_command_time()
     |> validate_game_settings()
+    |> validate_user_identifer(:name)
     |> unique_constraint(:name)
   end
 

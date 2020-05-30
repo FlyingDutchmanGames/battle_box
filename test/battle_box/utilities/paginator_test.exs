@@ -1,7 +1,7 @@
-defmodule BattleBoxWeb.Utilites.PaginatorTest do
-  import BattleBoxWeb.Utilites.Paginator
+defmodule BattleBox.Utilities.PaginatorTest do
   use BattleBox.DataCase
   alias BattleBox.{Bot, Repo}
+  import BattleBox.Utilities.Paginator
   import Ecto.Query
 
   @user_id Ecto.UUID.generate()

@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.GameController do
   use BattleBoxWeb, :controller
   alias BattleBox.{Repo, Game}
-  import BattleBoxWeb.Utilites.Paginator, only: [paginate: 2, pagination_info: 1]
+  import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
   import Ecto.Query
 
   def index(conn, params) do

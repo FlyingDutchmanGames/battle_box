@@ -11,7 +11,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
   setup do
     {:ok, user} = create_user()
-    {:ok, lobby} = robot_game_lobby(%{user: user, lobby_name: "TEST LOBBY"})
+    {:ok, lobby} = robot_game_lobby(%{user: user, lobby_name: "test-lobby"})
 
     %{
       init_opts: %{

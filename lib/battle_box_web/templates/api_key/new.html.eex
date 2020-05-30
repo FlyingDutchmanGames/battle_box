@@ -6,14 +6,11 @@
     </div>
   </div>
 
-  <form class="new_public_key" id="new_key" action="/keys" method="post">
-    <input name="_csrf_token" type="hidden" value="<%= Plug.CSRFProtection.get_csrf_token() %>">
-
+  <%= form_for @changeset, Routes.api_key_path(@conn, :create), fn f -> %>
     <div class="form-group">
-      <label for="api_key_name">Name:</label>
-      <input maxlength="30" required class="form-control" type="text" name="api_key[name]" id="api_key_title">
+      <label>Name: <%= text_input f, :name, class: "form-control" %></label><br>
+      <%= error_tag f, :name %>
     </div>
-
-    <button type="submit" class="btn btn-primary">Create API Key</button>
-  </form>
+    <%= submit "Create Api Key", class: "btn btn-primary" %>
+  <% end %>
 </div>

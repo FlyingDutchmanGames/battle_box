@@ -18,12 +18,12 @@ defmodule BattleBoxWeb.LobbyTest do
 
   setup context do
     {:ok, user} = create_user(user_id: @user_id)
-    {:ok, lobby} = robot_game_lobby(%{lobby_name: "TEST LOBBY", user: user})
+    {:ok, lobby} = robot_game_lobby(%{lobby_name: "test-lobby", user: user})
 
     {:ok, bot} =
       user
       |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Bot.changeset(%{name: "test-bot"})
       |> Repo.insert()
 
     {:ok, bot_server_1, _} =

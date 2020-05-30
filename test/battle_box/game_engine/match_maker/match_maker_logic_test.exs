@@ -10,10 +10,10 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     {:ok, bot} =
       user
       |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Bot.changeset(%{name: "test-bot"})
       |> Repo.insert()
 
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "TEST LOBBY")
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-lobby")
 
     %{bot: bot, lobby: lobby}
   end

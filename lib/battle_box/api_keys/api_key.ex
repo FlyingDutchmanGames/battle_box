@@ -1,5 +1,6 @@
 defmodule BattleBox.ApiKey do
   alias BattleBox.{Repo, User}
+  import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
   import Ecto.Changeset
   use Ecto.Schema
 
@@ -16,13 +17,12 @@ defmodule BattleBox.ApiKey do
     timestamps()
   end
 
-  def changeset(api_key, params) do
+  def changeset(api_key, params \\ %{}) do
     token = gen_token()
 
     api_key
     |> cast(params, [:name])
-    |> validate_required(:name)
-    |> validate_length(:name, max: 30)
+    |> validate_user_identifer(:name)
     |> put_change(:token, token)
     |> put_change(:hashed_token, hash(token))
   end
