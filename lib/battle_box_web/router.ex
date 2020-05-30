@@ -24,16 +24,16 @@ defmodule BattleBoxWeb.Router do
     get "/login", PageController, :login
 
     live("/games/:game_id", Game)
-    live("/users/:user_id/bots", Bots)
+    live("/users/:user_username/bots", Bots)
     live("/bot_servers/:bot_server_id/follow", BotServerFollow)
 
     resources "/lobbies", LobbyController, only: [], param: "name" do
       resources "/games", GameController, only: [:index]
     end
 
-    resources "/users", UserController, only: [:show] do
-      resources "/bots", BotController, only: [:show]
-      resources "/lobbies", LobbyController, only: [:index]
+    resources "/users", UserController, only: [:show], param: "username" do
+      resources "/bots", BotController, only: [:show], param: "name"
+      resources "/lobbies", LobbyController, only: [:index], param: "name"
     end
 
     scope "/" do
@@ -45,8 +45,8 @@ defmodule BattleBoxWeb.Router do
       get "/lobbies", UserRedirectController, :lobbies
 
       resources "/keys", ApiKeyController
-      resources "/bots", BotController, only: [:create, :new]
-      resources "/lobbies", LobbyController, only: [:create, :new]
+      resources "/bots", BotController, only: [:create, :new], param: "name"
+      resources "/lobbies", LobbyController, only: [:create, :new], param: "name"
     end
 
     scope "/" do
@@ -67,7 +67,7 @@ defmodule BattleBoxWeb.Router do
       get "/info", HealthController, :info
     end
 
-    live("/lobbies/:id", Lobby)
+    live("/lobbies/:name", Lobby)
 
     scope "/admin", Admin do
       pipe_through :require_admin

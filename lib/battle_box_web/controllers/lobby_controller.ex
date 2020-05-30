@@ -8,7 +8,7 @@ defmodule BattleBoxWeb.LobbyController do
     render(conn, "new.html", changeset: changeset)
   end
 
-  def index(conn, %{"user_id" => username}) do
+  def index(conn, %{"user_username" => username}) do
     Repo.get_by(User, username: username)
     |> Repo.preload(:lobbies)
     |> case do

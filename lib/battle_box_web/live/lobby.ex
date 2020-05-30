@@ -3,7 +3,7 @@ defmodule BattleBoxWeb.Lobby do
   alias BattleBox.{GameEngine, Lobby, Repo}
   alias BattleBoxWeb.{LobbyView, PageView}
 
-  def mount(%{"id" => name}, _session, socket) do
+  def mount(%{"name" => name}, _session, socket) do
     lobby =
       Lobby
       |> Repo.get_by(name: name)
