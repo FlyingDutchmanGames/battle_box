@@ -8,9 +8,9 @@ defmodule BattleBox.BotTest do
       refute changeset.valid?
     end
 
-    test "Name may not be longer than 20" do
-      name = :crypto.strong_rand_bytes(11) |> Base.encode16()
-      assert String.length(name) > 20
+    test "Name may not be longer than 39" do
+      name = :crypto.strong_rand_bytes(20) |> Base.encode16()
+      assert String.length(name) > 39
       changeset = Bot.changeset(%Bot{}, %{name: name})
       refute changeset.valid?
     end
@@ -76,16 +76,12 @@ defmodule BattleBox.BotTest do
     end
 
     test "it enforces the naming rules", %{user: user} do
-      assert {:error, %{errors: errors}} =
-               Bot.get_or_create_by_name(
-                 user,
-                 "fooooooooooooooooooooooooooooooooooooooooooooooooooooo"
-               )
+      assert {:error, %{errors: errors}} = Bot.get_or_create_by_name(user, :binary.copy("a", 40))
 
       assert errors == [
                name:
                  {"should be at most %{count} character(s)",
-                  [count: 20, validation: :length, kind: :max, type: :string]}
+                  [count: 39, validation: :length, kind: :max, type: :string]}
              ]
     end
   end

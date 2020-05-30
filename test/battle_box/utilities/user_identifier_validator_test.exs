@@ -1,5 +1,5 @@
 defmodule BattleBox.Utilities.UserIdentifierValidationTest do
-  import BattleBox.Utilities.UserIdentifierValidation, only: [validate_identifer: 2]
+  import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
   alias BattleBox.Bot
   import Ecto.Changeset
   use ExUnit.Case
@@ -11,9 +11,12 @@ defmodule BattleBox.Utilities.UserIdentifierValidationTest do
       {"-foo", {"Cannot start with a hyphen", [validation: :format]}},
       {"foo-", {"Cannot end with a hyphen", [validation: :format]}},
       {"😃", {"Can only contain alphanumeric characters or hyphens", [validation: :format]}},
+      {"foo😃bar", {"Can only contain alphanumeric characters or hyphens", [validation: :format]}},
       {:binary.copy("a", 40),
        {"should be at most %{count} character(s)",
         [count: 39, validation: :length, kind: :max, type: :string]}},
+      {"spaces test",
+       {"Can only contain alphanumeric characters or hyphens", [validation: :format]}},
       # Valid Identifiers
       {"foo", nil},
       {"foo-bar", nil}
@@ -22,9 +25,12 @@ defmodule BattleBox.Utilities.UserIdentifierValidationTest do
       changeset =
         %Bot{}
         |> change(%{name: name})
-        |> validate_identifer(:name)
+        |> validate_user_identifer(:name)
 
-      assert changeset.errors[:name] == errors
+      assert changeset.errors[:name] == errors,
+             "#{name} should yield #{inspect(errors)}, but instead is #{
+               inspect(changeset.errors[:name])
+             }"
     end)
   end
 end

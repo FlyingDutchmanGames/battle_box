@@ -2,6 +2,7 @@ defmodule BattleBox.Bot do
   alias BattleBox.{Repo, User, Game}
   use Ecto.Schema
   import Ecto.Changeset
+  import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -43,7 +44,7 @@ defmodule BattleBox.Bot do
     bot
     |> cast(params, [:name])
     |> validate_required(:name)
-    |> validate_length(:name, max: 20)
+    |> validate_user_identifer(:name)
     |> unique_constraint(:name,
       name: :bots_user_id_name_index,
       message: "Bot with that name already exists for your user"

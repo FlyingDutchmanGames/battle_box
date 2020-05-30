@@ -19,6 +19,7 @@ defmodule BattleBox.Lobby do
   import :timer, only: [seconds: 1]
   import Ecto.Changeset
   import BattleBox.InstalledGames
+  import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
   alias BattleBox.{Repo, User, Game}
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -69,7 +70,7 @@ defmodule BattleBox.Lobby do
     )
     |> validate_command_time()
     |> validate_game_settings()
-    |> validate_length(:name, max: 50)
+    |> validate_user_identifer(:name)
     |> unique_constraint(:name)
   end
 

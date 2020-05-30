@@ -15,13 +15,13 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     {:ok, key} =
       user
       |> Ecto.build_assoc(:api_keys)
-      |> ApiKey.changeset(%{name: "TEST KEY"})
+      |> ApiKey.changeset(%{name: "test-key"})
       |> Repo.insert()
 
     bot =
       user
       |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Bot.changeset(%{name: "test-bot"})
       |> Repo.insert!()
       |> Repo.preload(:user)
 
@@ -68,7 +68,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: context.bot.name,
-                 lobby_name: "FAKE LOBBY",
+                 lobby_name: "fake-lobby",
                  connection: self()
                })
     end
@@ -77,20 +77,20 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
       assert {:ok, pid, _} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
-                 bot_name: "new_name",
+                 bot_name: "new-name",
                  lobby_name: context.lobby.name,
                  connection: self()
                })
 
-      assert %Bot{name: "new_name"} = Repo.get_by(Bot, name: "new_name")
+      assert %Bot{name: "new-name"} = Repo.get_by(Bot, name: "new-name")
       assert Process.alive?(pid)
     end
 
     test "you can't start a bot with an illegal name", context do
-      assert {:error, %{name: ["should be at most 20 character(s)"]}} =
+      assert {:error, %{name: ["should be at most 39 character(s)"]}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
-                 bot_name: "name_that_is_way_too_long_to_be_legal......................",
+                 bot_name: :binary.copy("a", 40),
                  lobby_name: context.lobby.name,
                  connection: self()
                })

@@ -26,7 +26,7 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
       |> Bot.changeset(%{name: "FOO"})
       |> Repo.insert()
 
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "TEST LOBBY")
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-lobby")
 
     %{lobby: lobby, bot: bot, user: user}
   end
@@ -59,7 +59,7 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
 
-    {:ok, lobby2} = robot_game_lobby(user: user, lobby_name: "TEST LOBBY 2")
+    {:ok, lobby2} = robot_game_lobby(user: user, lobby_name: "test-lobby-2")
 
     :ok = MatchMaker.join_queue(names.game_engine, lobby.id, bot, player_1_pid)
     :ok = MatchMaker.join_queue(names.game_engine, lobby2.id, bot, player_2_pid)

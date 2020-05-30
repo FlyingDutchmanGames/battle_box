@@ -12,7 +12,7 @@ defmodule BattleBox.LobbyTest do
 
   describe "default timeouts" do
     test "the default game timeouts are correct" do
-      lobby = %Lobby{name: "Grant's Test", user_id: @user_id}
+      lobby = %Lobby{name: "grant-test", user_id: @user_id}
       assert lobby.game_acceptance_time_ms == 2000
       assert lobby.command_time_minimum_ms == 250
       assert lobby.command_time_maximum_ms == 1000
@@ -25,15 +25,13 @@ defmodule BattleBox.LobbyTest do
       assert changeset.errors[:name] == {"can't be blank", [validation: :required]}
     end
 
-    test "Name may not be longer than 50" do
-      name = :crypto.strong_rand_bytes(26) |> Base.encode16()
-      assert String.length(name) > 50
-
+    test "Name may not be longer than 39" do
+      name = :binary.copy("a", 40)
       changeset = Lobby.changeset(%Lobby{}, %{name: name})
 
       assert changeset.errors[:name] ==
                {"should be at most %{count} character(s)",
-                [{:count, 50}, {:validation, :length}, {:kind, :max}, {:type, :string}]}
+                [{:count, 39}, {:validation, :length}, {:kind, :max}, {:type, :string}]}
     end
 
     test "game_type must be an installed game" do
@@ -116,11 +114,13 @@ defmodule BattleBox.LobbyTest do
                user
                |> Ecto.build_assoc(:lobbies)
                |> Lobby.changeset(%{
-                 name: "Grant's Test",
+                 name: "test-name",
                  game_type: "robot_game",
                  robot_game_settings: %{}
                })
                |> Repo.insert()
+
+      assert %Lobby{} = Repo.get(Lobby, lobby.id)
     end
   end
 end

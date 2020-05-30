@@ -16,12 +16,12 @@ defmodule BattleBoxWeb.BotsServerFollowTest do
   setup context do
     {:ok, user} = create_user(%{user_id: @user_id})
 
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "LOBBY NAME")
+    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "lobby-name")
 
     {:ok, bot} =
       user
       |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "TEST BOT"})
+      |> Bot.changeset(%{name: "test-bot"})
       |> Repo.insert()
 
     {:ok, bot_server, _} =

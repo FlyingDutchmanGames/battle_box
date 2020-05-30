@@ -31,9 +31,9 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
     me = self()
 
     assert [] == get_all_in_registry(context.match_maker_registry)
-    :ok = MatchMaker.join_queue(context.game_engine, "TEST LOBBY", bot)
+    :ok = MatchMaker.join_queue(context.game_engine, "test-lobby", bot)
 
-    assert [{"TEST LOBBY", me, %{bot: bot, pid: self()}}] ==
+    assert [{"test-lobby", me, %{bot: bot, pid: self()}}] ==
              get_all_in_registry(context.match_maker_registry)
   end
 
@@ -60,12 +60,12 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
     me = self()
 
     assert [] == get_all_in_registry(context.match_maker_registry)
-    :ok = MatchMaker.join_queue(context.game_engine, "TEST LOBBY", context.bot)
+    :ok = MatchMaker.join_queue(context.game_engine, "test-lobby", context.bot)
 
-    assert [{"TEST LOBBY", me, %{bot: context.bot, pid: self()}}] ==
+    assert [{"test-lobby", me, %{bot: context.bot, pid: self()}}] ==
              get_all_in_registry(context.match_maker_registry)
 
-    :ok = MatchMaker.dequeue_self(context.game_engine, "TEST LOBBY")
+    :ok = MatchMaker.dequeue_self(context.game_engine, "test-lobby")
     assert [] == get_all_in_registry(context.match_maker_registry)
   end
 
