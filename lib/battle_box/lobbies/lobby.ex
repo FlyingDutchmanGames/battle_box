@@ -55,7 +55,6 @@ defmodule BattleBox.Lobby do
     |> cast(params, @params)
     |> validate_required(@params)
     |> validate_inclusion(:game_type, installed_games())
-    |> validate_length(:name, max: 50)
     |> validate_number(:game_acceptance_time_ms,
       greater_than_or_equal_to: seconds(1),
       less_than: seconds(10)
@@ -70,6 +69,7 @@ defmodule BattleBox.Lobby do
     )
     |> validate_command_time()
     |> validate_game_settings()
+    |> validate_length(:name, max: 50)
     |> unique_constraint(:name)
   end
 

@@ -1,4 +1,4 @@
-defmodule BattleBoxWeb.Utilites.Paginator do
+defmodule BattleBox.Utilities.Paginator do
   import Ecto.Query
 
   @default_per_page 25

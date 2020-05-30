@@ -1,6 +1,6 @@
-defmodule BattleBox.HumanizeTest do
+defmodule BattleBox.Utilities.HumanizeTest do
   use ExUnit.Case, async: true
-  alias BattleBox.Humanize
+  alias BattleBox.Utilities.Humanize
 
   test "seconds_ago_to_human_time" do
     [

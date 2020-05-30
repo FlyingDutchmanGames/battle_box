@@ -1,4 +1,4 @@
-defmodule BattleBox.Humanize do
+defmodule BattleBox.Utilities.Humanize do
   @one_minute_in_seconds 60
   @one_hour_in_seconds @one_minute_in_seconds * 60
   @one_day_in_seconds @one_hour_in_seconds * 24
