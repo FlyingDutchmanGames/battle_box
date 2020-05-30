@@ -1,5 +1,5 @@
 <script>window.useLiveView = true</script>
-<h1>Lobby: <%= "#{@lobby.user.user_name} / #{@lobby.name}" %></h1>
+<h1>Lobby: <%= "#{@lobby.user.username} / #{@lobby.name}" %></h1>
 <h2>Live Games</h2>
 <div class="games">
   <%= for game <- @live_games do %>

@@ -1,7 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      <a href="<%= Routes.user_lobby_path(@conn, :index, @current_user.user_name) %>">Lobbies</a>
+      <a href="<%= Routes.user_lobby_path(@conn, :index, @current_user.username) %>">Lobbies</a>
       / Create
     </div>
   </div>

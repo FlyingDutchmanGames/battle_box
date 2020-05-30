@@ -16,11 +16,11 @@ defmodule BattleBox.UserTest do
   end
 
   test "names are case insensitive" do
-    {:ok, _user} = create_user(user_name: "GrantJamesPowell")
+    {:ok, _user} = create_user(username: "GrantJamesPowell")
 
-    assert %User{user_name: "GrantJamesPowell"} = Repo.get_by(User, user_name: "GrantJamesPowell")
-    assert %User{user_name: "GrantJamesPowell"} = Repo.get_by(User, user_name: "grantjamespowell")
-    assert %User{user_name: "GrantJamesPowell"} = Repo.get_by(User, user_name: "GRANTJAMESPOWELL")
+    assert %User{username: "GrantJamesPowell"} = Repo.get_by(User, username: "GrantJamesPowell")
+    assert %User{username: "GrantJamesPowell"} = Repo.get_by(User, username: "grantjamespowell")
+    assert %User{username: "GrantJamesPowell"} = Repo.get_by(User, username: "GRANTJAMESPOWELL")
   end
 
   describe "upsert_from_github" do
@@ -32,13 +32,13 @@ defmodule BattleBox.UserTest do
     test "it will upsert the row if its called twice", context do
       assert {:ok, _} = User.upsert_from_github(context.user_from_github)
       user = Repo.get_by(User, github_id: context.user_from_github["id"])
-      assert user.user_name == "GrantJamesPowell"
+      assert user.username == "GrantJamesPowell"
 
       assert {:ok, user2} =
                User.upsert_from_github(%{context.user_from_github | "login" => "pass"})
 
       assert user2.id == user.id
-      assert user2.user_name == "pass"
+      assert user2.username == "pass"
     end
   end
 

@@ -14,7 +14,7 @@
       <tr>
         <td><img src="<%= user.avatar_url %>"></td>
         <td><div class="center-items"><%= user.is_admin %><div></td>
-        <td><div class="center-items"><a href="<%= Routes.user_path(@socket, :show, user.id) %>"><%= user.user_name %></a></div></td>
+        <td><div class="center-items"><a href="<%= Routes.user_path(@socket, :show, user.id) %>"><%= user.username %></a></div></td>
         <td><%= user.inserted_at %></td>
         <td>
           <form phx-change="adjust_ban">

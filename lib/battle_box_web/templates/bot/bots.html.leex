@@ -1,11 +1,11 @@
 <script>window.useLiveView = true</script>
 <% bot_servers_by_bot = Enum.group_by(@bot_servers, fn bot_server -> bot_server.bot.id end) %>
-<h1>User: <%= @user.user_name %></h1>
+<h1>User: <%= @user.username %></h1>
 <a href="<%= Routes.bot_path(BattleBoxWeb.Endpoint, :new) %>">New Bot</a>
 <div class="bots">
   <%= for bot <- @user.bots do %>
     <div class="bot">
-      <div>Name: <a href="<%= Routes.user_bot_path(BattleBoxWeb.Endpoint, :show, @user.user_name, bot.name) %>"><%= bot.name %></a></div>
+      <div>Name: <a href="<%= Routes.user_bot_path(BattleBoxWeb.Endpoint, :show, @user.username, bot.name) %>"><%= bot.name %></a></div>
       <div class="bot-servers">
         <%= for bot_server <- Map.get(bot_servers_by_bot, bot.id, []) do %>
           <div class="bot-server">

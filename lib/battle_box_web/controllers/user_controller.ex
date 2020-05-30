@@ -3,8 +3,8 @@ defmodule BattleBoxWeb.UserController do
   alias BattleBoxWeb.PageView
   alias BattleBox.{Repo, User}
 
-  def show(conn, %{"id" => user_name}) do
-    case Repo.get_by(User, user_name: user_name) do
+  def show(conn, %{"id" => username}) do
+    case Repo.get_by(User, username: username) do
       %User{} = user ->
         render(conn, "show.html", fetched_user: user)
 

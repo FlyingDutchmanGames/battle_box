@@ -15,15 +15,15 @@ defmodule BattleBoxWeb.BotController do
     |> Repo.insert()
     |> case do
       {:ok, bot} ->
-        redirect(conn, to: Routes.user_bot_path(conn, :show, user.user_name, bot.name))
+        redirect(conn, to: Routes.user_bot_path(conn, :show, user.username, bot.name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
   end
 
-  def show(conn, %{"user_id" => user_name, "id" => name}) do
-    with %User{} = user <- Repo.get_by(User, user_name: user_name),
+  def show(conn, %{"user_id" => username, "id" => name}) do
+    with %User{} = user <- Repo.get_by(User, username: username),
          %Bot{} = bot <- Repo.get_by(Bot, name: name, user_id: user.id) do
       bot = Repo.preload(bot, :user)
       render(conn, "show.html", bot: bot)
