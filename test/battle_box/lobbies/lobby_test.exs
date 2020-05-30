@@ -98,6 +98,18 @@ defmodule BattleBox.LobbyTest do
     end
   end
 
+  test "lobby name is case insenstive", %{user: user} do
+    assert {:ok, _lobby} =
+             user
+             |> Ecto.build_assoc(:lobbies)
+             |> Lobby.changeset(%{name: "ABC", game_type: "robot_game", robot_game_settings: %{}})
+             |> Repo.insert()
+
+    assert %Lobby{name: "ABC"} = Repo.get_by(Lobby, name: "AbC")
+    assert %Lobby{name: "ABC"} = Repo.get_by(Lobby, name: "aBc")
+    assert %Lobby{name: "ABC"} = Repo.get_by(Lobby, name: "abc")
+  end
+
   describe "persistence" do
     test "You can persist a lobby and get it back out", %{user: user} do
       assert {:ok, lobby} =

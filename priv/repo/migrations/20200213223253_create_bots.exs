@@ -3,7 +3,7 @@ defmodule BattleBox.Repo.Migrations.CreateBots do
 
   def change do
     create table("bots") do
-      add :name, :text, null: false
+      add :name, :citext, null: false
       add :user_id, :uuid, null: false
       timestamps()
     end

@@ -15,6 +15,14 @@ defmodule BattleBox.UserTest do
     }
   end
 
+  test "names are case insensitive" do
+    {:ok, _user} = create_user(user_name: "GrantJamesPowell")
+
+    assert %User{user_name: "GrantJamesPowell"} = Repo.get_by(User, user_name: "GrantJamesPowell")
+    assert %User{user_name: "GrantJamesPowell"} = Repo.get_by(User, user_name: "grantjamespowell")
+    assert %User{user_name: "GrantJamesPowell"} = Repo.get_by(User, user_name: "GRANTJAMESPOWELL")
+  end
+
   describe "upsert_from_github" do
     test "if there is nothing in the db it succeeds", context do
       assert {:ok, user} = User.upsert_from_github(context.user_from_github)

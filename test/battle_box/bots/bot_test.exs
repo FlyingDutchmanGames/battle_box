@@ -40,6 +40,19 @@ defmodule BattleBox.BotTest do
            ]
   end
 
+  test "bot names are case insensitive" do
+    {:ok, user} = create_user()
+
+    {:ok, _bot} =
+      Ecto.build_assoc(user, :bots)
+      |> Bot.changeset(%{name: "FOO"})
+      |> Repo.insert()
+
+    assert %Bot{name: "FOO"} = Repo.get_by(Bot, name: "foo")
+    assert %Bot{name: "FOO"} = Repo.get_by(Bot, name: "FOO")
+    assert %Bot{name: "FOO"} = Repo.get_by(Bot, name: "fOo")
+  end
+
   describe "get or create by name" do
     setup do
       {:ok, user} = create_user()
