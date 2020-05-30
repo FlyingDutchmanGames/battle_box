@@ -17,7 +17,7 @@ defmodule BattleBox.ApiKey do
     timestamps()
   end
 
-  def changeset(api_key, params) do
+  def changeset(api_key, params \\ %{}) do
     token = gen_token()
 
     api_key
