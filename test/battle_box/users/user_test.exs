@@ -16,7 +16,7 @@ defmodule BattleBox.UserTest do
   end
 
   test "names are case insensitive" do
-    {:ok, user} = create_user(user_name: "GrantJamesPowell")
+    {:ok, _user} = create_user(user_name: "GrantJamesPowell")
 
     assert %User{user_name: "GrantJamesPowell"} = Repo.get_by(User, user_name: "GrantJamesPowell")
     assert %User{user_name: "GrantJamesPowell"} = Repo.get_by(User, user_name: "grantjamespowell")

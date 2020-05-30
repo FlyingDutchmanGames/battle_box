@@ -3,7 +3,7 @@ defmodule BattleBox.Repo.Migrations.CreateApiKeys do
 
   def change do
     create table("api_keys") do
-      add :name, :text, null: false
+      add :name, :citext, null: false
       add :hashed_token, :bytea, null: false
       add :user_id, :uuid, null: false
       add :last_used, :timestamp

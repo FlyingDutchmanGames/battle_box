@@ -99,7 +99,7 @@ defmodule BattleBox.LobbyTest do
   end
 
   test "lobby name is case insenstive", %{user: user} do
-    assert {:ok, lobby} =
+    assert {:ok, _lobby} =
              user
              |> Ecto.build_assoc(:lobbies)
              |> Lobby.changeset(%{name: "ABC", game_type: "robot_game", robot_game_settings: %{}})
