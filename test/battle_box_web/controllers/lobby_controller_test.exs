@@ -28,8 +28,8 @@ defmodule BattleBoxWeb.LobbyControllerTest do
       })
 
     url = redirected_to(conn, 302)
-    %{"user" => user_name} = Regex.named_captures(~r/\/users\/(?<user>.*)\/lobbies/, url)
-    assert URI.encode_www_form(user.user_name) == user_name
+    %{"user" => username} = Regex.named_captures(~r/\/users\/(?<user>.*)\/lobbies/, url)
+    assert URI.encode_www_form(user.username) == username
   end
 
   test "creating a lobby with the same name as an existing lobby is an error", %{
@@ -61,8 +61,8 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
   describe "lobbies index" do
     test "it will 404 if the user isn't found", %{conn: conn} do
-      conn = get(conn, "/users/FAKE_USER_NAME/lobbies")
-      assert html_response(conn, 404) =~ "User (FAKE_USER_NAME) not found"
+      conn = get(conn, "/users/FAKE_username/lobbies")
+      assert html_response(conn, 404) =~ "User (FAKE_username) not found"
     end
 
     test "it will show a user's lobbies", %{conn: conn, user: user} do
@@ -72,7 +72,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
       conn =
         conn
-        |> get("/users/#{user.user_name}/lobbies")
+        |> get("/users/#{user.username}/lobbies")
 
       html = html_response(conn, 200)
       {:ok, document} = Floki.parse_document(html)

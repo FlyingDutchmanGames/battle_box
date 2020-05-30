@@ -50,7 +50,7 @@ defmodule BattleBoxWeb.LobbyTest do
 
   test "it can show a lobby", %{conn: conn} = context do
     {:ok, _view, html} = live(conn, "/lobbies/#{context.lobby.name}")
-    assert html =~ "#{context.user.user_name} / #{context.lobby.name}"
+    assert html =~ "#{context.user.username} / #{context.lobby.name}"
   end
 
   describe "live games" do

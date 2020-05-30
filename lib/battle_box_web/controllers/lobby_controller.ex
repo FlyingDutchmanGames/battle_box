@@ -8,8 +8,8 @@ defmodule BattleBoxWeb.LobbyController do
     render(conn, "new.html", changeset: changeset)
   end
 
-  def index(conn, %{"user_id" => user_name}) do
-    Repo.get_by(User, user_name: user_name)
+  def index(conn, %{"user_id" => username}) do
+    Repo.get_by(User, username: username)
     |> Repo.preload(:lobbies)
     |> case do
       %User{} = user ->
@@ -19,7 +19,7 @@ defmodule BattleBoxWeb.LobbyController do
         conn
         |> put_status(404)
         |> put_view(PageView)
-        |> render("not_found.html", message: "User (#{user_name}) not found")
+        |> render("not_found.html", message: "User (#{username}) not found")
     end
   end
 
@@ -30,7 +30,7 @@ defmodule BattleBoxWeb.LobbyController do
     |> Repo.insert()
     |> case do
       {:ok, _lobby} ->
-        redirect(conn, to: Routes.user_lobby_path(conn, :index, user.user_name))
+        redirect(conn, to: Routes.user_lobby_path(conn, :index, user.username))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)

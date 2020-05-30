@@ -16,7 +16,7 @@ defmodule BattleBoxWeb.BotControllerTest do
       |> Bot.changeset(%{"name" => "test-name"})
       |> Repo.insert()
 
-    conn = get(conn, "/users/#{user.user_name}/bots/#{bot.name}")
+    conn = get(conn, "/users/#{user.username}/bots/#{bot.name}")
 
     assert html_response(conn, 200) =~ "test-name"
   end
@@ -37,10 +37,10 @@ defmodule BattleBoxWeb.BotControllerTest do
       |> signin(user: user)
       |> post("/bots", %{"bot" => %{"name" => "FOO"}})
 
-    %{"name" => name, "user" => user_name} =
+    %{"name" => name, "user" => username} =
       Regex.named_captures(~r/\/users\/(?<user>.*)\/bots\/(?<name>.*)/, redirected_to(conn, 302))
 
-    assert URI.encode_www_form(user.user_name) == user_name
+    assert URI.encode_www_form(user.username) == username
     assert %Bot{} = Repo.get_by(Bot, name: name, user_id: @user_id)
   end
 
