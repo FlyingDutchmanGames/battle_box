@@ -22,7 +22,7 @@ defmodule BattleBoxWeb.BotController do
     end
   end
 
-  def show(conn, %{"user_id" => username, "id" => name}) do
+  def show(conn, %{"user_username" => username, "name" => name}) do
     with %User{} = user <- Repo.get_by(User, username: username),
          %Bot{} = bot <- Repo.get_by(Bot, name: name, user_id: user.id) do
       bot = Repo.preload(bot, :user)
