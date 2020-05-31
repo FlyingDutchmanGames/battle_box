@@ -1,8 +1,13 @@
 defmodule BattleBoxWeb.GameController do
   use BattleBoxWeb, :controller
-  alias BattleBox.{Repo, Game}
+  alias BattleBox.{Repo, Game, GameEngine}
   import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
   import Ecto.Query
+
+  def show(conn, %{"id" => id} = params) do
+    game = GameEngine.get_game(game_engine(), id)
+    render(conn, "show.html", id: id, game: game, follow: params["follow"])
+  end
 
   def index(conn, params) do
     games =

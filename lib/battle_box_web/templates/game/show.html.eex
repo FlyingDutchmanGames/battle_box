@@ -1,0 +1,11 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      Games / <%= @id %>
+    </div>
+  </div>
+
+  <%= if @follow do %>
+    <%= live_render(@conn, FollowBack, session: %{"game" => @game, "follow" => @follow}) %>
+  <%= end %>
+</div>

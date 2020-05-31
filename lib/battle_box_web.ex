@@ -27,6 +27,15 @@ defmodule BattleBoxWeb do
       import BattleBoxWeb.Gettext
       alias BattleBoxWeb.Router.Helpers, as: Routes
       import Phoenix.LiveView.Controller
+
+      @game_engine_provider Application.get_env(
+                              :battle_box,
+                              :game_engine_provider,
+                              GameEngineProvider
+                            )
+      def game_engine do
+        @game_engine_provider.game_engine()
+      end
     end
   end
 

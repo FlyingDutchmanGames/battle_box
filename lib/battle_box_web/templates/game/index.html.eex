@@ -30,7 +30,7 @@
           <% end %>
         </div>
         <div>
-          <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Game, game.id) %>" class="btn">Watch Replay</a>
+          <a href="<%= Routes.game_path(@conn, :show, game.id) %>" class="btn">Watch Replay</a>
         </div>
       </div>
     <% end %>
