@@ -3,9 +3,8 @@
     <div class="subhead-heading">
       Games / <%= @id %>
     </div>
+    <%= if @follow do %>
+      <%= live_render(@conn, FollowBack, session: %{"id" => @id, "game" => @game, "follow" => @follow}) %>
+    <%= end %>
   </div>
-
-  <%= if @follow do %>
-    <%= live_render(@conn, FollowBack, session: %{"game" => @game, "follow" => @follow}) %>
-  <%= end %>
 </div>

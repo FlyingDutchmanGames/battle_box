@@ -1,0 +1,17 @@
+<%= case {@mode, @game_alive?} do %>
+  <% {:auto, _} -> %>
+    <div class="btn btn-danger" phx-click="mode-passive">
+      <span class="blinking" style="display: inline-block; margin-right: 5px;">
+        Disable Auto <%= follow_back_msg(@follow, @mode) %>
+      </span>
+      <span style="font-weight: bold;">X</span>
+    </div>
+  <% {:passive, true} -> %>
+    <div class="btn" phx-click="mode-active">
+      Enable Auto <%= follow_back_msg(@follow, @mode) %>
+    </div>
+  <% {:passive, false} -> %>
+    <a class="btn btn-primary" href="<%= @follow_back_path %>">
+      <%= follow_back_msg(@follow, @mode) %>
+    </a>
+<% end %>
