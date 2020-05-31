@@ -1,7 +1,9 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @current_user.username) %>">Bots</a>
+      Users 
+      / <a href="<%= Routes.user_path(@conn, :show, @current_user.username) %>"><%= @current_user.username %></a> 
+      / <a href="<%= Routes.user_bot_path(@conn, :index, @current_user.username) %>">Bots</a>
       / Create
     </div>
   </div>

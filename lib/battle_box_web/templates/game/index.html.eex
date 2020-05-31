@@ -11,7 +11,7 @@
       <div class="box-row lobby">
         <div class="box-details">
           <div style="font-weight: bolder; padding-bottom: 10px;">ID: <%= game.id %></div>
-          <div>Lobby: <a href='<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, @params["lobby_name"]) %>'><%= game.lobby.name %></a></div>
+          <div>Lobby: <a href='<%= Routes.lobby_path(@conn, :show, @params["lobby_name"]) %>'><%= game.lobby.name %></a></div>
           <div>Type: <%= game.game_type.title %></div>
           <div>Played: <%= humanize_seconds_ago(game.inserted_at) %></div>
         </div>

@@ -69,4 +69,31 @@ defmodule BattleBoxWeb.BotControllerTest do
     {:ok, document} = Floki.parse_document(html)
     assert [_form] = Floki.find(document, "form:not(#logout)")
   end
+
+  describe "index" do
+    test "it will 404 if the user isn't found", %{conn: conn} do
+      conn = get(conn, "/users/FAKE_username/bots")
+      assert html_response(conn, 404) =~ "User (FAKE_username) not found"
+    end
+
+    test "it will show a user's bots", %{conn: conn, user: user} do
+      for i <- [1, 2, 3] do
+        {:ok, _} =
+          user
+          |> Ecto.build_assoc(:bots)
+          |> Bot.changeset(%{name: "test-name-#{i}"})
+          |> Repo.insert()
+      end
+
+      conn =
+        conn
+        |> get("/users/#{user.username}/bots")
+
+      html = html_response(conn, 200)
+      {:ok, document} = Floki.parse_document(html)
+
+      assert ["Name: test-name-1", "Name: test-name-2", "Name: test-name-3"] =
+               Enum.sort(Floki.find(document, ".bot .name") |> Enum.map(&Floki.text/1))
+    end
+  end
 end

@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.Live.BotServers do
   use BattleBoxWeb, :live_view
-  alias BattleBox.{Repo, GameEngine}
+  alias BattleBox.{GameEngine}
   alias BattleBoxWeb.BotView
 
   def mount(_params, %{"bot" => bot}, socket) do

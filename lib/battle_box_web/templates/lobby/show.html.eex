@@ -1,6 +1,10 @@
 <div class="page-content container">
   <div class="subhead">
-    <div class="subhead-heading">Lobbies / <%= @lobby.name %></div>
+    <div class="subhead-heading">
+      Users 
+      / <a href="<%= Routes.user_path(@conn, :show, @lobby.user.username) %>"><%= @lobby.user.username %></a>
+      / <a href="<%= Routes.user_lobby_path(@conn, :index, @lobby.user.username) %>">Lobbies</a>
+      / <%= @lobby.name %></div>
     <a href="<%= Routes.lobby_game_path(@conn, :index, @lobby.name) %>" class="btn">History</a>
   </div>
 
