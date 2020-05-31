@@ -15,9 +15,11 @@
 
 #### Bots
 - Edit bots
-- Bots index page revamped
+- Add pagination to index
 #### Lobbies
 - Edit lobbies
+- Add pagination to index
+- Add details to lobby details page
 - Robot Game Settings
   - Terrain Editor
 - bot self play allowed toggle
