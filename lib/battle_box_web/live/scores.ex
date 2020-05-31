@@ -25,7 +25,7 @@ defmodule BattleBoxWeb.Live.Scores do
     {:noreply, assign(socket, :games, games)}
   end
 
-  def handle_info({:game_start, game_id}, socket) do
+  def handle_info({_topic, :game_start, game_id}, socket) do
     games =
       case GameEngine.get_game_server(game_engine(), game_id) do
         nil ->
@@ -39,7 +39,7 @@ defmodule BattleBoxWeb.Live.Scores do
     {:noreply, assign(socket, :games, games)}
   end
 
-  def handle_info({:game_update, game_id}, socket) do
+  def handle_info({_topic, :game_update, game_id}, socket) do
     game = GameEngine.get_game_server(game_engine(), game_id)
 
     games =

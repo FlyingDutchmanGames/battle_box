@@ -25,7 +25,7 @@ defmodule BattleBoxWeb.BotServerFollow do
     end
   end
 
-  def handle_info({:bot_server_update, bot_server_id}, socket) do
+  def handle_info({_topic, :bot_server_update, bot_server_id}, socket) do
     case GameEngine.get_bot_server(game_engine(), bot_server_id) do
       nil ->
         {:noreply, assign(socket, not_found: true)}

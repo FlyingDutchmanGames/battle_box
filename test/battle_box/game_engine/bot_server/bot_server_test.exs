@@ -66,7 +66,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
     {:ok, _, _} =
       GameEngine.start_bot(context.game_engine, %{context.init_opts_p1 | bot_server_id: id})
 
-    assert_receive {:bot_server_start, ^id}
+    assert_receive {{:user, @user_id}, :bot_server_start, ^id}
   end
 
   test "The bot server dies if the connection dies", %{p1_server: p1} = context do
@@ -99,7 +99,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
 
     :ok = BotServer.match_make(context.p1_server)
 
-    assert_receive {:bot_server_update, ^id}
+    assert_receive {{:bot_server, ^id}, :bot_server_update, ^id}
   end
 
   describe "Matchmaking in a lobby" do

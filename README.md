@@ -68,7 +68,6 @@
 - Impersonation
 - Concurrent connection limiter
 - Favicon
-- Fix the pubsub to send out what topic a message is for
 - fix admin users page to new style
 
 ### Nice to Haves

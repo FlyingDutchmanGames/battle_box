@@ -48,7 +48,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
       GameEngine.subscribe_to_lobby_events(context.game_engine, context.lobby.id, [:game_start])
 
     {:ok, _pid} = GameEngine.start_game(context.game_engine, context.init_opts)
-    assert_receive {:game_start, ^id}
+    assert_receive {{:lobby, _}, :game_start, ^id}
   end
 
   test "the game server registers in the registry", context do
@@ -67,7 +67,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     game_id = context.init_opts.game.id
     GameEngine.subscribe_to_game_events(context.game_engine, game_id, [:game_update])
     {:ok, _pid} = GameEngine.start_game(context.game_engine, context.init_opts)
-    assert_receive {:game_update, ^game_id}
+    assert_receive {{:game, ^game_id}, :game_update, ^game_id}
   end
 
   test "the starting of the game server will send init messages to p1 & p2", context do

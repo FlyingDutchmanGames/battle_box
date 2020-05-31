@@ -19,7 +19,7 @@ defmodule BattleBoxWeb.Live.BotServers do
     {:noreply, assign(socket, :bot_servers, bot_servers)}
   end
 
-  def handle_info({:bot_server_start, bot_server_id}, socket) do
+  def handle_info({_topic, :bot_server_start, bot_server_id}, socket) do
     bot_server = GameEngine.get_bot_server(game_engine(), bot_server_id)
     Process.monitor(bot_server.pid)
     bot_servers = [bot_server | socket.assigns.bot_servers]

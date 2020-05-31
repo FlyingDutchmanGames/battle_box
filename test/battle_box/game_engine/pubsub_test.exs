@@ -54,7 +54,7 @@ defmodule BattleBox.PubSubTest do
           bot_server_id: bot_server_id
         })
 
-      assert_receive {:bot_server_start, ^bot_server_id}
+      assert_receive {{:user, @user_id}, :bot_server_start, ^bot_server_id}
     end
 
     test "you will not get events if its not a bot for your user", context do
@@ -70,7 +70,7 @@ defmodule BattleBox.PubSubTest do
           bot_server_id: bot_server_id
         })
 
-      refute_receive {:bot_server_start, ^bot_server_id}
+      refute_receive {{:user, @user_id}, :bot_server_start, ^bot_server_id}
     end
 
     test "you will not get bot_server_start updates if you do not request them", context do
@@ -85,7 +85,7 @@ defmodule BattleBox.PubSubTest do
           bot_server_id: bot_server_id
         })
 
-      refute_receive {:bot_server_start, ^bot_server_id}
+      refute_receive _
     end
   end
 
@@ -101,8 +101,8 @@ defmodule BattleBox.PubSubTest do
 
       Process.sleep(10)
       :ok = GameEngine.broadcast_game_update(context.game_engine, context.game)
-      assert_receive {:game_update_listener, {:game_update, @game_id}}
-      assert_receive {:lobby_update_listener, {:game_update, @game_id}}
+      assert_receive {:game_update_listener, {{:game, @game_id}, :game_update, @game_id}}
+      assert_receive {:lobby_update_listener, {{:lobby, @lobby_id}, :game_update, @game_id}}
     end
 
     test "game_start event works", context do
@@ -112,7 +112,7 @@ defmodule BattleBox.PubSubTest do
 
       Process.sleep(10)
       GameEngine.broadcast_game_start(context.game_engine, context.game)
-      assert_receive {:lobby_update_listener, {:game_start, @game_id}}
+      assert_receive {:lobby_update_listener, {{:lobby, @lobby_id}, :game_start, @game_id}}
     end
   end
 
@@ -127,7 +127,9 @@ defmodule BattleBox.PubSubTest do
 
       Process.sleep(10)
       GameEngine.broadcast_bot_server_update(context.game_engine, context.bot_server)
-      assert_receive {:bot_server_update_listener, {:bot_server_update, @bot_server_id}}
+
+      assert_receive {:bot_server_update_listener,
+                      {{:bot_server, @bot_server_id}, :bot_server_update, @bot_server_id}}
     end
   end
 
@@ -143,9 +145,9 @@ defmodule BattleBox.PubSubTest do
 
       Process.sleep(10)
       GameEngine.broadcast_bot_server_start(context.game_engine, context.bot_server)
-      assert_receive {:listener, {:bot_server_start, @bot_server_id}}
+      assert_receive {:listener, {{:bot, @bot_id}, :bot_server_start, @bot_server_id}}
       GameEngine.broadcast_bot_server_update(context.game_engine, context.bot_server)
-      assert_receive {:listener, {:bot_server_update, @bot_server_id}}
+      assert_receive {:listener, {{:bot, @bot_id}, :bot_server_update, @bot_server_id}}
     end
   end
 end
