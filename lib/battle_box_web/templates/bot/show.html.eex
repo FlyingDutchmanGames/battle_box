@@ -1,8 +1,22 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
+      Users / <a href="<%= Routes.user_path(@conn, :show, @bot.user.username) %>"><%= @bot.user.username %></a> /
       <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @bot.user.username) %>">Bots</a>
       / <%= @bot.name %>
     </div>
   </div>
+
+  <h2>Details</h2>
+  <div class="box">
+    <div class="box-row">
+      <div class="box-details">
+        <div class="name" style="font-weight: bolder; padding-bottom: 10px;">Name: <%= @bot.name %></div>
+        <div>Created: <%= humanize_seconds_ago(@bot.inserted_at) %></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Active Instances</h2>
+  <%= live_render(@conn, BotServers, session: %{"bot" => @bot}) %>
 </div>
