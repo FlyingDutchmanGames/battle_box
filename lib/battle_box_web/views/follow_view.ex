@@ -2,18 +2,16 @@ defmodule BattleBoxWeb.FollowView do
   use BattleBoxWeb, :view
   alias BattleBoxWeb.Live.Follow
 
-  def follow_back_msg(follow, mode) do
-    tense = %{active: "Following", passive: "Follow"}[mode]
-
+  def follow_back_target(follow) do
     case follow do
       %{"lobby" => name} ->
-        "Follow Lobby (#{name})"
+        "Lobby (#{name})"
 
       %{"bot" => name} ->
-        "Follow Bot (#{name})"
+        "Bot (#{name})"
 
       %{"user" => username} ->
-        "Follow User (#{username})"
+        "User (#{username})"
     end
   end
 end
