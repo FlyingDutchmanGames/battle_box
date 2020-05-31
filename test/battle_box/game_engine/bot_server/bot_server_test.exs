@@ -81,10 +81,10 @@ defmodule BattleBox.GameEngine.BotServerTest do
        %{p1_server: p1, p2_server: p2, bot: bot, lobby: lobby} = context do
     assert Registry.count(context.bot_registry) == 2
 
-    assert [{^p1, %{bot: ^bot, lobby: ^lobby, game_id: nil}}] =
+    assert [{^p1, %{bot: ^bot, lobby: ^lobby, game_id: nil, started_at: %NaiveDateTime{}}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)
 
-    assert [{^p2, %{bot: ^bot, lobby: ^lobby, game_id: nil}}] =
+    assert [{^p2, %{bot: ^bot, lobby: ^lobby, game_id: nil, started_at: %NaiveDateTime{}}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p2.bot_server_id)
   end
 

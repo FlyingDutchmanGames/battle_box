@@ -133,7 +133,35 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                )
     end
 
-    test "getting by user will return the bots for a user", %{bot: bot, lobby: lobby} = context do
+    test "getting by bot will return the bots servers for that bot",
+         %{bot: bot, lobby: lobby} = context do
+      assert {:ok, server1, %{user_id: @user_id}} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 lobby: lobby,
+                 bot: bot,
+                 connection: self()
+               })
+
+      assert {:ok, server2, %{user_id: @user_id}} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 lobby: lobby,
+                 bot: bot,
+                 connection: self()
+               })
+
+      assert [
+               %{bot: ^bot, lobby: ^lobby, pid: pid1},
+               %{bot: ^bot, lobby: ^lobby, pid: pid2}
+             ] =
+               BotSupervisor.get_bot_servers_with_bot_id(context.game_engine, bot.id)
+               |> Enum.sort()
+
+      assert pid1 in [server1, server2]
+      assert pid2 in [server1, server2]
+    end
+
+    test "getting by user will return the bots server for a user",
+         %{bot: bot, lobby: lobby} = context do
       assert {:ok, server1, %{user_id: @user_id}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  lobby: lobby,

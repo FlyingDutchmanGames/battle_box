@@ -1,5 +1,5 @@
 <div>User</div>
 <img style="width: 60px; height: 60px;" src="<%= @fetched_user.avatar_url %>">
 <div>Name: <%= @fetched_user.username %></div>
-<a href="<%= Routes.live_path(@conn, BattleBoxWeb.Bots, @fetched_user.username) %>">bots</a><br>
+<a href="<%= Routes.user_bot_path(@conn, :index, @fetched_user.username) %>">bots</a><br>
 <a href="<%= Routes.user_lobby_path(@conn, :index, @fetched_user.username) %>">lobbies</a>

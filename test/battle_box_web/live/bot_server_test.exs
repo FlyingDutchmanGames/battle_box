@@ -1,4 +1,5 @@
-defmodule BattleBoxWeb.BotsTest do
+defmodule BattleBoxWeb.Live.BotServersTest do
+  alias BattleBoxWeb.Live.BotServers
   use BattleBoxWeb.ConnCase
   import Phoenix.LiveViewTest
   alias BattleBox.{Lobby, Bot, GameEngine, GameEngineProvider.Mock}
@@ -30,18 +31,13 @@ defmodule BattleBoxWeb.BotsTest do
     %{bot: bot, user: user, lobby: lobby}
   end
 
-  test "with a non existant user, it returns not found", %{conn: conn} do
-    {:ok, _view, html} = live(conn, "/users/#{Ecto.UUID.generate()}/bots")
-    assert html =~ "Not Found"
+  test "is an empty list when there are no active servers", %{conn: conn} = context do
+    {:ok, _view, html} = live_isolated(conn, BotServers, session: %{"bot" => context.bot})
+    {:ok, document} = Floki.parse_document(html)
+    assert [] == Floki.find(document, ".bot-server")
   end
 
-  test "it will render a players bots", %{conn: conn, user: user} do
-    {:ok, _view, html} = live(conn, "/users/#{user.username}/bots")
-    assert html =~ "test-bot"
-  end
-
-  test "it will show the bot servers that a player has active",
-       %{conn: conn, user: user} = context do
+  test "shows the active servers", %{conn: conn} = context do
     {:ok, _, _} =
       GameEngine.start_bot(context.game_engine, %{
         lobby: context.lobby,
@@ -49,14 +45,12 @@ defmodule BattleBoxWeb.BotsTest do
         connection: self()
       })
 
-    {:ok, _view, html} = live(conn, "/users/#{user.username}/bots")
+    {:ok, _view, html} = live_isolated(conn, BotServers, session: %{"bot" => context.bot})
     {:ok, document} = Floki.parse_document(html)
-    assert [bot] = Floki.find(document, ".bot-server")
-    assert Floki.text(bot) =~ "test-lobby"
+    assert [_bot] = Floki.find(document, ".bot-server")
   end
 
-  test "if a bot server dies it will be removed from the page",
-       %{conn: conn, user: user} = context do
+  test "if a bot server dies, it will be removed from the page", %{conn: conn} = context do
     {:ok, bot_server_pid, _} =
       GameEngine.start_bot(context.game_engine, %{
         lobby: context.lobby,
@@ -64,19 +58,20 @@ defmodule BattleBoxWeb.BotsTest do
         connection: self()
       })
 
-    {:ok, view, html} = live(conn, "/users/#{user.username}/bots")
+    {:ok, view, html} = live_isolated(conn, BotServers, session: %{"bot" => context.bot})
     {:ok, document} = Floki.parse_document(html)
     assert [bot] = Floki.find(document, ".bot-server")
-    assert Floki.text(bot) =~ "test-lobby"
+
     Process.exit(bot_server_pid, :kill)
     Process.sleep(10)
+
     html = render(view)
     {:ok, document} = Floki.parse_document(html)
     assert [] = Floki.find(document, ".bot-server")
   end
 
-  test "if a bot server joins its reflected on the page", %{conn: conn, user: user} = context do
-    {:ok, view, html} = live(conn, "/users/#{user.username}/bots")
+  test "if a bot server joins it is reflected on the page", %{conn: conn} = context do
+    {:ok, view, html} = live_isolated(conn, BotServers, session: %{"bot" => context.bot})
     {:ok, document} = Floki.parse_document(html)
     assert [] = Floki.find(document, ".bot-server")
 

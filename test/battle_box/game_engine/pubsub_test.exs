@@ -3,6 +3,7 @@ defmodule BattleBox.PubSubTest do
   alias BattleBox.{Game, Bot, Lobby, GameEngine}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 2]
 
+  @bot_id Ecto.UUID.generate()
   @user_id Ecto.UUID.generate()
   @game_id Ecto.UUID.generate()
   @lobby_id Ecto.UUID.generate()
@@ -15,6 +16,7 @@ defmodule BattleBox.PubSubTest do
 
   setup do
     bot = %Bot{
+      id: @bot_id,
       name: "FOO",
       user_id: @user_id
     }
@@ -126,6 +128,24 @@ defmodule BattleBox.PubSubTest do
       Process.sleep(10)
       GameEngine.broadcast_bot_server_update(context.game_engine, context.bot_server)
       assert_receive {:bot_server_update_listener, {:bot_server_update, @bot_server_id}}
+    end
+  end
+
+  describe "bot events" do
+    test "you can subscribe to a bot server start/update for that bot", context do
+      named_proxy(:listener, fn ->
+        :ok =
+          GameEngine.subscribe_to_bot_events(context.game_engine, @bot_id, [
+            :bot_server_start,
+            :bot_server_update
+          ])
+      end)
+
+      Process.sleep(10)
+      GameEngine.broadcast_bot_server_start(context.game_engine, context.bot_server)
+      assert_receive {:listener, {:bot_server_start, @bot_server_id}}
+      GameEngine.broadcast_bot_server_update(context.game_engine, context.bot_server)
+      assert_receive {:listener, {:bot_server_update, @bot_server_id}}
     end
   end
 end

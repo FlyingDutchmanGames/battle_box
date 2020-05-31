@@ -2,6 +2,44 @@ defmodule BattleBox.GameEngine.PubSub do
   use Supervisor
   alias BattleBox.GameEngine
 
+  def subscribe_to_lobby_events(game_engine, lobby_id, events),
+    do: subscribe(game_engine, "lobby:#{lobby_id}", events)
+
+  def subscribe_to_user_events(game_engine, user_id, events),
+    do: subscribe(game_engine, "user:#{user_id}", events)
+
+  def subscribe_to_game_events(game_engine, game_id, events),
+    do: subscribe(game_engine, "game:#{game_id}", events)
+
+  def subscribe_to_bot_events(game_engine, bot_id, events) do
+    subscribe(game_engine, "bot:#{bot_id}", events)
+  end
+
+  def subscribe_to_bot_server_events(game_engine, bot_server_id, events),
+    do: subscribe(game_engine, "bot_server:#{bot_server_id}", events)
+
+  def broadcast_bot_server_start(game_engine, %{lobby: lobby, bot: bot, bot_server_id: id}) do
+    topics = ["bot_server:#{id}", "bot:#{bot.id}", "user:#{bot.user_id}", "lobby:#{lobby.id}"]
+    dispatch_event_to_topics(game_engine, topics, :bot_server_start, id)
+  end
+
+  def broadcast_bot_server_update(game_engine, %{lobby: lobby, bot: bot, bot_server_id: id}) do
+    topics = ["bot_server:#{id}", "bot:#{bot.id}", "user:#{bot.user_id}", "lobby:#{lobby.id}"]
+    dispatch_event_to_topics(game_engine, topics, :bot_server_update, id)
+  end
+
+  def broadcast_game_start(game_engine, %{id: game_id} = game) when not is_nil(game_id) do
+    lobby_id = get_lobby_id(game)
+    topics = ["lobby:#{lobby_id}"]
+    dispatch_event_to_topics(game_engine, topics, :game_start, game_id)
+  end
+
+  def broadcast_game_update(game_engine, %{id: game_id} = game) when not is_nil(game_id) do
+    lobby_id = get_lobby_id(game)
+    topics = ["game:#{game_id}", "lobby:#{lobby_id}"]
+    dispatch_event_to_topics(game_engine, topics, :game_update, game_id)
+  end
+
   def start_link(%{names: names} = opts) do
     Supervisor.start_link(__MODULE__, opts, name: names.pubsub)
   end
@@ -12,68 +50,19 @@ defmodule BattleBox.GameEngine.PubSub do
     Supervisor.init(children, strategy: :one_for_all)
   end
 
-  def broadcast_bot_server_start(game_engine, %{lobby: _, bot: bot, bot_server_id: id}) do
-    Registry.dispatch(registry_name(game_engine), "user:#{bot.user_id}", fn entries ->
-      for {pid, events} <- entries,
-          :bot_server_start in events,
-          do: send(pid, {:bot_server_start, id})
-    end)
+  defp subscribe(game_engine, topic, events) do
+    {:ok, _pid} = Registry.register(registry_name(game_engine), topic, events)
+    :ok
   end
 
-  def broadcast_bot_server_update(game_engine, %{lobby: _, bot: _, bot_server_id: id}) do
-    Registry.dispatch(registry_name(game_engine), "bot_server:#{id}", fn entries ->
-      for {pid, events} <- entries,
-          :bot_server_update in events,
-          do: send(pid, {:bot_server_update, id})
-    end)
-  end
-
-  def broadcast_game_start(game_engine, %{id: game_id} = game) when not is_nil(game_id) do
-    lobby_id = get_lobby_id(game)
-
-    ["lobby:#{lobby_id}"]
-    |> Enum.each(fn topic ->
+  defp dispatch_event_to_topics(game_engine, topics, event_name, payload) do
+    Enum.each(topics, fn topic ->
       Registry.dispatch(registry_name(game_engine), topic, fn entries ->
-        for {pid, events} <- entries, :game_start in events do
-          send(pid, {:game_start, game_id})
+        for {pid, events} <- entries, event_name in events do
+          send(pid, {event_name, payload})
         end
       end)
     end)
-  end
-
-  def broadcast_game_update(game_engine, %{id: game_id} = game) when not is_nil(game_id) do
-    lobby_id = get_lobby_id(game)
-
-    ["game:#{game_id}", "lobby:#{lobby_id}"]
-    |> Enum.each(fn topic ->
-      Registry.dispatch(registry_name(game_engine), topic, fn entries ->
-        for {pid, events} <- entries, :game_update in events do
-          send(pid, {:game_update, game_id})
-        end
-      end)
-    end)
-  end
-
-  def subscribe_to_lobby_events(game_engine, lobby_id, events) do
-    {:ok, _pid} = Registry.register(registry_name(game_engine), "lobby:#{lobby_id}", events)
-    :ok
-  end
-
-  def subscribe_to_user_events(game_engine, user_id, events) do
-    {:ok, _pid} = Registry.register(registry_name(game_engine), "user:#{user_id}", events)
-    :ok
-  end
-
-  def subscribe_to_game_events(game_engine, game_id, events) do
-    {:ok, _pid} = Registry.register(registry_name(game_engine), "game:#{game_id}", events)
-    :ok
-  end
-
-  def subscribe_to_bot_server_events(game_engine, bot_server_id, events) do
-    {:ok, _pid} =
-      Registry.register(registry_name(game_engine), "bot_server:#{bot_server_id}", events)
-
-    :ok
   end
 
   defp get_lobby_id(game) do

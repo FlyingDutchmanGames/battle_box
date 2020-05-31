@@ -35,4 +35,19 @@ defmodule BattleBoxWeb.BotController do
         |> render("not_found.html", message: "Bot not found")
     end
   end
+
+  def index(conn, %{"user_username" => username}) do
+    Repo.get_by(User, username: username)
+    |> Repo.preload(:bots)
+    |> case do
+      %User{} = user ->
+        render(conn, "index.html", user: user)
+
+      nil ->
+        conn
+        |> put_status(404)
+        |> put_view(PageView)
+        |> render("not_found.html", message: "User (#{username}) not found")
+    end
+  end
 end
