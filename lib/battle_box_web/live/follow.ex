@@ -23,14 +23,19 @@ defmodule BattleBoxWeb.Live.Follow do
   def handle_info({_topic, event, game_id}, socket) when event in [:game_update, :game_started] do
     keep_following =
       case socket.assigns.follow_params do
-        %{"lobby" => %{name: name}} -> %{lobby: name}
-        %{"bot" => %{name: name}} -> %{bot: name}
-        %{"user" => %{username: username}} -> %{user: username}
+        %{"lobby" => %{name: name}, "user" => %{username: username}} ->
+          %{lobby: name, user: username}
+
+        %{"bot" => %{name: name}, "user" => %{username: username}} ->
+          %{bot: name, user: username}
+
+        %{"user" => %{username: username}} ->
+          %{user: username}
       end
 
     {:noreply,
      redirect(socket,
-       to: Routes.live_path(socket, BattleBoxWeb.Game, game_id, %{follow: keep_following})
+       to: Routes.game_path(socket, :show, game_id, %{follow: keep_following})
      )}
   end
 
