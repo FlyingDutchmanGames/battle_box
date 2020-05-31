@@ -8,6 +8,21 @@ defmodule BattleBoxWeb.LobbyController do
     render(conn, "new.html", changeset: changeset)
   end
 
+  def show(conn, %{"name" => lobby_name}) do
+    Repo.get_by(Lobby, name: lobby_name)
+    |> Repo.preload(:user)
+    |> case do
+      %Lobby{} = lobby ->
+        render(conn, "show.html", lobby: lobby)
+
+      nil ->
+        conn
+        |> put_status(404)
+        |> put_view(PageView)
+        |> render("not_found.html", message: "Lobby (#{lobby_name}) not found")
+    end
+  end
+
   def index(conn, %{"user_username" => username}) do
     Repo.get_by(User, username: username)
     |> Repo.preload(:lobbies)

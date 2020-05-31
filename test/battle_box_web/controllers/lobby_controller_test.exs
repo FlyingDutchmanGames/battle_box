@@ -8,15 +8,23 @@ defmodule BattleBoxWeb.LobbyControllerTest do
     %{user: user}
   end
 
-  test "you can view a lobby", %{conn: conn, user: user} do
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-name")
+  describe "show" do
+    test "you can view a lobby", %{conn: conn, user: user} do
+      {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-name")
 
-    conn =
-      conn
-      |> signin(user: user)
-      |> get("/lobbies/#{lobby.name}")
+      conn =
+        conn
+        |> signin(user: user)
+        |> get("/lobbies/#{lobby.name}")
 
-    assert html_response(conn, 200) =~ "test-name"
+      assert html_response(conn, 200) =~ "test-name"
+    end
+
+    test "A non existant lobby triggers a 404", %{conn: conn} do
+      conn = conn |> get("/lobbies/fake-lobby")
+
+      assert html_response(conn, 404) =~ "Lobby (fake-lobby) not found"
+    end
   end
 
   test "you can create a lobby", %{conn: conn, user: user} do

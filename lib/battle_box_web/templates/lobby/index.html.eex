@@ -16,8 +16,7 @@
           <div>Created: <%= humanize_seconds_ago(lobby.inserted_at) %></div>
         </div>
         <div>
-          <a href="<%= Routes.lobby_game_path(@conn, :index, lobby.name) %>" class="btn">History</a>
-          <a href="<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, lobby.name) %>" class="btn">Watch Live 👀</a>
+          <a href="<%= Routes.lobby_path(@conn, :show, lobby.name) %>" class="btn">Details</a>
         </div>
       </div>
     <% end %>

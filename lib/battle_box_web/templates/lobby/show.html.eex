@@ -1,9 +1,8 @@
-<div>
-  <div>Name: <%= @lobby.name %></div>
-  <div>User: <%= @lobby.user_id %></div>
-  <div>Game Type: <%= @lobby.game_type %></div>
-  <div>Game Acceptance Time (ms): <%= @lobby.game_acceptance_time_ms %></div>
-  <div>Minimum Command Time (ms): <%= @lobby.command_time_minimum_ms %></div>
-  <div>Maximum Command Time (ms): <%= @lobby.command_time_maximum_ms %></div>
-</div>
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">Lobbies / <%= @lobby.name %></div>
+    <a href="<%= Routes.lobby_game_path(@conn, :index, @lobby.name) %>" class="btn">History</a>
+  </div>
 
+  <%= live_render(@conn, Scores, session: %{"lobby" => @lobby}) %>
+</div>

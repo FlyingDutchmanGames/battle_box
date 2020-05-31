@@ -25,7 +25,6 @@
 - add in server ais
 - Matchmaker queue live
 - set of default lobbies with interesting terrains and bots
-- Lobby Live page revamped
 #### Games
 - Historical Games Filtered/Paginated by [user, user + bot, lobby, all?]
 - Live Games that meet the same criteria
@@ -66,7 +65,7 @@
 - Add footer on all pages
 - Impersonation
 - Concurrent connection limiter
-- switch all the params in the router from `id` => `name`
+- Favicon
 
 ### Nice to Haves
 
