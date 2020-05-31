@@ -39,6 +39,11 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     {:ok, bot_server, %{user_id: bot.user_id, bot_server_id: opts.bot_server_id}}
   end
 
+  def get_bot_servers_with_bot_id(game_engine, bot_id) do
+    bot_registry = GameEngine.names(game_engine).bot_registry
+    get_from_registry(bot_registry, matches_bot_id(bot_id))
+  end
+
   def get_bot_servers_with_user_id(game_engine, user_id) do
     bot_registry = GameEngine.names(game_engine).bot_registry
     get_from_registry(bot_registry, matches_user_id(user_id))
@@ -61,6 +66,16 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
 
     [
       {{:"$1", :"$2", :"$3"}, [{:==, {:map_get, :user_id, {:map_get, :bot, :"$3"}}, user_id}],
+       [{{:"$1", :"$2", :"$3"}}]}
+    ]
+  end
+
+  defp matches_bot_id(bot_id) do
+    # :ets.fun2ms(fn {bot_server_id, pid, attrs} when :erlang.map_get(:id, :erlang.map_get(:bot, attrs)) == 2 ->
+    #   {bot_server_id, pid, attrs}
+    # end)
+    [
+      {{:"$1", :"$2", :"$3"}, [{:==, {:map_get, :id, {:map_get, :bot, :"$3"}}, bot_id}],
        [{{:"$1", :"$2", :"$3"}}]}
     ]
   end
