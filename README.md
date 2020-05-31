@@ -29,9 +29,10 @@
 - Matchmaker queue live
 - set of default lobbies with interesting terrains and bots
 #### Games
-- Historical Games Filtered/Paginated by [user, user + bot, lobby, all?]
+- Historical Games Filtered/Paginated by [user, user + bot]
 - Live Games that meet the same criteria
 - Better test the Game controller
+- Respect the new bot follow params in game visualizer
 #### Clients
 - BattleBox Elixir Client
 - BattleBox Python Client

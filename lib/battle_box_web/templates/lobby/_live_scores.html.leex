@@ -1,5 +1,5 @@
 <div class="live-score-board">
-  <%= for %{game: game, started_at: started_at} <- Enum.sort_by(@games, & &1.started_at) do %>
+  <%= for %{game: game} <- Enum.sort_by(@games, & &1.started_at) do %>
     <div class="live-score-card">
       <div class="scores">
         <%= for game_bot <- Enum.sort_by(game.game_bots, & &1.player) do %>
