@@ -1,18 +1,17 @@
 defmodule BattleBoxWeb.Live.FollowBack do
   use BattleBoxWeb, :live_view
-  alias BattleBox.GameEngine
   alias BattleBoxWeb.FollowView
 
-  def mount(_params, %{"id" => id, "game" => game, "follow" => follow}, socket) do
+  def mount(_params, %{"game_pid" => game_pid, "follow" => follow}, socket) do
     socket = assign(socket, follow: follow, follow_back_path: follow_back_path(socket, follow))
 
-    case game do
-      {{:live, pid}, _game} ->
-        if connected?(socket), do: Process.monitor(pid)
-        {:ok, assign(socket, mode: :auto, game_alive?: true)}
-
-      _ ->
+    case game_pid do
+      nil ->
         {:ok, assign(socket, mode: :passive, game_alive?: false)}
+
+      pid when is_pid(pid) ->
+        if connected?(socket), do: Process.monitor(pid)
+        {:ok, assign(socket, mode: :active, game_alive?: true)}
     end
   end
 
@@ -22,7 +21,7 @@ defmodule BattleBoxWeb.Live.FollowBack do
 
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
     case socket.assigns.mode do
-      :auto ->
+      :active ->
         {:noreply, redirect(socket, to: socket.assigns.follow_back_path)}
 
       :passive ->

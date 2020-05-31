@@ -4,8 +4,7 @@ defmodule BattleBox.GameEngine do
   alias BattleBox.GameEngine.BotServer.BotSupervisor, as: BotSup
   alias BattleBox.GameEngine.MatchMaker, as: MatchMakerSup
   alias BattleBox.GameEngine.PubSub, as: GameEnginePubSub
-  alias BattleBox.GameEngine.{MatchMakerServer, GameServer}
-  alias BattleBox.{Repo, Game}
+  alias BattleBox.GameEngine.MatchMakerServer
 
   @default_name GameEngine
   def default_name, do: @default_name
@@ -92,23 +91,6 @@ defmodule BattleBox.GameEngine do
     case Registry.lookup(registry, id) do
       [{pid, attributes}] -> Map.merge(attributes, %{:pid => pid, id_name => id})
       [] -> nil
-    end
-  end
-
-  def get_game(game_engine, id) do
-    case get_game_server(game_engine, id) do
-      %{pid: pid} ->
-        {:ok, game} = GameServer.get_game(pid)
-        {{:live, pid}, game}
-
-      nil ->
-        Repo.get(Game, id)
-        |> Game.preload_game_data()
-        |> Repo.preload(game_bots: [bot: :user])
-        |> case do
-          nil -> nil
-          game -> {:historical, Game.initialize(game)}
-        end
     end
   end
 end

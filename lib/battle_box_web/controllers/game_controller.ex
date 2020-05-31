@@ -25,8 +25,13 @@ defmodule BattleBoxWeb.GameController do
   end
 
   def show(conn, %{"id" => id} = params) do
-    game = GameEngine.get_game(game_engine(), id)
-    render(conn, "show.html", id: id, game: game, follow: params["follow"])
+    game_pid =
+      case GameEngine.get_game_server(game_engine(), id) do
+        %{pid: pid} -> pid
+        nil -> nil
+      end
+
+    render(conn, "show.html", id: id, game_pid: game_pid, follow: params["follow"])
   end
 
   defp filter_lobbies(query, %{"lobby_name" => lobby_name}) do
