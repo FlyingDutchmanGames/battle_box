@@ -6,11 +6,11 @@
       <%= if @lobby do %>
         / <a href="<%= Routes.user_lobby_path(@conn, :index, @user.username) %>">Lobbies</a>
         / <a href="<%= Routes.user_lobby_path(@conn, :show, @user.username, @lobby.name) %>"><%= @lobby.name %></a>
-      <%= end %>
+      <% end %>
       <%= if @bot do %>
         / <a href="<%= Routes.user_bot_path(@conn, :index, @user.username) %>">Bots</a>
         / <a href="<%= Routes.user_bot_path(@conn, :show, @user.username, @bot.name) %>"><%= @bot.name %></a>
-      <%= end %>
+      <% end %>
       / Follow
     </div>
   </div>

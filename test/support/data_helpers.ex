@@ -1,5 +1,5 @@
 defmodule BattleBox.Test.DataHelpers do
-  alias BattleBox.{User, Lobby, Repo}
+  alias BattleBox.{User, Bot, Lobby, Repo}
   import Ecto.Changeset
   import Phoenix.ConnTest
 
@@ -31,6 +31,13 @@ defmodule BattleBox.Test.DataHelpers do
       is_banned: opts[:is_banned] || false,
       is_admin: opts[:is_admin] || false
     )
+    |> Repo.insert()
+  end
+
+  def create_bot(opts) do
+    opts[:user]
+    |> Ecto.build_assoc(:bots)
+    |> Bot.changeset(%{name: opts[:bot_name]})
     |> Repo.insert()
   end
 
