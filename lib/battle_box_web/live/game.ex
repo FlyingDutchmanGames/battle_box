@@ -70,7 +70,7 @@ defmodule BattleBoxWeb.Game do
     {:noreply, socket}
   end
 
-  def handle_info({:game_update, id}, %{assigns: %{game: %{id: id}}} = socket) do
+  def handle_info({_topic, :game_update, id}, %{assigns: %{game: %{id: id}}} = socket) do
     {game_source, game} = get_game(id)
 
     {:noreply,

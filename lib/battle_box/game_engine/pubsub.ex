@@ -3,40 +3,37 @@ defmodule BattleBox.GameEngine.PubSub do
   alias BattleBox.GameEngine
 
   def subscribe_to_lobby_events(game_engine, lobby_id, events),
-    do: subscribe(game_engine, "lobby:#{lobby_id}", events)
+    do: subscribe(game_engine, {:lobby, lobby_id}, events)
 
   def subscribe_to_user_events(game_engine, user_id, events),
-    do: subscribe(game_engine, "user:#{user_id}", events)
+    do: subscribe(game_engine, {:user, user_id}, events)
 
   def subscribe_to_game_events(game_engine, game_id, events),
-    do: subscribe(game_engine, "game:#{game_id}", events)
+    do: subscribe(game_engine, {:game, game_id}, events)
 
-  def subscribe_to_bot_events(game_engine, bot_id, events) do
-    subscribe(game_engine, "bot:#{bot_id}", events)
-  end
+  def subscribe_to_bot_events(game_engine, bot_id, events),
+    do: subscribe(game_engine, {:bot, bot_id}, events)
 
   def subscribe_to_bot_server_events(game_engine, bot_server_id, events),
-    do: subscribe(game_engine, "bot_server:#{bot_server_id}", events)
+    do: subscribe(game_engine, {:bot_server, bot_server_id}, events)
 
   def broadcast_bot_server_start(game_engine, %{lobby: lobby, bot: bot, bot_server_id: id}) do
-    topics = ["bot_server:#{id}", "bot:#{bot.id}", "user:#{bot.user_id}", "lobby:#{lobby.id}"]
+    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}, {:lobby, lobby.id}]
     dispatch_event_to_topics(game_engine, topics, :bot_server_start, id)
   end
 
   def broadcast_bot_server_update(game_engine, %{lobby: lobby, bot: bot, bot_server_id: id}) do
-    topics = ["bot_server:#{id}", "bot:#{bot.id}", "user:#{bot.user_id}", "lobby:#{lobby.id}"]
+    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}, {:lobby, lobby.id}]
     dispatch_event_to_topics(game_engine, topics, :bot_server_update, id)
   end
 
   def broadcast_game_start(game_engine, %{id: game_id} = game) when not is_nil(game_id) do
-    lobby_id = get_lobby_id(game)
-    topics = ["lobby:#{lobby_id}"]
+    topics = [{:lobby, get_lobby_id(game)}]
     dispatch_event_to_topics(game_engine, topics, :game_start, game_id)
   end
 
   def broadcast_game_update(game_engine, %{id: game_id} = game) when not is_nil(game_id) do
-    lobby_id = get_lobby_id(game)
-    topics = ["game:#{game_id}", "lobby:#{lobby_id}"]
+    topics = [{:game, game_id}, {:lobby, get_lobby_id(game)}]
     dispatch_event_to_topics(game_engine, topics, :game_update, game_id)
   end
 
@@ -59,7 +56,7 @@ defmodule BattleBox.GameEngine.PubSub do
     Enum.each(topics, fn topic ->
       Registry.dispatch(registry_name(game_engine), topic, fn entries ->
         for {pid, events} <- entries, event_name in events do
-          send(pid, {event_name, payload})
+          send(pid, {topic, event_name, payload})
         end
       end)
     end)
