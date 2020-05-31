@@ -17,6 +17,7 @@
 - Edit bots
 - Add pagination to index
 #### Lobbies
+- Move all of lobbies under the user paths
 - Edit lobbies
 - Add pagination to index
 - Add details to lobby details page
