@@ -16,7 +16,7 @@ defmodule BattleBox.Game do
   use Ecto.Schema
   import Ecto.Changeset
   import BattleBox.InstalledGames
-  alias BattleBox.{Lobby, Bot, GameBot}
+  alias BattleBox.{Repo, Lobby, Bot, GameBot}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -60,6 +60,10 @@ defmodule BattleBox.Game do
     |> validate_inclusion(:game_type, installed_games())
     |> cast_assoc(:game_bots)
     |> cast_assoc(game.game_type.name)
+  end
+
+  def preload_game_data(game) do
+    Repo.preload(game, game.game_type.name)
   end
 
   def initialize(game) do

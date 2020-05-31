@@ -23,7 +23,7 @@ defmodule BattleBoxWeb.Router do
     get "/", PageController, :index
     get "/login", PageController, :login
 
-    live("/games/:game_id", Game)
+    resources "/games", GameController, only: [:show]
 
     resources "/users", UserController, only: [:show], param: "username" do
       get "/follow", FollowController, :follow

@@ -24,6 +24,11 @@ defmodule BattleBoxWeb.GameController do
     render(conn, "index.html", assigns)
   end
 
+  def show(conn, %{"id" => id} = params) do
+    game = GameEngine.get_game(game_engine(), id)
+    render(conn, "show.html", id: id, game: game, follow: params["follow"])
+  end
+
   defp filter_lobbies(query, %{"lobby_name" => lobby_name}) do
     query
     |> join(:inner, [game], lobby in assoc(game, :lobby), as: :lobby)
