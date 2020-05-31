@@ -12,8 +12,14 @@ defmodule BattleBoxWeb.LobbyController do
     Repo.get_by(Lobby, name: lobby_name)
     |> Repo.preload(:user)
     |> case do
-      %Lobby{} = lobby -> render(conn, "show.html", lobby: lobby)
-      nil -> render(conn, "not_found.html", message: "Lobby (#{lobby_name}) not found")
+      %Lobby{} = lobby ->
+        render(conn, "show.html", lobby: lobby)
+
+      nil ->
+        conn
+        |> put_status(404)
+        |> put_view(PageView)
+        |> render("not_found.html", message: "Lobby (#{lobby_name}) not found")
     end
   end
 
