@@ -1,6 +1,6 @@
 <div class="box">
   <%= for bot_server <- Enum.sort_by(@bot_servers, & &1.started_at) do %>
-      <div class="box-row">
+      <div class="box-row bot-server">
         <div class="box-details">
           <div class="name" style="font-weight: bolder; padding-bottom: 10px;">Bot: <%= bot_server.bot.name %></div>
           <div>Started: <%= humanize_seconds_ago(bot_server.started_at) %></div>
