@@ -28,7 +28,8 @@ defmodule BattleBox.PubSubTest do
 
     game = %Game{
       id: @game_id,
-      lobby_id: @lobby_id
+      lobby_id: @lobby_id,
+      game_bots: [%{bot: %{id: @bot_id, user_id: @user_id}}]
     }
 
     bot_server = %{
@@ -106,13 +107,13 @@ defmodule BattleBox.PubSubTest do
     end
 
     test "game_start event works", context do
-      named_proxy(:lobby_update_listener, fn ->
-        :ok = GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_start])
-      end)
-
-      Process.sleep(10)
+      :ok = GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_start])
+      :ok = GameEngine.subscribe_to_user_events(context.game_engine, @user_id, [:game_start])
+      :ok = GameEngine.subscribe_to_bot_events(context.game_engine, @bot_id, [:game_start])
       GameEngine.broadcast_game_start(context.game_engine, context.game)
-      assert_receive {:lobby_update_listener, {{:lobby, @lobby_id}, :game_start, @game_id}}
+      assert_receive {{:lobby, @lobby_id}, :game_start, @game_id}
+      assert_receive {{:user, @user_id}, :game_start, @game_id}
+      assert_receive {{:bot, @bot_id}, :game_start, @game_id}
     end
   end
 

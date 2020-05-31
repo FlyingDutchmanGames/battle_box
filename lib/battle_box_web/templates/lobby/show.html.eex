@@ -5,7 +5,10 @@
       / <a href="<%= Routes.user_path(@conn, :show, @lobby.user.username) %>"><%= @lobby.user.username %></a>
       / <a href="<%= Routes.user_lobby_path(@conn, :index, @lobby.user.username) %>">Lobbies</a>
       / <%= @lobby.name %></div>
-    <a href="<%= Routes.lobby_game_path(@conn, :index, @lobby.name) %>" class="btn">History</a>
+    <div class="btn-group">
+      <a href="<%= Routes.lobby_game_path(@conn, :index, @lobby.name) %>" class="btn btn-group-item">History</a>
+      <a href="<%= Routes.user_lobby_follow_path(@conn, :follow, @lobby.user.username, @lobby.name) %>" class="btn btn-group-item btn-primary">Follow</a>
+    </div>
   </div>
 
   <%= live_render(@conn, Scores, session: %{"lobby" => @lobby}) %>

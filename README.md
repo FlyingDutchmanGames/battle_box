@@ -17,6 +17,7 @@
 - Edit bots
 - Add pagination to index
 #### Lobbies
+- Move all of lobbies under the user paths
 - Edit lobbies
 - Add pagination to index
 - Add details to lobby details page
@@ -28,9 +29,10 @@
 - Matchmaker queue live
 - set of default lobbies with interesting terrains and bots
 #### Games
-- Historical Games Filtered/Paginated by [user, user + bot, lobby, all?]
+- Historical Games Filtered/Paginated by [user, user + bot]
 - Live Games that meet the same criteria
 - Better test the Game controller
+- Respect the new bot follow params in game visualizer
 #### Clients
 - BattleBox Elixir Client
 - BattleBox Python Client

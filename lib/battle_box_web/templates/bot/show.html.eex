@@ -5,6 +5,9 @@
       / <a href="<%= Routes.user_bot_path(@conn, :index, @bot.user.username) %>">Bots</a>
       / <%= @bot.name %>
     </div>
+    <div>
+      <a href="<%= Routes.user_bot_follow_path(@conn, :follow, @bot.user.username, @bot.name) %>" class="btn btn-group-item btn-primary">Follow</a>
+    </div>
   </div>
 
   <h2>Details</h2>
