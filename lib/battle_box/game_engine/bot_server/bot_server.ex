@@ -27,7 +27,8 @@ defmodule BattleBox.GameEngine.BotServer do
     GenStateMachine.start_link(__MODULE__, Map.merge(config, data),
       name:
         {:via, Registry,
-         {config.names.bot_registry, data.bot_server_id, %{bot: bot, lobby: lobby, game_id: nil}}}
+         {config.names.bot_registry, data.bot_server_id,
+          %{bot: bot, lobby: lobby, game_id: nil, started_at: NaiveDateTime.utc_now()}}}
     )
   end
 
