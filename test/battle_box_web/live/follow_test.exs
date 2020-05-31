@@ -1,4 +1,4 @@
-defmodule BattleBoxWeb.Live.ScoresTest do
+defmodule BattleBoxWeb.Live.FollowTest do
   use BattleBoxWeb.ConnCase, async: false
   alias BattleBoxWeb.Live.Follow
   import Phoenix.LiveViewTest

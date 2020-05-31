@@ -24,7 +24,6 @@ defmodule BattleBoxWeb.Router do
     get "/login", PageController, :login
 
     live("/games/:game_id", Game)
-    live("/bot_servers/:bot_server_id/follow", BotServerFollow)
 
     resources "/users", UserController, only: [:show], param: "username" do
       get "/follow", FollowController, :follow
