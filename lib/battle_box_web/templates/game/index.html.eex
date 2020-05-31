@@ -2,7 +2,7 @@
   <div class="subhead">
     <div class="subhead-heading">
       Lobbies /
-      <a href='<%= Routes.live_path(@conn, BattleBoxWeb.Lobby, @params["lobby_name"]) %>'><%= @params["lobby_name"] %></a>
+      <a href='<%= Routes.lobby_path(@conn, :show, @params["lobby_name"]) %>'><%= @params["lobby_name"] %></a>
       / Past Games
     </div>
   </div>

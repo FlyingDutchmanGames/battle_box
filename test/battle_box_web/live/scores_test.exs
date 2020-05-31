@@ -63,6 +63,7 @@ defmodule BattleBoxWeb.Live.ScoresTest do
       :ok = BotServer.match_make(context.bot_server_1)
       :ok = BotServer.match_make(context.bot_server_2)
       :ok = GameEngine.force_match_make(context.game_engine)
+      Process.sleep(20)
       {:ok, view, html} = live_isolated(conn, Scores, session: %{"lobby" => context.lobby})
       {:ok, document} = Floki.parse_document(html)
       assert [_] = Floki.find(document, ".live-score-card")

@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.Live.Scores do
   use BattleBoxWeb, :live_view
-  alias BattleBox.{GameEngine, Lobby}
+  alias BattleBox.GameEngine
   alias BattleBoxWeb.LobbyView
 
   def mount(_params, %{"lobby" => lobby}, socket) do
