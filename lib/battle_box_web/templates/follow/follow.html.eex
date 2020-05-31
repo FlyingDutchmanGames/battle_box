@@ -1,0 +1,19 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      Users 
+      / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
+      <%= if @lobby do %>
+        / <a href="<%= Routes.user_lobby_path(@conn, :index, @user.username) %>">Lobbies</a>
+        / <a href="<%= Routes.user_lobby_path(@conn, :show, @user.username, @lobby.name) %>"><%= @lobby.name %></a>
+      <%= end %>
+      <%= if @bot do %>
+        / <a href="<%= Routes.user_bot_path(@conn, :index, @user.username) %>">Bots</a>
+        / <a href="<%= Routes.user_bot_path(@conn, :show, @user.username, @bot.name) %>"><%= @bot.name %></a>
+      <%= end %>
+      / Follow
+    </div>
+  </div>
+
+  <%= live_render(@conn, Follow, session: %{"lobby" => @lobby, "bot" => @bot, "user" => @user}) %>
+</div>

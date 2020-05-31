@@ -27,8 +27,15 @@ defmodule BattleBoxWeb.Router do
     live("/bot_servers/:bot_server_id/follow", BotServerFollow)
 
     resources "/users", UserController, only: [:show], param: "username" do
-      resources "/bots", BotController, only: [:show, :index], param: "name"
-      resources "/lobbies", LobbyController, only: [:index], param: "name"
+      get "/follow", FollowController, :follow
+
+      resources "/bots", BotController, only: [:show, :index], param: "name" do
+        get "/follow", FollowController, :follow
+      end
+
+      resources "/lobbies", LobbyController, only: [:show, :index], param: "name" do
+        get "/follow", FollowController, :follow
+      end
     end
 
     scope "/" do

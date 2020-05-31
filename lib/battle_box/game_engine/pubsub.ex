@@ -38,7 +38,12 @@ defmodule BattleBox.GameEngine.PubSub do
   end
 
   def broadcast_game_update(game_engine, %{id: game_id} = game) when not is_nil(game_id) do
-    topics = [{:game, game_id}, {:lobby, get_lobby_id(game)}]
+    topics =
+      Enum.flat_map(game.game_bots, fn game_bot ->
+        [{:bot, game_bot.bot.id}, {:user, game_bot.bot.user_id}]
+      end)
+
+    topics = [{:game, game_id}, {:lobby, get_lobby_id(game)} | topics]
     dispatch_event_to_topics(game_engine, topics, :game_update, game_id)
   end
 

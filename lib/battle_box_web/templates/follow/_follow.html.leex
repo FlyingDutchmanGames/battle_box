@@ -1,0 +1,10 @@
+<div style="display: flex; justify-content: center; padding: 10px;">
+  <%= case @follow_params do %>
+    <% %{"lobby" => %{name: name}} -> %>
+      <h1 class="blinking">Waiting for Game in Lobby (<%= name %>)</h1>
+    <% %{"bot" => %{name: name}} -> %>
+      <h1 class="blinking">Waiting for a Game with Bot (<%= name %>)</h1>
+    <% %{"user" => %{username: username}} -> %>
+      <h1 class="blinking">Waiting for a Game with User (<%= username %>)</h1>
+  <% end %>
+</div>
