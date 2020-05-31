@@ -5,6 +5,6 @@
     </div>
     <%= if @follow do %>
       <%= live_render(@conn, FollowBack, session: %{"game_pid" => @game_pid, "follow" => @follow}) %>
-    <%= end %>
+    <% end %>
   </div>
 </div>
