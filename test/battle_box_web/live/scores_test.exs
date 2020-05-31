@@ -1,7 +1,8 @@
-defmodule BattleBoxWeb.LobbyTest do
+defmodule BattleBoxWeb.Live.ScoresTest do
   use BattleBoxWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
   alias BattleBox.{Bot, GameEngine, GameEngine.BotServer}
+  alias BattleBoxWeb.Live.Scores
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @user_id Ecto.UUID.generate()
@@ -43,18 +44,8 @@ defmodule BattleBoxWeb.LobbyTest do
     %{lobby: lobby, user: user, bot_server_1: bot_server_1, bot_server_2: bot_server_2}
   end
 
-  test "renders not found for a non existant lobby", %{conn: conn} do
-    {:ok, _view, html} = live(conn, "/lobbies/#{Ecto.UUID.generate()}")
-    assert html =~ "Not Found"
-  end
-
-  test "it can show a lobby", %{conn: conn} = context do
-    {:ok, _view, html} = live(conn, "/lobbies/#{context.lobby.name}")
-    assert html =~ "#{context.user.username} / #{context.lobby.name}"
-  end
-
   describe "live games" do
-    test "it will show live games in the lobby", %{conn: conn} = context do
+    test "it will show live game scores in the lobby", %{conn: conn} = context do
       Process.link(context.bot_server_1)
       Process.link(context.bot_server_2)
 
@@ -63,28 +54,28 @@ defmodule BattleBoxWeb.LobbyTest do
       :ok = GameEngine.force_match_make(context.game_engine)
 
       Process.sleep(100)
-      {:ok, _view, html} = live(conn, "/lobbies/#{context.lobby.name}")
+      {:ok, _view, html} = live_isolated(conn, Scores, session: %{"lobby" => context.lobby})
       {:ok, document} = Floki.parse_document(html)
-      assert [_] = Floki.find(document, ".game")
+      assert [_] = Floki.find(document, ".live-score-card")
     end
 
     test "if the game server dies it disappears from the page", %{conn: conn} = context do
       :ok = BotServer.match_make(context.bot_server_1)
       :ok = BotServer.match_make(context.bot_server_2)
       :ok = GameEngine.force_match_make(context.game_engine)
-      {:ok, view, html} = live(conn, "/lobbies/#{context.lobby.name}")
+      {:ok, view, html} = live_isolated(conn, Scores, session: %{"lobby" => context.lobby})
       {:ok, document} = Floki.parse_document(html)
-      assert [_] = Floki.find(document, ".game")
+      assert [_] = Floki.find(document, ".live-score-card")
       Process.exit(context.bot_server_1, :kill)
-      Process.sleep(10)
+      Process.sleep(20)
       {:ok, document} = render(view) |> Floki.parse_document()
-      assert [] == Floki.find(document, ".game")
+      assert [] == Floki.find(document, ".live-score-card")
     end
 
     test "it will add newly started games to the page", %{conn: conn} = context do
-      {:ok, view, html} = live(conn, "/lobbies/#{context.lobby.name}")
+      {:ok, view, html} = live_isolated(conn, Scores, session: %{"lobby" => context.lobby})
       {:ok, document} = Floki.parse_document(html)
-      assert [] == Floki.find(document, ".game")
+      assert [] == Floki.find(document, ".live-score-card")
 
       :ok = BotServer.match_make(context.bot_server_1)
       :ok = BotServer.match_make(context.bot_server_2)
@@ -92,7 +83,7 @@ defmodule BattleBoxWeb.LobbyTest do
 
       Process.sleep(20)
       {:ok, document} = render(view) |> Floki.parse_document()
-      assert [_] = Floki.find(document, ".game")
+      assert [_] = Floki.find(document, ".live-score-card")
     end
   end
 end

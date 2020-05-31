@@ -67,8 +67,6 @@ defmodule BattleBoxWeb.Router do
       get "/info", HealthController, :info
     end
 
-    live("/lobbies/:name", Lobby)
-
     scope "/admin", Admin do
       pipe_through :require_admin
 

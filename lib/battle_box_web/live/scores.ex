@@ -16,7 +16,7 @@ defmodule BattleBoxWeb.Live.Scores do
     if connected?(socket) do
       for %{pid: pid} <- games, do: Process.monitor(pid)
     end
-    
+
     {:ok, assign(socket, games: games)}
   end
 
@@ -51,9 +51,7 @@ defmodule BattleBoxWeb.Live.Scores do
     {:noreply, assign(socket, :games, games)}
   end
 
-
   def render(assigns) do
     LobbyView.render("_live_scores.html", assigns)
   end
 end
-
