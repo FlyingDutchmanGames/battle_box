@@ -45,7 +45,9 @@ defmodule BattleBoxWeb.Live.FollowBackTest do
     assert_redirected(view, "/users/user-name/follow")
   end
 
-  test "if the game pid dies & not auto follow mode, it goes passive and no redirect", %{conn: conn} do
+  test "if the game pid dies & not auto follow mode, it goes passive and no redirect", %{
+    conn: conn
+  } do
     pid = spawn(fn -> Process.sleep(:infinity) end)
     session = %{"follow" => @user, "game_pid" => pid}
     {:ok, view, html} = live_isolated(conn, FollowBack, session: session)
