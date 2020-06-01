@@ -1,0 +1,24 @@
+.game-header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 10px;
+  color: #6a6666;
+  background-color: #a7a5a5;
+}
+
+.game-header .title {
+  font-size: 3em;
+  user-select: none;
+  font-weight: bolder;
+}
+
+.live-dot {
+  border-radius: 10px;
+  background-color: white;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+}
+
