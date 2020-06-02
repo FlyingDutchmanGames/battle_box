@@ -35,12 +35,6 @@ defmodule BattleBox.User do
     )
   end
 
-  def set_ban_status(%__MODULE__{} = user, status) do
-    user
-    |> change(is_banned: status)
-    |> Repo.update()
-  end
-
   def admin_changeset(user, params \\ %{}) do
     user
     |> cast(params, [:username, :avatar_url, :is_admin, :is_banned])

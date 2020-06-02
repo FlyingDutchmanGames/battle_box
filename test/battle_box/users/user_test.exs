@@ -41,19 +41,4 @@ defmodule BattleBox.UserTest do
       assert user2.username == "pass"
     end
   end
-
-  describe "set_ban_status" do
-    test "you can ban and unban people" do
-      {:ok, user} = create_user(%{is_banned: true})
-      assert user.is_banned
-
-      {:ok, _user} = User.set_ban_status(user, false)
-      user = Repo.get(User, user.id)
-      refute user.is_banned
-
-      {:ok, _user} = User.set_ban_status(user, true)
-      user = Repo.get(User, user.id)
-      assert user.is_banned
-    end
-  end
 end

@@ -97,7 +97,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     end
 
     test "starting a bot with a banned user fails", context do
-      {:ok, _user} = User.set_ban_status(context.user, true)
+      Repo.update_all(User, set: [is_banned: true])
 
       assert {:error, %{user: ["User is banned"]}} =
                BotSupervisor.start_bot(context.game_engine, %{

@@ -110,10 +110,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     test "trying to join while your user is banned is an error", %{
       socket: socket,
       bot: bot,
-      key: key,
-      user: user
+      key: key
     } do
-      User.set_ban_status(user, true)
+      Repo.update_all(User, set: [is_banned: true])
       bot_connect_req = encode(%{"token" => key.token, "lobby" => @lobby_name, "bot" => bot.name})
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
