@@ -1,12 +1,13 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      Users / <a href="<%= Routes.user_path(@conn, :show, @bot.user.username) %>"><%= @bot.user.username %></a>
+      / Users 
+      / <a href="<%= Routes.user_path(@conn, :show, @bot.user.username) %>"><%= @bot.user.username %></a>
       / <a href="<%= Routes.user_bot_path(@conn, :index, @bot.user.username) %>">Bots</a>
       / <%= @bot.name %>
-    </div>
-    <div>
-      <a href="<%= Routes.user_bot_follow_path(@conn, :follow, @bot.user.username, @bot.name) %>" class="btn btn-group-item btn-primary">Follow</a>
+      { 
+        <a href="<%= Routes.user_bot_follow_path(@conn, :follow, @bot.user.username, @bot.name) %>">/ Follow</a>
+      }
     </div>
   </div>
 

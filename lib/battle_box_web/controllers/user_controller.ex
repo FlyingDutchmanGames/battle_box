@@ -6,7 +6,7 @@ defmodule BattleBoxWeb.UserController do
   def show(conn, %{"username" => username}) do
     case Repo.get_by(User, username: username) do
       %User{} = user ->
-        render(conn, "show.html", fetched_user: user)
+        render(conn, "show.html", user: user)
 
       nil ->
         conn

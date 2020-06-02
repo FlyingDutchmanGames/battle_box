@@ -247,3 +247,8 @@ a.btn {
   flex-flow: row nowrap;
   justify-content: space-evenly;
 }
+
+.disabled-link {
+  pointer-events: none;
+  color: gray;
+}
