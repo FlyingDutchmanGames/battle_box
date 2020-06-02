@@ -72,6 +72,7 @@ defmodule BattleBoxWeb.Router do
     scope "/admin", Admin, as: :admin do
       pipe_through :require_admin
 
+      get "/", PageController, :index
       resources "/users", UserController, except: [:new, :create], param: "username"
 
       live_dashboard "/dashboard", metrics: BattleBoxWeb.Telemetry
