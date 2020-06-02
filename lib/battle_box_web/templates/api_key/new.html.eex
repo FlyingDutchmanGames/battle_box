@@ -1,8 +1,10 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      <a href="<%= Routes.api_key_path(@conn, :index) %>">API Keys</a>
-      / Create
+      / Users
+      / <a href="<% Routes.user_path(@conn, :show, @current_user.username) %>"><%= @current_user.username %></a>
+      / <a href="<%= Routes.api_key_path(@conn, :index) %>">Keys</a>
+      / New
     </div>
   </div>
 

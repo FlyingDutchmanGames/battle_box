@@ -1,15 +1,13 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      Users 
+      / Users 
       / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
       / Lobbies
+      <%= if @current_user && @current_user.id == @user.id do %>
+        { <a href="<%= Routes.lobby_path(@conn, :new) %>">/ New</a> }
+      <% end %>
     </div>
-    <%= if @current_user && @current_user.id == @user.id do %>
-      <div class="subhead-action">
-        <a href="<%= Routes.lobby_path(@conn, :new) %>" class="btn btn-primary">New Lobby</a>
-      </div>
-    <% end %>
   </div>
   <div class="box">
     <%= for lobby <- @user.lobbies do %>

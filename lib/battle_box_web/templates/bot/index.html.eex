@@ -1,15 +1,13 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      Users
+      / Users
       / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
       / Bots
-    </div>
     <%= if @current_user && @current_user.id == @user.id do %>
-      <div class="subhead-action">
-        <a href="<%= Routes.bot_path(@conn, :new) %>" class="btn btn-primary">New Bot</a>
-      </div>
+      { <a href="<%= Routes.bot_path(@conn, :new) %>">/ New</a> }
     <% end %>
+    </div>
   </div>
   <div class="box">
     <%= for bot <- Enum.sort_by(@user.bots, & &1.inserted_at, {:desc, NaiveDateTime}) do %> 

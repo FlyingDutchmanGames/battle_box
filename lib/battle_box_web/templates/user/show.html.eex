@@ -1,7 +1,15 @@
-<div>User</div>
-<img style="width: 60px; height: 60px;" src="<%= @fetched_user.avatar_url %>">
-<div>Name: <%= @fetched_user.username %></div>
-<a href="<%= Routes.user_bot_path(@conn, :index, @fetched_user.username) %>">bots</a><br>
-<a href="<%= Routes.user_lobby_path(@conn, :index, @fetched_user.username) %>">lobbies</a>
-<a href="<%= Routes.user_follow_path(@conn, :follow, @fetched_user.username) %>" class="btn btn-group-item btn-primary">Follow</a>
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      / Users
+      / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
+      {
+        <a href="<%= Routes.user_bot_path(@conn, :index, @user.username) %>">/ Bots</a>,
+        <a href="<%= Routes.user_lobby_path(@conn, :index, @user.username) %>">/ Lobbies</a>,
+        <a href="<%= Routes.user_follow_path(@conn, :follow, @user.username) %>">/ Follow</a>,
+        <a class='<%= unless @current_user && @current_user.id == @user.id, do: "disabled-link" %>' href="<%= Routes.api_key_path(@conn, :index) %>">/ Keys</a>
+      }
+    </div>
+  </div>
+</div>
 

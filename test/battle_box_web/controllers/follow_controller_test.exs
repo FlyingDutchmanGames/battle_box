@@ -19,7 +19,7 @@ defmodule BattleBoxWeb.FollowControllerTest do
     assert [break_crumbs] = Floki.find(document, ".subhead-heading")
 
     assert Regex.replace(~r/\s+/, Floki.text(break_crumbs), " ") ==
-             " Users / #{user.username} / Follow "
+             " / Users / #{user.username} / Follow "
   end
 
   test "you can do it with a lobby", %{conn: conn, user: user} do
@@ -32,7 +32,7 @@ defmodule BattleBoxWeb.FollowControllerTest do
     assert [break_crumbs] = Floki.find(document, ".subhead-heading")
 
     assert Regex.replace(~r/\s+/, Floki.text(break_crumbs), " ") ==
-             " Users / #{user.username} / Lobbies / test-name / Follow "
+             " / Users / #{user.username} / Lobbies / test-name / Follow "
   end
 
   test "you can do it with a bot", %{conn: conn, user: user} do
@@ -45,6 +45,6 @@ defmodule BattleBoxWeb.FollowControllerTest do
     assert [break_crumbs] = Floki.find(document, ".subhead-heading")
 
     assert Regex.replace(~r/\s+/, Floki.text(break_crumbs), " ") ==
-             " Users / #{user.username} / Bots / test-name / Follow "
+             " / Users / #{user.username} / Bots / test-name / Follow "
   end
 end
