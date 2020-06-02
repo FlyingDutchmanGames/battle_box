@@ -7,6 +7,6 @@
       <%= live_render(@conn, FollowBack, session: %{"game_pid" => @game_pid, "follow" => @follow}) %>
     <% end %>
   </div>
-
-  <%= live_render(@conn, GameViewer, session: %{"game_id" => @id}) %>
 </div>
+
+<%= live_render(@conn, GameViewer, session: %{"game_id" => @id}) %>
