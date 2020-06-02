@@ -13,13 +13,10 @@ defmodule BattleBoxWeb.GameController do
       |> preload(game_bots: [bot: :user])
       |> Repo.all()
 
-    assigns =
-      params
-      |> pagination_info
-      |> Enum.into([])
-      |> Keyword.merge(games: games, params: params)
+    pagination_info = pagination_info(params)
+    to_page = to_page(conn, params, pagination_info)
 
-    render(conn, "index.html", assigns)
+    render(conn, "index.html", Map.merge(pagination_info, %{games: games, to_page: to_page}))
   end
 
   defp filter_lobbies(query, %{"lobby_name" => lobby_name}) do
@@ -30,4 +27,15 @@ defmodule BattleBoxWeb.GameController do
   end
 
   defp filter_lobbies(query, _), do: preload(query, :lobby)
+
+  defp to_page(conn, %{"user_username" => username, "lobby_name" => lobby_name}, %{
+         per_page: per_page
+       }) do
+    fn page ->
+      Routes.user_lobby_game_path(conn, :index, username, lobby_name, %{
+        page: page,
+        per_page: per_page
+      })
+    end
+  end
 end

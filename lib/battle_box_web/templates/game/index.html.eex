@@ -36,6 +36,5 @@
     <% end %>
   </div>
 
-  <% to_page = fn page -> Routes.lobby_game_path(@conn, :index, @params["lobby_name"], %{page: page, per_page: @per_page}) end %>
-  <%= BattleBoxWeb.PageView.render("_pagination_controls.html", to_page: to_page, incomplete_page?: length(@games) < @per_page, params: @params) %> 
+  <%= BattleBoxWeb.PageView.render("_pagination_controls.html", to_page: @to_page, incomplete_page?: length(@games) < @per_page, pagination_info: @pagination_info) %> 
 </div>

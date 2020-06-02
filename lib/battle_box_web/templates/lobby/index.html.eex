@@ -20,7 +20,7 @@
           <div>Created: <%= humanize_seconds_ago(lobby.inserted_at) %></div>
         </div>
         <div>
-          <a href="<%= Routes.lobby_path(@conn, :show, lobby.name) %>" class="btn">Details</a>
+          <a href="<%= Routes.user_lobby_path(@conn, :show, @user.username, lobby.name) %>" class="btn">Details</a>
         </div>
       </div>
     <% end %>
