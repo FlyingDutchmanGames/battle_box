@@ -71,6 +71,8 @@
 - Concurrent connection limiter
 - Favicon
 - fix admin users page to new style
+- Vendor in the font
+- Robot game give out random player ids / color coding based on player 
 
 ### Nice to Haves
 
