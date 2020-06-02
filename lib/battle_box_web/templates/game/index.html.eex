@@ -1,8 +1,10 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      Lobbies /
-      <a href='<%= Routes.lobby_path(@conn, :show, @params["lobby_name"]) %>'><%= @params["lobby_name"] %></a>
+      Users
+      / <a href="<%= Routes.user_path(@conn, :show, @lobby.user.username) %>"><%= @lobby.user.username %></a>
+      / <a href="<%= Routes.user_lobby_path(@conn, :index, @lobby.user.username) %>">Lobbies</a>
+      / <a href='<%= Routes.user_lobby_path(@conn, :show, @lobby.user.username, @lobby.name) %>'><%= @lobby.name %></a>
       / Past Games
     </div>
   </div>
@@ -11,7 +13,7 @@
       <div class="box-row lobby">
         <div class="box-details">
           <div style="font-weight: bolder; padding-bottom: 10px;">ID: <%= game.id %></div>
-          <div>Lobby: <a href='<%= Routes.lobby_path(@conn, :show, @params["lobby_name"]) %>'><%= game.lobby.name %></a></div>
+          <div>Lobby: <a href='<%= Routes.user_lobby_path(@conn, :show, @lobby.user.username, @lobby.name) %>'><%= game.lobby.name %></a></div>
           <div>Type: <%= game.game_type.title %></div>
           <div>Played: <%= humanize_seconds_ago(game.inserted_at) %></div>
         </div>
@@ -36,5 +38,5 @@
     <% end %>
   </div>
 
-  <%= BattleBoxWeb.PageView.render("_pagination_controls.html", to_page: @to_page, incomplete_page?: length(@games) < @per_page, pagination_info: @pagination_info) %> 
+  <%= BattleBoxWeb.PageView.render("_pagination_controls.html", to_page: @to_page, incomplete_page?: length(@games) < @pagination_info.per_page, pagination_info: @pagination_info) %> 
 </div>
