@@ -2,6 +2,7 @@ defmodule BattleBox.User do
   use Ecto.Schema
   alias BattleBox.{Repo, Bot, Lobby, ApiKey}
   import Ecto.Changeset
+  import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -38,5 +39,13 @@ defmodule BattleBox.User do
     user
     |> change(is_banned: status)
     |> Repo.update()
+  end
+
+  def admin_changeset(user, params \\ %{}) do
+    user
+    |> cast(params, [:username, :avatar_url, :is_admin, :is_banned])
+    |> validate_required([:username, :avatar_url, :is_admin, :is_admin])
+    |> validate_user_identifer(:username)
+    |> unique_constraint(:username)
   end
 end

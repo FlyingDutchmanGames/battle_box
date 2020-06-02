@@ -1,0 +1,41 @@
+
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      / Admin
+      / <a href="<%= Routes.admin_user_path(@conn, :index) %>">Users</a>
+      / <a href="<%= Routes.admin_user_path(@conn, :show, @user.username) %>"><%= @user.username %></a> 
+      / Edit
+    </div>
+  </div>
+  <%= form_for @changeset, Routes.admin_user_path(@conn, :update, @user.username), fn f -> %>
+    <div class="form-group">
+      <label>Username: <%= text_input f, :username, class: "form-control" %></label><br>
+      <%= error_tag f, :username %>
+    </div>
+
+    <div class="form-group">
+      <label style="display: flex; align-items: center;">
+        Admin: 
+        <div class="switch" style="margin-left: 10px;">
+          <%= checkbox f, :is_admin, class: "form-control" %>
+          <span class="slider round"></span>
+        </div>
+      </label>
+      <%= error_tag f, :is_admin %>
+    </div>
+
+    <div class="form-group">
+      <label style="display: flex; align-items: center;">
+        Banned: 
+        <div class="switch" style="margin-left: 10px;">
+          <%= checkbox f, :is_banned, class: "form-control" %>
+          <span class="slider round"></span>
+        </div>
+      </label>
+      <%= error_tag f, :is_banned %>
+    </div>
+
+    <%= submit "Save", class: "btn btn-primary" %>
+  <% end %>
+</div>

@@ -144,6 +144,11 @@ a.btn {
   margin-right: auto;
 }
 
+.box-details .name {
+  font-weight: bolder;
+  padding-bottom: 10px;
+}
+
 .paginate-container {
   display: flex;
   justify-content: center;
