@@ -34,6 +34,7 @@ defmodule BattleBoxWeb.Router do
 
       resources "/lobbies", LobbyController, only: [:show, :index], param: "name" do
         get "/follow", FollowController, :follow
+        resources "/games", GameController, only: [:index]
       end
     end
 
@@ -48,10 +49,6 @@ defmodule BattleBoxWeb.Router do
       resources "/keys", ApiKeyController
       resources "/bots", BotController, only: [:create, :new], param: "name"
       resources "/lobbies", LobbyController, only: [:create, :new], param: "name"
-    end
-
-    resources "/lobbies", LobbyController, only: [:show], param: "name" do
-      resources "/games", GameController, only: [:index]
     end
 
     scope "/" do

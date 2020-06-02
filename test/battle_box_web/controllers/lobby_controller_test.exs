@@ -15,13 +15,13 @@ defmodule BattleBoxWeb.LobbyControllerTest do
       conn =
         conn
         |> signin(user: user)
-        |> get("/lobbies/#{lobby.name}")
+        |> get("/users/#{user.username}/lobbies/#{lobby.name}")
 
       assert html_response(conn, 200) =~ "test-name"
     end
 
-    test "A non existant lobby triggers a 404", %{conn: conn} do
-      conn = conn |> get("/lobbies/fake-lobby")
+    test "A non existant lobby triggers a 404", %{conn: conn, user: user} do
+      conn = conn |> get("/users/#{user.username}/lobbies/fake-lobby")
 
       assert html_response(conn, 404) =~ "Lobby (fake-lobby) not found"
     end
@@ -78,10 +78,7 @@ defmodule BattleBoxWeb.LobbyControllerTest do
         {:ok, _} = robot_game_lobby(user: user, lobby_name: "test-name-#{i}")
       end
 
-      conn =
-        conn
-        |> get("/users/#{user.username}/lobbies")
-
+      conn = get(conn, "/users/#{user.username}/lobbies")
       html = html_response(conn, 200)
       {:ok, document} = Floki.parse_document(html)
 

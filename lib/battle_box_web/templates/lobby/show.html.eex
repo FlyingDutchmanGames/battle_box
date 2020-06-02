@@ -6,7 +6,7 @@
       / <a href="<%= Routes.user_lobby_path(@conn, :index, @lobby.user.username) %>">Lobbies</a>
       / <%= @lobby.name %></div>
     <div class="btn-group">
-      <a href="<%= Routes.lobby_game_path(@conn, :index, @lobby.name) %>" class="btn btn-group-item">History</a>
+      <a href="<%= Routes.user_lobby_game_path(@conn, :index, @lobby.user.username, @lobby.name) %>" class="btn btn-group-item">History</a>
       <a href="<%= Routes.user_lobby_follow_path(@conn, :follow, @lobby.user.username, @lobby.name) %>" class="btn btn-group-item btn-primary">Follow</a>
     </div>
   </div>

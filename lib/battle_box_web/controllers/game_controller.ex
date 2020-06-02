@@ -1,10 +1,14 @@
 defmodule BattleBoxWeb.GameController do
   use BattleBoxWeb, :controller
-  alias BattleBox.{Repo, Game}
+  alias BattleBox.{Repo, Game, Lobby}
   import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
   import Ecto.Query
 
-  def index(conn, params) do
+  def index(conn, %{"lobby_name" => lobby_name} = params) do
+    lobby =
+      Repo.get_by(Lobby, name: lobby_name)
+      |> Repo.preload(:user)
+
     games =
       Game
       |> order_by(desc: :inserted_at)
@@ -13,11 +17,9 @@ defmodule BattleBoxWeb.GameController do
       |> preload(game_bots: [bot: :user])
       |> Repo.all()
 
-    assigns =
-      params
-      |> pagination_info
-      |> Enum.into([])
-      |> Keyword.merge(games: games, params: params)
+    pagination_info = pagination_info(params)
+    to_page = to_page(conn, params, pagination_info)
+    assigns = %{pagination_info: pagination_info, games: games, to_page: to_page, lobby: lobby}
 
     render(conn, "index.html", assigns)
   end
@@ -30,4 +32,15 @@ defmodule BattleBoxWeb.GameController do
   end
 
   defp filter_lobbies(query, _), do: preload(query, :lobby)
+
+  defp to_page(conn, %{"user_username" => username, "lobby_name" => lobby_name}, %{
+         per_page: per_page
+       }) do
+    fn page ->
+      Routes.user_lobby_game_path(conn, :index, username, lobby_name, %{
+        page: page,
+        per_page: per_page
+      })
+    end
+  end
 end

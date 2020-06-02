@@ -1,17 +1,16 @@
-<% %{page: current_page, adjacent_pages: adjacent_pages} = pagination_info(@params) %>
 <div class="paginate-container">
   <div class="pagination">
-    <a href="<%= @to_page.(current_page - 1) %>" class='<%= if current_page == 1, do: "disabled" %>'>Previous</a>
-    <%= for page <- adjacent_pages do %>
+    <a href="<%= @to_page.(@pagination_info.page - 1) %>" class='<%= if @pagination_info.page == 1, do: "disabled" %>'>Previous</a>
+    <%= for i <- @pagination_info.adjacent_pages do %>
       <%= cond do %>
-        <% page < current_page -> %>
-          <a href="<%= @to_page.(page) %>"><%= page %></a>
-        <% page == current_page -> %>
-          <a href="<%= @to_page.(page) %>" class="current"><%= page %></a>
-        <% page > current_page -> %>
-          <a href="<%= @to_page.(page) %>" class='<%= if @incomplete_page?, do: "disabled" %>'><%= page %></a>
+        <% i < @pagination_info.page -> %>
+          <a href="<%= @to_page.(i) %>"><%= i %></a>
+        <% i == @pagination_info.page -> %>
+          <a href="<%= @to_page.(i) %>" class="current"><%= i %></a>
+        <% i > @pagination_info.page -> %>
+          <a href="<%= @to_page.(i) %>" class='<%= if @incomplete_page?, do: "disabled" %>'><%= i %></a>
       <% end %>
     <% end %>
-    <a href="<%= @to_page.(current_page + 1) %>" class='<%= if @incomplete_page?, do: "disabled" %>'>Next</a>
+    <a href="<%= @to_page.(@pagination_info.page + 1) %>" class='<%= if @incomplete_page?, do: "disabled" %>'>Next</a>
   </div>
 </div>
