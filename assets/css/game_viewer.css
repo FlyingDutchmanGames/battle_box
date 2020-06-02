@@ -1,7 +1,7 @@
 .game-header {
   display: flex;
   flex-flow: row nowrap;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   padding: 5px 10px;
   color: #6a6666;
@@ -11,7 +11,6 @@
 .game-header .title {
   font-size: 3em;
   user-select: none;
-  font-weight: bolder;
 }
 
 .live-dot {
