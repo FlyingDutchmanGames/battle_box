@@ -11,5 +11,12 @@
     </div>
   </div>
 
-  <%= live_render(@conn, Scores, session: %{"lobby" => @lobby}) %>
+  <h2>Details</h2>
+  <div class="box">
+  </div>
+
+  <h2>Live Games</h2>
+  <div class="box">
+    <%= live_render(@conn, Scores, session: %{"lobby" => @lobby}) %>
+  </div>
 </div>
