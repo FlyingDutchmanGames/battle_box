@@ -44,6 +44,7 @@
 - Manual GC?
 - Robot game give out random player ids / color coding based on player 
 - Make sure user input can't cause a game to crash (maybe changesets)
+- Procedural terrain generation?
 #### Static Site
 - Wire protocol docs
 - Robot game rules docs
