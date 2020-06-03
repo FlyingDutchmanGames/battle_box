@@ -37,7 +37,7 @@
     <hr>
     <div>
       <%= inputs_for f, @game_type.settings_module.name, fn settings -> %>
-        <%= @game_type.view.render("_settings.html", settings: settings) %>
+        <%= @game_type.view.render("_settings_edit.html", settings: settings, conn: @conn) %>
       <% end %>
     </div>
     <hr>

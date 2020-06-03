@@ -1,3 +1,24 @@
-<div>
-  <h1>Terrain</h1>
+<div style="display: flex; justify-content: space-evenly; flex-flow: column nowrap; align-items: center;">
+  <div class="rg_terrain_selector_panel">
+    <%= for terrain <- [:normal, :inaccessible, :spawn, :obstacle] do %>
+      <div phx-click="set-terrain-type" phx-value-terrain="<%= terrain %>" class='choice <%= if @active == terrain, do: "active" %>'>
+        <div class='rg_terrain <%= terrain %>'></div>
+        <span style="margin: auto; padding-left: 5px;"><%= terrain %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <div style='display: grid; <%= "grid-template: repeat(#{@rows}, max-content) / repeat(#{@cols}, max-content)" %>'>
+    <%= for row <- 0..(@rows - 1), col <- 0..(@cols - 1) do %>
+      <div
+        class="rg_terrain <%= Terrain.at_location(@terrain, [row, col]) %>"
+        style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>; cursor: pointer;'
+        phx-click="apply-terrain-type"
+        phx-value-row="<%= row %>"
+        phx-value-col="<%= col %>"
+        ><%= terrain_number([row, col]) %></div>
+    <% end %>
+  </div>
 </div>
+
+<input type="hidden" id="lobby_robot_game_settings_terrain_base64" name="lobby[robot_game_settings][terrain_base64]" value="<%= @terrain_base64 %>">
