@@ -36,32 +36,8 @@
 
     <hr>
     <div>
-      <div style="font-weight: bold;">Robot Game Settings</div>
-      <%= inputs_for f, :robot_game_settings, fn robot_game_settings -> %>
-        <div class="form-group">
-          <label>Spawn Every: <%= number_input(robot_game_settings, :spawn_every, class: "form-control") %></label><br>
-          <%= error_tag robot_game_settings, :spawn_every %>
-        </div>
-
-        <div class="form-group">
-          <label>Spawn Per Player: <%= number_input(robot_game_settings, :spawn_per_player, class: "form-control") %></label><br>
-          <%= error_tag robot_game_settings, :spawn_per_player %>
-        </div>
-
-        <div class="form-group">
-          <label>Robot HP: <%= number_input(robot_game_settings, :robot_hp, class: "form-control") %></label><br>
-          <%= error_tag robot_game_settings, :robot_hp %>
-        </div>
-
-        <div class="form-group">
-          <label>Max Turns: <%= number_input(robot_game_settings, :max_turns, class: "form-control") %></label><br>
-          <%= error_tag robot_game_settings, :max_turns %>
-        </div>
-        
-        <div class="form-group">
-          <label>Terrain Base64: <%= textarea(robot_game_settings, :terrain_base64, class: "form-control") %></label><br>
-          <%= error_tag robot_game_settings, :terrain_base64 %>
-        </div>
+      <%= inputs_for f, @game_type.settings_module.name, fn settings -> %>
+        <%= @game_type.view.render("_settings.html", settings: settings) %>
       <% end %>
     </div>
     <hr>

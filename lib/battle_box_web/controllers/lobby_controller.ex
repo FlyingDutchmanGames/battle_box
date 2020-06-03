@@ -1,11 +1,11 @@
 defmodule BattleBoxWeb.LobbyController do
   use BattleBoxWeb, :controller
-  alias BattleBox.{Lobby, Repo, User}
+  alias BattleBox.{Lobby, Repo, User, Games.RobotGame}
   alias BattleBoxWeb.PageView
 
   def new(conn, _params) do
     changeset = Lobby.changeset(%Lobby{})
-    render(conn, "new.html", changeset: changeset)
+    render(conn, "new.html", changeset: changeset, game_type: RobotGame)
   end
 
   def show(conn, %{"name" => lobby_name}) do
@@ -48,7 +48,7 @@ defmodule BattleBoxWeb.LobbyController do
         redirect(conn, to: Routes.user_lobby_path(conn, :index, user.username))
 
       {:error, changeset} ->
-        render(conn, "new.html", changeset: changeset)
+        render(conn, "new.html", changeset: changeset, game_type: RobotGame)
     end
   end
 end
