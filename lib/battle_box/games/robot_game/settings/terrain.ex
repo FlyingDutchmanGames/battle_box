@@ -45,10 +45,19 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
     end
   end
 
+  def set_at_location(terrain, [row, col], type) do
+    <<rows::8, cols::8, data::binary>> = terrain
+    offset = row * cols + col
+    <<prefix::binary-size(offset), _replace::8, suffix::binary>> = data
+    <<rows::8, cols::8, prefix::binary, type_to_int(type)::8, suffix::binary>>
+  end
+
   def inaccessible(terrain), do: get_type(terrain, 0)
   def normal(terrain), do: get_type(terrain, 1)
   def spawn(terrain), do: get_type(terrain, 2)
   def obstacle(terrain), do: get_type(terrain, 3)
+
+  def dimensions2(<<rows::8, cols::8, _::binary>>), do: %{rows: rows, cols: cols}
 
   def dimensions(<<rows::8, cols::8, _::binary>>) do
     %{
@@ -71,5 +80,14 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
 
       [row, col]
     end)
+  end
+
+  defp type_to_int(type) do
+    case type do
+      :inaccessible -> 0
+      :normal -> 1
+      :spawn -> 2
+      :obstacle -> 3
+    end
   end
 end
