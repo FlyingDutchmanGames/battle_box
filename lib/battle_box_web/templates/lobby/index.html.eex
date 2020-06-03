@@ -13,7 +13,7 @@
     <%= for lobby <- @user.lobbies do %>
       <div class="box-row lobby">
         <div class="box-details">
-          <div class="name" style="font-weight: bolder; padding-bottom: 10px;">Name: <%= lobby.name %></div>
+          <div class="name">Name: <%= lobby.name %></div>
           <div>Type: <%= lobby.game_type.title %></div>
           <div>Created: <%= humanize_seconds_ago(lobby.inserted_at) %></div>
         </div>
