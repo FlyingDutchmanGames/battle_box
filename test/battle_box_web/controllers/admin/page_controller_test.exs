@@ -1,4 +1,4 @@
-defmodule BattleBoxWeb.PageControllerTest do
+defmodule BattleBoxWeb.Admin.PageControllerTest do
   use BattleBoxWeb.ConnCase
 
   describe "GET /admin" do
