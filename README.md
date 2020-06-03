@@ -17,7 +17,6 @@
 - Edit bots
 - Add pagination to index
 #### Lobbies
-- Move all of lobbies under the user paths
 - Edit lobbies
 - Add pagination to index
 - Add details to lobby details page
@@ -28,6 +27,8 @@
 - add in server ais
 - Matchmaker queue live
 - set of default lobbies with interesting terrains and bots
+#### Admin
+- Show number of bots/lobbies/games by user
 #### Games
 - Historical Games Filtered/Paginated by [user, user + bot]
 - Live Games that meet the same criteria
@@ -36,11 +37,13 @@
 #### Clients
 - BattleBox Elixir Client
 - BattleBox Python Client
-- Make sure user input can't cause a game to crash
 - WebSocket interface
-#### Robot Game Representation
+- Update protocol to give the result of each move
+#### Robot Game
 - limit memory usage of game servers (they're currently at 2 mbs)
 - Manual GC?
+- Robot game give out random player ids / color coding based on player 
+- Make sure user input can't cause a game to crash (maybe changesets)
 #### Static Site
 - Wire protocol docs
 - Robot game rules docs
@@ -70,9 +73,7 @@
 - Impersonation
 - Concurrent connection limiter
 - Favicon
-- fix admin users page to new style
 - Vendor in the font
-- Robot game give out random player ids / color coding based on player 
 - Bread crumb helper functions to force consistency
   - "Not found" revaamp to perserve bread crumbs
 - User self admin
