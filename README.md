@@ -73,6 +73,12 @@
 - fix admin users page to new style
 - Vendor in the font
 - Robot game give out random player ids / color coding based on player 
+- Bread crumb helper functions to force consistency
+  - "Not found" revaamp to perserve bread crumbs
+- User self admin
+  - provide a way to change username
+  - provide avatars that are not from github
+  - Have a way to have users not from github
 
 ### Nice to Haves
 

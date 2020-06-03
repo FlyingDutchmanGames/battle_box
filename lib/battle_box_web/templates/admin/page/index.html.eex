@@ -1,0 +1,11 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      / Admin
+      {
+        / <a href="<%= Routes.admin_user_path(@conn, :index) %>">Users</a>
+      }
+    </div>
+  </div>
+</div>
+

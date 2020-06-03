@@ -3,7 +3,6 @@ import header_css from "../css/header.css"
 import robot_game_css from "../css/robot_game.css"
 import game_css from "../css/game.css"
 import not_found_css from "../css/not_found.css"
-import admin_css from "../css/admin.css"
 import settings_css from "../css/settings.css"
 
 import "phoenix_html"

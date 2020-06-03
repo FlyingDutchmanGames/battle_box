@@ -1,0 +1,29 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      / Admin
+      / Users
+    </div>
+  </div>
+
+  <p>Admin those users, yo</p>
+  <div class="box">
+    <%= for user <- @users do %>
+      <div class="box-row">
+        <img src="<%= user.avatar_url %>" style="width: 50px; height: 50px; border-radius: 5px; margin-right: 10px;"></img>
+        <div class="box-details">
+          <div class="name">
+            Username: 
+            <a href="<%= Routes.admin_user_path(@conn, :show, user.username) %>"><%= user.username %></a>
+          </div>
+          <div>Joined: <%=humanize_seconds_ago(user.inserted_at) %></div>
+        </div>
+        <div>
+          <a href="<%= Routes.admin_user_path(@conn, :show, user.username) %>">. / <%= user.username %></a>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <%= BattleBoxWeb.PageView.render("_pagination_controls.html", to_page: @to_page, incomplete_page?: @incomplete_page?, pagination_info: @pagination_info) %> 
+</div>

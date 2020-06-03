@@ -69,10 +69,12 @@ defmodule BattleBoxWeb.Router do
       get "/info", HealthController, :info
     end
 
-    scope "/admin", Admin do
+    scope "/admin", Admin, as: :admin do
       pipe_through :require_admin
 
-      live("/users", Users)
+      get "/", PageController, :index
+      resources "/users", UserController, except: [:new, :create], param: "username"
+
       live_dashboard "/dashboard", metrics: BattleBoxWeb.Telemetry
     end
   end

@@ -10,6 +10,11 @@
     <div class="nav-item">
       <a href="<%= Routes.api_key_path(@conn, :index) %>">Keys</a>
     </div>
+    <%= if @current_user.is_admin do %>
+      <div class="nav-item">
+        <a href="<%= Routes.admin_page_path(@conn, :index) %>">Admin</a>
+      </div>
+    <% end %>
     <a href="<%= Routes.user_path(@conn, :show, @current_user.username) %>">
       <div class="user">
         <div class="name"><%= @current_user.username %></div>
