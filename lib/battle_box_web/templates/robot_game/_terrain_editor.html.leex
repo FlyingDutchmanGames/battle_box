@@ -9,18 +9,22 @@
   </div>
 
   <div style="display: flex;">
-    <label style="padding: 10px;">
-      Rows (<%= @rows %>)
-      <input name="rows" type="range" min="1" max="40" value="<%= @rows %>" phx-change="wtf">
+    <!-- I'd rather user <input> but phx has trouble with phx-update and nested forms... -->
+    <label style="padding: 10px; display: flex; align-items: center;">
+      <div class="arrow-left clickable" phx-click="decrement-rows"></div>
+      <div style="margin: 0px 10px;">Rows (<%= @rows %>)</div>
+      <div class="arrow-right clickable" phx-click="increment-rows"></div>
     </label>
-    <label style="padding: 10px;">
-      Cols (<%= @cols %>)
-      <input name="cols" type="range" min="1" max="40" value="<%= @cols %>" phx-change="wtf">
+    <label style="padding: 10px; display: flex; align-items: center;">
+      <div class="arrow-left clickable" phx-click="decrement-cols"></div>
+      <div style="margin: 0px 10px;">Cols (<%= @cols %>)</div>
+      <div class="arrow-right clickable" phx-click="increment-cols"></div>
     </label>
-    <label style="padding: 10px;">
-      Brush Width (<%= @brush_width %>)
-      <input name="brush-width" type="range" min="1" max="3" value="<%= @brush_width %>" phx-change="wtf">
-    </label>
+    <label style="padding: 10px; display: flex; align-items: center;">
+      <div class="arrow-left clickable" phx-click="decrement-brush"></div>
+      <div style="margin: 0px 10px;">Brush Width (<%= @brush_width %>)</div>
+      <div class="arrow-right clickable" phx-click="increment-brush"></div>
+  </label>
   </div>
 
   <div style='display: grid; <%= "grid-template: repeat(#{@rows}, max-content) / repeat(#{@cols}, max-content)" %>'>
