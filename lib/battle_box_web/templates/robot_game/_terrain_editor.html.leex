@@ -50,12 +50,16 @@
   </div>
 </div>
 
+<input
+  type="hidden"
+  id="lobby_robot_game_settings_terrain_base64"
+  name="lobby[robot_game_settings][terrain_base64]" 
+  value="<%= @terrain_base64 %>">
+
 <div class="form-group">
   <label>Terrain (Base64 Encoded):
     <textarea
      disabled
-     id="lobby_robot_game_settings_terrain_base64"
-     name="lobby[robot_game_settings][terrain_base64]"
      class="form-control"
      style="width: 100%; height: 200px;">
       <%= @terrain_base64 %>

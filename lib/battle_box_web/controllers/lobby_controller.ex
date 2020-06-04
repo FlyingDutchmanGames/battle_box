@@ -42,14 +42,14 @@ defmodule BattleBoxWeb.LobbyController do
     end
   end
 
-  def create(%{assigns: %{current_user: user}} = conn, %{"lobby" => params}) do
+  def create(%{assigns: %{current_user: user}} = conn, %{"lobby" => params} = foo) do
     user
     |> Ecto.build_assoc(:lobbies)
     |> Lobby.changeset(params)
     |> Repo.insert()
     |> case do
-      {:ok, _lobby} ->
-        redirect(conn, to: Routes.user_lobby_path(conn, :index, user.username))
+      {:ok, lobby} ->
+        redirect(conn, to: Routes.user_lobby_path(conn, :show, user.username, lobby.name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
