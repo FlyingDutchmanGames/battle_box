@@ -291,3 +291,10 @@ a.btn {
 }
 
 .clickable { cursor: pointer; }
+
+.game-type-choice {
+  padding: 30px 0px;
+  color: white;
+  font-size: 3em;
+}
+
