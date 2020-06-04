@@ -20,8 +20,6 @@
 - Edit lobbies
 - Add pagination to index
 - Add details to lobby details page
-- Robot Game Settings
-  - Terrain Editor
 - bot self play allowed toggle
 - user self play allowed toggle
 - add in server ais
@@ -45,6 +43,8 @@
 - Robot game give out random player ids / color coding based on player 
 - Make sure user input can't cause a game to crash (maybe changesets)
 - Procedural terrain generation?
+- Robot Game Settings
+  - Get rid of the damage modifier
 #### Static Site
 - Wire protocol docs
 - Robot game rules docs
@@ -84,10 +84,10 @@
 
 ### Nice to Haves
 
-- [ ] Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
-- [ ] Build TicTacToe as proof of game engine extendability
-- [ ] Pass timing info to the game so it can do move timing
-- [ ] Make all tests async by passing the ecto sandbox to all of the game engine
+- Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
+- Build TicTacToe/Othello/ as proof of game engine extendability
+- Pass timing info to the game so it can do move timing
+- Make all tests async by passing the ecto sandbox to all of the game engine
 
 ### Useful SQL
 
