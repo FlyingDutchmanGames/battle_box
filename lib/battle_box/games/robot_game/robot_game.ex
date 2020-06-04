@@ -3,8 +3,7 @@ defmodule BattleBox.Games.RobotGame do
   import Ecto.Changeset
   require __MODULE__.Settings.Shared
   alias BattleBox.Game
-  alias __MODULE__.{Settings, Event}
-  alias __MODULE__.Settings.{Terrain, DamageModifier}
+  alias __MODULE__.{Settings, Settings.Terrain, Event}
   use Ecto.Schema
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -191,13 +190,15 @@ defmodule BattleBox.Games.RobotGame do
   end
 
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
-  def attack_damage(game), do: DamageModifier.calc_damage(game.attack_damage)
+  def attack_damage(game), do: calc_damage(game.attack_damage_min, game.attack_damage_max)
 
   def guarded_suicide_damage(game), do: Integer.floor_div(suicide_damage(game), 2)
-  def suicide_damage(game), do: DamageModifier.calc_damage(game.suicide_damage)
+  def suicide_damage(game), do: calc_damage(game.suicide_damage_min, game.suicide_damage_max)
 
   def guarded_collision_damage(_game), do: 0
-  def collision_damage(game), do: DamageModifier.calc_damage(game.collision_damage)
+
+  def collision_damage(game),
+    do: calc_damage(game.collision_damage_min, game.collision_damage_max)
 
   def commands_requests(game) do
     request = %{robots: robots(game), turn: game.turn}
@@ -211,8 +212,12 @@ defmodule BattleBox.Games.RobotGame do
         :spawn_per_player,
         :robot_hp,
         :max_turns,
-        :attack_damage,
-        :collision_damage
+        :attack_damage_min,
+        :attack_damage_max,
+        :collision_damage_min,
+        :collision_damage_max,
+        :suicide_damage_min,
+        :suicide_damage_max
       ])
 
     terrain = Base.encode64(game.terrain)
@@ -242,6 +247,9 @@ defmodule BattleBox.Games.RobotGame do
       update_in(game.robots_at_end_of_turn, &Map.put(&1, turn, robots_at_turn(game, turn)))
     end)
   end
+
+  def calc_damage(same, same), do: same
+  def calc_damage(min, max), do: min + :rand.uniform(max - min)
 end
 
 defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do

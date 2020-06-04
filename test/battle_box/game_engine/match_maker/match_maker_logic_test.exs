@@ -68,9 +68,12 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       :spawn_per_player,
       :robot_hp,
       :max_turns,
-      :attack_damage,
-      :collision_damage,
-      :suicide_damage,
+      :attack_damage_min,
+      :attack_damage_max,
+      :collision_damage_min,
+      :collision_damage_max,
+      :suicide_damage_min,
+      :suicide_damage_max,
       :terrain,
       :spawn_enabled
     ]

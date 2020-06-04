@@ -6,11 +6,15 @@ defmodule BattleBox.Games.RobotGame.Settings.Shared do
       field :robot_hp, :integer, default: 50
       field :max_turns, :integer, default: 100
 
-      field :attack_damage, BattleBox.Games.RobotGame.Settings.DamageModifier,
-        default: %{min: 8, max: 10}
+      field :attack_damage_min, :integer, default: 8
+      field :attack_damage_max, :integer, default: 10
 
-      field :collision_damage, BattleBox.Games.RobotGame.Settings.DamageModifier, default: 5
-      field :suicide_damage, BattleBox.Games.RobotGame.Settings.DamageModifier, default: 15
+      field :collision_damage_min, :integer, default: 5
+      field :collision_damage_max, :integer, default: 5
+
+      field :suicide_damage_min, :integer, default: 15
+      field :suicide_damage_max, :integer, default: 15
+
       field :terrain, :binary, default: BattleBox.Games.RobotGame.Settings.Terrain.default()
     end
   end
@@ -29,13 +33,16 @@ defmodule BattleBox.Games.RobotGame.Settings do
   def name, do: :robot_game_settings
 
   @shared_fields [
+    :attack_damage_max,
+    :attack_damage_min,
+    :collision_damage_max,
+    :collision_damage_min,
+    :max_turns,
+    :robot_hp,
     :spawn_every,
     :spawn_per_player,
-    :robot_hp,
-    :max_turns,
-    :attack_damage,
-    :collision_damage,
-    :suicide_damage,
+    :suicide_damage_max,
+    :suicide_damage_min,
     :terrain
   ]
 
