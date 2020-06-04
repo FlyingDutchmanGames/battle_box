@@ -79,6 +79,27 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
       end)
     end
 
+    test "it validates the relationships between mins/maxs" do
+      changeset =
+        Settings.changeset(%Settings{}, %{
+          attack_damage_max: 1,
+          attack_damage_min: 2,
+          collision_damage_max: 1,
+          collision_damage_min: 2,
+          suicide_damage_max: 1,
+          suicide_damage_min: 2
+        })
+
+      assert changeset.errors == [
+               collision_damage_min:
+                 {"collision_damage_min must be less than or equal to collision_damage_max", []},
+               suicide_damage_min:
+                 {"suicide_damage_min must be less than or equal to suicide_damage_max", []},
+               attack_damage_min:
+                 {"attack_damage_min must be less than or equal to attack_damage_max", []}
+             ]
+    end
+
     test "it validate the terrain" do
       [
         {<<1>>, {"Illegal Size Header", []}},

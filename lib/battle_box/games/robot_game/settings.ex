@@ -64,6 +64,9 @@ defmodule BattleBox.Games.RobotGame.Settings do
     |> validate_number(:spawn_per_player, greater_than_or_equal_to: 1, less_than_or_equal_to: 20)
     |> validate_number(:robot_hp, greater_than_or_equal_to: 1, less_than_or_equal_to: 100)
     |> validate_number(:max_turns, greater_than_or_equal_to: 1, less_than_or_equal_to: 500)
+    |> validate_less_than_or_equal_to(:attack_damage_min, :attack_damage_max)
+    |> validate_less_than_or_equal_to(:suicide_damage_min, :suicide_damage_max)
+    |> validate_less_than_or_equal_to(:collision_damage_min, :collision_damage_max)
     |> validate_change(:terrain_base64, fn :terrain_base64, terrain_base64 ->
       with {:decode, {:ok, terrain}} <- {:decode, Base.decode64(terrain_base64)},
            {:validate, :ok} <- {:validate, Terrain.validate(terrain)} do
@@ -87,5 +90,13 @@ defmodule BattleBox.Games.RobotGame.Settings do
         changeset
       end
     end)
+  end
+
+  defp validate_less_than_or_equal_to(changeset, field_1, field_2) do
+    if get_field(changeset, field_1) > get_field(changeset, field_2) do
+      add_error(changeset, field_1, "#{field_1} must be less than or equal to #{field_2}")
+    else
+      changeset
+    end
   end
 end
