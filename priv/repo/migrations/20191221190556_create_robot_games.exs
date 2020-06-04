@@ -6,9 +6,16 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
       add :robot_hp, :integer, null: false
       add :spawn_every, :integer, null: false
       add :spawn_per_player, :integer, null: false
-      add :attack_damage, :jsonb, null: false
-      add :collision_damage, :jsonb, null: false
-      add :suicide_damage, :jsonb, null: false
+
+      add :attack_damage_min, :integer, null: false
+      add :attack_damage_max, :integer, null: false
+
+      add :collision_damage_min, :integer, null: false
+      add :collision_damage_max, :integer, null: false
+
+      add :suicide_damage_min, :integer, null: false
+      add :suicide_damage_max, :integer, null: false
+
       add :max_turns, :integer, null: false
       add :terrain, :binary, null: false
     end

@@ -14,9 +14,11 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
           settings: %{
             terrain: @terrain,
             spawn_enabled: false,
-            attack_damage: 1,
+            attack_damage_min: 1,
+            attack_damage_max: 1,
             robot_hp: 50,
-            suicide_damage: 5
+            suicide_damage_min: 5,
+            suicide_damage_max: 5
           }
         )
     }
@@ -27,7 +29,13 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
 
     game =
       RobotGame.new(
-        settings: %{terrain: @terrain, spawn_enabled: false, attack_damage: 50, robot_hp: 50}
+        settings: %{
+          terrain: @terrain,
+          spawn_enabled: false,
+          attack_damage_min: 50,
+          attack_damage_max: 50,
+          robot_hp: 50
+        }
       )
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()

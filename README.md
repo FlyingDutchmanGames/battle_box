@@ -45,6 +45,9 @@
 - Procedural terrain generation?
 - Robot Game Settings
   - Get rid of the damage modifier
+  - Get rid of the obstacle type
+  - Reorgainze the code
+  - Add in team spawns
 #### Static Site
 - Wire protocol docs
 - Robot game rules docs

@@ -7,7 +7,7 @@
       / New
     </div>
   </div>
-  <div style="font-weight: bold;">General Settings</div>
+  <h2>General Settings</h2>
   <%= form_for @changeset, Routes.lobby_path(@conn, :create), fn f -> %>
     <div class="form-group">
       <label>Name: <%= text_input f, :name, class: "form-control" %></label><br>
