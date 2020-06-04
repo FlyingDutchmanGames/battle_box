@@ -74,6 +74,15 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
     end
   end
 
+  describe "resize" do
+    test "it get to the right size" do
+      assert <<10::8, 10::8, _rest::binary>> = Terrain.resize(<<1, 1, 0>>, 10, 10)
+      assert <<4::8, 5::8, _rest::binary>> = Terrain.resize(<<1, 1, 0>>, 4, 5)
+      assert <<1::8, 1::8, _rest::binary>> = Terrain.resize(<<1, 1, 0>>, 1, 1)
+      assert <<1::8, 1::8, _rest::binary>> = Terrain.resize(<<2, 2, 0, 0, 0, 0>>, 1, 1)
+    end
+  end
+
   describe "dimensions" do
     test "the dimensions of a one square map are 0s" do
       assert %{

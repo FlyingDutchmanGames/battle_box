@@ -27,6 +27,17 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
   def rows(<<rows::8, _cols::8, _::binary>>), do: rows
   def cols(<<_rows::8, cols::8, _::binary>>), do: cols
 
+  def resize(<<_current_rows::8, _current_cols::8, data::binary>>, desired_rows, desired_cols) do
+    # 🤷
+    amount_of_bytes_needed = desired_rows * desired_cols
+    replicas = Integer.floor_div(amount_of_bytes_needed, byte_size(data))
+
+    <<new_data::binary-size(amount_of_bytes_needed), _rest::binary>> =
+      :binary.copy(data, replicas + 1)
+
+    <<desired_rows::8, desired_cols::8, new_data::binary>>
+  end
+
   def at_location(terrain, [row, col]) do
     <<rows::8, cols::8, data::binary>> = terrain
     on_board? = row >= 0 && col >= 0 && row <= rows - 1 && col <= cols - 1
