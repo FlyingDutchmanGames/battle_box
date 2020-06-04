@@ -18,24 +18,30 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
       changeset =
         %Settings{}
         |> Settings.changeset(%{
+          attack_damage_max: nil,
+          attack_damage_min: nil,
+          collision_damage_max: nil,
+          collision_damage_min: nil,
+          max_turns: nil,
+          robot_hp: nil,
           spawn_every: nil,
           spawn_per_player: nil,
-          robot_hp: nil,
-          max_turns: nil,
-          attack_damage: nil,
-          collision_damage: nil,
-          suicide_damage: nil,
+          suicide_damage_max: nil,
+          suicide_damage_min: nil,
           terrain_base64: nil
         })
 
       assert Enum.sort(Keyword.keys(changeset.errors)) == [
-               :attack_damage,
-               :collision_damage,
+               :attack_damage_max,
+               :attack_damage_min,
+               :collision_damage_max,
+               :collision_damage_min,
                :max_turns,
                :robot_hp,
                :spawn_every,
                :spawn_per_player,
-               :suicide_damage,
+               :suicide_damage_max,
+               :suicide_damage_min,
                :terrain_base64
              ]
     end

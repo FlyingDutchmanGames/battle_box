@@ -82,8 +82,12 @@ defmodule BattleBox.GameEngine.GameServerTest do
         spawn_every: game.robot_game.spawn_every,
         spawn_per_player: game.robot_game.spawn_per_player,
         robot_hp: game.robot_game.robot_hp,
-        attack_damage: game.robot_game.attack_damage,
-        collision_damage: game.robot_game.collision_damage,
+        attack_damage_min: game.robot_game.attack_damage_min,
+        attack_damage_max: game.robot_game.attack_damage_max,
+        collision_damage_min: game.robot_game.collision_damage_min,
+        collision_damage_max: game.robot_game.collision_damage_max,
+        suicide_damage_min: game.robot_game.suicide_damage_min,
+        suicide_damage_max: game.robot_game.suicide_damage_max,
         max_turns: game.robot_game.max_turns,
         terrain_base64: Base.encode64(Terrain.default())
       }

@@ -121,15 +121,18 @@ defmodule BattleBox.Games.RobotGame do
         %{} = settings -> Map.merge(%Settings{}, settings)
       end
       |> Map.take([
+        :attack_damage_max,
+        :attack_damage_min,
+        :collision_damage_max,
+        :collision_damage_min,
+        :max_turns,
+        :robot_hp,
+        :spawn_enabled,
         :spawn_every,
         :spawn_per_player,
-        :robot_hp,
-        :max_turns,
-        :attack_damage,
-        :collision_damage,
-        :suicide_damage,
-        :terrain,
-        :spawn_enabled
+        :suicide_damage_max,
+        :suicide_damage_min,
+        :terrain
       ])
 
     opts = Enum.into(opts, %{})

@@ -190,12 +190,16 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                  "game_id" => <<_::288>> = game_id,
                  "player" => _,
                  "settings" => %{
-                   "attack_damage" => _,
-                   "collision_damage" => _,
+                   "attack_damage_max" => _,
+                   "attack_damage_min" => _,
+                   "collision_damage_max" => _,
+                   "collision_damage_min" => _,
                    "max_turns" => _,
                    "robot_hp" => _,
                    "spawn_every" => _,
                    "spawn_per_player" => _,
+                   "suicide_damage_max" => _,
+                   "suicide_damage_min" => _,
                    "terrain_base64" => _
                  }
                },

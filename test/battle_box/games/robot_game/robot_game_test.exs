@@ -12,19 +12,27 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       assert %{turn: 42} = RobotGame.new(turn: 42)
 
       assert %{
-               suicide_damage: 15,
+               attack_damage_max: 2,
+               attack_damage_min: 1,
+               collision_damage_max: 4,
+               collision_damage_min: 4,
+               max_turns: 400,
                robot_hp: 42,
                spawn_every: 45,
-               max_turns: 400,
-               collision_damage: 4
+               suicide_damage_max: 30,
+               suicide_damage_min: 15
              } =
                RobotGame.new(%{
                  settings: %{
-                   suicide_damage: 15,
+                   attack_damage_max: 2,
+                   attack_damage_min: 1,
+                   collision_damage_max: 4,
+                   collision_damage_min: 4,
+                   max_turns: 400,
                    robot_hp: 42,
                    spawn_every: 45,
-                   max_turns: 400,
-                   collision_damage: 4
+                   suicide_damage_max: 30,
+                   suicide_damage_min: 15
                  }
                })
     end
@@ -268,34 +276,37 @@ defmodule BattleBox.Games.RobotGame.GameTest do
       game = RobotGame.new()
       damage = RobotGame.attack_damage(game)
 
-      assert damage >= game.attack_damage.min &&
-               damage <= game.attack_damage.max
+      assert damage >= game.attack_damage_min &&
+               damage <= game.attack_damage_max
     end
 
     test "guarded attack damage is 50% of regular damage rounding down to the integer" do
-      game = RobotGame.new(settings: %{attack_damage: 100})
+      game = RobotGame.new(settings: %{attack_damage_min: 100, attack_damage_max: 100})
       assert 50 == RobotGame.guarded_attack_damage(game)
 
-      game = RobotGame.new(settings: %{attack_damage: 99})
+      game = RobotGame.new(settings: %{attack_damage_min: 99, attack_damage_max: 99})
       assert 49 == RobotGame.guarded_attack_damage(game)
     end
 
     test "it works if the the min and max attack are the same" do
-      game = RobotGame.new(settings: %{attack_damage: %{min: 50, max: 50}})
+      game = RobotGame.new(settings: %{attack_damage_min: 50, attack_damage_max: 50})
       assert 50 == RobotGame.attack_damage(game)
     end
   end
 
   describe "suicide_damage" do
     test "it gets the value set in settings" do
-      assert 42 = RobotGame.suicide_damage(RobotGame.new(settings: %{suicide_damage: 42}))
+      assert 42 =
+               RobotGame.suicide_damage(
+                 RobotGame.new(settings: %{suicide_damage_min: 42, suicide_damage_max: 42})
+               )
     end
 
     test "guarded suicide damage is 50% of regular damage rounding down to the integer" do
-      game = RobotGame.new(settings: %{suicide_damage: 10})
+      game = RobotGame.new(settings: %{suicide_damage_min: 10, suicide_damage_max: 10})
       assert 5 == RobotGame.guarded_suicide_damage(game)
 
-      game = RobotGame.new(settings: %{suicide_damage: 9})
+      game = RobotGame.new(settings: %{suicide_damage_min: 9, suicide_damage_max: 9})
       assert 4 == RobotGame.guarded_suicide_damage(game)
     end
   end
