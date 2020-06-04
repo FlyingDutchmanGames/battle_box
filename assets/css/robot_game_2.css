@@ -1,0 +1,51 @@
+/* SETTINGS */
+
+.rg_terrain_selector_panel {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-gap: 10px;
+
+  padding: 10px;
+}
+
+.rg_terrain_selector_panel .choice {
+  padding: 10px;
+  display: flex;
+  flex-flow: row nowrap;
+  border: 1px solid black;
+  border: 1px solid #e1e4e8;
+  border-radius: 10px;
+  align-items: center;
+  cursor: pointer;
+  color: var(--primary-three);
+}
+
+.rg_terrain_selector_panel .choice:hover {
+  background-color: #eff3f6;
+  border-color: #e1e4e8;
+}
+
+.rg_terrain_selector_panel .choice.active {
+  color: #fff;
+  background-color: #0366d6;
+  border-color: #0366d6;
+}
+
+
+.rg_terrain {
+  width: 35px;
+  height: 30px;
+  border: 1px solid black;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  color: gray;
+}
+
+.rg_terrain.normal { background-color: white; }
+.rg_terrain.spawn { background-color: yellow; color: black; }
+.rg_terrain.inaccessible { background-color: lightgray; }
+.rg_terrain.obstacle { background-color: brown; color: white; }

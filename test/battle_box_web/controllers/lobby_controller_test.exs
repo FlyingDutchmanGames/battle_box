@@ -1,5 +1,6 @@
 defmodule BattleBoxWeb.LobbyControllerTest do
   use BattleBoxWeb.ConnCase, async: false
+  import BattleBox.InstalledGames
 
   @user_id Ecto.UUID.generate()
 
@@ -56,11 +57,30 @@ defmodule BattleBoxWeb.LobbyControllerTest do
     assert html_response(conn, 200) =~ "has already been taken"
   end
 
-  test "theres a form to create a new lobby", %{conn: conn, user: user} do
+  test "It asks you the game type if you don't provide a game type", %{conn: conn, user: user} do
     conn =
       conn
       |> signin(user: user)
       |> get("/lobbies/new")
+
+    html = html_response(conn, 200)
+    {:ok, document} = Floki.parse_document(html)
+
+    game_types =
+      Floki.find(document, "a")
+      |> Enum.map(&Floki.attribute(&1, "a", "href"))
+      |> List.flatten()
+      |> Enum.filter(&String.starts_with?(&1, "/lobbies/new"))
+      |> Enum.map(fn "/lobbies/new?game_type=" <> game_type -> game_type end)
+
+    assert Enum.sort(game_types) == Enum.sort(installed_games() |> Enum.map(&"#{&1.name}"))
+  end
+
+  test "theres a form to create a new lobby", %{conn: conn, user: user} do
+    conn =
+      conn
+      |> signin(user: user)
+      |> get("/lobbies/new?game_type=robot_game")
 
     html = html_response(conn, 200)
     {:ok, document} = Floki.parse_document(html)

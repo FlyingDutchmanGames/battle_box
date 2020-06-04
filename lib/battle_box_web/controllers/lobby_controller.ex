@@ -3,9 +3,13 @@ defmodule BattleBoxWeb.LobbyController do
   alias BattleBox.{Lobby, Repo, User}
   alias BattleBoxWeb.PageView
 
-  def new(conn, _params) do
-    changeset = Lobby.changeset(%Lobby{})
+  def new(conn, %{"game_type" => game_type}) do
+    changeset = Lobby.changeset(%Lobby{}, %{"game_type" => game_type})
     render(conn, "new.html", changeset: changeset)
+  end
+
+  def new(conn, _params) do
+    render(conn, "game_type_select.html")
   end
 
   def show(conn, %{"name" => lobby_name}) do

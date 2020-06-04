@@ -135,6 +135,13 @@ a:active {
   align-items: center;
 }
 
+.flex-center {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
 .flex-center-row-space-evenly {
   display: flex;
   flex-flow: row nowrap;

@@ -2,6 +2,7 @@ defmodule BattleBoxWeb.RobotGameView do
   use BattleBoxWeb, :view
   alias BattleBox.Games.RobotGame
   alias BattleBox.Games.RobotGame.Settings.Terrain
+  alias BattleBoxWeb.Live.RobotGame.TerrainEditor
 
   def move_direction([from_row, from_col], [to_row, to_col]) do
     case {from_row - to_row, from_col - to_col} do

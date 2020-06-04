@@ -1,0 +1,22 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      / Users
+      / <a href="<%= Routes.user_path(@conn, :show, @current_user.username) %>"><%= @current_user.username %></a>
+      / <a href="<%= Routes.user_lobby_path(@conn, :index, @current_user.username) %>">Lobbies</a>
+      / New
+    </div>
+  </div>
+  <p>Pick a Game Type</p>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 10px;">
+    <%= for game <- installed_games() do %>
+      <a
+       class="flex-center clickable game-type-choice"
+       style="background-color: <%= game.color %>;"
+       href="<%= Routes.lobby_path(@conn, :new, %{game_type: game.name}) %>"
+       >
+        <%= game.title %>
+      </a>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+<div style="font-weight: bold;">Robot Game Settings</div>
+
+<% session = %{"terrain_base64" => Phoenix.HTML.FormData.input_value(@conn, @settings, :terrain_base64)} %>
+<%= live_render(@conn, TerrainEditor, session: session) %>
+<%= error_tag @settings, :terrain_base64 %>
+
+<div class="form-group">
+  <label>Spawn Every: <%= number_input(@settings, :spawn_every, class: "form-control") %></label><br>
+  <%= error_tag @settings, :spawn_every %>
+</div>
+
+<div class="form-group">
+  <label>Spawn Per Player: <%= number_input(@settings, :spawn_per_player, class: "form-control") %></label><br>
+  <%= error_tag @settings, :spawn_per_player %>
+</div>
+
+<div class="form-group">
+  <label>Robot HP: <%= number_input(@settings, :robot_hp, class: "form-control") %></label><br>
+  <%= error_tag @settings, :robot_hp %>
+</div>
+
+<div class="form-group">
+  <label>Max Turns: <%= number_input(@settings, :max_turns, class: "form-control") %></label><br>
+  <%= error_tag @settings, :max_turns %>
+</div>

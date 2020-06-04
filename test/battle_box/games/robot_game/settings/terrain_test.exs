@@ -45,11 +45,41 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
     end
   end
 
+  describe "at_location/set_at_location" do
+    test "you can get the terrain at a location" do
+      assert :normal == Terrain.at_location(<<2, 2, 0, 0, 1, 0>>, [1, 0])
+      assert :normal == Terrain.at_location(<<1, 4, 0, 0, 1, 0>>, [0, 2])
+    end
+
+    test "you can set the terrain at a location" do
+      before = <<2, 2, 0, 0, 0, 0>>
+      expect = <<2, 2, 0, 0, 1, 0>>
+      assert expect == Terrain.set_at_location(before, [1, 0], :normal)
+
+      before = <<1, 4, 0, 0, 0, 0>>
+      expect = <<1, 4, 0, 0, 1, 0>>
+      assert expect == Terrain.set_at_location(before, [0, 2], :normal)
+
+      before = <<1, 4, 0, 0, 1, 0>>
+      expect = <<1, 4, 1, 0, 1, 0>>
+      assert expect == Terrain.set_at_location(before, [0, 0], :normal)
+    end
+  end
+
   describe "getting spaces" do
     test "you can get spaces by type" do
       assert Terrain.normal(@test_terrain) == [[0, 2], [0, 3]]
       assert Terrain.spawn(@test_terrain) == [[0, 4], [0, 5]]
       assert Terrain.obstacle(@test_terrain) == [[0, 6], [0, 7]]
+    end
+  end
+
+  describe "resize" do
+    test "it get to the right size" do
+      assert <<10::8, 10::8, _rest::binary>> = Terrain.resize(<<1, 1, 0>>, 10, 10)
+      assert <<4::8, 5::8, _rest::binary>> = Terrain.resize(<<1, 1, 0>>, 4, 5)
+      assert <<1::8, 1::8, _rest::binary>> = Terrain.resize(<<1, 1, 0>>, 1, 1)
+      assert <<1::8, 1::8, _rest::binary>> = Terrain.resize(<<2, 2, 0, 0, 0, 0>>, 1, 1)
     end
   end
 

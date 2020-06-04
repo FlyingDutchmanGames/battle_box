@@ -27,6 +27,17 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
   def rows(<<rows::8, _cols::8, _::binary>>), do: rows
   def cols(<<_rows::8, cols::8, _::binary>>), do: cols
 
+  def resize(<<_current_rows::8, _current_cols::8, data::binary>>, desired_rows, desired_cols) do
+    # 🤷
+    amount_of_bytes_needed = desired_rows * desired_cols
+    replicas = Integer.floor_div(amount_of_bytes_needed, byte_size(data))
+
+    <<new_data::binary-size(amount_of_bytes_needed), _rest::binary>> =
+      :binary.copy(data, replicas + 1)
+
+    <<desired_rows::8, desired_cols::8, new_data::binary>>
+  end
+
   def at_location(terrain, [row, col]) do
     <<rows::8, cols::8, data::binary>> = terrain
     on_board? = row >= 0 && col >= 0 && row <= rows - 1 && col <= cols - 1
@@ -45,10 +56,19 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
     end
   end
 
+  def set_at_location(terrain, [row, col], type) do
+    <<rows::8, cols::8, data::binary>> = terrain
+    offset = row * cols + col
+    <<prefix::binary-size(offset), _replace::8, suffix::binary>> = data
+    <<rows::8, cols::8, prefix::binary, type_to_int(type)::8, suffix::binary>>
+  end
+
   def inaccessible(terrain), do: get_type(terrain, 0)
   def normal(terrain), do: get_type(terrain, 1)
   def spawn(terrain), do: get_type(terrain, 2)
   def obstacle(terrain), do: get_type(terrain, 3)
+
+  def dimensions2(<<rows::8, cols::8, _::binary>>), do: %{rows: rows, cols: cols}
 
   def dimensions(<<rows::8, cols::8, _::binary>>) do
     %{
@@ -71,5 +91,14 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
 
       [row, col]
     end)
+  end
+
+  defp type_to_int(type) do
+    case type do
+      :inaccessible -> 0
+      :normal -> 1
+      :spawn -> 2
+      :obstacle -> 3
+    end
   end
 end
