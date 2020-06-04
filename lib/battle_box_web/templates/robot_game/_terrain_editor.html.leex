@@ -1,7 +1,11 @@
 <div style="display: flex; justify-content: space-evenly; flex-flow: column nowrap; align-items: center;">
   <div class="rg_terrain_selector_panel">
     <%= for terrain <- [:normal, :inaccessible, :spawn, :obstacle] do %>
-      <div phx-click="set-terrain-type" phx-value-terrain="<%= terrain %>" class='choice <%= if @active == terrain, do: "active" %>'>
+      <div
+       id="choice-<%= terrain %>"
+       phx-click="set-terrain-type"
+       phx-value-terrain="<%= terrain %>"
+       class='choice <%= if @active == terrain, do: "active" %>'>
         <div class='rg_terrain <%= terrain %>'></div>
         <span style="margin: auto; padding-left: 5px;"><%= terrain %></span>
       </div>
@@ -11,19 +15,19 @@
   <div style="display: flex;">
     <!-- I'd rather user <input> but phx has trouble with phx-update and nested forms... -->
     <label style="padding: 10px; display: flex; align-items: center;">
-      <div class="arrow-left clickable" phx-click="decrement-rows"></div>
-      <div style="margin: 0px 10px;">Rows (<%= @rows %>)</div>
-      <div class="arrow-right clickable" phx-click="increment-rows"></div>
+      <div id="rows-decrement" class="arrow-left clickable" phx-click="decrement-rows"></div>
+      <div id="rows" style="margin: 0px 10px;">Rows (<%= @rows %>)</div>
+      <div id="rows-increment" class="arrow-right clickable" phx-click="increment-rows"></div>
     </label>
     <label style="padding: 10px; display: flex; align-items: center;">
-      <div class="arrow-left clickable" phx-click="decrement-cols"></div>
-      <div style="margin: 0px 10px;">Cols (<%= @cols %>)</div>
-      <div class="arrow-right clickable" phx-click="increment-cols"></div>
+      <div id="cols-decrement" class="arrow-left clickable" phx-click="decrement-cols"></div>
+      <div id="cols" style="margin: 0px 10px;">Cols (<%= @cols %>)</div>
+      <div id="cols-increment" class="arrow-right clickable" phx-click="increment-cols"></div>
     </label>
     <label style="padding: 10px; display: flex; align-items: center;">
-      <div class="arrow-left clickable" phx-click="decrement-brush"></div>
-      <div style="margin: 0px 10px;">Brush Width (<%= @brush_width %>)</div>
-      <div class="arrow-right clickable" phx-click="increment-brush"></div>
+      <div id="brush-decrement" class="arrow-left clickable" phx-click="decrement-brush"></div>
+      <div id="brush-width" style="margin: 0px 10px;">Brush Width (<%= @brush %>)</div>
+      <div id="brush-increment" class="arrow-right clickable" phx-click="increment-brush"></div>
   </label>
   </div>
 
@@ -32,6 +36,7 @@
       <div
         class="rg_terrain <%= Terrain.at_location(@terrain, [row, col]) %>"
         style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>; cursor: pointer;'
+        loc="[<%= row %>, <%= col %>]"
         phx-click="apply-terrain-type"
         phx-value-row="<%= row %>"
         phx-value-col="<%= col %>"
@@ -40,8 +45,8 @@
   </div>
 
   <div style="padding: 10px; display: flex;">
-    <div class="btn" phx-click="reset">Reset</div>
-    <div class="btn" style="margin-left: 10px;" phx-click="random">Random</div>
+    <div id="reset" class="btn" phx-click="reset">Reset</div>
+    <div id="randomize"class="btn" style="margin-left: 10px;" phx-click="random">Random</div>
   </div>
 </div>
 

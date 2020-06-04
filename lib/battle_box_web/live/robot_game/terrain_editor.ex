@@ -6,7 +6,7 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditor do
   def mount(_params, %{"terrain_base64" => terrain_base64}, socket) do
     terrain = Base.decode64!(terrain_base64)
     socket = assign_terrain(socket, terrain)
-    {:ok, assign(socket, active: :normal, brush_width: 1)}
+    {:ok, assign(socket, active: :normal, brush: 1)}
   end
 
   def handle_event("set-terrain-type", %{"terrain" => terrain}, socket) do
@@ -28,7 +28,7 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditor do
     row = String.to_integer(row)
     col = String.to_integer(col)
 
-    brush = socket.assigns.brush_width - 1
+    brush = socket.assigns.brush - 1
 
     terrain =
       for(
@@ -59,7 +59,7 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditor do
 
     case thing do
       :brush ->
-        {:noreply, assign(socket, :brush_width, min(3, socket.assigns.brush_width + 1))}
+        {:noreply, assign(socket, :brush, min(3, socket.assigns.brush + 1))}
 
       :rows ->
         rows = min(39, socket.assigns.rows + 1)
