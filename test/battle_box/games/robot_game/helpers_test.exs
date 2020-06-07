@@ -1,4 +1,4 @@
-defmodule BattleBox.Games.RobotGame.Settings.Terrain.HelpersTest do
+defmodule BattleBox.Games.RobotGame.Terrain.HelpersTest do
   use ExUnit.Case, async: true
   import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
 
