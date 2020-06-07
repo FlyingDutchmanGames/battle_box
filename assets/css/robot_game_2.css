@@ -1,3 +1,14 @@
+/* VIEWER */
+
+.terrain_spawn { fill: #ff0; }
+.terrain_normal { fill: #fff; }
+.terrain_inaccessible { fill: #d3d3d3; }
+
+.robot {}
+.robot.player_1 { fill: #ffcccc; stroke: #990000; }
+.robot.player_2 { fill: #cce6ff; stroke: #0059b3; }
+
+
 /* SETTINGS */
 
 .rg_terrain_selector_panel {

@@ -2,7 +2,6 @@
   <div class="game-header">
     <div style="display: flex; flex-flow: column nowrap; align-items: center;">
       <div class="title"><%= @game.game_type.title %></div>
-      <!--<div>Users / <%= @game.lobby.user.username %> / Lobbies / <%= @game.lobby.name %></div>-->
     </div>
 
     <%= for game_bot <- @game.game_bots do %>
@@ -10,7 +9,5 @@
     <% end %>
   </div>
 
-  <div style="display: flex;">
-    <%= @game.game_type.view_module.render("_game.html", assigns) %>
-  </div>
+  <%= @game.game_type.view_module.render("_game.html", game_data: Game.game_data(@game), turn: @turn) %>
 </div>

@@ -6,11 +6,13 @@
   padding: 5px 10px;
   color: #6a6666;
   background-color: #a7a5a5;
+  min-width: max-content;
 }
 
 .game-header .title {
   font-size: 3em;
   user-select: none;
+  width: max-content;
 }
 
 .live-dot {

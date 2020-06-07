@@ -15,7 +15,7 @@ defmodule BattleBoxWeb.Live.GameViewer do
           Process.monitor(pid)
         end
 
-        {:ok, assign(socket, game: game, source: source)}
+        {:ok, assign(socket, game: game, source: source, turn: 5)}
     end
   end
 

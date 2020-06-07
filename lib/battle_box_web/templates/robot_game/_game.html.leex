@@ -1,1 +1,32 @@
-<div style="border: 1px solid red;">hello</div>
+<svg viewBox="0 0 <%= Terrain.rows(@game_data.terrain) * 35 %> <%= Terrain.cols(@game_data.terrain) * 30 %>" style="font-family: 'Ruda', sans-serif;">
+  <%= for row <- 0..(Terrain.rows(@game_data.terrain) - 1), col <- 0..(Terrain.cols(@game_data.terrain) - 1) do %>
+    <rect
+       x="<%= 35 * row %>"
+       y="<%= 30 * col %>"
+       height="30"
+       width="35"
+       style="stroke: grey;"
+       class="terrain_<%= Terrain.at_location(@game_data.terrain, [row, col])  %>"/>
+  <% end %>
+
+  <%= for {%{location: [row, col]} = robot, action} <- robot_actions(@game_data, @turn) do %>
+    <svg x="<%= 35 * row %>" y="<%= 30 * col %>">
+      <g>
+        <rect
+          x=2
+          y=2
+          height="26"
+          width="31"
+          style="stroke-width: 3; stroke-linejoin: round;"
+          class="robot player_<%= robot.player_id %>">
+        </rect>
+        <text
+          x=17
+          y=20
+          style="text-anchor: middle">
+          <%= robot.hp %>
+        </text>
+      </g>
+    </svg>
+  <% end %>
+</svg>
