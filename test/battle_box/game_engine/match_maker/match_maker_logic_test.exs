@@ -80,6 +80,9 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
 
     assert Map.take(game.robot_game, from_lobby) ==
              Map.take(Lobby.get_settings(lobby), from_lobby)
+
+    # It also preloads the user into the lobby
+    refute is_nil(game.lobby.user.username)
   end
 
   test "the games it makes are persistable", %{lobby: %{id: lobby_id}, bot: bot} do
