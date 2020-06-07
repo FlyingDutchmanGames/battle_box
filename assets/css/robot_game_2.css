@@ -48,4 +48,3 @@
 .rg_terrain.normal { background-color: white; }
 .rg_terrain.spawn { background-color: yellow; color: black; }
 .rg_terrain.inaccessible { background-color: lightgray; }
-.rg_terrain.obstacle { background-color: brown; color: white; }

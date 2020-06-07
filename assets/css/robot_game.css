@@ -86,7 +86,6 @@
 .robot-game-board .terrain.normal { background-color: white; }
 .robot-game-board .terrain.spawn { background-color: yellow; }
 .robot-game-board .terrain.inaccessible { background-color: lightgray; }
-.robot-game-board .terrain.obstacle { background-color: brown; }
 
 .robot-game-board .robot {
   display: flex;

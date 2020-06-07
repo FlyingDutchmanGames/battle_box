@@ -44,8 +44,6 @@
 - Make sure user input can't cause a game to crash (maybe changesets)
 - Procedural terrain generation?
 - Robot Game Settings
-  - Get rid of the damage modifier
-  - Get rid of the obstacle type
   - Reorgainze the code
   - Add in team spawns
 #### Static Site
