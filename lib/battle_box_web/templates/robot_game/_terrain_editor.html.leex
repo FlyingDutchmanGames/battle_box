@@ -1,6 +1,6 @@
 <div style="display: flex; justify-content: space-evenly; flex-flow: column nowrap; align-items: center;">
   <div class="rg_terrain_selector_panel">
-    <%= for terrain <- [:normal, :inaccessible, :spawn, :obstacle] do %>
+    <%= for terrain <- [:normal, :inaccessible, :spawn] do %>
       <div
        id="choice-<%= terrain %>"
        phx-click="set-terrain-type"

@@ -93,8 +93,11 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditorTest do
   defp get_base64_terrain(html) do
     {:ok, document} = Floki.parse_document(html)
 
-    Floki.find(document, "#lobby_robot_game_settings_terrain_base64")
-    |> Floki.text()
-    |> String.trim()
+    [terrain] =
+      document
+      |> Floki.find("#lobby_robot_game_settings_terrain_base64")
+      |> Floki.attribute("value")
+
+    String.trim(terrain)
   end
 end
