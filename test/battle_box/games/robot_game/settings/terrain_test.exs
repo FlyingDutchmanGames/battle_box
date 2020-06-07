@@ -3,7 +3,7 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
   alias BattleBox.Games.RobotGame.Settings.Terrain
   import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
 
-  @test_terrain ~t/0 0 1 1 2 2 3 3/
+  @test_terrain ~t/0 0 1 1 2 2 0 0/
 
   describe "default" do
     test "it has the correct number of spaces" do
@@ -21,7 +21,7 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
     test "it handles valid terrain" do
       [
         <<1, 1, 1>>,
-        <<2, 2, 1, 2, 3, 1>>,
+        <<2, 2, 1, 2, 0, 1>>,
         <<40, 40>> <> :binary.copy(<<1>>, 40 * 40)
       ]
       |> Enum.each(fn terrain ->
@@ -37,7 +37,7 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
         {<<1, 256>>, "Rows and cols must be between 1 and 40"},
         {<<256, 1>>, "Rows and cols must be between 1 and 40"},
         {<<2, 2, 4, 5, 6, 7>>,
-         "Terrain data must have bytes less than 3, but found bytes [4, 5, 6, 7]"}
+         "Terrain data must have bytes less than 2, but found bytes [4, 5, 6, 7]"}
       ]
       |> Enum.each(fn {terrain, error_msg} ->
         assert {:error, ^error_msg} = Terrain.validate(terrain)
@@ -70,7 +70,6 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
     test "you can get spaces by type" do
       assert Terrain.normal(@test_terrain) == [[0, 2], [0, 3]]
       assert Terrain.spawn(@test_terrain) == [[0, 4], [0, 5]]
-      assert Terrain.obstacle(@test_terrain) == [[0, 6], [0, 7]]
     end
   end
 

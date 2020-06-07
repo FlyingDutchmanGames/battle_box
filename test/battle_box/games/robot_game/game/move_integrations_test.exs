@@ -28,7 +28,6 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
   # 0 - Invalid
   # 1 - Normal
   # 2 - Spawn
-  # 3 - Obstacle
   # ← ↑ → ↓ - Attempted move into a space, that fails and robot takes collision damage
   # ▲ ▼ ◀ ▶ - Successful move into a space
   # 🐢 - A guarding robot
@@ -36,7 +35,6 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
   test "you can move into a normal square", do: run_test("▶1")
   test "you can move into a spawn square", do: run_test("▶2")
-  test "you can not move into an obstacle", do: run_test("→3")
   test "you can not move into an invalid square", do: run_test("→0")
   test "you can not move into a guarding robot", do: run_test("→🐢")
   test "you can not move into a non guarding robot, but it will take damage", do: run_test("→🤕")

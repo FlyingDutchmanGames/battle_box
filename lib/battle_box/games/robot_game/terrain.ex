@@ -1,13 +1,58 @@
-defmodule BattleBox.Games.RobotGame.Settings.Terrain do
-  alias __MODULE__.Default
+defmodule BattleBox.Games.RobotGame.Settings.Terrain.Helpers do
+  def sigil_t(map, _modifiers) do
+    graphs =
+      map
+      |> String.split("\n")
+      |> Enum.map(&String.graphemes/1)
+      |> Enum.reject(fn x -> x == [] end)
+      |> Enum.map(&Enum.reject(&1, fn grapheme -> String.trim(grapheme) == "" end))
 
-  defdelegate default, to: Default
+    rows = length(graphs)
+    cols = graphs |> Enum.map(&length/1) |> Enum.max(fn -> 0 end)
+
+    header = <<rows::8, cols::8>>
+
+    terrain_data =
+      graphs
+      |> List.flatten()
+      |> Enum.map(&String.to_integer/1)
+      |> Enum.map(&<<&1::8>>)
+
+    [header, terrain_data]
+    |> IO.iodata_to_binary()
+  end
+end
+
+defmodule BattleBox.Games.RobotGame.Settings.Terrain do
+  import __MODULE__.Helpers
+
+  @default ~t/0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 2 2 2 2 2 0 0 0 0 0 0 0
+  0 0 0 0 0 2 2 1 1 1 1 1 2 2 0 0 0 0 0
+  0 0 0 2 2 1 1 1 1 1 1 1 1 1 2 2 0 0 0
+  0 0 0 2 1 1 1 1 1 1 1 1 1 1 1 2 0 0 0
+  0 0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0 0
+  0 0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0 0
+  0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0
+  0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0
+  0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0
+  0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0
+  0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0
+  0 0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0 0
+  0 0 2 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0 0
+  0 0 0 2 1 1 1 1 1 1 1 1 1 1 1 2 0 0 0
+  0 0 0 2 2 1 1 1 1 1 1 1 1 1 2 2 0 0 0
+  0 0 0 0 0 2 2 1 1 1 1 1 2 2 0 0 0 0 0
+  0 0 0 0 0 0 0 2 2 2 2 2 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/
+
+  def default, do: @default
 
   def validate(terrain) do
     with {:size_header, <<rows::8, cols::8, data::binary>>} <- {:size_header, terrain},
          {:size, rows, cols} when rows in 1..40 and cols in 1..40 <- {:size, rows, cols},
          {:data_amount_correct, true} <- {:data_amount_correct, rows * cols == byte_size(data)},
-         {:illegal_bytes, []} <- {:illegal_bytes, for(<<i <- data>>, i > 3, do: i)} do
+         {:illegal_bytes, []} <- {:illegal_bytes, for(<<i <- data>>, i > 2, do: i)} do
       :ok
     else
       {:size_header, _} ->
@@ -20,7 +65,7 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
         {:error, "Terrain data byte size must equal rows * cols"}
 
       {:illegal_bytes, bytes} ->
-        {:error, "Terrain data must have bytes less than 3, but found bytes #{inspect(bytes)}"}
+        {:error, "Terrain data must have bytes less than 2, but found bytes #{inspect(bytes)}"}
     end
   end
 
@@ -49,7 +94,6 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
         0 -> :inaccessible
         1 -> :normal
         2 -> :spawn
-        3 -> :obstacle
       end
     else
       :inaccessible
@@ -66,7 +110,6 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
   def inaccessible(terrain), do: get_type(terrain, 0)
   def normal(terrain), do: get_type(terrain, 1)
   def spawn(terrain), do: get_type(terrain, 2)
-  def obstacle(terrain), do: get_type(terrain, 3)
 
   def dimensions2(<<rows::8, cols::8, _::binary>>), do: %{rows: rows, cols: cols}
 
@@ -98,7 +141,6 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
       :inaccessible -> 0
       :normal -> 1
       :spawn -> 2
-      :obstacle -> 3
     end
   end
 end
