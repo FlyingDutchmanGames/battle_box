@@ -1,6 +1,7 @@
 <svg
   x="<%= @x %>"
   y="<%= @y %>"
+  class="robot"
   data-move="<%= inspect(@action) %>"
   data-robot-id="<%= @robot.id %>">
   <rect
@@ -8,9 +9,28 @@
     y=2
     height="26"
     width="31"
-    style="stroke-width: 3; stroke-linejoin: round;"
+    <%= if @action == "guard" do %>
+      style="stroke: green; stroke-dasharray: 5px;"
+    <% end %>
     class="robot player_<%= @robot.player_id %>">
   </rect>
+  <%= case @action do %>
+    <% {action, direction} -> %>
+      <rect
+        <%= case direction do %>
+          <% :up -> %>
+            x=15 y=0 width=5 height=10
+          <% :down -> %>
+            x=15 y=20 width=5 height=10
+          <% :left -> %>
+            x=0 y=12.5 width=10 height=5
+          <% :right -> %>
+            x=25 y=12.5 width=10 height=5
+        <% end %>
+        class='<%= "action #{action} #{direction}" %>'>
+      </rect>
+    <% "guard" -> %>
+  <% end %>
   <text
     x=17
     y=20

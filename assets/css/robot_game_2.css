@@ -4,10 +4,15 @@
 .terrain_normal { fill: #fff; }
 .terrain_inaccessible { fill: #d3d3d3; }
 
-.robot {}
+.robot { stroke-width: 3px; stroke-linejoin: round; }
 .robot.player_1 { fill: #ffcccc; stroke: #990000; }
 .robot.player_2 { fill: #cce6ff; stroke: #0059b3; }
 
+.robot .action { transform: translate(0px 50px); }
+
+.robot .action.move { fill: blue; }
+.robot .action.failed-move { fill: gray; }
+.robot .action.attack { fill: red; }
 
 /* SETTINGS */
 
