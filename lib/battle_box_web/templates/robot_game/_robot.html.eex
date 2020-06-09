@@ -1,0 +1,20 @@
+<svg
+  x="<%= @x %>"
+  y="<%= @y %>"
+  data-move="<%= inspect(@action) %>"
+  data-robot-id="<%= @robot.id %>">
+  <rect
+    x=2
+    y=2
+    height="26"
+    width="31"
+    style="stroke-width: 3; stroke-linejoin: round;"
+    class="robot player_<%= @robot.player_id %>">
+  </rect>
+  <text
+    x=17
+    y=20
+    style="text-anchor: middle; user-select: none;">
+    <%= @robot.hp %>
+  </text>
+</svg>

@@ -63,15 +63,15 @@ defmodule BattleBoxWeb.RobotGameView do
 
       %{"target" => ^current_location, "type" => "move"} ->
         direction = move_direction(old_location, current_location)
-        "move #{direction}"
+        {"move", direction}
 
       %{"target" => target, "type" => "move"} ->
         direction = move_direction(current_location, target)
-        "failed-move #{direction}"
+        {"failed-move", direction}
 
       %{"target" => target, "type" => type} when type in ["attack", "move"] ->
         direction = move_direction(current_location, target)
-        "#{type} #{direction}"
+        {type, direction}
 
       %{"type" => type} ->
         type
