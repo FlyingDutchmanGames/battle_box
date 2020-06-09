@@ -29,7 +29,7 @@
 			<div class="paginate-container">
 				<div class="pagination">
 					<a phx-click="change-turn" phx-value-turn="<%= @turn - 1 %>" class='<%= if @turn == 1, do: "disabled" %>'>Previous</a>
-					<%= for i <- adjacent_turns(@turn, @max_turn) do %>
+					<%= for i <- adjacent_turns(@turn, @max_turn_so_far) do %>
 						<%= cond do %>
 							<% i < @turn -> %>
 								<a phx-click="change-turn" phx-value-turn="<%= i %>"><%= i %></a>

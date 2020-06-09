@@ -28,8 +28,7 @@
         <% end %>
         class='<%= "action #{action} #{direction}" %>'>
       </rect>
-    <% "guard" -> %>
-    <% nil -> %>
+    <% _ -> %>
   <% end %>
   <text
     x=17

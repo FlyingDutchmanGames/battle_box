@@ -4,11 +4,15 @@ defmodule BattleBoxWeb.Live.GameViewer do
   use BattleBoxWeb, :live_view
 
   def mount(_params, %{"game_id" => game_id} = session, socket) do
-    socket = assign(socket, turn: String.to_integer(session["turn"] || "1"))
+    socket =
+      assign(socket,
+        turn: String.to_integer(session["turn"] || "1"),
+        game_id: game_id
+      )
 
     case get_game(game_id) do
       nil ->
-        {:ok, assign(socket, not_found: true, game_id: game_id)}
+        {:ok, assign(socket, not_found: true)}
 
       {source, game} ->
         with {:live, pid} <- source,
@@ -28,7 +32,8 @@ defmodule BattleBoxWeb.Live.GameViewer do
         {:noreply, assign(socket, turn: turn)}
 
       %{"code" => "ArrowRight"} ->
-        {:noreply, update(socket, :turn, fn turn -> min(turn + 1, socket.assigns.max_turn) end)}
+        {:noreply,
+         update(socket, :turn, fn turn -> min(turn + 1, socket.assigns.max_turn_so_far) end)}
 
       %{"code" => "ArrowLeft"} ->
         {:noreply, update(socket, :turn, fn turn -> max(0, turn - 1) end)}
@@ -44,8 +49,14 @@ defmodule BattleBoxWeb.Live.GameViewer do
   end
 
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
-    {source, game} = get_game(socket.assigns.game.id)
-    {:noreply, set_game(socket, game, source)}
+    case get_game(socket.assigns.game.id) do
+      {source, game} -> {:noreply, set_game(socket, game, source)}
+      nil -> {:noreply, assign(socket, crashed: true)}
+    end
+  end
+
+  def render(%{crashed: true, game_id: game_id}) do
+    GameView.render("_crashed.html", message: "Game (#{game_id}) has crashed")
   end
 
   def render(%{not_found: true, game_id: game_id}) do
@@ -59,7 +70,7 @@ defmodule BattleBoxWeb.Live.GameViewer do
   defp set_game(socket, game, source) do
     %{current_turn: current_turn, max_turn: max_turn} = Game.turn_info(game)
 
-    socket = assign(socket, max_turn: max_turn, source: source)
+    socket = assign(socket, max_turn: max_turn, max_turn_so_far: current_turn, source: source)
 
     case source do
       {:live, _} ->
