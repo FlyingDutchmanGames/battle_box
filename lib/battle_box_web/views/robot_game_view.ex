@@ -59,7 +59,7 @@ defmodule BattleBoxWeb.RobotGameView do
     |> Map.get(robot.id)
     |> case do
       nil ->
-        ""
+        nil
 
       %{"target" => ^current_location, "type" => "move"} ->
         direction = move_direction(old_location, current_location)

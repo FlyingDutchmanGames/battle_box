@@ -30,6 +30,7 @@
         class='<%= "action #{action} #{direction}" %>'>
       </rect>
     <% "guard" -> %>
+    <% nil -> %>
   <% end %>
   <text
     x=17

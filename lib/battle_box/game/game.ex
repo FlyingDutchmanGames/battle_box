@@ -62,6 +62,8 @@ defmodule BattleBox.Game do
     |> cast_assoc(game.game_type.name)
   end
 
+  def preload_game_data(nil), do: nil
+
   def preload_game_data(game) do
     Repo.preload(game, game.game_type.name)
   end

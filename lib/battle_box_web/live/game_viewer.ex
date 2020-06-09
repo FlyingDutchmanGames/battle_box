@@ -6,7 +6,7 @@ defmodule BattleBoxWeb.Live.GameViewer do
   def mount(_params, %{"game_id" => game_id} = session, socket) do
     case get_game(game_id) do
       nil ->
-        {:ok, assign(socket, :not_found, true)}
+        {:ok, assign(socket, not_found: true, game_id: game_id)}
 
       {source, game} ->
         with {:live, pid} <- source,
@@ -19,13 +19,19 @@ defmodule BattleBoxWeb.Live.GameViewer do
     end
   end
 
+  def handle_info({_topic, :game_update, _game_id}, socket) do
+    {game_source, game} = get_game(socket.assigns.game.id)
+    {:noreply, assign(socket, game: game, game_source: game_source)}
+  end
+
   def handle_event("change-turn", %{"turn" => turn}, socket) do
     turn = String.to_integer(turn)
     {:noreply, assign(socket, turn: turn)}
   end
 
-  def render(%{not_found: true, game_id: game_id}),
-    do: PageView.render("not_found.html", message: "Game (#{game_id}) not found")
+  def render(%{not_found: true, game_id: game_id}) do
+    PageView.render("not_found.html", message: "Game (#{game_id}) not found")
+  end
 
   def render(assigns) do
     GameView.render("_game_viewer.html", assigns)

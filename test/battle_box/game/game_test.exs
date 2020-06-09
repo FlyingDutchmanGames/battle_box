@@ -9,4 +9,10 @@ defmodule BattleBox.GameTest do
              %Game{game_type: BattleBox.Games.RobotGame, lobby_id: @lobby_id, game_bots: []}
              |> Repo.insert()
   end
+
+  describe "preload_game_data" do
+    test "with nil, yields nil" do
+      assert Game.preload_game_data(nil) == nil
+    end
+  end
 end
