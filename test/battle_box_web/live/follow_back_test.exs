@@ -50,10 +50,10 @@ defmodule BattleBoxWeb.Live.FollowBackTest do
   } do
     pid = spawn(fn -> Process.sleep(:infinity) end)
     session = %{"follow" => @user, "game_pid" => pid}
-    {:ok, view, html} = live_isolated(conn, FollowBack, session: session)
+    {:ok, view, _html} = live_isolated(conn, FollowBack, session: session)
     view |> element("button") |> render_click()
     Process.exit(pid, :kill)
     Process.sleep(10)
-    assert render(view) == "Follow User (user-name)"
+    assert render(view) =~ "Follow User (user-name)"
   end
 end
