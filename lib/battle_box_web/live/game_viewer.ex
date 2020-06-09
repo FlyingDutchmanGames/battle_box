@@ -15,8 +15,13 @@ defmodule BattleBoxWeb.Live.GameViewer do
           Process.monitor(pid)
         end
 
-        {:ok, assign(socket, game: game, source: source, turn: 5)}
+        {:ok, assign(socket, game: game, source: source, turn: 1)}
     end
+  end
+
+  def handle_event("change-turn", %{"turn" => turn}, socket) do
+    turn = String.to_integer(turn)
+    {:noreply, assign(socket, turn: turn)}
   end
 
   def render(%{not_found: true, game_id: game_id}),

@@ -11,5 +11,24 @@
     </div>
 
     <%= @game.game_type.view_module.render("_game.html", game_data: Game.game_data(@game), turn: @turn) %>
+
+    <div>
+			<div class="paginate-container">
+				<div class="pagination">
+					<a phx-click="change-turn" phx-value-turn="<%= @turn - 1 %>" class='<%= if @turn == 1, do: "disabled" %>'>Previous</a>
+					<%= for i <- adjacent_turns(@turn) do %>
+						<%= cond do %>
+							<% i < @turn -> %>
+								<a phx-click="change-turn" phx-value-turn="<%= i %>"><%= i %></a>
+							<% i == @turn -> %>
+								<a class="current"><%= i %></a>
+							<% i > @turn -> %>
+								<a phx-click="change-turn" phx-value-turn="<%= i %>"><%= i %></a>
+						<% end %>
+					<% end %>
+					<a phx-click="change-turn" phx-value-turn="<%= @turn + 1 %>">Next</a>
+				</div>
+			</div>
+    </div>
   </div>
 </div>
