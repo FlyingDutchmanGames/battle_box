@@ -5,17 +5,8 @@ defmodule BattleBoxWeb.FollowController do
 
   def follow(conn, %{"user_username" => username} = params) do
     case Repo.get_by(User, username: username) do
-      nil ->
-        render404(conn, username: username)
-
-      user ->
-        assigns =
-          Keyword.merge(
-            [user: user, lobby: nil, bot: nil],
-            hydrate_params(params, user)
-          )
-
-        render(conn, "follow.html", hydrate_params(params, user))
+      nil -> render404(conn, username: username)
+      user -> render(conn, "follow.html", hydrate_params(params, user))
     end
   end
 

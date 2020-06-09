@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.GameController do
   use BattleBoxWeb, :controller
-  alias BattleBox.{Repo, Game, Lobby}
+  alias BattleBox.{Repo, Game, Lobby, GameEngine}
   import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
   import Ecto.Query
 
@@ -22,6 +22,21 @@ defmodule BattleBoxWeb.GameController do
     assigns = %{pagination_info: pagination_info, games: games, to_page: to_page, lobby: lobby}
 
     render(conn, "index.html", assigns)
+  end
+
+  def show(conn, %{"id" => id} = params) do
+    game_pid =
+      case GameEngine.get_game_server(game_engine(), id) do
+        %{pid: pid} -> pid
+        nil -> nil
+      end
+
+    render(conn, "show.html",
+      id: id,
+      game_pid: game_pid,
+      follow: params["follow"],
+      turn: params["turn"]
+    )
   end
 
   defp filter_lobbies(query, %{"lobby_name" => lobby_name}) do

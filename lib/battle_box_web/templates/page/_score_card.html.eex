@@ -1,0 +1,10 @@
+<div class="score player<%= @game_bot.player %>" style='order: <%= if rem(@game_bot.player, 2) == 0, do: "1", else: "-1" %>'>
+  <div class="bot-info">
+    <img src="<%= @game_bot.bot.user.avatar_url %>">
+    <div class="names">
+      <a href="<%= Routes.user_path(BattleBoxWeb.Endpoint, :show, @game_bot.bot.user.username) %>"><div style="font-size: 0.3em; color: white;"><%= @game_bot.bot.user.username %></div></a>
+      <a href="<%= Routes.user_bot_path(BattleBoxWeb.Endpoint, :show, @game_bot.bot.user.username, @game_bot.bot.name) %>" style="color: white;"><div><%= @game_bot.bot.name %></div></a>
+    </div>
+  </div>
+  <div style="font-size: 2em;"><%= @game_bot.score %></div>
+</div>

@@ -22,4 +22,7 @@ defprotocol BattleBoxGame do
 
   @spec winner(struct()) :: binary | nil
   def winner(game)
+
+  @spec turn_info(struct()) :: map()
+  def turn_info(game)
 end

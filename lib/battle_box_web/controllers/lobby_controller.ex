@@ -42,7 +42,7 @@ defmodule BattleBoxWeb.LobbyController do
     end
   end
 
-  def create(%{assigns: %{current_user: user}} = conn, %{"lobby" => params} = foo) do
+  def create(%{assigns: %{current_user: user}} = conn, %{"lobby" => params}) do
     user
     |> Ecto.build_assoc(:lobbies)
     |> Lobby.changeset(params)

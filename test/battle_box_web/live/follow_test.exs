@@ -12,15 +12,14 @@ defmodule BattleBoxWeb.Live.FollowTest do
   @user %{username: "user-name", id: @user_id}
   @lobby %{name: "lobby-name", id: @lobby_id}
 
-  @all_nil %{"lobby" => nil, "bot" => nil, "user" => nil}
+  @base %{"lobby" => nil, "bot" => nil, "user" => @user}
 
-  @with_bot Map.merge(@all_nil, %{"bot" => @bot})
-  @with_user Map.merge(@all_nil, %{"user" => @user})
-  @with_lobby Map.merge(@all_nil, %{"lobby" => @lobby})
+  @with_bot Map.merge(@base, %{"bot" => @bot})
+  @with_lobby Map.merge(@base, %{"lobby" => @lobby})
 
   [
+    {@base, "Waiting for a Game with User (user-name)"},
     {@with_bot, "Waiting for a Game with Bot (bot-name)"},
-    {@with_user, "Waiting for a Game with User (user-name)"},
     {@with_lobby, "Waiting for a Game in Lobby (lobby-name)"}
   ]
   |> Enum.each(fn {session, expected} ->
@@ -33,9 +32,9 @@ defmodule BattleBoxWeb.Live.FollowTest do
   end)
 
   redirect_cases = [
-    {@with_bot, "/games/#{@game_id}?follow[bot]=bot-name"},
-    {@with_user, "/games/#{@game_id}?follow[user]=user-name"},
-    {@with_lobby, "/games/#{@game_id}?follow[lobby]=lobby-name"}
+    {@base, "/games/#{@game_id}?follow[user]=user-name"},
+    {@with_bot, "/games/#{@game_id}?follow[bot]=bot-name&follow[user]=user-name"},
+    {@with_lobby, "/games/#{@game_id}?follow[lobby]=lobby-name&follow[user]=user-name"}
   ]
 
   for {session, expected} <- redirect_cases, msg <- [:game_started, :game_update] do
