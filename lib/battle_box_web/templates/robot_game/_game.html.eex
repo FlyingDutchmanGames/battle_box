@@ -20,6 +20,6 @@
   <% end %>
 
   <%= for {%{location: [row, col]} = robot, action} <- robot_actions(@game_data, @turn) do %>
-    <%= render("_robot.html", x: (35 * row), y: (30 * col), robot: robot, action: action) %>
+    <%= render("_robot.html", x: (35 * col), y: (30 * row), robot: robot, action: action) %>
   <% end %>
 </svg>

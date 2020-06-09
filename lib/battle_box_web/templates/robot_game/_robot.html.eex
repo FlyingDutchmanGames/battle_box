@@ -2,7 +2,6 @@
   x="<%= @x %>"
   y="<%= @y %>"
   class="robot"
-  data-move="<%= inspect(@action) %>"
   data-robot-id="<%= @robot.id %>">
   <rect
     x=2
