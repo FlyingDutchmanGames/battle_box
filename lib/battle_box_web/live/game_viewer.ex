@@ -21,9 +21,21 @@ defmodule BattleBoxWeb.Live.GameViewer do
     end
   end
 
-  def handle_event("change-turn", %{"turn" => turn}, socket) do
-    turn = String.to_integer(turn)
-    {:noreply, assign(socket, turn: turn)}
+  def handle_event("change-turn", event, socket) do
+    case event do
+      %{"turn" => turn} ->
+        turn = String.to_integer(turn)
+        {:noreply, assign(socket, turn: turn)}
+
+      %{"code" => "ArrowRight"} ->
+        {:noreply, update(socket, :turn, fn turn -> min(turn + 1, socket.assigns.max_turn) end)}
+
+      %{"code" => "ArrowLeft"} ->
+        {:noreply, update(socket, :turn, fn turn -> max(0, turn - 1) end)}
+
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   def handle_info({_topic, :game_update, _game_id}, socket) do
