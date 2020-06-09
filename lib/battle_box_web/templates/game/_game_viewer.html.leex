@@ -14,7 +14,7 @@
               <div><%= humanize_seconds_ago(@game.inserted_at) %></div>
             </div>
           <% end %>
-          <div>TURN: <%= @turn %></div>
+          <div>TURN: <%= @turn %> / <%= @max_turn %></div>
         </div>
       </div>
 
@@ -29,7 +29,7 @@
 			<div class="paginate-container">
 				<div class="pagination">
 					<a phx-click="change-turn" phx-value-turn="<%= @turn - 1 %>" class='<%= if @turn == 1, do: "disabled" %>'>Previous</a>
-					<%= for i <- adjacent_turns(@turn) do %>
+					<%= for i <- adjacent_turns(@turn, @max_turn) do %>
 						<%= cond do %>
 							<% i < @turn -> %>
 								<a phx-click="change-turn" phx-value-turn="<%= i %>"><%= i %></a>
@@ -39,7 +39,7 @@
 								<a phx-click="change-turn" phx-value-turn="<%= i %>"><%= i %></a>
 						<% end %>
 					<% end %>
-					<a phx-click="change-turn" phx-value-turn="<%= @turn + 1 %>">Next</a>
+					<a phx-click="change-turn" phx-value-turn="<%= @turn + 1 %>" class='<%= if @turn == @max_turn, do: "disabled" %>'>Next</a>
 				</div>
 			</div>
     </div>

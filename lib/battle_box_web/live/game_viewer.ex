@@ -4,6 +4,8 @@ defmodule BattleBoxWeb.Live.GameViewer do
   use BattleBoxWeb, :live_view
 
   def mount(_params, %{"game_id" => game_id} = session, socket) do
+    socket = assign(socket, turn: String.to_integer(session["turn"] || "1"))
+
     case get_game(game_id) do
       nil ->
         {:ok, assign(socket, not_found: true, game_id: game_id)}
@@ -15,18 +17,23 @@ defmodule BattleBoxWeb.Live.GameViewer do
           Process.monitor(pid)
         end
 
-        {:ok, assign(socket, game: game, source: source, turn: session["turn"] || 1)}
+        {:ok, set_game(socket, game, source)}
     end
-  end
-
-  def handle_info({_topic, :game_update, _game_id}, socket) do
-    {game_source, game} = get_game(socket.assigns.game.id)
-    {:noreply, assign(socket, game: game, game_source: game_source)}
   end
 
   def handle_event("change-turn", %{"turn" => turn}, socket) do
     turn = String.to_integer(turn)
     {:noreply, assign(socket, turn: turn)}
+  end
+
+  def handle_info({_topic, :game_update, _game_id}, socket) do
+    {source, game} = get_game(socket.assigns.game.id)
+    {:noreply, set_game(socket, game, source)}
+  end
+
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
+    {source, game} = get_game(socket.assigns.game.id)
+    {:noreply, set_game(socket, game, source)}
   end
 
   def render(%{not_found: true, game_id: game_id}) do
@@ -37,9 +44,19 @@ defmodule BattleBoxWeb.Live.GameViewer do
     GameView.render("_game_viewer.html", assigns)
   end
 
-  def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
-    {game_source, game} = get_game(socket.assigns.game.id)
-    {:noreply, assign(socket, game: game, game_source: game_source)}
+  defp set_game(socket, game, source) do
+    %{current_turn: current_turn, max_turn: max_turn} = Game.turn_info(game)
+
+    socket = assign(socket, max_turn: max_turn, source: source)
+
+    case source do
+      {:live, _} ->
+        turn = max(0, current_turn - 1)
+        assign(socket, game: game, turn: turn, source: source)
+
+      :historical ->
+        assign(socket, game: game)
+    end
   end
 
   defp get_game(game_id) do

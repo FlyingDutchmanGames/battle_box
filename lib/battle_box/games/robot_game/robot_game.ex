@@ -266,4 +266,10 @@ defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do
   def calculate_turn(game, commands), do: RobotGame.Logic.calculate_turn(game, commands)
   def score(game), do: RobotGame.score(game)
   def winner(game), do: game.winner
+
+  def turn_info(game),
+    do: %{
+      current_turn: game.turn,
+      max_turn: game.max_turns
+    }
 end
