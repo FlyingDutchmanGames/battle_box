@@ -3,6 +3,19 @@
     <div class="game-header">
       <div style="display: flex; flex-flow: column nowrap; align-items: center;">
         <div class="title"><%= @game.game_type.title %></div>
+        <div style="display: flex; flex-flow: row nowrap; align-items: center; justify-content: space-around;">
+          <%= if match?({:live, _}, @source) do %>
+            <div class="game-source-badge live">
+              <div class="live-dot blinking"></div>
+              <div>LIVE</div>
+            </div>
+          <% else %>
+            <div title="<%= @game.inserted_at %>"class="game-source-badge recorded">
+              <div><%= humanize_seconds_ago(@game.inserted_at) %></div>
+            </div>
+          <% end %>
+          <div>TURN: <%= @turn %></div>
+        </div>
       </div>
 
       <%= for game_bot <- @game.game_bots do %>

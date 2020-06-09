@@ -3,7 +3,7 @@ defmodule BattleBoxWeb.Live.GameViewer do
   alias BattleBoxWeb.{GameView, PageView}
   use BattleBoxWeb, :live_view
 
-  def mount(_params, %{"game_id" => game_id}, socket) do
+  def mount(_params, %{"game_id" => game_id} = session, socket) do
     case get_game(game_id) do
       nil ->
         {:ok, assign(socket, :not_found, true)}
@@ -15,7 +15,7 @@ defmodule BattleBoxWeb.Live.GameViewer do
           Process.monitor(pid)
         end
 
-        {:ok, assign(socket, game: game, source: source, turn: 1)}
+        {:ok, assign(socket, game: game, source: source, turn: session["turn"] || 1)}
     end
   end
 

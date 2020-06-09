@@ -31,7 +31,12 @@ defmodule BattleBoxWeb.GameController do
         nil -> nil
       end
 
-    render(conn, "show.html", id: id, game_pid: game_pid, follow: params["follow"])
+    render(conn, "show.html",
+      id: id,
+      game_pid: game_pid,
+      follow: params["follow"],
+      turn: params["turn"]
+    )
   end
 
   defp filter_lobbies(query, %{"lobby_name" => lobby_name}) do

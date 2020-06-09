@@ -8,6 +8,6 @@
     <% end %>
   </div>
 
-  <%= live_render(@conn, GameViewer, session: %{"game_id" => @id}) %>
+  <%= live_render(@conn, GameViewer, session: %{"game_id" => @id, "turn" => @turn}) %>
 </div>
 
