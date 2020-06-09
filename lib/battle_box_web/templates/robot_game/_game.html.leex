@@ -1,4 +1,6 @@
-<svg viewBox="0 0 <%= Terrain.rows(@game_data.terrain) * 35 %> <%= Terrain.cols(@game_data.terrain) * 30 %>" style="font-family: 'Ruda', sans-serif;">
+<svg
+  viewBox="0 0 <%= Terrain.rows(@game_data.terrain) * 35 %> <%= Terrain.cols(@game_data.terrain) * 30 %>"
+  style="font-family: 'Ruda', sans-serif; width: <%= 35 * Terrain.rows(@game_data.terrain) %>; height: <%= 30 * Terrain.cols(@game_data.terrain) %> ">
   <%= for row <- 0..(Terrain.rows(@game_data.terrain) - 1), col <- 0..(Terrain.cols(@game_data.terrain) - 1) do %>
     <rect
        x="<%= 35 * row %>"
