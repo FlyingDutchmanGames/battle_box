@@ -59,7 +59,7 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditor do
 
     case thing do
       :brush ->
-        {:noreply, assign(socket, :brush, min(3, socket.assigns.brush + 1))}
+        {:noreply, assign(socket, :brush, min(4, socket.assigns.brush + 1))}
 
       :rows ->
         rows = min(39, socket.assigns.rows + 1)

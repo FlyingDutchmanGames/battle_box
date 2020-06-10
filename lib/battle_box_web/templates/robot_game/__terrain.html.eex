@@ -1,10 +1,15 @@
-<svg>
+<svg viewBox="0 0 <%= Terrain.rows(@terrain) * 35 %> <%= Terrain.cols(@terrain) * 30 %>">
   <%= for row <- 0..(Terrain.rows(@terrain) - 1), col <- 0..(Terrain.cols(@terrain) - 1) do %>
     <rect
        x="<%= 35 * row %>"
        y="<%= 30 * col %>"
        height="30"
        width="35"
+       <%= if assigns[:phx_click] do %>
+         phx-click="<%= @phx_click %>"
+         phx-value-row="<%= row %>"
+         phx-value-col="<%= col %>"
+       <% end %>
        style="stroke: grey;"
        class="terrain_<%= Terrain.at_location(@terrain, [row, col])  %>"/>
   <% end %>

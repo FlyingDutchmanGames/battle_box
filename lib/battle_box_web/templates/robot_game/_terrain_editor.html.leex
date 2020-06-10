@@ -28,21 +28,10 @@
       <div id="brush-decrement" class="arrow-left clickable" phx-click="decrement-brush"></div>
       <div id="brush-width" style="margin: 0px 10px;">Brush Width (<%= @brush %>)</div>
       <div id="brush-increment" class="arrow-right clickable" phx-click="increment-brush"></div>
-  </label>
+    </label>
   </div>
 
-  <div style='display: grid; <%= "grid-template: repeat(#{@rows}, max-content) / repeat(#{@cols}, max-content)" %>'>
-    <%= for row <- 0..(@rows - 1), col <- 0..(@cols - 1) do %>
-      <div
-        class="rg_terrain <%= Terrain.at_location(@terrain, [row, col]) %>"
-        style='<%= "grid-row: #{row + 1}; grid-column: #{col + 1};" %>; cursor: pointer;'
-        loc="[<%= row %>, <%= col %>]"
-        phx-click="apply-terrain-type"
-        phx-value-row="<%= row %>"
-        phx-value-col="<%= col %>"
-        ><%= terrain_number([row, col]) %></div>
-    <% end %>
-  </div>
+  <%= render("__terrain.html", terrain: @terrain, phx_click: "apply-terrain-type") %>
 
   <div style="padding: 10px; display: flex;">
     <div id="reset" class="btn" phx-click="reset">Reset</div>
