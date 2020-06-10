@@ -79,7 +79,7 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditorTest do
       live_isolated(conn, TerrainEditor, session: %{"terrain_base64" => @base64_default})
 
     assert terrain_at_location(html, 0, 0) == :inaccessible
-    html = view |> element("div[loc='[0, 0]']") |> render_click
+    html = view |> element("[phx-value-row=0][phx-value-col=0]") |> render_click
     assert terrain_at_location(html, 0, 0) == :normal
   end
 
