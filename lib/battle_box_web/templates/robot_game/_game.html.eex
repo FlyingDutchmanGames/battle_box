@@ -1,25 +1,10 @@
 <svg
   viewBox="0 0 <%= Terrain.rows(@game_data.terrain) * 35 %> <%= Terrain.cols(@game_data.terrain) * 30 %>"
   style="width: <%= 35 * Terrain.rows(@game_data.terrain) %>; height: <%= 30 * Terrain.cols(@game_data.terrain) %> ">
-  <%= for row <- 0..(Terrain.rows(@game_data.terrain) - 1), col <- 0..(Terrain.cols(@game_data.terrain) - 1) do %>
-    <rect
-       x="<%= 35 * row %>"
-       y="<%= 30 * col %>"
-       height="30"
-       width="35"
-       style="stroke: grey;"
-       class="terrain_<%= Terrain.at_location(@game_data.terrain, [row, col])  %>"/>
-  <% end %>
 
-  <%= for row <- 0..(Terrain.rows(@game_data.terrain)) do %>
-    <text x="<%= 35 * row + 17 %>" y="21" style="text-anchor: middle; fill: gray; user-select: none;"><%= row %></text>
-  <% end %>
-
-  <%= for col <- 1..(Terrain.cols(@game_data.terrain)) do %>
-    <text x="17" y="<%= 30 * col + 21 %>" style="text-anchor: middle; fill: gray; user-select: none;"><%= col %></text>
-  <% end %>
+  <%= render("__terrain.html", terrain: @game_data.terrain) %>
 
   <%= for {%{location: [row, col]} = robot, action} <- robot_actions(@game_data, @turn) do %>
-    <%= render("_robot.html", x: (35 * col), y: (30 * row), robot: robot, action: action) %>
+    <%= render("__robot.html", x: (35 * col), y: (30 * row), robot: robot, action: action) %>
   <% end %>
 </svg>
