@@ -3,6 +3,7 @@ defmodule BattleBoxWeb.LobbyView do
   import BattleBox.InstalledGames
   alias BattleBoxWeb.Live.Scores
   alias BattleBoxWeb.PageView
+  alias BattleBox.Lobby
 
   def game_bots_to_game_name(game_bots) do
     game_bots

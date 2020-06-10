@@ -1,14 +1,16 @@
+
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / Users 
+      / Users
       / <a href="<%= Routes.user_path(@conn, :show, @current_user.username) %>"><%= @current_user.username %></a>
       / <a href="<%= Routes.user_lobby_path(@conn, :index, @current_user.username) %>">Lobbies</a>
-      / New
+      / <a href="<%= Routes.user_lobby_path(@conn, :show, @current_user.username, @lobby.name) %>"><%= @lobby.name %></a>
+      / Edit
     </div>
   </div>
-  <%= form_for @changeset, Routes.lobby_path(@conn, :create), fn form -> %>
+  <%= form_for @changeset, Routes.user_lobby_path(@conn, :update, @current_user.username, @lobby.name), fn form -> %>
     <%= render("_form.html", form: form, conn: @conn) %>
-    <%= submit "Create Lobby", class: "btn btn-primary" %>
+    <%= submit "Save Lobby", class: "btn btn-primary" %>
   <% end %>
 </div>

@@ -17,9 +17,7 @@
 - Edit bots
 - Add pagination to index
 #### Lobbies
-- Edit lobbies
 - Add pagination to index
-- Add details to lobby details page
 - bot self play allowed toggle
 - user self play allowed toggle
 - add in server ais
@@ -47,11 +45,10 @@
   - Reorgainze the code
   - Add in team spawns
 #### Static Site
+- Dynamically created docs
 - Wire protocol docs
 - Robot game rules docs
 #### Robot Game
-- More efficent game visualizer
-- Make the end turns the number of turns in the game
 - Remove row-min/max from terrain, because everything must be 0 indexed
 - Area conquer mode
 #### ELO rankings
@@ -70,6 +67,14 @@
     - Load the credential for the host being connected to
 #### General
 - Upgrade phoenix/liveview
+- Disallow the following in user identifiers
+  - new
+  - license
+  - edit
+  - update
+  - create
+  - show
+  - index
 - Handle when connection is closed on trying to send from connection server
 - Add footer on all pages
 - Impersonation

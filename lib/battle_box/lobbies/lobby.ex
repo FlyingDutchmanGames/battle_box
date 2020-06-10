@@ -75,10 +75,15 @@ defmodule BattleBox.Lobby do
   end
 
   def get_settings(lobby) do
-    Repo.preload(lobby, :robot_game_settings)
-    |> case do
-      %{robot_game_settings: robot_game_settings} -> robot_game_settings
-    end
+    lobby
+    |> preload_game_settings
+    |> Map.fetch!(lobby.game_type.settings_module.name)
+  end
+
+  def preload_game_settings(nil), do: nil
+
+  def preload_game_settings(lobby) do
+    Repo.preload(lobby, lobby.game_type.settings_module.name)
   end
 
   defp validate_command_time(changeset) do

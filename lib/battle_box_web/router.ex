@@ -49,6 +49,10 @@ defmodule BattleBoxWeb.Router do
       resources "/keys", ApiKeyController
       resources "/bots", BotController, only: [:create, :new], param: "name"
       resources "/lobbies", LobbyController, only: [:create, :new], param: "name"
+
+      resources "/users", UserController, only: [], param: "username" do
+        resources "/lobbies", LobbyController, only: [:edit, :update], param: "name"
+      end
     end
 
     scope "/" do
