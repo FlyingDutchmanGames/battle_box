@@ -47,7 +47,6 @@
 - Wire protocol docs
 - Robot game rules docs
 #### Robot Game
-- Remove row-min/max from terrain, because everything must be 0 indexed
 - Area conquer mode
 #### ELO rankings
 - Provide optional ELOs to lobbies

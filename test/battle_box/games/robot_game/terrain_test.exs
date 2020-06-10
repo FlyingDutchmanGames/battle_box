@@ -85,28 +85,22 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
   describe "dimensions" do
     test "the dimensions of a one square map are 0s" do
       assert %{
-               row_min: 0,
-               row_max: 0,
-               col_min: 0,
-               col_max: 0
+               rows: 1,
+               cols: 1
              } == Terrain.dimensions(~t/1/)
     end
 
     test "you can get the dimensions of one-d map" do
       assert %{
-               row_min: 0,
-               row_max: 0,
-               col_min: 0,
-               col_max: 10
-             } == Terrain.dimensions(~t/11111111111/)
+               rows: 1,
+               cols: 10
+             } == Terrain.dimensions(~t/1111111111/)
     end
 
     test "you can get the dimensions of a full terrain" do
       assert %{
-               row_min: 0,
-               row_max: 18,
-               col_min: 0,
-               col_max: 18
+               rows: 19,
+               cols: 19
              } == Terrain.dimensions(Terrain.default())
     end
   end

@@ -78,7 +78,7 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditor do
   end
 
   defp assign_terrain(socket, terrain) do
-    %{rows: rows, cols: cols} = Terrain.dimensions2(terrain)
+    %{rows: rows, cols: cols} = Terrain.dimensions(terrain)
 
     assign(socket,
       terrain_base64: Base.encode64(terrain),

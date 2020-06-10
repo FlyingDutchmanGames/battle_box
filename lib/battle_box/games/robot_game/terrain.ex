@@ -111,16 +111,7 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
   def normal(terrain), do: get_type(terrain, 1)
   def spawn(terrain), do: get_type(terrain, 2)
 
-  def dimensions2(<<rows::8, cols::8, _::binary>>), do: %{rows: rows, cols: cols}
-
-  def dimensions(<<rows::8, cols::8, _::binary>>) do
-    %{
-      row_min: 0,
-      row_max: rows - 1,
-      col_min: 0,
-      col_max: cols - 1
-    }
-  end
+  def dimensions(<<rows::8, cols::8, _::binary>>), do: %{rows: rows, cols: cols}
 
   defp get_type(terrain, type) do
     <<_rows::8, cols::8, terrain_data::binary>> = terrain
