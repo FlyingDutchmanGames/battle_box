@@ -1,5 +1,4 @@
 defmodule BattleBoxWeb.Admin.UserController do
-  import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
   use BattleBoxWeb, :controller
   alias BattleBoxWeb.PageView
   alias BattleBox.{Repo, User}

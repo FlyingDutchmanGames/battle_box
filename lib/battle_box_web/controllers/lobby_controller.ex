@@ -35,12 +35,29 @@ defmodule BattleBoxWeb.LobbyController do
     end
   end
 
-  def index(conn, %{"user_username" => username}) do
+  def index(conn, %{"user_username" => username} = params) do
     Repo.get_by(User, username: username)
-    |> Repo.preload(:lobbies)
     |> case do
-      %User{} = user -> render(conn, "index.html", user: user)
-      nil -> render404(conn, "User (#{username}) not found")
+      %User{} = user ->
+        lobbies =
+          Lobby
+          |> where(user_id: ^user.id)
+          |> order_by(desc: :inserted_at)
+          |> paginate(params)
+          |> Repo.all()
+
+        pagination_info = pagination_info(params)
+        to_page = to_page(conn, params, pagination_info)
+
+        render(conn, "index.html",
+          user: user,
+          lobbies: lobbies,
+          pagination_info: pagination_info,
+          to_page: to_page
+        )
+
+      nil ->
+        render404(conn, "User (#{username}) not found")
     end
   end
 
@@ -87,5 +104,11 @@ defmodule BattleBoxWeb.LobbyController do
     |> put_status(404)
     |> put_view(PageView)
     |> render("not_found.html", message: message)
+  end
+
+  defp to_page(conn, %{"user_username" => username}, %{per_page: per_page}) do
+    fn page ->
+      Routes.user_lobby_path(conn, :index, username, %{page: page, per_page: per_page})
+    end
   end
 end

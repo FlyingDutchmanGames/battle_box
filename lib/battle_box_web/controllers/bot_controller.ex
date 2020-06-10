@@ -2,7 +2,6 @@ defmodule BattleBoxWeb.BotController do
   use BattleBoxWeb, :controller
   alias BattleBoxWeb.PageView
   alias BattleBox.{Repo, Bot, User}
-  import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
   import Ecto.Query
 
   def new(conn, _params) do
@@ -41,6 +40,7 @@ defmodule BattleBoxWeb.BotController do
       %User{} = user ->
         bots =
           Bot
+          |> where(user_id: ^user.id)
           |> order_by(desc: :inserted_at)
           |> paginate(params)
           |> Repo.all()
