@@ -52,6 +52,7 @@ defmodule BattleBoxWeb.Router do
 
       resources "/users", UserController, only: [], param: "username" do
         resources "/lobbies", LobbyController, only: [:edit, :update], param: "name"
+        resources "/bots", BotController, only: [:edit, :update], param: "name"
       end
     end
 

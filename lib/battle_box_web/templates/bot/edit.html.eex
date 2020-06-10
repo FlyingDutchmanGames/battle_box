@@ -1,0 +1,14 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      / Users
+      / <a href="<%= Routes.user_path(@conn, :show, @current_user.username) %>"><%= @current_user.username %></a>
+      / <a href="<%= Routes.user_bot_path(@conn, :index, @current_user.username) %>">Bots</a>
+      / Edit
+    </div>
+  </div>
+  <%= form_for @changeset, Routes.user_bot_path(@conn, :update, @current_user.username, @bot.name), fn form -> %>
+    <%= render("_form.html", form: form) %>
+    <%= submit "Save Bot", class: "btn btn-primary" %>
+  <% end %>
+</div>
