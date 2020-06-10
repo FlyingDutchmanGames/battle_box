@@ -1,0 +1,27 @@
+<div style="display: flex; align-items: center; width: 100%; justify-content: space-between;">
+  <div>
+    <h3>General</h3>
+    <div>Robot HP: <%= @settings.robot_hp %></div>
+    <div>Max Turns: <%= @settings.max_turns %></div>
+
+    <h3>Spawning</h3>
+    <div>Spawn Every: <%= @settings.spawn_every %></div>
+    <div>Spawn Per Player: <%= @settings.spawn_per_player %></div>
+
+    <h3>Attack Damage</h3>
+    <div>Attack Damage Min: <%= @settings.attack_damage_min %></div>
+    <div>Attack Damage Max: <%= @settings.attack_damage_max %></div>
+
+    <h3>Collision Damage</h3>
+    <div>Collision Damage Min: <%= @settings.collision_damage_min %></div>
+    <div>Collision Damage Max: <%= @settings.collision_damage_max %></div>
+
+    <h3>Suicide Damage</h3>
+    <div>Suicide Damage Min: <%= @settings.suicide_damage_min %></div>
+    <div>Suicide Damage Max: <%= @settings.suicide_damage_max %></div>
+  </div>
+
+  <div style="width: 70%;">
+    <%= render("__terrain.html", terrain: @settings.terrain) %>
+  </div>
+</div>
