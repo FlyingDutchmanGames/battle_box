@@ -52,7 +52,7 @@ defmodule BattleBoxWeb.BotController do
     with {:user, %User{} = user} <- {:user, Repo.get_by(User, username: username)},
          {:bot, %Bot{} = bot} <- {:bot, Repo.get_by(Bot, name: name, user_id: user.id)} do
       bot = Repo.preload(bot, :user)
-      render(conn, "show.html", bot: bot)
+      render(conn, "show.html", bot: bot, user: user)
     else
       {:user, nil} -> render404(conn, "User (#{username}) not found")
       {:bot, nil} -> render404(conn, "Bot (#{name}) not found")

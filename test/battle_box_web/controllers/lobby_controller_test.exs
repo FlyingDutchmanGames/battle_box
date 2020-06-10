@@ -16,7 +16,6 @@ defmodule BattleBoxWeb.LobbyControllerTest do
 
       conn =
         conn
-        |> signin(user: user)
         |> get("/users/#{user.username}/lobbies/#{lobby.name}")
 
       assert html_response(conn, 200) =~ "test-name"

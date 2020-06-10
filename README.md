@@ -13,8 +13,6 @@
 
 ### V1
 
-#### Bots
-- Edit bots
 #### Lobbies
 - bot self play allowed toggle
 - user self play allowed toggle
@@ -23,11 +21,13 @@
 - set of default lobbies with interesting terrains and bots
 #### Admin
 - Show number of bots/lobbies/games by user
+#### User self admin
+- provide a way to change username
+- provide avatars that are not from github
+- Have a way to have users not from github
 #### Games
 - Historical Games Filtered/Paginated by [user, user + bot]
-- Live Games that meet the same criteria
 - Better test the Game controller
-- Respect the new bot follow params in game visualizer
 #### Clients
 - BattleBox Elixir Client
 - BattleBox Python Client
@@ -39,6 +39,7 @@
 - Robot game give out random player ids / color coding based on player 
 - Make sure user input can't cause a game to crash (maybe changesets)
 - Procedural terrain generation?
+- Area conquer mode
 - Robot Game Settings
   - Reorgainze the code
   - Add in team spawns
@@ -46,8 +47,6 @@
 - Dynamically created docs
 - Wire protocol docs
 - Robot game rules docs
-#### Robot Game
-- Area conquer mode
 #### ELO rankings
 - Provide optional ELOs to lobbies
 #### Client
@@ -75,19 +74,15 @@
   - index
 - Handle when connection is closed on trying to send from connection server
 - Add footer on all pages
-- Impersonation
 - Concurrent connection limiter
 - Favicon
 - Vendor in the font
 - Bread crumb helper functions to force consistency
   - "Not found" revaamp to perserve bread crumbs
-- User self admin
-  - provide a way to change username
-  - provide avatars that are not from github
-  - Have a way to have users not from github
 
 ### Nice to Haves
 
+- Impersonation
 - Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
 - Build TicTacToe/Othello/ as proof of game engine extendability
 - Pass timing info to the game so it can do move timing
