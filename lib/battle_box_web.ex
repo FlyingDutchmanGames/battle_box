@@ -27,6 +27,7 @@ defmodule BattleBoxWeb do
       import BattleBoxWeb.Gettext
       alias BattleBoxWeb.Router.Helpers, as: Routes
       import Phoenix.LiveView.Controller
+      import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
 
       @game_engine_provider Application.get_env(
                               :battle_box,

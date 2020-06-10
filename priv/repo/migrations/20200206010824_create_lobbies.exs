@@ -15,6 +15,6 @@ defmodule BattleBox.Repo.Migrations.CreateLobbies do
     end
 
     create index("lobbies", [:name], unique: true)
-    create index("lobbies", [:user_id])
+    create index("lobbies", [:user_id, :inserted_at])
   end
 end

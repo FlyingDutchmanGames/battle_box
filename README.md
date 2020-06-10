@@ -15,9 +15,7 @@
 
 #### Bots
 - Edit bots
-- Add pagination to index
 #### Lobbies
-- Add pagination to index
 - bot self play allowed toggle
 - user self play allowed toggle
 - add in server ais
@@ -66,6 +64,7 @@
     - {"localhost": { "token": "asdbasdafsdfas"}, "app.botskrieg.com": {"token": "asdasdfas"}} <- creds format
     - Load the credential for the host being connected to
 #### General
+- Index Page
 - Upgrade phoenix/liveview
 - Disallow the following in user identifiers
   - new
