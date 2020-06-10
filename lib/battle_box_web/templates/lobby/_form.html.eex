@@ -1,0 +1,29 @@
+<h2>General Settings</h2>
+<div class="form-group">
+  <label>Name: <%= text_input @form, :name, class: "form-control" %></label><br>
+  <%= error_tag @form, :name %>
+</div>
+
+<div class="form-group">
+  <label>Game Acceptance Time (ms): <%= number_input(@form, :game_acceptance_time_ms, class: "form-control") %></label><br>
+  <%= error_tag @form, :game_acceptance_time_ms %>
+</div>
+
+<div class="form-group">
+  <label>Minimum Command Time (ms): <%= number_input(@form, :command_time_minimum_ms, class: "form-control") %></label><br>
+  <%= error_tag @form, :command_time_minimum_ms %>
+</div>
+
+<div class="form-group">
+  <label>Maximum Command Time (ms): <%= number_input(@form, :command_time_maximum_ms, class: "form-control") %></label><br>
+  <%= error_tag @form, :command_time_maximum_ms %>
+</div>
+
+<hr>
+<div>
+  <% game_module = Phoenix.HTML.FormData.input_value(@conn, @form, :game_type) |> game_type_name_to_module %>
+  <%= inputs_for @form, game_module.settings_module.name, fn settings -> %>
+    <%= game_module.view.render("_settings_edit.html", settings: settings, conn: @conn) %>
+  <% end %>
+</div>
+<hr>

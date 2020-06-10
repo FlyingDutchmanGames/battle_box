@@ -2,6 +2,7 @@ defmodule BattleBoxWeb.LobbyController do
   use BattleBoxWeb, :controller
   alias BattleBox.{Lobby, Repo, User}
   alias BattleBoxWeb.PageView
+  import Ecto.Query
 
   def new(conn, %{"game_type" => game_type}) do
     changeset = Lobby.changeset(%Lobby{}, %{"game_type" => game_type})
@@ -25,6 +26,16 @@ defmodule BattleBoxWeb.LobbyController do
         |> put_view(PageView)
         |> render("not_found.html", message: "Lobby (#{lobby_name}) not found")
     end
+  end
+
+  def edit(%{assigns: %{current_user: %{id: user_id}}} = conn, %{"name" => lobby_name}) do
+    %Lobby{} =
+      lobby =
+      Repo.one(from Lobby, where: [name: ^lobby_name, user_id: ^user_id])
+      |> Lobby.preload_game_settings()
+
+    changeset = Lobby.changeset(lobby)
+    render(conn, "edit.html", changeset: changeset, lobby: lobby)
   end
 
   def index(conn, %{"user_username" => username}) do
@@ -53,6 +64,29 @@ defmodule BattleBoxWeb.LobbyController do
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
+    end
+  end
+
+  def update(
+        %{assigns: %{current_user: %{id: user_id} = user}} = conn,
+        %{"name" => lobby_name, "lobby" => params} = foo
+      ) do
+    IO.inspect(foo)
+
+    %Lobby{} =
+      lobby =
+      Repo.one(from Lobby, where: [name: ^lobby_name, user_id: ^user_id])
+      |> Lobby.preload_game_settings()
+
+    lobby
+    |> Lobby.changeset(params)
+    |> Repo.update()
+    |> case do
+      {:ok, lobby} ->
+        redirect(conn, to: Routes.user_lobby_path(conn, :show, user.username, lobby.name))
+
+      {:error, changeset} ->
+        render(conn, "edit.html", changeset: changeset, lobby: lobby)
     end
   end
 end
