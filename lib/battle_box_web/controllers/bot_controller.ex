@@ -2,6 +2,8 @@ defmodule BattleBoxWeb.BotController do
   use BattleBoxWeb, :controller
   alias BattleBoxWeb.PageView
   alias BattleBox.{Repo, Bot, User}
+  import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
+  import Ecto.Query
 
   def new(conn, _params) do
     changeset = Bot.changeset(%Bot{})
@@ -23,31 +25,49 @@ defmodule BattleBoxWeb.BotController do
   end
 
   def show(conn, %{"user_username" => username, "name" => name}) do
-    with %User{} = user <- Repo.get_by(User, username: username),
-         %Bot{} = bot <- Repo.get_by(Bot, name: name, user_id: user.id) do
+    with {:user, %User{} = user} <- {:user, Repo.get_by(User, username: username)},
+         {:bot, %Bot{} = bot} <- {:bot, Repo.get_by(Bot, name: name, user_id: user.id)} do
       bot = Repo.preload(bot, :user)
       render(conn, "show.html", bot: bot)
     else
-      nil ->
-        conn
-        |> put_status(404)
-        |> put_view(PageView)
-        |> render("not_found.html", message: "Bot not found")
+      {:user, nil} -> render404(conn, "User (#{username}) not found")
+      {:bot, nil} -> render404(conn, "Bot (#{name}) not found")
     end
   end
 
-  def index(conn, %{"user_username" => username}) do
+  def index(conn, %{"user_username" => username} = params) do
     Repo.get_by(User, username: username)
-    |> Repo.preload(:bots)
     |> case do
       %User{} = user ->
-        render(conn, "index.html", user: user)
+        bots =
+          Bot
+          |> order_by(desc: :inserted_at)
+          |> paginate(params)
+          |> Repo.all()
+
+        pagination_info = pagination_info(params)
+        to_page = to_page(conn, params, pagination_info)
+
+        render(conn, "index.html",
+          user: user,
+          bots: bots,
+          pagination_info: pagination_info,
+          to_page: to_page
+        )
 
       nil ->
-        conn
-        |> put_status(404)
-        |> put_view(PageView)
-        |> render("not_found.html", message: "User (#{username}) not found")
+        render404(conn, "User (#{username}) not found")
     end
+  end
+
+  defp render404(conn, message) do
+    conn
+    |> put_status(404)
+    |> put_view(PageView)
+    |> render("not_found.html", message: message)
+  end
+
+  defp to_page(conn, %{"user_username" => username}, %{per_page: per_page}) do
+    fn page -> Routes.user_bot_path(conn, :index, username, %{page: page, per_page: per_page}) end
   end
 end

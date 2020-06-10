@@ -10,16 +10,15 @@
     </div>
   </div>
   <div class="box">
-    <%= for bot <- Enum.sort_by(@user.bots, & &1.inserted_at, {:desc, NaiveDateTime}) do %> 
+    <%= for bot <- @bots do %> 
       <div class="box-row bot">
         <div class="box-details">
-          <div class="name">Name: <%= bot.name %></div>
+          <div class="name">Name: <a href="<%= Routes.user_bot_path(@conn, :show, @user.username, bot.name) %>"><%= bot.name %></a></div>
           <div>Created: <%= humanize_seconds_ago(bot.inserted_at) %></div>
-        </div>
-        <div>
-          <a href="<%= Routes.user_bot_path(@conn, :show, @user.username, bot.name) %>" class="btn">Details</a>
         </div>
       </div>
     <% end %>
   </div>
+
+  <%= BattleBoxWeb.PageView.render("_pagination_controls.html", to_page: @to_page, incomplete_page?: length(@bots) < @pagination_info.per_page, pagination_info: @pagination_info) %>
 </div>
