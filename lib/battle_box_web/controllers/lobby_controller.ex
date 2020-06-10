@@ -69,10 +69,8 @@ defmodule BattleBoxWeb.LobbyController do
 
   def update(
         %{assigns: %{current_user: %{id: user_id} = user}} = conn,
-        %{"name" => lobby_name, "lobby" => params} = foo
+        %{"name" => lobby_name, "lobby" => params}
       ) do
-    IO.inspect(foo)
-
     %Lobby{} =
       lobby =
       Repo.one(from Lobby, where: [name: ^lobby_name, user_id: ^user_id])
