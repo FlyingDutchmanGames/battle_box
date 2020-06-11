@@ -14,5 +14,6 @@ defmodule BattleBox.Repo.Migrations.CreateUsers do
 
     create index("users", [:username], unique: true)
     create index("users", [:github_id], unique: true)
+    create index("users", [:inserted_at])
   end
 end

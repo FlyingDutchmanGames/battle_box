@@ -3,7 +3,7 @@ defmodule BattleBoxWeb.PageControllerTest do
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")
-    assert html_response(conn, 200) =~ "BattleBox"
+    assert html_response(conn, 200) =~ "Botskrieg"
   end
 
   test "GET /login", %{conn: conn} do
