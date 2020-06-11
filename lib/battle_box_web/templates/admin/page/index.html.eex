@@ -3,7 +3,8 @@
     <div class="subhead-heading">
       / Admin
       {
-        / <a href="<%= Routes.admin_user_path(@conn, :index) %>">Users</a>
+        / <a href="<%= Routes.admin_user_path(@conn, :index) %>">Users</a>,
+        / <a href="<%= Routes.live_dashboard_path(@conn, :home) %>">Dashboard</a>
       }
     </div>
   </div>
