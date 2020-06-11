@@ -1,1 +1,86 @@
-<p>BattleBox</p>
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      <a href="<%= Routes.page_path(@conn, :index) %>">/</a>
+      {
+        <a href="">Docs</a>,
+        <a href="">Users</a>,
+        <a href="">Watch</a>
+      }
+    </div>
+  </div>
+
+  <h1 style="text-align: center;">Botskrieg (The Bot Battle Platform)</h1>
+
+  <h2>What's a Botskrieg?</h2>
+  <p>Botskrieg is a platform to Write bots to compete against other people's bots in games/programming challenges</p>
+
+  <h2>Why Build Botskrieg?</h2>
+  <ol>
+    <li>Botskrieg is the classroom "Learn Programming" assignment I always wanted!</li>
+    <li>Other online games kick you off for writing bots, Botskrieg encourages it!</li>
+  </ol>
+
+  <hr>
+
+  <h1>Getting Started</h1>
+  <h2>Navigating Botskrieg</h2>
+  <h2>Sign Up/Login</h2>
+  <h2>Your first API Key</h2>
+  <h2>Picking a Client</h2>
+  <h2>What Game to Play</h2>
+
+  <hr>
+
+  <h1>Project Goals</h1>
+
+  <h2>Easy to Debug &#62;&#62;&#62; As Efficient as Possible</h2>
+  <ul>
+    <li>Optimize for observability/debugability</li>
+    <li>Choose human readable formats where possible</li>
+  </ul>
+
+  <h2>There is No Such Thing as Cheating</h2>
+  <ul>
+    <li>Make it impossible to gain an advantage by being <i>...creative</i></li>
+  </ul>
+
+  <h2><b>BYOPL</b> (Bring Your Own Programming Language)</h2>
+  <ul>
+    <li>Make it easy to build new clients in any language</li>
+    <li>Building a client should only require the following dependencies</li>
+    <ol>
+      <li>TCP Sockets</li>
+      <li>JSON</li>
+    </ol>
+  </ul>
+
+  <h2>Make it Easy to Write New Botskrieg Games</h2>
+  <ul>
+    <li>Provide an easy to use runtime interface that handles all the messy/annoying parts of writing something like this. Writing a game should be as easy as writing a pure function.</li>
+    <li>Make <b>The Right Thing &trade;</b> the easy thing to do</li>
+  </ul>
+
+  <h2>Make Configuring/Running a Botskrieg Server Easy</h2>
+  <ul>
+    <li>Security first</li>
+    <li>Provide admin functionality to manage a server in the face of <b><i>...creative...</i></b> players</li>
+    <li>Minimize dependencies, strive for 100% Elixir/Erlang dependencies</li>
+    <li>Optimize the server for ease of setup</li>
+  </ul>
+
+  <hr>
+
+  <h1>Other</h1>
+
+  <h2>What the heck is an Erlang? (Why build Botskrieg in Such a Niche Language?)</h2>
+  <p><a href="https://www.erlang.org/">Erlang</a> (and <a href="https://elixir-lang.org/">Elixir</a>) are programming languages designed to build large scale concurrent applications. Erlang/Elixir are a good fit for the design of Botskrieg, handling large numbers of current connections gracefully.</p>
+  <h3>Elixir/Erlang Resources</h3>
+  <ul>
+    <li><a href="https://www.phoenixframework.org/">Phoenix</a></li>
+    <li><a href="https://pragprog.com/titles/sbsockets/">Real-Time Phoenix</a></li>
+    <li><a href="https://learnyousomeerlang.com/">Learn You Some Erlang (for Great Good)</a></li>
+    <li><a href="https://www.phoenixframework.org/blog/the-road-to-2-million-websocket-connections">The Road to 2 Million Websocket Connections</a></li>
+  </ul>
+</div>
+
