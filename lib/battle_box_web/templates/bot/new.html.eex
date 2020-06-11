@@ -7,12 +7,8 @@
       / New
     </div>
   </div>
-  <%= form_for @changeset, Routes.bot_path(@conn, :create), fn f -> %>
-    <div class="form-group">
-      <label>Name: <%= text_input f, :name, class: "form-control" %></label><br>
-      <%= error_tag f, :name %>
-    </div>
-
+  <%= form_for @changeset, Routes.bot_path(@conn, :create), fn form -> %>
+    <%= render("_form.html", form: form) %>
     <%= submit "Create Bot", class: "btn btn-primary" %>
   <% end %>
 </div>

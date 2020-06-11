@@ -8,7 +8,7 @@
       {
       <a href="<%= Routes.user_lobby_game_path(@conn, :index, @lobby.user.username, @lobby.name) %>">/ Games</a>,
       <a href="<%= Routes.user_lobby_follow_path(@conn, :follow, @lobby.user.username, @lobby.name) %>" >/ Follow</a>,
-      <a class='<%= unless @current_user && @current_user.id == @lobby.user_id, do: "disabled-link" %>' href="<%= Routes.user_lobby_path(@conn, :edit, @current_user.username, @lobby.name) %>">/ Edit</a>
+      <a class='<%= unless (@current_user && @current_user.id == @lobby.user_id), do: "disabled-link" %>' href="<%= if @current_user, do: Routes.user_lobby_path(@conn, :edit, @current_user.username, @lobby.name) %>">/ Edit</a>
       }
     </div>
   </div>

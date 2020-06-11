@@ -23,14 +23,53 @@ defmodule BattleBoxWeb.BotController do
     end
   end
 
+  def update(
+        %{assigns: %{current_user: %{id: user_id} = user}} = conn,
+        %{"name" => name, "bot" => params}
+      ) do
+    Bot
+    |> where(name: ^name, user_id: ^user_id)
+    |> Repo.one()
+    |> case do
+      nil ->
+        render404(conn, "Bot (#{name}) Not Found for User (#{user.username})")
+
+      %Bot{} = bot ->
+        bot
+        |> Bot.changeset(params)
+        |> Repo.update()
+        |> case do
+          {:ok, bot} ->
+            redirect(conn, to: Routes.user_bot_path(conn, :show, user.username, bot.name))
+
+          {:error, changeset} ->
+            render(conn, "edit.html", changeset: changeset, bot: bot)
+        end
+    end
+  end
+
   def show(conn, %{"user_username" => username, "name" => name}) do
     with {:user, %User{} = user} <- {:user, Repo.get_by(User, username: username)},
          {:bot, %Bot{} = bot} <- {:bot, Repo.get_by(Bot, name: name, user_id: user.id)} do
       bot = Repo.preload(bot, :user)
-      render(conn, "show.html", bot: bot)
+      render(conn, "show.html", bot: bot, user: user)
     else
       {:user, nil} -> render404(conn, "User (#{username}) not found")
       {:bot, nil} -> render404(conn, "Bot (#{name}) not found")
+    end
+  end
+
+  def edit(%{assigns: %{current_user: %{id: user_id} = user}} = conn, %{"name" => name}) do
+    Bot
+    |> where(name: ^name, user_id: ^user_id)
+    |> Repo.one()
+    |> case do
+      %Bot{} = bot ->
+        changeset = Bot.changeset(bot)
+        render(conn, "edit.html", changeset: changeset, bot: bot)
+
+      nil ->
+        render404(conn, "Bot (#{name}) Not Found for User (#{user.username})")
     end
   end
 

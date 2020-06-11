@@ -22,8 +22,10 @@ defmodule BattleBoxWeb.LobbyController do
     end
   end
 
-  def edit(%{assigns: %{current_user: %{id: user_id} = user}} = conn, %{"name" => lobby_name}) do
-    Repo.one(from Lobby, where: [name: ^lobby_name, user_id: ^user_id])
+  def edit(%{assigns: %{current_user: %{id: user_id} = user}} = conn, %{"name" => name}) do
+    Lobby
+    |> where(name: ^name, user_id: ^user_id)
+    |> Repo.one()
     |> Lobby.preload_game_settings()
     |> case do
       %Lobby{} = lobby ->
@@ -31,7 +33,7 @@ defmodule BattleBoxWeb.LobbyController do
         render(conn, "edit.html", changeset: changeset, lobby: lobby)
 
       nil ->
-        render404(conn, "Lobby (#{lobby_name}) Not Found for User (#{user.username})")
+        render404(conn, "Lobby (#{name}) Not Found for User (#{user.username})")
     end
   end
 
@@ -77,13 +79,15 @@ defmodule BattleBoxWeb.LobbyController do
 
   def update(
         %{assigns: %{current_user: %{id: user_id} = user}} = conn,
-        %{"name" => lobby_name, "lobby" => params}
+        %{"name" => name, "lobby" => params}
       ) do
-    Repo.one(from Lobby, where: [name: ^lobby_name, user_id: ^user_id])
+    Lobby
+    |> where(name: ^name, user_id: ^user_id)
+    |> Repo.one()
     |> Lobby.preload_game_settings()
     |> case do
       nil ->
-        render404(conn, "Lobby (#{lobby_name}) Not Found for User (#{user.username})")
+        render404(conn, "Lobby (#{name}) Not Found for User (#{user.username})")
 
       %Lobby{} = lobby ->
         lobby
