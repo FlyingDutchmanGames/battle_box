@@ -83,6 +83,7 @@ defmodule BattleBoxWeb.LobbyController do
       ) do
     Lobby
     |> where(name: ^name, user_id: ^user_id)
+    |> Repo.one()
     |> Lobby.preload_game_settings()
     |> case do
       nil ->

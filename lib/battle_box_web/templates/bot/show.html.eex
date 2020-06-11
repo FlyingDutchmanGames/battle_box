@@ -7,7 +7,7 @@
       / <%= @bot.name %>
       { 
       <a href="<%= Routes.user_bot_follow_path(@conn, :follow, @user.username, @bot.name) %>">/ Follow</a>,
-      <a class='<%= unless @current_user && @current_user.id == @bot.user_id, do: "disabled-link" %>' href="<%= Routes.user_bot_path(@conn, :edit, @current_user.username, @bot.name) %>">/ Edit</a>
+      <a class='<%= unless @current_user && @current_user.id == @bot.user_id, do: "disabled-link" %>' href="<%= if @current_user, do: Routes.user_bot_path(@conn, :edit, @current_user.username, @bot.name) %>">/ Edit</a>
       }
     </div>
   </div>

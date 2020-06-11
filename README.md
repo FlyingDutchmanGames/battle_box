@@ -21,7 +21,8 @@
 - set of default lobbies with interesting terrains and bots
 #### Admin
 - Show number of bots/lobbies/games by user
-#### User self admin
+#### Users
+- index
 - provide a way to change username
 - provide avatars that are not from github
 - Have a way to have users not from github
