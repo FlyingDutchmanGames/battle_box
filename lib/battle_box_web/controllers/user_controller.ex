@@ -9,7 +9,7 @@ defmodule BattleBoxWeb.UserController do
       User
       |> order_by(asc: :inserted_at)
       |> paginate(params)
-      |> Repo.all
+      |> Repo.all()
 
     pagination_info = pagination_info(params)
     to_page = to_page(conn, pagination_info)
