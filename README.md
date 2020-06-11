@@ -22,7 +22,6 @@
 #### Admin
 - Show number of bots/lobbies/games by user
 #### Users
-- index
 - provide a way to change username
 - provide avatars that are not from github
 - Have a way to have users not from github
@@ -64,7 +63,6 @@
     - {"localhost": { "token": "asdbasdafsdfas"}, "botskrieg.com": {"token": "asdasdfas"}} <- creds format
     - Load the credential for the host being connected to
 #### General
-- Index Page
 - Disallow the following in user identifiers
   - new
   - license
