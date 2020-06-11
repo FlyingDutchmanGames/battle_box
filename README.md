@@ -36,6 +36,7 @@
 - Update protocol to give the result of each move
 #### Robot Game
 - limit memory usage of game servers (they're currently at 2 mbs)
+- Fix terrain to be the right orientation
 - Manual GC?
 - Robot game give out random player ids / color coding based on player 
 - Make sure user input can't cause a game to crash (maybe changesets)
@@ -64,7 +65,6 @@
     - Load the credential for the host being connected to
 #### General
 - Index Page
-- Upgrade phoenix/liveview
 - Disallow the following in user identifiers
   - new
   - license
@@ -88,6 +88,7 @@
 - Build TicTacToe/Othello/ as proof of game engine extendability
 - Pass timing info to the game so it can do move timing
 - Make all tests async by passing the ecto sandbox to all of the game engine
+- Rip out webpack/npm? It seems like we could eliminate a pretty huge dep if its basically static css and js
 
 ### Useful SQL
 
