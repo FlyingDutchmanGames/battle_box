@@ -4,7 +4,7 @@
       <a href="<%= Routes.page_path(@conn, :index) %>">/</a>
       {
         <a href="">Docs</a>,
-        <a href="">Users</a>,
+        <a href="<%= Routes.user_path(@conn, :index) %>">Users</a>,
         <a href="">Watch</a>
       }
     </div>

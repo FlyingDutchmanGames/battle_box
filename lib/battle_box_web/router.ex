@@ -25,7 +25,7 @@ defmodule BattleBoxWeb.Router do
 
     resources "/games", GameController, only: [:show]
 
-    resources "/users", UserController, only: [:show], param: "username" do
+    resources "/users", UserController, only: [:show, :index], param: "username" do
       get "/follow", FollowController, :follow
 
       resources "/bots", BotController, only: [:show, :index], param: "name" do
