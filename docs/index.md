@@ -8,8 +8,6 @@ Botskrieg is written in [Elixir](https://elixir-lang.org/) on top of the `Battle
 
 ## Getting Started
 
-
-
 ## Games
 
 ### Robot Game

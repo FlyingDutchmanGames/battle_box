@@ -6,12 +6,12 @@ This is mostly for me, but others might find it interesting
 
 1.) Provision a server from Digital Ocean using the `docker` base image
   A.) (I'm using the 5$ a month 1gb 1vcpu instance)
-2.) Choose a dns name and point it at your instance `app.botskrieg.com` => server
+2.) Choose a dns name and point it at your instance `botskrieg.com` => server
   A.) Check that its pointed correctly
 ```
-  ➜  docs git:(docker-prod-builds-part-2) ✗ dig app.botskrieg.com
+  ➜  docs git:(docker-prod-builds-part-2) ✗ dig botskrieg.com
 
-; <<>> DiG 9.10.6 <<>> app.botskrieg.com
+; <<>> DiG 9.10.6 <<>> botskrieg.com
 ;; global options: +cmd
 ;; Got answer:
 ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 62775
@@ -20,10 +20,10 @@ This is mostly for me, but others might find it interesting
 ;; OPT PSEUDOSECTION:
 ; EDNS: version: 0, flags:; udp: 512
 ;; QUESTION SECTION:
-;app.botskrieg.com.		IN	A
+;botskrieg.com.		IN	A
 
 ;; ANSWER SECTION:
-app.botskrieg.com.	3588	IN	A	68.183.104.42
+botskrieg.com.	3588	IN	A	68.183.104.42
 
 ;; Query time: 66 msec
 ;; SERVER: 8.8.8.8#53(8.8.8.8)
@@ -35,16 +35,15 @@ app.botskrieg.com.	3588	IN	A	68.183.104.42
   B.) Port 80 (HTTP to be redirected to HTTP 443)
   C.) Port 443 (HTTPS)
   D.) Port 4242 (BattleBox TCP Connections)
-  E.) Port 4243 (BattleBox WS Connections)
 4.) Go to Github and make a new Oauth App
-  A.) Set the callback to `$BATTLE_BOX_HOST/auth/github/callback` (for me `https://app.botskrieg.com/auth/github/callback`)
+  A.) Set the callback to `$BATTLE_BOX_HOST/auth/github/callback` (for me `https://botskrieg.com/auth/github/callback`)
 
 ## Box Setup (To be run on the server)
 
 Export the hostname for your server
 
 ```
-export BATTLE_BOX_HOST=app.botskrieg.com
+export BATTLE_BOX_HOST=botskrieg.com
 ```
 
 ### Enable Firewall
@@ -54,7 +53,6 @@ ufw allow ssh/tcp
 ufw allow http/tcp
 ufw allow https/tcp
 ufw allow 4242
-ufw allow 4243
 ufw logging on
 yes | ufw enable
 ufw status
