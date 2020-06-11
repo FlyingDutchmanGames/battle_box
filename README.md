@@ -57,11 +57,11 @@
   - MyBot.start(lobby, opts \\ %{})
     - opts
       - credential: "TOKEN"
-      - uri: "battleboxs://app.botskrieg.com:4242"
+      - uri: "battleboxs://botskrieg.com:4242"
   - Choose host / protocol
-    `opt passed to start/2` `$BATTLE_BOX_SERVER_URI` `Application.get_env(:battle_box_client, :server_uri)` `battleboxs://app.botskrieg.com:4242` 
+    `opt passed to start/2` `$BATTLE_BOX_SERVER_URI` `Application.get_env(:battle_box_client, :server_uri)` `battleboxs://botskrieg.com:4242` 
   - implicitly load one of (in order) `opt passed to start/2` `$BATTLE_BOX_CREDENTIALS`, `$BATTLE_BOX_CRENDENTIAL_FILE`, `.battle_box_crendentials` `throw error with helpful info`
-    - {"localhost": { "token": "asdbasdafsdfas"}, "app.botskrieg.com": {"token": "asdasdfas"}} <- creds format
+    - {"localhost": { "token": "asdbasdafsdfas"}, "botskrieg.com": {"token": "asdasdfas"}} <- creds format
     - Load the credential for the host being connected to
 #### General
 - Index Page
