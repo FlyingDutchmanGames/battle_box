@@ -7,8 +7,11 @@ defmodule BattleBox.Repo.Migrations.CreateUsers do
       add :avatar_url, :text, null: false
       add :username, :citext, null: false
 
+      add :concurrent_connection_limit, :integer, null: false
+
       add :is_admin, :boolean, default: false, null: false
       add :is_banned, :boolean, default: false, null: false
+
       timestamps()
     end
 

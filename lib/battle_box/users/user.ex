@@ -12,6 +12,8 @@ defmodule BattleBox.User do
     field :avatar_url, :string
     field :username, :string
 
+    field :concurrent_connection_limit, :integer, default: 10
+
     field :is_admin, :boolean, default: false
     field :is_banned, :boolean, default: false
 
