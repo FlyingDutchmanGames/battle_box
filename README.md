@@ -63,14 +63,6 @@
     - {"localhost": { "token": "asdbasdafsdfas"}, "botskrieg.com": {"token": "asdasdfas"}} <- creds format
     - Load the credential for the host being connected to
 #### General
-- Disallow the following in user identifiers
-  - new
-  - license
-  - edit
-  - update
-  - create
-  - show
-  - index
 - Handle when connection is closed on trying to send from connection server
 - Add footer on all pages
 - Vendor in the font
