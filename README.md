@@ -73,7 +73,6 @@
   - index
 - Handle when connection is closed on trying to send from connection server
 - Add footer on all pages
-- Concurrent connection limiter
 - Vendor in the font
 - Bread crumb helper functions to force consistency
   - "Not found" revaamp to perserve bread crumbs

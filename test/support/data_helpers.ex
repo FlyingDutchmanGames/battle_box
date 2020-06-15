@@ -29,7 +29,8 @@ defmodule BattleBox.Test.DataHelpers do
       avatar_url: "http://not-real.com",
       username: opts[:username] || "username-#{user_id}",
       is_banned: opts[:is_banned] || false,
-      is_admin: opts[:is_admin] || false
+      is_admin: opts[:is_admin] || false,
+      connection_limit: opts[:connection_limit] || 10
     )
     |> Repo.insert()
   end
