@@ -41,6 +41,11 @@
       <%= error_tag f, :is_banned %>
     </div>
 
+    <div class="form-group">
+      <label>Concurrent Connection Limit: <%= number_input(f, :connection_limit, class: "form-control") %></label><br>
+      <%= error_tag f, :connection_limit %>
+    </div>
+
     <%= submit "Save", class: "btn btn-primary" %>
   <% end %>
 </div>

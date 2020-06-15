@@ -12,6 +12,8 @@ defmodule BattleBox.User do
     field :avatar_url, :string
     field :username, :string
 
+    field :connection_limit, :integer, default: 10
+
     field :is_admin, :boolean, default: false
     field :is_banned, :boolean, default: false
 
@@ -37,8 +39,9 @@ defmodule BattleBox.User do
 
   def admin_changeset(user, params \\ %{}) do
     user
-    |> cast(params, [:username, :avatar_url, :is_admin, :is_banned])
-    |> validate_required([:username, :avatar_url, :is_admin, :is_admin])
+    |> cast(params, [:username, :avatar_url, :is_admin, :is_banned, :connection_limit])
+    |> validate_required([:username, :avatar_url, :is_admin, :is_admin, :connection_limit])
+    |> validate_number(:connection_limit, greater_than: 0)
     |> validate_user_identifer(:username)
     |> unique_constraint(:username)
   end

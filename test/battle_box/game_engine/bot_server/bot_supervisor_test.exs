@@ -10,7 +10,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
   end
 
   setup do
-    {:ok, user} = create_user(id: @user_id)
+    {:ok, user} = create_user(id: @user_id, connection_limit: 1)
 
     {:ok, key} =
       user
@@ -71,6 +71,20 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                  lobby_name: "fake-lobby",
                  connection: self()
                })
+    end
+
+    test "starting a bot when you're at your limit fails", context do
+      params = %{
+        token: context.key.token,
+        bot_name: "whatever",
+        lobby_name: context.lobby.name,
+        connection: self()
+      }
+
+      assert {:ok, _pid, _params} = BotSupervisor.start_bot(context.game_engine, params)
+
+      assert {:error, %{user: ["User connection limit exceeded"]}} =
+               BotSupervisor.start_bot(context.game_engine, params)
     end
 
     test "starting a bot that doesn't exist creates it", context do

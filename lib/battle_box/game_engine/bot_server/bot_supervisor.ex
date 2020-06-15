@@ -16,18 +16,16 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
         %{connection: connection, lobby_name: lobby_name, token: token, bot_name: bot_name}
       ) do
     with {:ok, user} <- ApiKey.authenticate(token),
+         {:within_connection_limit?, true} <-
+           {:within_connection_limit?, within_connection_limit?(game_engine, user)},
          {:ok, bot} <- Bot.get_or_create_by_name(user, bot_name),
          {:lobby, %Lobby{} = lobby} <- {:lobby, Repo.get_by(Lobby, name: lobby_name)} do
       start_bot(game_engine, %{connection: connection, bot: bot, lobby: lobby})
     else
-      {:lobby, nil} ->
-        {:error, %{lobby: ["Lobby not found"]}}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:error, BattleBox.changeset_errors(changeset)}
-
-      {:error, errors} ->
-        {:error, errors}
+      {:within_connection_limit?, false} -> {:error, %{user: ["User connection limit exceeded"]}}
+      {:lobby, nil} -> {:error, %{lobby: ["Lobby not found"]}}
+      {:error, %Ecto.Changeset{} = changeset} -> {:error, BattleBox.changeset_errors(changeset)}
+      {:error, errors} -> {:error, errors}
     end
   end
 
@@ -37,6 +35,15 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     opts = update_in(opts.bot, fn bot -> Repo.preload(bot, :user) end)
     {:ok, bot_server} = DynamicSupervisor.start_child(bot_supervisor, {BotServer, opts})
     {:ok, bot_server, %{user_id: bot.user_id, bot_server_id: opts.bot_server_id}}
+  end
+
+  def within_connection_limit?(game_engine, user) do
+    number_connections =
+      game_engine
+      |> get_bot_servers_with_user_id(user.id)
+      |> length
+
+    number_connections < user.connection_limit
   end
 
   def get_bot_servers_with_bot_id(game_engine, bot_id) do
