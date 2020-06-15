@@ -13,9 +13,15 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       |> Bot.changeset(%{name: "test-bot"})
       |> Repo.insert()
 
+    {:ok, other_bot} =
+      user
+      |> Ecto.build_assoc(:bots)
+      |> Bot.changeset(%{name: "something-else"})
+      |> Repo.insert()
+
     {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-lobby")
 
-    %{bot: bot, lobby: lobby}
+    %{bot: bot, other_bot: other_bot, lobby: lobby, user: user}
   end
 
   test "no players means no matches", %{lobby: lobby} do
@@ -35,7 +41,10 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     matches =
       make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], lobby.id)
 
-    assert [%{game: game, players: %{1 => ^player_1_pid, 2 => ^player_2_pid}}] = matches
+    assert [%{game: game, players: %{1 => pid1, 2 => pid2}}] = matches
+    assert pid1 != pid2
+    assert pid1 in [player_1_pid, player_2_pid]
+    assert pid2 in [player_1_pid, player_2_pid]
   end
 
   test "it will only make one match if there are three in the queue", %{lobby: lobby, bot: bot} do
@@ -53,7 +62,10 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
         lobby.id
       )
 
-    assert [%{game: game, players: %{1 => ^player_1_pid, 2 => ^player_2_pid}}] = matches
+    assert [%{game: game, players: %{1 => pid1, 2 => pid2}}] = matches
+    assert pid1 != pid2
+    assert pid1 in [player_1_pid, player_2_pid, player_3_pid]
+    assert pid2 in [player_1_pid, player_2_pid, player_3_pid]
   end
 
   test "it will use the settings from the lobby", %{lobby: lobby, bot: bot} do
@@ -114,5 +126,44 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
                score: 0
              }
            ] = game.game_bots
+  end
+
+  describe "user_self_play / bot_self_play settings" do
+    test "when bot_self_play is false it won't match two of the same bots together", context do
+      {:ok, _} =
+        Lobby.changeset(context.lobby, %{bot_self_play: false})
+        |> Repo.update()
+
+      assert [] ==
+               make_matches(
+                 [%{bot: context.bot, pid: self()}, %{bot: context.bot, pid: self()}],
+                 context.lobby.id
+               )
+    end
+
+    test "when bot_self_play is false, but user self play is true, different bots from the same user can play themselves",
+         context do
+      {:ok, _} =
+        Lobby.changeset(context.lobby, %{user_self_play: true, bot_self_play: false})
+        |> Repo.update()
+
+      assert [%{game: _}] =
+               make_matches(
+                 [%{bot: context.bot, pid: self()}, %{bot: context.other_bot, pid: self()}],
+                 context.lobby.id
+               )
+    end
+
+    test "when user_self_play is false it won't match two of the same users together", context do
+      {:ok, _} =
+        Lobby.changeset(context.lobby, %{user_self_play: false})
+        |> Repo.update()
+
+      assert [] ==
+               make_matches(
+                 [%{bot: context.bot, pid: self()}, %{bot: context.other_bot, pid: self()}],
+                 context.lobby.id
+               )
+    end
   end
 end
