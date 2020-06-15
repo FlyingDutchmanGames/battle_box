@@ -13,7 +13,7 @@ defmodule BattleBox.Repo.Migrations.CreateGames do
       add :bot_id, :uuid, null: false
       add :player, :integer, null: false
       add :score, :integer, null: false
-      add :winner, :bool, null: false, default: false
+      add :winner, :boolean, null: false, default: false
       timestamps()
     end
 

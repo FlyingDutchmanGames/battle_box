@@ -29,6 +29,11 @@
     <div>Minimum Command Time (ms): <%= @lobby.command_time_minimum_ms %></div>
     <div>Maximum Command Time (ms): <%= @lobby.command_time_maximum_ms %></div>
 
+    <h2>Matchmaker</h3>
+    <hr>
+    <div>Bots can play themselves?: <%= @lobby.bot_self_play %></div>
+    <div>Users can play themselves?: <%= @lobby.user_self_play %></div>
+
     <h2><%= @lobby.game_type.title %> Settings</h2>
     <hr>
     <%= @lobby.game_type.view.render("_settings_show.html", settings: Lobby.get_settings(@lobby)) %>

@@ -11,6 +11,9 @@ defmodule BattleBox.Repo.Migrations.CreateLobbies do
       add :command_time_minimum_ms, :integer, null: false
       add :command_time_maximum_ms, :integer, null: false
 
+      add :bot_self_play, :boolean, null: false
+      add :user_self_play, :boolean, null: false
+
       timestamps()
     end
 

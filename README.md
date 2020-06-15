@@ -14,8 +14,6 @@
 ### V1
 
 #### Lobbies
-- bot self play allowed toggle
-- user self play allowed toggle
 - add in server ais
 - Matchmaker queue live
 - set of default lobbies with interesting terrains and bots
@@ -77,25 +75,3 @@
 - Pass timing info to the game so it can do move timing
 - Make all tests async by passing the ecto sandbox to all of the game engine
 - Rip out webpack/npm? It seems like we could eliminate a pretty huge dep if its basically static css and js
-
-### Useful SQL
-
-Find number of game bots for a user
-```
- select users.username, count(*) from game_bots join bots on bots.id = game_bots.bot_id join users on users.id = bots.user_id group by users.id order by count desc;
-```
-
-Number of bots per user
-```
-select username, count(*) from bots join users on bots.user_id = users.id group by users.id order by count desc;
-```
-
-Number of lobbies per user
-```
-select username, count(*) from lobbies join users on lobbies.user_id = users.id group by users.id order by count desc;
-```
-
-Number of games per lobby
-```
-select lobbies.name, count(*) from games join lobbies on games.lobby_id = lobbies.id group by lobbies.id order by count desc;
-```

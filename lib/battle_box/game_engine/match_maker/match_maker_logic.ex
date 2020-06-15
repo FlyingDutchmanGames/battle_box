@@ -13,18 +13,23 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
     settings = Lobby.get_settings(lobby)
     players = lobby.game_type.players_for_settings(settings)
 
+    grouper_function =
+      case lobby do
+        %{user_self_play: false} -> & &1.bot.user_id
+        %{bot_self_play: false} -> & &1.bot.id
+        _ -> fn _ -> :erlang.unique_integer() end
+      end
+
     enqueued_players
-    |> Enum.chunk_every(length(players))
-    |> Enum.filter(fn chunk -> length(chunk) == length(players) end)
-    |> Enum.map(fn chunk -> Enum.zip(players, chunk) end)
-    |> Enum.map(fn chunk ->
+    |> match_players(players, grouper_function)
+    |> Enum.map(fn match ->
       game_bots =
-        for {player, %{bot: bot}} <- chunk do
+        for {player, %{bot: bot}} <- match do
           bot = Repo.preload(bot, :user)
           %GameBot{player: player, bot: bot}
         end
 
-      player_pid_mapping = Map.new(for {player, %{pid: pid}} <- chunk, do: {player, pid})
+      player_pid_mapping = Map.new(for {player, %{pid: pid}} <- match, do: {player, pid})
 
       game_data =
         struct(lobby.game_type)
@@ -42,5 +47,31 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
 
       %{game: game, players: player_pid_mapping}
     end)
+  end
+
+  defp match_players(enqueued_players, players, grouper_function) do
+    enqueued_players
+    |> Enum.group_by(grouper_function)
+    |> Enum.map(fn {_key, values} -> values end)
+    |> Stream.unfold(fn need_to_be_matched ->
+      need_to_be_matched =
+        need_to_be_matched
+        |> Enum.reject(&(&1 == []))
+        |> Enum.shuffle()
+
+      if length(need_to_be_matched) >= length(players) do
+        begin = Enum.take(need_to_be_matched, length(players))
+        rest = Enum.drop(need_to_be_matched, length(players))
+
+        {selected, begin} =
+          begin
+          |> Enum.map(&List.pop_at(&1, 0))
+          |> Enum.unzip()
+
+        match = Enum.zip(players, selected)
+        {match, begin ++ rest}
+      end
+    end)
+    |> Enum.to_list()
   end
 end
