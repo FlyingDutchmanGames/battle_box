@@ -30,7 +30,9 @@ defmodule BattleBox.Lobby do
     :game_type,
     :game_acceptance_time_ms,
     :command_time_minimum_ms,
-    :command_time_maximum_ms
+    :command_time_maximum_ms,
+    :bot_self_play,
+    :user_self_play
   ]
 
   schema "lobbies" do
@@ -38,6 +40,9 @@ defmodule BattleBox.Lobby do
     field :game_acceptance_time_ms, :integer, default: 2000
     field :command_time_minimum_ms, :integer, default: 250
     field :command_time_maximum_ms, :integer, default: 1000
+
+    field :bot_self_play, :boolean, default: true
+    field :user_self_play, :boolean, default: true
 
     field :game_type, GameType, default: BattleBox.Games.RobotGame
 
