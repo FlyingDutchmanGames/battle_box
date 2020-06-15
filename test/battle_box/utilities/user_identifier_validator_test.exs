@@ -17,6 +17,10 @@ defmodule BattleBox.Utilities.UserIdentifierValidationTest do
         [count: 39, validation: :length, kind: :max, type: :string]}},
       {"spaces test",
        {"Can only contain alphanumeric characters or hyphens", [validation: :format]}},
+      {"foo--bar", {"Cannot contain two hyphens in a row", []}},
+      {"new", {"Cannot be \"new\"", []}},
+      {"index", {"Cannot be \"index\"", []}},
+      {"edit", {"Cannot be \"edit\"", []}},
       # Valid Identifiers
       {"foo", nil},
       {"foo-bar", nil}
