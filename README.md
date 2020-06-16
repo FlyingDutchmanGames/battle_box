@@ -64,7 +64,6 @@
 - Handle when connection is closed on trying to send from connection server
 - Add footer on all pages
 - "watch" from index show's next game
-- Vendor in the font
 - Rename Lobby => Arena??
 - Bread crumb helper functions to force consistency
   - "Not found" revaamp to perserve bread crumbs
