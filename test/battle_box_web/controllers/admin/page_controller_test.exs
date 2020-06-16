@@ -22,7 +22,7 @@ defmodule BattleBoxWeb.Admin.PageControllerTest do
         |> signin(is_admin: true)
         |> get("/admin")
 
-      assert html_response(conn, 200) =~ "/ Admin"
+      assert html_response(conn, 200) =~ "Admin"
     end
   end
 end
