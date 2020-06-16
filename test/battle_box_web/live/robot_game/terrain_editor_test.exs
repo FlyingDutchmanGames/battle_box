@@ -95,7 +95,7 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditorTest do
 
     [terrain] =
       document
-      |> Floki.find("#lobby_robot_game_settings_terrain_base64")
+      |> Floki.find("#arena_robot_game_settings_terrain_base64")
       |> Floki.attribute("value")
 
     String.trim(terrain)

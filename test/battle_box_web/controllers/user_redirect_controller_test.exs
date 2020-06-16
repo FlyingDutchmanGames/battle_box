@@ -3,13 +3,13 @@ defmodule BattleBoxWeb.UserRedirectControllerTest do
 
   @user_id Ecto.UUID.generate()
 
-  test "it will redirect you to your user's lobbies", %{conn: conn} do
+  test "it will redirect you to your user's arenas", %{conn: conn} do
     conn =
       conn
       |> signin(user_id: @user_id, username: "FOO")
-      |> get("/lobbies")
+      |> get("/arenas")
 
-    assert redirected_to(conn, 302) =~ "/users/FOO/lobbies"
+    assert redirected_to(conn, 302) =~ "/users/FOO/arenas"
   end
 
   test "it will redirect you to your user's bots", %{conn: conn} do

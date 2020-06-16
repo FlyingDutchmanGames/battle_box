@@ -1,9 +1,9 @@
 defmodule BattleBoxWeb.GameControllerTest do
   use BattleBoxWeb.ConnCase, async: false
 
-  # test "it will not 404 with a not real lobby", %{conn: conn} do
+  # test "it will not 404 with a not real arena", %{conn: conn} do
   #   conn
-  #   |> get("/users/FAKE-USER/lobbies/FAKE/games")
+  #   |> get("/users/FAKE-USER/arenas/FAKE/games")
   #   |> html_response(404)
   # end
 

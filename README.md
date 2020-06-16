@@ -13,12 +13,12 @@
 
 ### V1
 
-#### Lobbies
+#### Arenas
 - add in server ais
 - Matchmaker queue live
-- set of default lobbies with interesting terrains and bots
+- set of default arenas with interesting terrains and bots
 #### Admin
-- Show number of bots/lobbies/games by user
+- Show number of bots/arenas/games by user
 #### Users
 - provide a way to change username
 - provide avatars that are not from github
@@ -47,11 +47,11 @@
 - Wire protocol docs
 - Robot game rules docs
 #### ELO rankings
-- Provide optional ELOs to lobbies
+- Provide optional ELOs to arenas
 #### Client
-- remake protocol from `lobby_name` => `lobby` `bot_name` => `bot` and make `bot` optional and default to `unnamed`
+- remake protocol from `arena_name` => `arena` `bot_name` => `bot` and make `bot` optional and default to `unnamed`
 - have a `use BattleBoxClient.Bot, game_type: RobotGame` macro
-  - MyBot.start(lobby, opts \\ %{})
+  - MyBot.start(arena, opts \\ %{})
     - opts
       - credential: "TOKEN"
       - uri: "battleboxs://botskrieg.com:4242"
@@ -64,14 +64,13 @@
 - Handle when connection is closed on trying to send from connection server
 - Add footer on all pages
 - "watch" from index show's next game
-- Rename Lobby => Arena??
 - Bread crumb helper functions to force consistency
   - "Not found" revaamp to perserve bread crumbs
 
 ### Nice to Haves
 
 - Impersonation
-- Game Engine Stats Server/Interface (# Live Games, # Most Active Lobby, # Connections)?
+- Game Engine Stats Server/Interface (# Live Games, # Most Active arena, # Connections)?
 - Build TicTacToe/Othello/ as proof of game engine extendability
 - Pass timing info to the game so it can do move timing
 - Make all tests async by passing the ecto sandbox to all of the game engine

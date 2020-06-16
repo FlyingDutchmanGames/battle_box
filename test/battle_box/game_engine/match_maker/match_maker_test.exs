@@ -31,41 +31,41 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
     me = self()
 
     assert [] == get_all_in_registry(context.match_maker_registry)
-    :ok = MatchMaker.join_queue(context.game_engine, "test-lobby", bot)
+    :ok = MatchMaker.join_queue(context.game_engine, "test-arena", bot)
 
-    assert [{"test-lobby", me, %{bot: bot, pid: self()}}] ==
+    assert [{"test-arena", me, %{bot: bot, pid: self()}}] ==
              get_all_in_registry(context.match_maker_registry)
   end
 
-  test "you can get all the players in a lobby", context do
-    assert [] == MatchMaker.queue_for_lobby(context.game_engine, "FOO")
+  test "you can get all the players in a arena", context do
+    assert [] == MatchMaker.queue_for_arena(context.game_engine, "FOO")
     :ok = MatchMaker.join_queue(context.game_engine, "FOO", context.bot)
 
     assert [%{bot: context.bot, pid: self(), enqueuer_pid: self()}] ==
-             MatchMaker.queue_for_lobby(context.game_engine, "FOO")
+             MatchMaker.queue_for_arena(context.game_engine, "FOO")
   end
 
-  test "you can get all the lobbies with queued players", context do
-    assert [] == MatchMaker.lobbies_with_queued_players(context.game_engine)
+  test "you can get all the arenas with queued players", context do
+    assert [] == MatchMaker.arenas_with_queued_players(context.game_engine)
     :ok = MatchMaker.join_queue(context.game_engine, "FOO", context.bot)
     :ok = MatchMaker.join_queue(context.game_engine, "BAR", context.bot)
     :ok = MatchMaker.join_queue(context.game_engine, "BAR", context.bot)
     :ok = MatchMaker.join_queue(context.game_engine, "BAZ", context.bot)
 
     assert Enum.sort(["BAR", "BAZ", "FOO"]) ==
-             Enum.sort(MatchMaker.lobbies_with_queued_players(context.game_engine))
+             Enum.sort(MatchMaker.arenas_with_queued_players(context.game_engine))
   end
 
   test "you can dequeue yourself", context do
     me = self()
 
     assert [] == get_all_in_registry(context.match_maker_registry)
-    :ok = MatchMaker.join_queue(context.game_engine, "test-lobby", context.bot)
+    :ok = MatchMaker.join_queue(context.game_engine, "test-arena", context.bot)
 
-    assert [{"test-lobby", me, %{bot: context.bot, pid: self()}}] ==
+    assert [{"test-arena", me, %{bot: context.bot, pid: self()}}] ==
              get_all_in_registry(context.match_maker_registry)
 
-    :ok = MatchMaker.dequeue_self(context.game_engine, "test-lobby")
+    :ok = MatchMaker.dequeue_self(context.game_engine, "test-arena")
     assert [] == get_all_in_registry(context.match_maker_registry)
   end
 

@@ -4,16 +4,16 @@ defmodule BattleBoxWeb.Live.FollowBackTest do
   import Phoenix.LiveViewTest
 
   @bot "bot-name"
-  @lobby "lobby-name"
+  @arena "arena-name"
   @user %{"user" => "user-name"}
 
   @with_bot Map.merge(@user, %{"bot" => @bot})
-  @with_lobby Map.merge(@user, %{"lobby" => @lobby})
+  @with_arena Map.merge(@user, %{"arena" => @arena})
 
   [
     {@user, "Disable Auto Following User (user-name)"},
     {@with_bot, "Disable Auto Following Bot (bot-name)"},
-    {@with_lobby, "Disable Auto Following Lobby (lobby-name)"}
+    {@with_arena, "Disable Auto Following Arena (arena-name)"}
   ]
   |> Enum.each(fn {follow, expected} ->
     test "it displays the correct message when given a pid: #{inspect(expected)}", context do

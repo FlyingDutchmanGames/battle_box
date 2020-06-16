@@ -2,7 +2,7 @@ defmodule BattleBoxWeb.Live.BotServersTest do
   alias BattleBoxWeb.Live.BotServers
   use BattleBoxWeb.ConnCase
   import Phoenix.LiveViewTest
-  alias BattleBox.{Lobby, Bot, GameEngine, GameEngineProvider.Mock}
+  alias BattleBox.{Arena, Bot, GameEngine, GameEngineProvider.Mock}
 
   @user_id Ecto.UUID.generate()
 
@@ -16,10 +16,10 @@ defmodule BattleBoxWeb.Live.BotServersTest do
   setup do
     {:ok, user} = create_user(%{user_id: @user_id})
 
-    {:ok, lobby} =
+    {:ok, arena} =
       user
-      |> Ecto.build_assoc(:lobbies)
-      |> Lobby.changeset(%{name: "test-lobby", game_type: "robot_game", robot_game_settings: %{}})
+      |> Ecto.build_assoc(:arenas)
+      |> Arena.changeset(%{name: "test-arena", game_type: "robot_game", robot_game_settings: %{}})
       |> Repo.insert()
 
     {:ok, bot} =
@@ -28,7 +28,7 @@ defmodule BattleBoxWeb.Live.BotServersTest do
       |> Bot.changeset(%{name: "test-bot"})
       |> Repo.insert()
 
-    %{bot: bot, user: user, lobby: lobby}
+    %{bot: bot, user: user, arena: arena}
   end
 
   test "is an empty list when there are no active servers", %{conn: conn} = context do
@@ -40,7 +40,7 @@ defmodule BattleBoxWeb.Live.BotServersTest do
   test "shows the active servers", %{conn: conn} = context do
     {:ok, _, _} =
       GameEngine.start_bot(context.game_engine, %{
-        lobby: context.lobby,
+        arena: context.arena,
         bot: context.bot,
         connection: self()
       })
@@ -53,7 +53,7 @@ defmodule BattleBoxWeb.Live.BotServersTest do
   test "if a bot server dies, it will be removed from the page", %{conn: conn} = context do
     {:ok, bot_server_pid, _} =
       GameEngine.start_bot(context.game_engine, %{
-        lobby: context.lobby,
+        arena: context.arena,
         bot: context.bot,
         connection: self()
       })
@@ -77,7 +77,7 @@ defmodule BattleBoxWeb.Live.BotServersTest do
 
     {:ok, bot_server_pid, _} =
       GameEngine.start_bot(context.game_engine, %{
-        lobby: context.lobby,
+        arena: context.arena,
         bot: context.bot,
         connection: self()
       })

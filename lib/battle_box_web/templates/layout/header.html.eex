@@ -11,7 +11,7 @@
       <a href="<%= Routes.user_bot_path(@conn, :index, @current_user.username) %>">Bots</a>
     </div>
     <div class="nav-item">
-      <a href="<%= Routes.user_lobby_path(@conn, :index, @current_user.username) %>">Lobbies</a>
+      <a href="<%= Routes.user_arena_path(@conn, :index, @current_user.username) %>">Arenas</a>
     </div>
     <div class="nav-item">
       <a href="<%= Routes.api_key_path(@conn, :index) %>">Keys</a>

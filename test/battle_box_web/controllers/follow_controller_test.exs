@@ -22,17 +22,17 @@ defmodule BattleBoxWeb.FollowControllerTest do
              " / Users / #{user.username} / Follow "
   end
 
-  test "you can do it with a lobby", %{conn: conn, user: user} do
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-name")
+  test "you can do it with a arena", %{conn: conn, user: user} do
+    {:ok, arena} = robot_game_arena(user: user, arena_name: "test-name")
 
-    conn = conn |> get("/users/#{user.username}/lobbies/#{lobby.name}/follow")
+    conn = conn |> get("/users/#{user.username}/arenas/#{arena.name}/follow")
     html = html_response(conn, 200)
 
     {:ok, document} = Floki.parse_document(html)
     assert [break_crumbs] = Floki.find(document, ".subhead-heading")
 
     assert Regex.replace(~r/\s+/, Floki.text(break_crumbs), " ") ==
-             " / Users / #{user.username} / Lobbies / test-name / Follow "
+             " / Users / #{user.username} / Arenas / test-name / Follow "
   end
 
   test "you can do it with a bot", %{conn: conn, user: user} do

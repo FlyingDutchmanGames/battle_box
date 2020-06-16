@@ -32,7 +32,7 @@ defmodule BattleBoxWeb.Router do
         get "/follow", FollowController, :follow
       end
 
-      resources "/lobbies", LobbyController, only: [:show, :index], param: "name" do
+      resources "/arenas", ArenaController, only: [:show, :index], param: "name" do
         get "/follow", FollowController, :follow
         resources "/games", GameController, only: [:index]
       end
@@ -44,14 +44,14 @@ defmodule BattleBoxWeb.Router do
 
       get "/me", UserRedirectController, :users
       get "/bots", UserRedirectController, :bots
-      get "/lobbies", UserRedirectController, :lobbies
+      get "/arenas", UserRedirectController, :arenas
 
       resources "/keys", ApiKeyController
       resources "/bots", BotController, only: [:create, :new], param: "name"
-      resources "/lobbies", LobbyController, only: [:create, :new], param: "name"
+      resources "/arenas", ArenaController, only: [:create, :new], param: "name"
 
       resources "/users", UserController, only: [], param: "username" do
-        resources "/lobbies", LobbyController, only: [:edit, :update], param: "name"
+        resources "/arenas", ArenaController, only: [:edit, :update], param: "name"
         resources "/bots", BotController, only: [:edit, :update], param: "name"
       end
     end

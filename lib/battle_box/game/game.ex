@@ -16,13 +16,13 @@ defmodule BattleBox.Game do
   use Ecto.Schema
   import Ecto.Changeset
   import BattleBox.InstalledGames
-  alias BattleBox.{Repo, Lobby, Bot, GameBot}
+  alias BattleBox.{Repo, Arena, Bot, GameBot}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
   schema "games" do
-    belongs_to :lobby, Lobby
+    belongs_to :arena, Arena
     has_many :game_bots, GameBot
     many_to_many :bots, Bot, join_through: "game_bots"
 

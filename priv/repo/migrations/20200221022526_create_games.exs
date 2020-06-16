@@ -3,7 +3,7 @@ defmodule BattleBox.Repo.Migrations.CreateGames do
 
   def change do
     create table("games") do
-      add :lobby_id, :uuid
+      add :arena_id, :uuid
       add :game_type, :text, null: false
       timestamps()
     end
@@ -18,7 +18,7 @@ defmodule BattleBox.Repo.Migrations.CreateGames do
     end
 
     create index("games", :inserted_at)
-    create index("games", :lobby_id)
+    create index("games", :arena_id)
     create index("game_bots", [:bot_id])
     create index("game_bots", [:game_id, :player], unique: true)
   end

@@ -1,4 +1,4 @@
-defmodule BattleBox.Lobby do
+defmodule BattleBox.Arena do
   defmodule GameType do
     use Ecto.Type
     import BattleBox.InstalledGames
@@ -35,7 +35,7 @@ defmodule BattleBox.Lobby do
     :user_self_play
   ]
 
-  schema "lobbies" do
+  schema "arenas" do
     field :name, :string
     field :game_acceptance_time_ms, :integer, default: 2000
     field :command_time_minimum_ms, :integer, default: 250
@@ -56,8 +56,8 @@ defmodule BattleBox.Lobby do
     timestamps()
   end
 
-  def changeset(lobby, params \\ %{}) do
-    lobby
+  def changeset(arena, params \\ %{}) do
+    arena
     |> cast(params, @params)
     |> validate_required(@params)
     |> validate_inclusion(:game_type, installed_games())
@@ -79,16 +79,16 @@ defmodule BattleBox.Lobby do
     |> unique_constraint(:name)
   end
 
-  def get_settings(lobby) do
-    lobby
+  def get_settings(arena) do
+    arena
     |> preload_game_settings
-    |> Map.fetch!(lobby.game_type.settings_module.name)
+    |> Map.fetch!(arena.game_type.settings_module.name)
   end
 
   def preload_game_settings(nil), do: nil
 
-  def preload_game_settings(lobby) do
-    Repo.preload(lobby, lobby.game_type.settings_module.name)
+  def preload_game_settings(arena) do
+    Repo.preload(arena, arena.game_type.settings_module.name)
   end
 
   defp validate_command_time(changeset) do

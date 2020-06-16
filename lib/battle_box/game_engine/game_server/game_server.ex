@@ -38,7 +38,7 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def handle_event(:internal, :setup, :game_acceptance, data) do
-    data = update_in(data.game, &Repo.preload(&1, :lobby))
+    data = update_in(data.game, &Repo.preload(&1, :arena))
 
     for {player, pid} <- data.players do
       Process.monitor(pid)
@@ -134,8 +134,8 @@ defmodule BattleBox.GameEngine.GameServer do
      %{
        game_id: game.id,
        game_state: request,
-       minimum_time: game.lobby.command_time_minimum_ms,
-       maximum_time: game.lobby.command_time_maximum_ms,
+       minimum_time: game.arena.command_time_minimum_ms,
+       maximum_time: game.arena.command_time_maximum_ms,
        player: player
      }}
   end
@@ -146,7 +146,7 @@ defmodule BattleBox.GameEngine.GameServer do
        game_server: self(),
        game_id: game.id,
        player: player,
-       accept_time: game.lobby.game_acceptance_time_ms,
+       accept_time: game.arena.game_acceptance_time_ms,
        settings: Game.settings(game)
      }}
   end

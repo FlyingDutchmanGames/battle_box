@@ -5,7 +5,7 @@
       / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
       {
         <a href="<%= Routes.user_bot_path(@conn, :index, @user.username) %>">/ Bots</a>,
-        <a href="<%= Routes.user_lobby_path(@conn, :index, @user.username) %>">/ Lobbies</a>,
+        <a href="<%= Routes.user_arena_path(@conn, :index, @user.username) %>">/ Arenas</a>,
         <a href="<%= Routes.user_follow_path(@conn, :follow, @user.username) %>">/ Follow</a>,
         <a class='<%= unless @current_user && @current_user.id == @user.id, do: "disabled-link" %>' href="<%= Routes.api_key_path(@conn, :index) %>">/ Keys</a>
       }

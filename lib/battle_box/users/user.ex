@@ -1,6 +1,6 @@
 defmodule BattleBox.User do
   use Ecto.Schema
-  alias BattleBox.{Repo, Bot, Lobby, ApiKey}
+  alias BattleBox.{Repo, Bot, Arena, ApiKey}
   import Ecto.Changeset
   import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
 
@@ -18,7 +18,7 @@ defmodule BattleBox.User do
     field :is_banned, :boolean, default: false
 
     has_many :bots, Bot
-    has_many :lobbies, Lobby
+    has_many :arenas, Arena
     has_many :api_keys, ApiKey
 
     timestamps()

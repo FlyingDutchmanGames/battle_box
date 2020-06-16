@@ -6,7 +6,7 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
   describe "persistence" do
     test "you can save it and pull it back out" do
       {:ok, %{id: id}} =
-        %Settings{lobby_id: Ecto.UUID.generate()}
+        %Settings{arena_id: Ecto.UUID.generate()}
         |> Repo.insert()
 
       %Settings{id: ^id} = Repo.get(Settings, id)

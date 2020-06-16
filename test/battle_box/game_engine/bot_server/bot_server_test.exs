@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{GameEngine, Repo, Bot, Lobby}
+  alias BattleBox.{GameEngine, Repo, Bot, Arena}
   alias BattleBox.GameEngine.{MatchMaker, BotServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -24,23 +24,23 @@ defmodule BattleBox.GameEngine.BotServerTest do
 
     bot = Repo.preload(bot, :user)
 
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-lobby")
+    {:ok, arena} = robot_game_arena(user: user, arena_name: "test-arena")
 
-    %{lobby: lobby, bot: bot}
+    %{arena: arena, bot: bot}
   end
 
-  setup %{lobby: lobby, bot: bot} do
+  setup %{arena: arena, bot: bot} do
     %{
       init_opts_p1: %{
         bot_server_id: @bot_1_server_id,
         bot: bot,
-        lobby: lobby,
+        arena: arena,
         connection: named_proxy(:p1_connection)
       },
       init_opts_p2: %{
         bot_server_id: @bot_2_server_id,
         bot: bot,
-        lobby: lobby,
+        arena: arena,
         connection: named_proxy(:p2_connection)
       }
     }
@@ -78,13 +78,13 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   test "the bot server registers in the bot server registry",
-       %{p1_server: p1, p2_server: p2, bot: bot, lobby: lobby} = context do
+       %{p1_server: p1, p2_server: p2, bot: bot, arena: arena} = context do
     assert Registry.count(context.bot_registry) == 2
 
-    assert [{^p1, %{bot: ^bot, lobby: ^lobby, game_id: nil, started_at: %NaiveDateTime{}}}] =
+    assert [{^p1, %{bot: ^bot, arena: ^arena, game_id: nil, started_at: %NaiveDateTime{}}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)
 
-    assert [{^p2, %{bot: ^bot, lobby: ^lobby, game_id: nil, started_at: %NaiveDateTime{}}}] =
+    assert [{^p2, %{bot: ^bot, arena: ^arena, game_id: nil, started_at: %NaiveDateTime{}}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p2.bot_server_id)
   end
 
@@ -102,15 +102,15 @@ defmodule BattleBox.GameEngine.BotServerTest do
     assert_receive {{:bot_server, ^id}, :bot_server_update, ^id}
   end
 
-  describe "Matchmaking in a lobby" do
+  describe "Matchmaking in a arena" do
     test "You can ask the bot server to match_make",
          %{p1_server: p1, bot: %{id: bot_id}} = context do
-      assert [] == MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
+      assert [] == MatchMaker.queue_for_arena(context.game_engine, context.arena.id)
 
       :ok = BotServer.match_make(context.p1_server)
 
       assert [%{bot: %{id: ^bot_id}, pid: ^p1}] =
-               MatchMaker.queue_for_lobby(context.game_engine, context.lobby.id)
+               MatchMaker.queue_for_arena(context.game_engine, context.arena.id)
     end
 
     test "When a match is made it forwards the request to the connections", context do
@@ -136,8 +136,8 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   test "if you wait too long to accept, the game is cancelled", context do
-    context.lobby
-    |> Lobby.changeset()
+    context.arena
+    |> Arena.changeset()
     |> Ecto.Changeset.put_change(:game_acceptance_time_ms, 1)
     |> Repo.update!()
 
@@ -150,9 +150,9 @@ defmodule BattleBox.GameEngine.BotServerTest do
     assert_receive {:p2_connection, {:game_cancelled, ^game_id}}
   end
 
-  test "Your commands aren't submitted until after the lobby.minimum_time", context do
-    context.lobby
-    |> Lobby.changeset()
+  test "Your commands aren't submitted until after the arena.minimum_time", context do
+    context.arena
+    |> Arena.changeset()
     |> Ecto.Changeset.put_change(:command_time_minimum_ms, 30)
     |> Repo.update!()
 

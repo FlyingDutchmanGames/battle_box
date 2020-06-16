@@ -20,7 +20,7 @@ defmodule BattleBox.GameEngine.BotServer do
 
   def start_link(
         %{names: _} = config,
-        %{connection: _, bot: bot, lobby: lobby} = data
+        %{connection: _, bot: bot, arena: arena} = data
       ) do
     data = Map.put_new(data, :bot_server_id, Ecto.UUID.generate())
 
@@ -28,7 +28,7 @@ defmodule BattleBox.GameEngine.BotServer do
       name:
         {:via, Registry,
          {config.names.bot_registry, data.bot_server_id,
-          %{bot: bot, lobby: lobby, game_id: nil, started_at: NaiveDateTime.utc_now()}}}
+          %{bot: bot, arena: arena, game_id: nil, started_at: NaiveDateTime.utc_now()}}}
     )
   end
 
@@ -36,7 +36,7 @@ defmodule BattleBox.GameEngine.BotServer do
     :ok =
       GameEngine.broadcast_bot_server_start(
         data.names.game_engine,
-        Map.take(data, [:bot, :lobby, :bot_server_id])
+        Map.take(data, [:bot, :arena, :bot_server_id])
       )
 
     Process.monitor(connection)
@@ -48,12 +48,12 @@ defmodule BattleBox.GameEngine.BotServer do
   end
 
   def handle_event({:call, from}, :match_make, :options, data) do
-    :ok = MatchMaker.join_queue(data.names.game_engine, data.lobby.id, data.bot)
+    :ok = MatchMaker.join_queue(data.names.game_engine, data.arena.id, data.bot)
     {:next_state, :match_making, data, {:reply, from, :ok}}
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
-    :ok = MatchMaker.dequeue_self(data.names.game_engine, data.lobby.id)
+    :ok = MatchMaker.dequeue_self(data.names.game_engine, data.arena.id)
     {:ok, data} = setup_game(data, game_info)
     {:next_state, :game_acceptance, data, {:next_event, :internal, :setup_game_acceptance}}
   end
@@ -175,7 +175,7 @@ defmodule BattleBox.GameEngine.BotServer do
     :ok =
       GameEngine.broadcast_bot_server_update(
         names.game_engine,
-        Map.take(data, [:bot, :lobby, :bot_server_id])
+        Map.take(data, [:bot, :arena, :bot_server_id])
       )
 
     :keep_state_and_data

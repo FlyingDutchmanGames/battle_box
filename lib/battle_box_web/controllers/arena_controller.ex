@@ -1,11 +1,11 @@
-defmodule BattleBoxWeb.LobbyController do
+defmodule BattleBoxWeb.ArenaController do
   use BattleBoxWeb, :controller
-  alias BattleBox.{Lobby, Repo, User}
+  alias BattleBox.{Arena, Repo, User}
   alias BattleBoxWeb.PageView
   import Ecto.Query
 
   def new(conn, %{"game_type" => game_type}) do
-    changeset = Lobby.changeset(%Lobby{}, %{"game_type" => game_type})
+    changeset = Arena.changeset(%Arena{}, %{"game_type" => game_type})
     render(conn, "new.html", changeset: changeset)
   end
 
@@ -13,27 +13,27 @@ defmodule BattleBoxWeb.LobbyController do
     render(conn, "game_type_select.html")
   end
 
-  def show(conn, %{"name" => lobby_name}) do
-    Repo.get_by(Lobby, name: lobby_name)
+  def show(conn, %{"name" => arena_name}) do
+    Repo.get_by(Arena, name: arena_name)
     |> Repo.preload(:user)
     |> case do
-      %Lobby{} = lobby -> render(conn, "show.html", lobby: lobby)
-      nil -> render404(conn, "Lobby (#{lobby_name}) not found")
+      %Arena{} = arena -> render(conn, "show.html", arena: arena)
+      nil -> render404(conn, "Arena (#{arena_name}) not found")
     end
   end
 
   def edit(%{assigns: %{current_user: %{id: user_id} = user}} = conn, %{"name" => name}) do
-    Lobby
+    Arena
     |> where(name: ^name, user_id: ^user_id)
     |> Repo.one()
-    |> Lobby.preload_game_settings()
+    |> Arena.preload_game_settings()
     |> case do
-      %Lobby{} = lobby ->
-        changeset = Lobby.changeset(lobby)
-        render(conn, "edit.html", changeset: changeset, lobby: lobby)
+      %Arena{} = arena ->
+        changeset = Arena.changeset(arena)
+        render(conn, "edit.html", changeset: changeset, arena: arena)
 
       nil ->
-        render404(conn, "Lobby (#{name}) Not Found for User (#{user.username})")
+        render404(conn, "Arena (#{name}) Not Found for User (#{user.username})")
     end
   end
 
@@ -41,8 +41,8 @@ defmodule BattleBoxWeb.LobbyController do
     Repo.get_by(User, username: username)
     |> case do
       %User{} = user ->
-        lobbies =
-          Lobby
+        arenas =
+          Arena
           |> where(user_id: ^user.id)
           |> order_by(desc: :inserted_at)
           |> paginate(params)
@@ -53,7 +53,7 @@ defmodule BattleBoxWeb.LobbyController do
 
         render(conn, "index.html",
           user: user,
-          lobbies: lobbies,
+          arenas: arenas,
           pagination_info: pagination_info,
           to_page: to_page
         )
@@ -63,14 +63,14 @@ defmodule BattleBoxWeb.LobbyController do
     end
   end
 
-  def create(%{assigns: %{current_user: user}} = conn, %{"lobby" => params}) do
+  def create(%{assigns: %{current_user: user}} = conn, %{"arena" => params}) do
     user
-    |> Ecto.build_assoc(:lobbies)
-    |> Lobby.changeset(params)
+    |> Ecto.build_assoc(:arenas)
+    |> Arena.changeset(params)
     |> Repo.insert()
     |> case do
-      {:ok, lobby} ->
-        redirect(conn, to: Routes.user_lobby_path(conn, :show, user.username, lobby.name))
+      {:ok, arena} ->
+        redirect(conn, to: Routes.user_arena_path(conn, :show, user.username, arena.name))
 
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
@@ -79,26 +79,26 @@ defmodule BattleBoxWeb.LobbyController do
 
   def update(
         %{assigns: %{current_user: %{id: user_id} = user}} = conn,
-        %{"name" => name, "lobby" => params}
+        %{"name" => name, "arena" => params}
       ) do
-    Lobby
+    Arena
     |> where(name: ^name, user_id: ^user_id)
     |> Repo.one()
-    |> Lobby.preload_game_settings()
+    |> Arena.preload_game_settings()
     |> case do
       nil ->
-        render404(conn, "Lobby (#{name}) Not Found for User (#{user.username})")
+        render404(conn, "Arena (#{name}) Not Found for User (#{user.username})")
 
-      %Lobby{} = lobby ->
-        lobby
-        |> Lobby.changeset(params)
+      %Arena{} = arena ->
+        arena
+        |> Arena.changeset(params)
         |> Repo.update()
         |> case do
-          {:ok, lobby} ->
-            redirect(conn, to: Routes.user_lobby_path(conn, :show, user.username, lobby.name))
+          {:ok, arena} ->
+            redirect(conn, to: Routes.user_arena_path(conn, :show, user.username, arena.name))
 
           {:error, changeset} ->
-            render(conn, "edit.html", changeset: changeset, lobby: lobby)
+            render(conn, "edit.html", changeset: changeset, arena: arena)
         end
     end
   end
@@ -112,7 +112,7 @@ defmodule BattleBoxWeb.LobbyController do
 
   defp to_page(conn, %{"user_username" => username}, %{per_page: per_page}) do
     fn page ->
-      Routes.user_lobby_path(conn, :index, username, %{page: page, per_page: per_page})
+      Routes.user_arena_path(conn, :index, username, %{page: page, per_page: per_page})
     end
   end
 end

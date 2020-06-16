@@ -2,8 +2,8 @@ defmodule BattleBox.GameEngine.PubSub do
   use Supervisor
   alias BattleBox.GameEngine
 
-  def subscribe_to_lobby_events(game_engine, lobby_id, events),
-    do: subscribe(game_engine, {:lobby, lobby_id}, events)
+  def subscribe_to_arena_events(game_engine, arena_id, events),
+    do: subscribe(game_engine, {:arena, arena_id}, events)
 
   def subscribe_to_user_events(game_engine, user_id, events),
     do: subscribe(game_engine, {:user, user_id}, events)
@@ -17,13 +17,13 @@ defmodule BattleBox.GameEngine.PubSub do
   def subscribe_to_bot_server_events(game_engine, bot_server_id, events),
     do: subscribe(game_engine, {:bot_server, bot_server_id}, events)
 
-  def broadcast_bot_server_start(game_engine, %{lobby: lobby, bot: bot, bot_server_id: id}) do
-    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}, {:lobby, lobby.id}]
+  def broadcast_bot_server_start(game_engine, %{arena: arena, bot: bot, bot_server_id: id}) do
+    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}, {:arena, arena.id}]
     dispatch_event_to_topics(game_engine, topics, :bot_server_start, id)
   end
 
-  def broadcast_bot_server_update(game_engine, %{lobby: lobby, bot: bot, bot_server_id: id}) do
-    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}, {:lobby, lobby.id}]
+  def broadcast_bot_server_update(game_engine, %{arena: arena, bot: bot, bot_server_id: id}) do
+    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}, {:arena, arena.id}]
     dispatch_event_to_topics(game_engine, topics, :bot_server_update, id)
   end
 
@@ -33,7 +33,7 @@ defmodule BattleBox.GameEngine.PubSub do
         [{:bot, game_bot.bot.id}, {:user, game_bot.bot.user_id}]
       end)
 
-    topics = [{:lobby, get_lobby_id(game)} | topics]
+    topics = [{:arena, get_arena_id(game)} | topics]
     dispatch_event_to_topics(game_engine, topics, :game_start, game_id)
   end
 
@@ -43,7 +43,7 @@ defmodule BattleBox.GameEngine.PubSub do
         [{:bot, game_bot.bot.id}, {:user, game_bot.bot.user_id}]
       end)
 
-    topics = [{:game, game_id}, {:lobby, get_lobby_id(game)} | topics]
+    topics = [{:game, game_id}, {:arena, get_arena_id(game)} | topics]
     dispatch_event_to_topics(game_engine, topics, :game_update, game_id)
   end
 
@@ -72,10 +72,10 @@ defmodule BattleBox.GameEngine.PubSub do
     end)
   end
 
-  defp get_lobby_id(game) do
+  defp get_arena_id(game) do
     case game do
-      %{lobby: %{id: lobby_id}} when not is_nil(lobby_id) -> lobby_id
-      %{lobby_id: lobby_id} when not is_nil(lobby_id) -> lobby_id
+      %{arena: %{id: arena_id}} when not is_nil(arena_id) -> arena_id
+      %{arena_id: arena_id} when not is_nil(arena_id) -> arena_id
     end
   end
 
