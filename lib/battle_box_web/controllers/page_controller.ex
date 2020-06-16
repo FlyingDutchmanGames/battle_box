@@ -2,7 +2,13 @@ defmodule BattleBoxWeb.PageController do
   use BattleBoxWeb, :controller
 
   def index(conn, _params) do
-    render(conn, "index.html")
+    navigation_options = [
+      {"Docs", nil},
+      {"Users", Routes.user_path(conn, :index)},
+      {"Watch", nil}
+    ]
+
+    render(conn, "index.html", navigation_options: navigation_options)
   end
 
   def login(conn, _params) do

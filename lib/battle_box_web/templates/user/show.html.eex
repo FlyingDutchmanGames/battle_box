@@ -1,14 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / <a href="<%= Routes.user_path(@conn, :index) %>">Users</a>
-      / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
-      {
-        <a href="<%= Routes.user_bot_path(@conn, :index, @user.username) %>">/ Bots</a>,
-        <a href="<%= Routes.user_arena_path(@conn, :index, @user.username) %>">/ Arenas</a>,
-        <a href="<%= Routes.user_follow_path(@conn, :follow, @user.username) %>">/ Follow</a>,
-        <a class='<%= unless @current_user && @current_user.id == @user.id, do: "disabled-link" %>' href="<%= Routes.api_key_path(@conn, :index) %>">/ Keys</a>
-      }
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments, options: @nav_options) %>
     </div>
   </div>
 

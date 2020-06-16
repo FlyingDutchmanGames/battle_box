@@ -29,6 +29,7 @@ defmodule BattleBoxWeb.BotController do
       ) do
     Bot
     |> where(name: ^name, user_id: ^user_id)
+    |> preload(:user)
     |> Repo.one()
     |> case do
       nil ->
@@ -50,9 +51,20 @@ defmodule BattleBoxWeb.BotController do
 
   def show(conn, %{"user_username" => username, "name" => name}) do
     with {:user, %User{} = user} <- {:user, Repo.get_by(User, username: username)},
-         {:bot, %Bot{} = bot} <- {:bot, Repo.get_by(Bot, name: name, user_id: user.id)} do
-      bot = Repo.preload(bot, :user)
-      render(conn, "show.html", bot: bot, user: user)
+         {:bot, %Bot{} = bot} <- {:bot, Repo.get_by(Bot, name: name, user_id: user.id)},
+         bot <- Repo.preload(bot, :user) do
+      nav_segments = [{bot.user, :bots}, bot.name]
+
+      nav_options = [
+        {:games, bot},
+        {:follow, bot},
+        if(conn.assigns[:current_user] && conn.assigns.current_user.id == bot.user_id,
+          do: {:edit, bot},
+          else: {:inaccessible, "Edit"}
+        )
+      ]
+
+      render(conn, "show.html", bot: bot, nav_segments: nav_segments, nav_options: nav_options)
     else
       {:user, nil} -> render404(conn, "User (#{username}) not found")
       {:bot, nil} -> render404(conn, "Bot (#{name}) not found")
@@ -62,6 +74,7 @@ defmodule BattleBoxWeb.BotController do
   def edit(%{assigns: %{current_user: %{id: user_id} = user}} = conn, %{"name" => name}) do
     Bot
     |> where(name: ^name, user_id: ^user_id)
+    |> preload(:user)
     |> Repo.one()
     |> case do
       %Bot{} = bot ->
@@ -84,12 +97,23 @@ defmodule BattleBoxWeb.BotController do
           |> paginate(params)
           |> Repo.all()
 
+        nav_segments = [user, "Bots"]
+
+        nav_options = [
+          if(conn.assigns[:current_user] && conn.assigns.current_user.id == user.id,
+            do: {:new, :bot},
+            else: {:inaccessible, "New"}
+          )
+        ]
+
         pagination_info = pagination_info(params)
         to_page = to_page(conn, params, pagination_info)
 
         render(conn, "index.html",
           user: user,
           bots: bots,
+          nav_segments: nav_segments,
+          nav_options: nav_options,
           pagination_info: pagination_info,
           to_page: to_page
         )

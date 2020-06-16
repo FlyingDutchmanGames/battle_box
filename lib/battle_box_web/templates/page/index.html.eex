@@ -1,12 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      <a href="<%= Routes.page_path(@conn, :index) %>">/</a>
-      {
-        <a href="">Docs</a>,
-        <a href="<%= Routes.user_path(@conn, :index) %>">Users</a>,
-        <a href="">Watch</a>
-      }
+      <%= render("_bread_crumbs.html", conn: @conn, segments: [], options: @navigation_options) %>
     </div>
   </div>
 

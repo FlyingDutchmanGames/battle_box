@@ -1,12 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / <a href="<%= Routes.user_path(@conn, :index) %>">Users</a>
-      / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
-      / Bots
-    <%= if @current_user && @current_user.id == @user.id do %>
-      { <a href="<%= Routes.bot_path(@conn, :new) %>">/ New</a> }
-    <% end %>
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments, options: @nav_options) %>
     </div>
   </div>
   <div class="box">

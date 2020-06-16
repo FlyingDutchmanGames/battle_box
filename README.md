@@ -62,6 +62,8 @@
     - Load the credential for the host being connected to
 #### General
 - Handle when connection is closed on trying to send from connection server
+- Api Key -> Key
+- Root Api Keys under users
 - Add footer on all pages
 - "watch" from index show's next game
 - Bread crumb helper functions to force consistency
