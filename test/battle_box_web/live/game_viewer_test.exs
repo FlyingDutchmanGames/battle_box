@@ -20,7 +20,7 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
 
   setup do
     {:ok, user} = create_user(%{user_id: @user_id})
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-lobby")
+    {:ok, arena} = robot_game_arena(user: user, arena_name: "test-arena")
 
     {:ok, bot} =
       user
@@ -31,7 +31,7 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
     bot = Repo.preload(bot, :user)
 
     %{
-      lobby: lobby,
+      arena: arena,
       user: user,
       bot: bot,
       game_bots: [
@@ -56,8 +56,8 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
 
     {:ok, %{id: id}} =
       %Game{
-        lobby: context.lobby,
-        lobby_id: context.lobby.id,
+        arena: context.arena,
+        arena_id: context.arena.id,
         game_type: RobotGame,
         robot_game: robot_game,
         game_bots: context.game_bots
@@ -79,7 +79,7 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
       on_exit(fn -> GameEngineProvider.reset!() end)
     end
 
-    setup %{game_engine: game_engine, lobby: lobby, game_bots: game_bots} do
+    setup %{game_engine: game_engine, arena: arena, game_bots: game_bots} do
       {:ok, pid} =
         GameEngine.start_game(game_engine, %{
           players: %{
@@ -88,8 +88,8 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
           },
           game: %Game{
             id: @game_id,
-            lobby: lobby,
-            lobby_id: lobby.id,
+            arena: arena,
+            arena_id: arena.id,
             game_bots: game_bots,
             game_type: RobotGame,
             robot_game: %RobotGame{}
@@ -132,8 +132,8 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
 
       {:ok, _} =
         %Game{
-          lobby: context.lobby,
-          lobby_id: context.lobby.id,
+          arena: context.arena,
+          arena_id: context.arena.id,
           robot_game: robot_game,
           game_bots: context.game_bots,
           game_type: RobotGame,

@@ -2,18 +2,18 @@
   <div class="subhead">
     <div class="subhead-heading">
       / <a href="<%= Routes.user_path(@conn, :index) %>">Users</a>,
-      / <a href="<%= Routes.user_path(@conn, :show, @lobby.user.username) %>"><%= @lobby.user.username %></a>
-      / <a href="<%= Routes.user_lobby_path(@conn, :index, @lobby.user.username) %>">Lobbies</a>
-      / <a href='<%= Routes.user_lobby_path(@conn, :show, @lobby.user.username, @lobby.name) %>'><%= @lobby.name %></a>
+      / <a href="<%= Routes.user_path(@conn, :show, @arena.user.username) %>"><%= @arena.user.username %></a>
+      / <a href="<%= Routes.user_arena_path(@conn, :index, @arena.user.username) %>">Arenas</a>
+      / <a href='<%= Routes.user_arena_path(@conn, :show, @arena.user.username, @arena.name) %>'><%= @arena.name %></a>
       / Games
     </div>
   </div>
   <div class="box">
     <%= for game <- @games do %>
-      <div class="box-row lobby">
+      <div class="box-row arena">
         <div class="box-details">
           <div style="font-weight: bolder; padding-bottom: 10px;">ID: <%= game.id %></div>
-          <div>Lobby: <a href='<%= Routes.user_lobby_path(@conn, :show, @lobby.user.username, @lobby.name) %>'><%= game.lobby.name %></a></div>
+          <div>Arena: <a href='<%= Routes.user_arena_path(@conn, :show, @arena.user.username, @arena.name) %>'><%= game.arena.name %></a></div>
           <div>Type: <%= game.game_type.title %></div>
           <div>Played: <%= humanize_seconds_ago(game.inserted_at) %></div>
         </div>

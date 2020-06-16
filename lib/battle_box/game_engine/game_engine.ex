@@ -32,7 +32,7 @@ defmodule BattleBox.GameEngine do
 
   defdelegate subscribe_to_bot_events(game_engine, bot_id, events), to: GameEnginePubSub
   defdelegate subscribe_to_user_events(game_engine, user_id, events), to: GameEnginePubSub
-  defdelegate subscribe_to_lobby_events(game_engine, lobby_id, events), to: GameEnginePubSub
+  defdelegate subscribe_to_arena_events(game_engine, arena_id, events), to: GameEnginePubSub
   defdelegate subscribe_to_game_events(game_engine, game_id, events), to: GameEnginePubSub
 
   defdelegate broadcast_bot_server_start(game_engine, bot_server), to: GameEnginePubSub
@@ -49,7 +49,7 @@ defmodule BattleBox.GameEngine do
 
   defdelegate start_game(game_engine, opts), to: GameSup
   defdelegate get_live_games(game_engine), to: GameSup
-  defdelegate get_live_games_with_lobby_id(game_engine, lobby_id), to: GameSup
+  defdelegate get_live_games_with_arena_id(game_engine, arena_id), to: GameSup
 
   defdelegate force_match_make(game_engine), to: MatchMakerServer
 

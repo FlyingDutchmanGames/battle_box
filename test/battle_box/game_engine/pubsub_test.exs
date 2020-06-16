@@ -1,12 +1,12 @@
 defmodule BattleBox.PubSubTest do
   use ExUnit.Case, async: true
-  alias BattleBox.{Game, Bot, Lobby, GameEngine}
+  alias BattleBox.{Game, Bot, Arena, GameEngine}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 2]
 
   @bot_id Ecto.UUID.generate()
   @user_id Ecto.UUID.generate()
   @game_id Ecto.UUID.generate()
-  @lobby_id Ecto.UUID.generate()
+  @arena_id Ecto.UUID.generate()
   @bot_server_id Ecto.UUID.generate()
 
   setup %{test: name} do
@@ -21,24 +21,24 @@ defmodule BattleBox.PubSubTest do
       user_id: @user_id
     }
 
-    lobby = %Lobby{
-      id: @lobby_id,
+    arena = %Arena{
+      id: @arena_id,
       name: "FOO"
     }
 
     game = %Game{
       id: @game_id,
-      lobby_id: @lobby_id,
+      arena_id: @arena_id,
       game_bots: [%{bot: %{id: @bot_id, user_id: @user_id}}]
     }
 
     bot_server = %{
       bot_server_id: @bot_server_id,
-      lobby: lobby,
+      arena: arena,
       bot: bot
     }
 
-    %{bot: bot, lobby: lobby, game: game, bot_server: bot_server}
+    %{bot: bot, arena: arena, game: game, bot_server: bot_server}
   end
 
   describe "user events" do
@@ -51,7 +51,7 @@ defmodule BattleBox.PubSubTest do
       :ok =
         GameEngine.broadcast_bot_server_start(context.game_engine, %{
           bot: context.bot,
-          lobby: context.lobby,
+          arena: context.arena,
           bot_server_id: bot_server_id
         })
 
@@ -67,7 +67,7 @@ defmodule BattleBox.PubSubTest do
       :ok =
         GameEngine.broadcast_bot_server_start(context.game_engine, %{
           bot: %{context.bot | user_id: Ecto.UUID.generate()},
-          lobby: context.lobby,
+          arena: context.arena,
           bot_server_id: bot_server_id
         })
 
@@ -82,7 +82,7 @@ defmodule BattleBox.PubSubTest do
       :ok =
         GameEngine.broadcast_bot_server_start(context.game_engine, %{
           bot: context.bot,
-          lobby: context.lobby,
+          arena: context.arena,
           bot_server_id: bot_server_id
         })
 
@@ -96,22 +96,22 @@ defmodule BattleBox.PubSubTest do
         :ok = GameEngine.subscribe_to_game_events(context.game_engine, @game_id, [:game_update])
       end)
 
-      named_proxy(:lobby_update_listener, fn ->
-        :ok = GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_update])
+      named_proxy(:arena_update_listener, fn ->
+        :ok = GameEngine.subscribe_to_arena_events(context.game_engine, @arena_id, [:game_update])
       end)
 
       Process.sleep(10)
       :ok = GameEngine.broadcast_game_update(context.game_engine, context.game)
       assert_receive {:game_update_listener, {{:game, @game_id}, :game_update, @game_id}}
-      assert_receive {:lobby_update_listener, {{:lobby, @lobby_id}, :game_update, @game_id}}
+      assert_receive {:arena_update_listener, {{:arena, @arena_id}, :game_update, @game_id}}
     end
 
     test "game_start event works", context do
-      :ok = GameEngine.subscribe_to_lobby_events(context.game_engine, @lobby_id, [:game_start])
+      :ok = GameEngine.subscribe_to_arena_events(context.game_engine, @arena_id, [:game_start])
       :ok = GameEngine.subscribe_to_user_events(context.game_engine, @user_id, [:game_start])
       :ok = GameEngine.subscribe_to_bot_events(context.game_engine, @bot_id, [:game_start])
       GameEngine.broadcast_game_start(context.game_engine, context.game)
-      assert_receive {{:lobby, @lobby_id}, :game_start, @game_id}
+      assert_receive {{:arena, @arena_id}, :game_start, @game_id}
       assert_receive {{:user, @user_id}, :game_start, @game_id}
       assert_receive {{:bot, @bot_id}, :game_start, @game_id}
     end

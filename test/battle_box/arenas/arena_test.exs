@@ -1,6 +1,6 @@
-defmodule BattleBox.LobbyTest do
+defmodule BattleBox.ArenaTest do
   use BattleBox.DataCase
-  alias BattleBox.{Lobby, Repo}
+  alias BattleBox.{Arena, Repo}
   import BattleBox.InstalledGames
 
   @user_id Ecto.UUID.generate()
@@ -12,22 +12,22 @@ defmodule BattleBox.LobbyTest do
 
   describe "default timeouts" do
     test "the default game timeouts are correct" do
-      lobby = %Lobby{name: "grant-test", user_id: @user_id}
-      assert lobby.game_acceptance_time_ms == 2000
-      assert lobby.command_time_minimum_ms == 250
-      assert lobby.command_time_maximum_ms == 1000
+      arena = %Arena{name: "grant-test", user_id: @user_id}
+      assert arena.game_acceptance_time_ms == 2000
+      assert arena.command_time_minimum_ms == 250
+      assert arena.command_time_maximum_ms == 1000
     end
   end
 
   describe "validations" do
     test "Name must not be blank" do
-      changeset = Lobby.changeset(%Lobby{}, %{name: ""})
+      changeset = Arena.changeset(%Arena{}, %{name: ""})
       assert changeset.errors[:name] == {"can't be blank", [validation: :required]}
     end
 
     test "Name may not be longer than 39" do
       name = :binary.copy("a", 40)
-      changeset = Lobby.changeset(%Lobby{}, %{name: name})
+      changeset = Arena.changeset(%Arena{}, %{name: name})
 
       assert changeset.errors[:name] ==
                {"should be at most %{count} character(s)",
@@ -36,24 +36,24 @@ defmodule BattleBox.LobbyTest do
 
     test "game_type must be an installed game" do
       for game <- installed_games() do
-        changeset = Lobby.changeset(%Lobby{}, %{game_type: "#{game.name}"})
+        changeset = Arena.changeset(%Arena{}, %{game_type: "#{game.name}"})
         assert changeset.errors[:game_type] == nil
       end
 
-      changeset = Lobby.changeset(%Lobby{}, %{game_type: "NOT A REAL GAME"})
+      changeset = Arena.changeset(%Arena{}, %{game_type: "NOT A REAL GAME"})
 
       assert changeset.errors[:game_type] ==
-               {"is invalid", [type: BattleBox.Lobby.GameType, validation: :cast]}
+               {"is invalid", [type: BattleBox.Arena.GameType, validation: :cast]}
     end
 
     test "game acceptance time must be in range" do
-      changeset = Lobby.changeset(%Lobby{}, %{game_acceptance_time_ms: 999})
+      changeset = Arena.changeset(%Arena{}, %{game_acceptance_time_ms: 999})
 
       assert changeset.errors[:game_acceptance_time_ms] ==
                {"must be greater than or equal to %{number}",
                 [{:validation, :number}, {:kind, :greater_than_or_equal_to}, {:number, 1000}]}
 
-      changeset = Lobby.changeset(%Lobby{}, %{game_acceptance_time_ms: 10001})
+      changeset = Arena.changeset(%Arena{}, %{game_acceptance_time_ms: 10001})
 
       assert changeset.errors[:game_acceptance_time_ms] ==
                {"must be less than %{number}",
@@ -61,20 +61,20 @@ defmodule BattleBox.LobbyTest do
     end
 
     test "command time minimum must be in range" do
-      changeset = Lobby.changeset(%Lobby{}, %{command_time_minimum_ms: 249})
+      changeset = Arena.changeset(%Arena{}, %{command_time_minimum_ms: 249})
 
       assert changeset.errors[:command_time_minimum_ms] ==
                {"must be greater than or equal to %{number}",
                 [validation: :number, kind: :greater_than_or_equal_to, number: 250]}
 
       changeset =
-        Lobby.changeset(%Lobby{}, %{command_time_minimum_ms: 1001, command_time_maximum_ms: 999})
+        Arena.changeset(%Arena{}, %{command_time_minimum_ms: 1001, command_time_maximum_ms: 999})
 
       assert changeset.errors[:command_time_minimum_ms] ==
                {"Minimum command time must be less than maximum command time", []}
 
       changeset =
-        Lobby.changeset(%Lobby{}, %{command_time_minimum_ms: 1001, command_time_maximum_ms: 1002})
+        Arena.changeset(%Arena{}, %{command_time_minimum_ms: 1001, command_time_maximum_ms: 1002})
 
       assert changeset.errors[:command_time_minimum_ms] ==
                {"must be less than %{number}",
@@ -82,13 +82,13 @@ defmodule BattleBox.LobbyTest do
     end
 
     test "command time maximum must be in range" do
-      changeset = Lobby.changeset(%Lobby{}, %{command_time_maximum_ms: 249})
+      changeset = Arena.changeset(%Arena{}, %{command_time_maximum_ms: 249})
 
       assert changeset.errors[:command_time_maximum_ms] ==
                {"must be greater than or equal to %{number}",
                 [validation: :number, kind: :greater_than_or_equal_to, number: 250]}
 
-      changeset = Lobby.changeset(%Lobby{}, %{command_time_maximum_ms: 10001})
+      changeset = Arena.changeset(%Arena{}, %{command_time_maximum_ms: 10001})
 
       assert changeset.errors[:command_time_maximum_ms] ==
                {"must be less than %{number}",
@@ -96,31 +96,31 @@ defmodule BattleBox.LobbyTest do
     end
   end
 
-  test "lobby name is case insenstive", %{user: user} do
-    assert {:ok, _lobby} =
+  test "arena name is case insenstive", %{user: user} do
+    assert {:ok, _arena} =
              user
-             |> Ecto.build_assoc(:lobbies)
-             |> Lobby.changeset(%{name: "ABC", game_type: "robot_game", robot_game_settings: %{}})
+             |> Ecto.build_assoc(:arenas)
+             |> Arena.changeset(%{name: "ABC", game_type: "robot_game", robot_game_settings: %{}})
              |> Repo.insert()
 
-    assert %Lobby{name: "ABC"} = Repo.get_by(Lobby, name: "AbC")
-    assert %Lobby{name: "ABC"} = Repo.get_by(Lobby, name: "aBc")
-    assert %Lobby{name: "ABC"} = Repo.get_by(Lobby, name: "abc")
+    assert %Arena{name: "ABC"} = Repo.get_by(Arena, name: "AbC")
+    assert %Arena{name: "ABC"} = Repo.get_by(Arena, name: "aBc")
+    assert %Arena{name: "ABC"} = Repo.get_by(Arena, name: "abc")
   end
 
   describe "persistence" do
-    test "You can persist a lobby and get it back out", %{user: user} do
-      assert {:ok, lobby} =
+    test "You can persist a arena and get it back out", %{user: user} do
+      assert {:ok, arena} =
                user
-               |> Ecto.build_assoc(:lobbies)
-               |> Lobby.changeset(%{
+               |> Ecto.build_assoc(:arenas)
+               |> Arena.changeset(%{
                  name: "test-name",
                  game_type: "robot_game",
                  robot_game_settings: %{}
                })
                |> Repo.insert()
 
-      assert %Lobby{} = Repo.get(Lobby, lobby.id)
+      assert %Arena{} = Repo.get(Arena, arena.id)
     end
   end
 end

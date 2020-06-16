@@ -33,7 +33,7 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
     end
 
     create table("robot_game_settings") do
-      add :lobby_id, :uuid, null: false
+      add :arena_id, :uuid, null: false
 
       shared()
       timestamps()

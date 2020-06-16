@@ -3,9 +3,9 @@
     <div class="subhead-heading">
       / Users 
       / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
-      <%= if @lobby do %>
-        / <a href="<%= Routes.user_lobby_path(@conn, :index, @user.username) %>">Lobbies</a>
-        / <a href="<%= Routes.user_lobby_path(@conn, :show, @user.username, @lobby.name) %>"><%= @lobby.name %></a>
+      <%= if @arena do %>
+        / <a href="<%= Routes.user_arena_path(@conn, :index, @user.username) %>">Arenas</a>
+        / <a href="<%= Routes.user_arena_path(@conn, :show, @user.username, @arena.name) %>"><%= @arena.name %></a>
       <% end %>
       <%= if @bot do %>
         / <a href="<%= Routes.user_bot_path(@conn, :index, @user.username) %>">Bots</a>
@@ -15,5 +15,5 @@
     </div>
   </div>
 
-  <%= live_render(@conn, Follow, session: %{"lobby" => @lobby, "bot" => @bot, "user" => @user}) %>
+  <%= live_render(@conn, Follow, session: %{"arena" => @arena, "bot" => @bot, "user" => @user}) %>
 </div>

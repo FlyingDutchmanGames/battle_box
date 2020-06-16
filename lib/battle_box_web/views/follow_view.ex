@@ -4,8 +4,8 @@ defmodule BattleBoxWeb.FollowView do
 
   def follow_back_target(follow) do
     case follow do
-      %{"lobby" => name} ->
-        "Lobby (#{name})"
+      %{"arena" => name} ->
+        "Arena (#{name})"
 
       %{"bot" => name} ->
         "Bot (#{name})"

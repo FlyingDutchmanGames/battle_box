@@ -88,7 +88,7 @@ defmodule BattleBoxWeb.Live.GameViewer do
         Game
         |> Repo.get(game_id)
         |> Game.preload_game_data()
-        |> Repo.preload(lobby: [:user], game_bots: [bot: :user])
+        |> Repo.preload(arena: [:user], game_bots: [bot: :user])
         |> case do
           nil -> nil
           game -> {:historical, Game.initialize(game)}

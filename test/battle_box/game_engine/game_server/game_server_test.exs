@@ -11,7 +11,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
   setup do
     {:ok, user} = create_user()
-    {:ok, lobby} = robot_game_lobby(%{user: user, lobby_name: "test-lobby"})
+    {:ok, arena} = robot_game_arena(%{user: user, arena_name: "test-arena"})
 
     %{
       init_opts: %{
@@ -21,14 +21,14 @@ defmodule BattleBox.GameEngine.GameServerTest do
         },
         game: %Game{
           id: Ecto.UUID.generate(),
-          lobby: lobby,
-          lobby_id: lobby.id,
+          arena: arena,
+          arena_id: arena.id,
           game_type: RobotGame,
           game_bots: [],
           robot_game: %RobotGame{}
         }
       },
-      lobby: lobby
+      arena: arena
     }
   end
 
@@ -45,10 +45,10 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
   test "game servers emit a game start event", %{init_opts: %{game: %{id: id}}} = context do
     :ok =
-      GameEngine.subscribe_to_lobby_events(context.game_engine, context.lobby.id, [:game_start])
+      GameEngine.subscribe_to_arena_events(context.game_engine, context.arena.id, [:game_start])
 
     {:ok, _pid} = GameEngine.start_game(context.game_engine, context.init_opts)
-    assert_receive {{:lobby, _}, :game_start, ^id}
+    assert_receive {{:arena, _}, :game_start, ^id}
   end
 
   test "the game server registers in the registry", context do
@@ -194,8 +194,8 @@ defmodule BattleBox.GameEngine.GameServerTest do
   test "you can play a game! (and it persists it to the db when you're done)", context do
     game = %Game{
       id: Ecto.UUID.generate(),
-      lobby: context.lobby,
-      lobby_id: context.lobby.id,
+      arena: context.arena,
+      arena_id: context.arena.id,
       game_type: RobotGame,
       game_bots: [],
       robot_game: %RobotGame{max_turns: 10}

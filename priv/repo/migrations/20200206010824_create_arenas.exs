@@ -1,8 +1,8 @@
-defmodule BattleBox.Repo.Migrations.CreateLobbies do
+defmodule BattleBox.Repo.Migrations.CreateArenas do
   use Ecto.Migration
 
   def change do
-    create table("lobbies") do
+    create table("arenas") do
       add :name, :citext, null: false
       add :user_id, :uuid, null: false
 
@@ -17,7 +17,7 @@ defmodule BattleBox.Repo.Migrations.CreateLobbies do
       timestamps()
     end
 
-    create index("lobbies", [:name], unique: true)
-    create index("lobbies", [:user_id, :inserted_at])
+    create index("arenas", [:name], unique: true)
+    create index("arenas", [:user_id, :inserted_at])
   end
 end

@@ -1,20 +1,20 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
-  alias BattleBox.{Repo, Lobby, Game, GameBot}
+  alias BattleBox.{Repo, Arena, Game, GameBot}
 
   def make_matches([_], _), do: []
 
-  def make_matches(enqueued_players, lobby_id) do
-    %Lobby{} =
-      lobby =
-      Lobby
-      |> Repo.get(lobby_id)
+  def make_matches(enqueued_players, arena_id) do
+    %Arena{} =
+      arena =
+      Arena
+      |> Repo.get(arena_id)
       |> Repo.preload(:user)
 
-    settings = Lobby.get_settings(lobby)
-    players = lobby.game_type.players_for_settings(settings)
+    settings = Arena.get_settings(arena)
+    players = arena.game_type.players_for_settings(settings)
 
     grouper_function =
-      case lobby do
+      case arena do
         %{user_self_play: false} -> & &1.bot.user_id
         %{bot_self_play: false} -> & &1.bot.id
         _ -> fn _ -> :erlang.unique_integer() end
@@ -32,18 +32,18 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
       player_pid_mapping = Map.new(for {player, %{pid: pid}} <- match, do: {player, pid})
 
       game_data =
-        struct(lobby.game_type)
-        |> Map.merge(Map.take(settings, lobby.game_type.settings_module.shared_fields()))
+        struct(arena.game_type)
+        |> Map.merge(Map.take(settings, arena.game_type.settings_module.shared_fields()))
 
       game =
         %Game{
           id: Ecto.UUID.generate(),
-          lobby: lobby,
-          lobby_id: lobby.id,
-          game_type: lobby.game_type,
+          arena: arena,
+          arena_id: arena.id,
+          game_type: arena.game_type,
           game_bots: game_bots
         }
-        |> Map.put(lobby.game_type.name, game_data)
+        |> Map.put(arena.game_type.name, game_data)
 
       %{game: game, players: player_pid_mapping}
     end)

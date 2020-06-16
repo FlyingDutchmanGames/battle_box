@@ -18,9 +18,9 @@ defmodule BattleBox.GameEngine.GameServer.GameSupervisor do
     DynamicSupervisor.start_child(game_supervisor, {GameServer, opts})
   end
 
-  def get_live_games_with_lobby_id(game_engine, lobby_id) do
+  def get_live_games_with_arena_id(game_engine, arena_id) do
     game_registry = GameEngine.names(game_engine).game_registry
-    select_from_registry(game_registry, select_games_with_lobby_id(lobby_id))
+    select_from_registry(game_registry, select_games_with_arena_id(arena_id))
   end
 
   def get_live_games(game_engine) do
@@ -28,10 +28,10 @@ defmodule BattleBox.GameEngine.GameServer.GameSupervisor do
     select_from_registry(game_registry, @select_all)
   end
 
-  defp select_games_with_lobby_id(lobby_id) do
+  defp select_games_with_arena_id(arena_id) do
     [
       {{:"$1", :"$2", :"$3"},
-       [{:==, {:map_get, :id, {:map_get, :lobby, {:map_get, :game, :"$3"}}}, lobby_id}],
+       [{:==, {:map_get, :id, {:map_get, :arena, {:map_get, :game, :"$3"}}}, arena_id}],
        [{{:"$1", :"$2", :"$3"}}]}
     ]
   end

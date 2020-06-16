@@ -2,11 +2,11 @@ defmodule BattleBox.GameTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{Game, Repo}
 
-  @lobby_id Ecto.UUID.generate()
+  @arena_id Ecto.UUID.generate()
 
   test "you can persist them" do
     assert {:ok, _game} =
-             %Game{game_type: BattleBox.Games.RobotGame, lobby_id: @lobby_id, game_bots: []}
+             %Game{game_type: BattleBox.Games.RobotGame, arena_id: @arena_id, game_bots: []}
              |> Repo.insert()
   end
 

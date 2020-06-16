@@ -1,8 +1,8 @@
 defmodule BattleBoxWeb.UserRedirectController do
   use BattleBoxWeb, :controller
 
-  def lobbies(%{assigns: %{current_user: user}} = conn, _params) do
-    redirect(conn, to: Routes.user_lobby_path(conn, :index, user.username))
+  def arenas(%{assigns: %{current_user: user}} = conn, _params) do
+    redirect(conn, to: Routes.user_arena_path(conn, :index, user.username))
   end
 
   def bots(%{assigns: %{current_user: user}} = conn, _params) do

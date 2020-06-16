@@ -6,8 +6,8 @@ defmodule BattleBoxWeb.Live.Follow do
   def mount(_params, session, socket) do
     if connected?(socket) do
       case session do
-        %{"lobby" => %{id: id}} ->
-          GameEngine.subscribe_to_lobby_events(game_engine(), id, [:game_started, :game_update])
+        %{"arena" => %{id: id}} ->
+          GameEngine.subscribe_to_arena_events(game_engine(), id, [:game_started, :game_update])
 
         %{"bot" => %{id: id}} ->
           GameEngine.subscribe_to_bot_events(game_engine(), id, [:game_started, :game_update])
@@ -23,8 +23,8 @@ defmodule BattleBoxWeb.Live.Follow do
   def handle_info({_topic, event, game_id}, socket) when event in [:game_update, :game_started] do
     keep_following =
       case socket.assigns.follow_params do
-        %{"lobby" => %{name: name}, "user" => %{username: username}} ->
-          %{lobby: name, user: username}
+        %{"arena" => %{name: name}, "user" => %{username: username}} ->
+          %{arena: name, user: username}
 
         %{"bot" => %{name: name}, "user" => %{username: username}} ->
           %{bot: name, user: username}

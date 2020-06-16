@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Bot, Lobby, Repo}
+  alias BattleBox.{Bot, Arena, Repo}
   import BattleBox.GameEngine.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -19,27 +19,27 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       |> Bot.changeset(%{name: "something-else"})
       |> Repo.insert()
 
-    {:ok, lobby} = robot_game_lobby(user: user, lobby_name: "test-lobby")
+    {:ok, arena} = robot_game_arena(user: user, arena_name: "test-arena")
 
-    %{bot: bot, other_bot: other_bot, lobby: lobby, user: user}
+    %{bot: bot, other_bot: other_bot, arena: arena, user: user}
   end
 
-  test "no players means no matches", %{lobby: lobby} do
-    assert [] == make_matches([], lobby.id)
+  test "no players means no matches", %{arena: arena} do
+    assert [] == make_matches([], arena.id)
   end
 
-  test "one player means no matches", %{lobby: lobby, bot: bot} do
+  test "one player means no matches", %{arena: arena, bot: bot} do
     player_1_pid = named_proxy(:player_1)
-    matches = make_matches([%{bot: bot, pid: player_1_pid}], lobby.id)
+    matches = make_matches([%{bot: bot, pid: player_1_pid}], arena.id)
     assert [] = matches
   end
 
-  test "it will chunk players by twos", %{lobby: lobby, bot: bot} do
+  test "it will chunk players by twos", %{arena: arena, bot: bot} do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
 
     matches =
-      make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], lobby.id)
+      make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], arena.id)
 
     assert [%{game: game, players: %{1 => pid1, 2 => pid2}}] = matches
     assert pid1 != pid2
@@ -47,7 +47,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     assert pid2 in [player_1_pid, player_2_pid]
   end
 
-  test "it will only make one match if there are three in the queue", %{lobby: lobby, bot: bot} do
+  test "it will only make one match if there are three in the queue", %{arena: arena, bot: bot} do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
     player_3_pid = named_proxy(:player_3)
@@ -59,7 +59,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
           %{bot: bot, pid: player_2_pid},
           %{bot: bot, pid: player_3_pid}
         ],
-        lobby.id
+        arena.id
       )
 
     assert [%{game: game, players: %{1 => pid1, 2 => pid2}}] = matches
@@ -68,14 +68,14 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     assert pid2 in [player_1_pid, player_2_pid, player_3_pid]
   end
 
-  test "it will use the settings from the lobby", %{lobby: lobby, bot: bot} do
+  test "it will use the settings from the arena", %{arena: arena, bot: bot} do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
 
     [%{game: game}] =
-      make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], lobby.id)
+      make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], arena.id)
 
-    from_lobby = [
+    from_arena = [
       :spawn_every,
       :spawn_per_player,
       :robot_hp,
@@ -90,14 +90,14 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       :spawn_enabled
     ]
 
-    assert Map.take(game.robot_game, from_lobby) ==
-             Map.take(Lobby.get_settings(lobby), from_lobby)
+    assert Map.take(game.robot_game, from_arena) ==
+             Map.take(Arena.get_settings(arena), from_arena)
 
-    # It also preloads the user into the lobby
-    refute is_nil(game.lobby.user.username)
+    # It also preloads the user into the arena
+    refute is_nil(game.arena.user.username)
   end
 
-  test "the games it makes are persistable", %{lobby: %{id: lobby_id}, bot: bot} do
+  test "the games it makes are persistable", %{arena: %{id: arena_id}, bot: bot} do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
 
@@ -107,12 +107,12 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
           %{bot: bot, pid: player_1_pid},
           %{bot: bot, pid: player_2_pid}
         ],
-        lobby_id
+        arena_id
       )
 
     {:ok, game} = Repo.insert(game)
     game = Repo.preload(game, [:game_bots])
-    assert %{lobby_id: lobby_id} = game
+    assert %{arena_id: arena_id} = game
 
     assert [
              %{
@@ -131,38 +131,38 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   describe "user_self_play / bot_self_play settings" do
     test "when bot_self_play is false it won't match two of the same bots together", context do
       {:ok, _} =
-        Lobby.changeset(context.lobby, %{bot_self_play: false})
+        Arena.changeset(context.arena, %{bot_self_play: false})
         |> Repo.update()
 
       assert [] ==
                make_matches(
                  [%{bot: context.bot, pid: self()}, %{bot: context.bot, pid: self()}],
-                 context.lobby.id
+                 context.arena.id
                )
     end
 
     test "when bot_self_play is false, but user self play is true, different bots from the same user can play themselves",
          context do
       {:ok, _} =
-        Lobby.changeset(context.lobby, %{user_self_play: true, bot_self_play: false})
+        Arena.changeset(context.arena, %{user_self_play: true, bot_self_play: false})
         |> Repo.update()
 
       assert [%{game: _}] =
                make_matches(
                  [%{bot: context.bot, pid: self()}, %{bot: context.other_bot, pid: self()}],
-                 context.lobby.id
+                 context.arena.id
                )
     end
 
     test "when user_self_play is false it won't match two of the same users together", context do
       {:ok, _} =
-        Lobby.changeset(context.lobby, %{user_self_play: false})
+        Arena.changeset(context.arena, %{user_self_play: false})
         |> Repo.update()
 
       assert [] ==
                make_matches(
                  [%{bot: context.bot, pid: self()}, %{bot: context.other_bot, pid: self()}],
-                 context.lobby.id
+                 context.arena.id
                )
     end
   end

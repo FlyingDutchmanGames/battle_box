@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.FollowController do
   use BattleBoxWeb, :controller
   alias BattleBoxWeb.PageView
-  alias BattleBox.{Repo, Lobby, User, Bot}
+  alias BattleBox.{Repo, Arena, User, Bot}
 
   def follow(conn, %{"user_username" => username} = params) do
     case Repo.get_by(User, username: username) do
@@ -21,12 +21,12 @@ defmodule BattleBoxWeb.FollowController do
     hydrated =
       params
       |> Enum.map(fn
-        {"lobby_name", name} -> {:lobby, Repo.get_by(Lobby, name: name, user_id: user.id)}
+        {"arena_name", name} -> {:arena, Repo.get_by(Arena, name: name, user_id: user.id)}
         {"bot_name", name} -> {:bot, Repo.get_by(Bot, name: name, user_id: user.id)}
         _ -> nil
       end)
       |> Enum.reject(&is_nil/1)
 
-    Keyword.merge([user: user, lobby: nil, bot: nil], hydrated)
+    Keyword.merge([user: user, arena: nil, bot: nil], hydrated)
   end
 end

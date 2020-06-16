@@ -6,7 +6,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   @ip {127, 0, 0, 1}
   @bot_name "bot-name"
-  @lobby_name "lobby-name"
+  @arena_name "arena-name"
   @user_id Ecto.UUID.generate()
 
   setup %{test: name} do
@@ -29,8 +29,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   setup do
     {:ok, user} = create_user(id: @user_id)
 
-    {:ok, lobby} =
-      robot_game_lobby(user: user, lobby_name: @lobby_name, command_time_minimum_ms: 1)
+    {:ok, arena} =
+      robot_game_arena(user: user, arena_name: @arena_name, command_time_minimum_ms: 1)
 
     {:ok, bot} =
       user
@@ -44,13 +44,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       |> ApiKey.changeset(%{name: "test-key"})
       |> Repo.insert()
 
-    %{user: user, lobby: lobby, bot: bot, key: key}
+    %{user: user, arena: arena, bot: bot, key: key}
   end
 
   setup context do
     %{
       connection_request:
-        encode(%{"token" => context.key.token, "lobby" => context.lobby.name, "bot" => @bot_name}),
+        encode(%{"token" => context.key.token, "arena" => context.arena.name, "bot" => @bot_name}),
       start_matchmaking_request: encode(%{"action" => "start_match_making"})
     }
   end
@@ -76,14 +76,14 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
   end
 
-  describe "joining a lobby as a bot" do
+  describe "joining a arena as a bot" do
     setup context do
       {:ok, socket} = connect(context.port)
       %{socket: socket}
     end
 
     test "you can join", %{socket: socket, key: %{token: token}} do
-      bot_connect_req = encode(%{"token" => token, "lobby" => @lobby_name, "bot" => @bot_name})
+      bot_connect_req = encode(%{"token" => token, "arena" => @arena_name, "bot" => @bot_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
@@ -96,15 +96,15 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
              } = Jason.decode!(msg)
     end
 
-    test "trying to join a lobby that doesn't exist is an error", %{
+    test "trying to join a arena that doesn't exist is an error", %{
       socket: socket,
       bot: bot,
       key: key
     } do
-      bot_connect_req = encode(%{"token" => key.token, "lobby" => "FAKE", "bot" => bot.name})
+      bot_connect_req = encode(%{"token" => key.token, "arena" => "FAKE", "bot" => bot.name})
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
-      assert %{"error" => %{"lobby" => ["Lobby not found"]}} = Jason.decode!(msg)
+      assert %{"error" => %{"arena" => ["Arena not found"]}} = Jason.decode!(msg)
     end
 
     test "trying to join while your user is banned is an error", %{
@@ -113,7 +113,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       key: key
     } do
       Repo.update_all(User, set: [is_banned: true])
-      bot_connect_req = encode(%{"token" => key.token, "lobby" => @lobby_name, "bot" => bot.name})
+      bot_connect_req = encode(%{"token" => key.token, "arena" => @arena_name, "bot" => bot.name})
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => %{"user" => ["User is banned"]}} = Jason.decode!(msg)
@@ -137,7 +137,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
     test "if you try to join as a bot that doesn't exist it fails", %{socket: socket} = context do
       bot_connect_req =
-        encode(%{"token" => "FAKE", "lobby" => context.lobby.name, "bot" => @bot_name})
+        encode(%{"token" => "FAKE", "arena" => context.arena.name, "bot" => @bot_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
@@ -153,7 +153,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         join_request =
           encode(%{
             "token" => context.key.token,
-            "lobby" => context.lobby.name,
+            "arena" => context.arena.name,
             "bot" => @bot_name
           })
 
@@ -216,7 +216,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         join_request =
           encode(%{
             "token" => context.key.token,
-            "lobby" => context.lobby.name,
+            "arena" => context.arena.name,
             "bot" => @bot_name
           })
 
@@ -303,7 +303,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
           join_request =
             encode(%{
               "token" => context.key.token,
-              "lobby" => context.lobby.name,
+              "arena" => context.arena.name,
               "bot" => context.bot.name
             })
 

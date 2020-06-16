@@ -19,7 +19,7 @@ defmodule BattleBoxWeb.Live.ScoresTest do
 
   setup context do
     {:ok, user} = create_user(user_id: @user_id)
-    {:ok, lobby} = robot_game_lobby(%{lobby_name: "test-lobby", user: user})
+    {:ok, arena} = robot_game_arena(%{arena_name: "test-arena", user: user})
 
     {:ok, bot} =
       user
@@ -29,23 +29,23 @@ defmodule BattleBoxWeb.Live.ScoresTest do
 
     {:ok, bot_server_1, _} =
       GameEngine.start_bot(context.game_engine, %{
-        lobby: lobby,
+        arena: arena,
         bot: bot,
         connection: named_proxy(:player_1)
       })
 
     {:ok, bot_server_2, _} =
       GameEngine.start_bot(context.game_engine, %{
-        lobby: lobby,
+        arena: arena,
         bot: bot,
         connection: named_proxy(:player_1)
       })
 
-    %{lobby: lobby, user: user, bot_server_1: bot_server_1, bot_server_2: bot_server_2}
+    %{arena: arena, user: user, bot_server_1: bot_server_1, bot_server_2: bot_server_2}
   end
 
   describe "live games" do
-    test "it will show live game scores in the lobby", %{conn: conn} = context do
+    test "it will show live game scores in the arena", %{conn: conn} = context do
       Process.link(context.bot_server_1)
       Process.link(context.bot_server_2)
 
@@ -54,7 +54,7 @@ defmodule BattleBoxWeb.Live.ScoresTest do
       :ok = GameEngine.force_match_make(context.game_engine)
 
       Process.sleep(100)
-      {:ok, _view, html} = live_isolated(conn, Scores, session: %{"lobby" => context.lobby})
+      {:ok, _view, html} = live_isolated(conn, Scores, session: %{"arena" => context.arena})
       {:ok, document} = Floki.parse_document(html)
       assert [_] = Floki.find(document, ".live-score-card")
     end
@@ -64,7 +64,7 @@ defmodule BattleBoxWeb.Live.ScoresTest do
       :ok = BotServer.match_make(context.bot_server_2)
       :ok = GameEngine.force_match_make(context.game_engine)
       Process.sleep(20)
-      {:ok, view, html} = live_isolated(conn, Scores, session: %{"lobby" => context.lobby})
+      {:ok, view, html} = live_isolated(conn, Scores, session: %{"arena" => context.arena})
       {:ok, document} = Floki.parse_document(html)
       assert [_] = Floki.find(document, ".live-score-card")
       Process.exit(context.bot_server_1, :kill)
@@ -74,7 +74,7 @@ defmodule BattleBoxWeb.Live.ScoresTest do
     end
 
     test "it will add newly started games to the page", %{conn: conn} = context do
-      {:ok, view, html} = live_isolated(conn, Scores, session: %{"lobby" => context.lobby})
+      {:ok, view, html} = live_isolated(conn, Scores, session: %{"arena" => context.arena})
       {:ok, document} = Floki.parse_document(html)
       assert [] == Floki.find(document, ".live-score-card")
 

@@ -1,17 +1,17 @@
 defmodule BattleBoxWeb.Live.Scores do
   use BattleBoxWeb, :live_view
   alias BattleBox.GameEngine
-  alias BattleBoxWeb.LobbyView
+  alias BattleBoxWeb.ArenaView
 
-  def mount(_params, %{"lobby" => lobby}, socket) do
+  def mount(_params, %{"arena" => arena}, socket) do
     if connected?(socket) do
-      GameEngine.subscribe_to_lobby_events(game_engine(), lobby.id, [
+      GameEngine.subscribe_to_arena_events(game_engine(), arena.id, [
         :game_start,
         :game_update
       ])
     end
 
-    games = GameEngine.get_live_games_with_lobby_id(game_engine(), lobby.id)
+    games = GameEngine.get_live_games_with_arena_id(game_engine(), arena.id)
 
     if connected?(socket) do
       for %{pid: pid} <- games, do: Process.monitor(pid)
@@ -52,6 +52,6 @@ defmodule BattleBoxWeb.Live.Scores do
   end
 
   def render(assigns) do
-    LobbyView.render("_live_scores.html", assigns)
+    ArenaView.render("_live_scores.html", assigns)
   end
 end

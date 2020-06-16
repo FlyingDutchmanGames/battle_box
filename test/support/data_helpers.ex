@@ -1,5 +1,5 @@
 defmodule BattleBox.Test.DataHelpers do
-  alias BattleBox.{User, Bot, Lobby, Repo}
+  alias BattleBox.{User, Bot, Arena, Repo}
   import Ecto.Changeset
   import Phoenix.ConnTest
 
@@ -42,12 +42,12 @@ defmodule BattleBox.Test.DataHelpers do
     |> Repo.insert()
   end
 
-  def robot_game_lobby(opts \\ %{}) do
+  def robot_game_arena(opts \\ %{}) do
     (opts[:user] || create_user())
-    |> Ecto.build_assoc(:lobbies)
+    |> Ecto.build_assoc(:arenas)
     |> Map.put(:command_time_minimum_ms, opts[:command_time_minimum_ms] || 20)
-    |> Lobby.changeset(%{
-      "name" => opts[:lobby_name] || "lobby-name",
+    |> Arena.changeset(%{
+      "name" => opts[:arena_name] || "arena-name",
       "game_type" => "robot_game",
       "robot_game_settings" => %{}
     })

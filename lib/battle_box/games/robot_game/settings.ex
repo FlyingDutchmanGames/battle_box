@@ -21,7 +21,7 @@ defmodule BattleBox.Games.RobotGame.Settings.Shared do
 end
 
 defmodule BattleBox.Games.RobotGame.Settings do
-  alias BattleBox.Lobby
+  alias BattleBox.Arena
   alias __MODULE__.Terrain
   use Ecto.Schema
   import Ecto.Changeset
@@ -47,7 +47,7 @@ defmodule BattleBox.Games.RobotGame.Settings do
   ]
 
   schema "robot_game_settings" do
-    belongs_to :lobby, Lobby
+    belongs_to :arena, Arena
     field :spawn_enabled, :boolean, default: true, virtual: true
     field :terrain_base64, :binary, default: Base.encode64(Terrain.default()), virtual: true
     __MODULE__.Shared.fields()
