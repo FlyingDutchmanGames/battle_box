@@ -18,9 +18,14 @@ defmodule BattleBoxWeb.GameController do
 
     pagination_info = pagination_info(params)
     to_page = to_page(conn, params, pagination_info)
-    assigns = %{pagination_info: pagination_info, games: games, to_page: to_page, arena: arena}
 
-    render(conn, "index.html", assigns)
+    render(conn, "index.html", %{
+      pagination_info: pagination_info,
+      games: games,
+      to_page: to_page,
+      arena: arena,
+      nav_segments: [arena, "Games"]
+    })
   end
 
   def show(conn, %{"id" => id} = params) do

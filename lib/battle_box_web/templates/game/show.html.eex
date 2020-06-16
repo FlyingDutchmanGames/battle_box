@@ -1,7 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      Games / <%= @id %>
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: ["Games", @id]) %>
     </div>
     <%= if @follow do %>
       <%= live_render(@conn, FollowBack, session: %{"game_pid" => @game_pid, "follow" => @follow}) %>
