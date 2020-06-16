@@ -26,7 +26,13 @@ defmodule BattleBoxWeb.FollowController do
         _ -> nil
       end)
       |> Enum.reject(&is_nil/1)
+      |> Enum.map(fn {key, resource} -> {key, Repo.preload(resource, :user)} end)
+      |> Map.new()
 
-    Keyword.merge([user: user, arena: nil, bot: nil], hydrated)
+    lead_segment = hydrated[:arena] || hydrated[:bot] || user
+
+    %{user: user, arena: nil, bot: nil}
+    |> Map.merge(hydrated)
+    |> Map.put(:nav_segments, [lead_segment, "Follow"])
   end
 end

@@ -1,10 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / Users
-      / <a href="<% Routes.user_path(@conn, :show, @current_user.username) %>"><%= @current_user.username %></a>
-      / <a href="<%= Routes.api_key_path(@conn, :index) %>">Keys</a>
-      / New
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: [@current_user, {"Keys", Routes.api_key_path(@conn, :index)}, "New"]) %>
     </div>
   </div>
 

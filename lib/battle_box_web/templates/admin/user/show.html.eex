@@ -1,12 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / Admin
-      / <a href="<%= Routes.admin_user_path(@conn, :index) %>">Users</a>
-      / <%= @user.username %>
-      {
-        / <a href="<%= Routes.admin_user_path(@conn, :edit, @user.username) %>">Edit</a>
-      }
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments, options: @nav_options) %>
     </div>
   </div>
 

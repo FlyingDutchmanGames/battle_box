@@ -1,8 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / Admin
-      / Users
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: [:admin, "Users"]) %>
     </div>
   </div>
 

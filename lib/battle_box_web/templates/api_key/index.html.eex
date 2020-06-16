@@ -1,10 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / <a href="<%= Routes.user_path(@conn, :index) %>">Users</a>
-      / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
-      / Keys
-      { <a href="<%= Routes.api_key_path(@conn, :new) %>">/ New</a> }
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments, nav_options: @nav_options) %>
     </div>
   </div>
   <p>API Keys for accessing Botskrieg</p>

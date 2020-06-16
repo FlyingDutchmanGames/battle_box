@@ -20,7 +20,23 @@ defmodule BattleBoxWeb.UserController do
   def show(conn, %{"username" => username}) do
     case Repo.get_by(User, username: username) do
       %User{} = user ->
-        render(conn, "show.html", user: user)
+        nav_segments = [
+          {"Users", Routes.user_path(conn, :index)},
+          {user.username, Routes.user_path(conn, :show, user.username)}
+        ]
+
+        nav_options = [
+          {"Arenas", Routes.user_arena_path(conn, :index, user.username)},
+          {"Bots", Routes.user_bot_path(conn, :index, user.username)},
+          {:games, user},
+          {:follow, user},
+          if(conn.assigns[:current_user] && user.id == conn.assigns.current_user.id,
+            do: {"Keys", Routes.api_key_path(conn, :index)},
+            else: {:inaccessible, "Keys"}
+          )
+        ]
+
+        render(conn, "show.html", user: user, nav_segments: nav_segments, nav_options: nav_options)
 
       nil ->
         conn

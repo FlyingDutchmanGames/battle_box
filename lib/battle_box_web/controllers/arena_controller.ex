@@ -17,14 +17,33 @@ defmodule BattleBoxWeb.ArenaController do
     Repo.get_by(Arena, name: arena_name)
     |> Repo.preload(:user)
     |> case do
-      %Arena{} = arena -> render(conn, "show.html", arena: arena)
-      nil -> render404(conn, "Arena (#{arena_name}) not found")
+      %Arena{} = arena ->
+        nav_segments = [{arena.user, :arenas}, arena.name]
+
+        nav_options = [
+          {:games, arena},
+          {:follow, arena},
+          if(conn.assigns[:current_user] && conn.assigns.current_user.id == arena.user_id,
+            do: {:edit, arena},
+            else: {:inaccessible, "Edit"}
+          )
+        ]
+
+        render(conn, "show.html",
+          arena: arena,
+          nav_segments: nav_segments,
+          nav_options: nav_options
+        )
+
+      nil ->
+        render404(conn, "Arena (#{arena_name}) not found")
     end
   end
 
   def edit(%{assigns: %{current_user: %{id: user_id} = user}} = conn, %{"name" => name}) do
     Arena
     |> where(name: ^name, user_id: ^user_id)
+    |> preload(:user)
     |> Repo.one()
     |> Arena.preload_game_settings()
     |> case do
@@ -48,12 +67,23 @@ defmodule BattleBoxWeb.ArenaController do
           |> paginate(params)
           |> Repo.all()
 
+        nav_segments = [user, "Arenas"]
+
+        nav_options = [
+          if(conn.assigns[:current_user] && user.id == conn.assigns.current_user.id,
+            do: {:new, :arena},
+            else: {:inaccessible, "New"}
+          )
+        ]
+
         pagination_info = pagination_info(params)
         to_page = to_page(conn, params, pagination_info)
 
         render(conn, "index.html",
           user: user,
           arenas: arenas,
+          nav_options: nav_options,
+          nav_segments: nav_segments,
           pagination_info: pagination_info,
           to_page: to_page
         )
@@ -83,6 +113,7 @@ defmodule BattleBoxWeb.ArenaController do
       ) do
     Arena
     |> where(name: ^name, user_id: ^user_id)
+    |> preload(:user)
     |> Repo.one()
     |> Arena.preload_game_settings()
     |> case do

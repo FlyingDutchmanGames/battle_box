@@ -28,7 +28,9 @@ defmodule BattleBoxWeb.ApiKeyController do
   end
 
   def index(%{assigns: %{current_user: user}} = conn, _params) do
+    nav_segments = [conn.assigns.current_user, {"Keys", Routes.api_key_path(conn, :index)}]
+    nav_options = [{:new, :api_key}]
     user = Repo.preload(user, :api_keys)
-    render(conn, "index.html", user: user)
+    render(conn, "index.html", nav_segments: nav_segments, nav_options: nav_options, user: user)
   end
 end

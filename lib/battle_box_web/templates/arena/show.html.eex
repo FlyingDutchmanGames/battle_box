@@ -1,15 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / <a href="<%= Routes.user_path(@conn, :index) %>">Users</a>
-      / <a href="<%= Routes.user_path(@conn, :show, @arena.user.username) %>"><%= @arena.user.username %></a>
-      / <a href="<%= Routes.user_arena_path(@conn, :index, @arena.user.username) %>">Arenas</a>
-      / <%= @arena.name %>
-      {
-      <a href="<%= Routes.user_arena_game_path(@conn, :index, @arena.user.username, @arena.name) %>">/ Games</a>,
-      <a href="<%= Routes.user_arena_follow_path(@conn, :follow, @arena.user.username, @arena.name) %>" >/ Follow</a>,
-      <a class='<%= unless (@current_user && @current_user.id == @arena.user_id), do: "disabled-link" %>' href="<%= if @current_user, do: Routes.user_arena_path(@conn, :edit, @current_user.username, @arena.name) %>">/ Edit</a>
-      }
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments, options: @nav_options) %>
     </div>
   </div>
 

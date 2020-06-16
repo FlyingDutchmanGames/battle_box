@@ -1,10 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / Users 
-      / <a href="<%= Routes.user_path(@conn, :show, @current_user.username) %>"><%= @current_user.username %></a> 
-      / <a href="<%= Routes.user_bot_path(@conn, :index, @current_user.username) %>">Bots</a>
-      / New
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: [{@current_user, :bots}, "New"]) %>
     </div>
   </div>
   <%= form_for @changeset, Routes.bot_path(@conn, :create), fn form -> %>

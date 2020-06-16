@@ -1,17 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      / Users 
-      / <a href="<%= Routes.user_path(@conn, :show, @user.username) %>"><%= @user.username %></a>
-      <%= if @arena do %>
-        / <a href="<%= Routes.user_arena_path(@conn, :index, @user.username) %>">Arenas</a>
-        / <a href="<%= Routes.user_arena_path(@conn, :show, @user.username, @arena.name) %>"><%= @arena.name %></a>
-      <% end %>
-      <%= if @bot do %>
-        / <a href="<%= Routes.user_bot_path(@conn, :index, @user.username) %>">Bots</a>
-        / <a href="<%= Routes.user_bot_path(@conn, :show, @user.username, @bot.name) %>"><%= @bot.name %></a>
-      <% end %>
-      / Follow
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments) %>
     </div>
   </div>
 
