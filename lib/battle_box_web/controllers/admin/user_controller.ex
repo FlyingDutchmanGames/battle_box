@@ -6,8 +6,14 @@ defmodule BattleBoxWeb.Admin.UserController do
 
   def show(conn, %{"username" => username}) do
     case Repo.get_by(User, username: username) do
-      %User{} = user -> render(conn, "show.html", user: user)
-      nil -> render404(conn, username)
+      %User{} = user ->
+        nav_segments = [:admin, {:admin, user}]
+        nav_options = [{:admin, {:edit, user}}]
+
+        render(conn, "show.html", user: user, nav_segments: nav_segments, nav_options: nav_options)
+
+      nil ->
+        render404(conn, username)
     end
   end
 

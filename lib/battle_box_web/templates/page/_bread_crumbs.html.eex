@@ -2,9 +2,11 @@
 
 <%= for segment <- @segments do %>
   <%= case segment do %>
+
     <% %User{username: username} -> %>
       <a href="<%= Routes.user_path(@conn, :index) %>">Users</a> /
       <a href="<%= Routes.user_path(@conn, :show, username) %>"><%= username %></a> /
+
     <% {%User{username: username}, user_resource} -> %>
       <a href="<%= Routes.user_path(@conn, :index) %>">Users</a> /
       <a href="<%= Routes.user_path(@conn, :show, username) %>"><%= username %></a> /
@@ -16,6 +18,7 @@
         <% :keys -> %>
           <a href="<%= Routes.api_key_path(@conn, :index) %>">Keys</a> /
       <% end %>
+
     <% %{user: %{username: username}, name: name, __struct__: struct} -> %>
       <a href="<%= Routes.user_path(@conn, :index) %>">Users</a> /
       <a href="<%= Routes.user_path(@conn, :show, username) %>"><%= username %></a> /
@@ -27,12 +30,23 @@
           <a href="<%= Routes.user_bot_path(@conn, :index, username) %>">Bots</a> /
           <a href="<%= Routes.user_bot_path(@conn, :show, username, name) %>"><%= name %></a> /
       <% end %>
+
+    <% :admin -> %>
+      <a href="<%= Routes.admin_page_path(@conn, :index) %>">Admin</a> /
+
+    <% {:admin, %User{username: username}} -> %>
+      <a href="<%= Routes.admin_user_path(@conn, :index) %>">Users</a> /
+      <a href="<%= Routes.admin_user_path(@conn, :show, username) %>"><%= username %></a> /
+
     <% name when is_binary(name) -> %>
       <%= name %> /
+
     <% {name, nil} when is_binary(name) -> %>
       <%= name %> /
+
     <% {name, link} when is_binary(name) and is_binary(link) -> %>
       <a href="<%= link %>"><%= name %></a> /
+
   <% end %>
 <% end %>
 
@@ -47,6 +61,7 @@
           <% Bot -> %>
             <a href="<%= Routes.user_bot_game_path(@conn, :index, username, name) %>">Games</a>,
         <% end %>
+
       <% {:follow, %{user: %{username: username}, name: name, __struct__: struct}} -> %>
         <%= case struct do %>
           <% Arena -> %>
@@ -54,6 +69,7 @@
           <% Bot -> %>
             <a href="<%= Routes.user_bot_follow_path(@conn, :follow, username, name) %>" >Follow</a>,
         <% end %>
+
       <% {:edit, %{user: %{username: username}, name: name, __struct__: struct}} -> %>
         <%= case struct do %>
           <% Arena -> %>
@@ -61,10 +77,16 @@
           <% Bot -> %>
             <a href="<%= Routes.user_bot_path(@conn, :edit, username, name) %>">Edit</a>
         <% end %>
+
+      <% {:admin, {:edit, %User{username: username}}} -> %>
+        <a href="<%= Routes.admin_user_path(@conn, :edit, username) %>">Edit</a>
+
       <% {:new, resource} -> %>
         <a href='<%= :erlang.apply(Routes, :"#{resource}_path", [@conn, :new]) %>'>New</a>
+
       <% {:inaccessible, name} -> %>
         <a class="disabled-link"><%= name %></a>,
+
       <% {name, link} when is_binary(name) -> %>
         <a href="<%= link %>"><%= name %></a>,
     <% end %>
