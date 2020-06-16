@@ -4,6 +4,7 @@
     <meta charset="utf-8"/>
     <title>Botskrieg</title>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
+    <%= render("_fonts.html", conn: @conn) %>
   </head>
   <body>
     <%= render("header.html", assigns) %>
