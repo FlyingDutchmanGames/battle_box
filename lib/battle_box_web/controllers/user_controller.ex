@@ -26,10 +26,10 @@ defmodule BattleBoxWeb.UserController do
         ]
 
         nav_options = [
-          {"Bots", Routes.user_bot_path(conn, :index, user.username)},
-          {"Games", Routes.user_game_path(conn, :index, user.username)},
           {"Arenas", Routes.user_arena_path(conn, :index, user.username)},
-          {"Follow", Routes.user_follow_path(conn, :follow, user.username)},
+          {"Bots", Routes.user_bot_path(conn, :index, user.username)},
+          {:games, user},
+          {:follow, user},
           if(conn.assigns[:current_user] && user.id == conn.assigns.current_user.id,
             do: {"Keys", Routes.api_key_path(conn, :index)},
             else: {:inaccessible, "Keys"}

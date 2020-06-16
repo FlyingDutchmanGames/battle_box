@@ -1,4 +1,4 @@
-<a href="<%= Routes.page_path(@conn, :index) %>">/</a>
+<a href="<%= Routes.page_path(@conn, :index) %>">/ </a>
 
 <%= for segment <- @segments do %>
   <%= case segment do %>
@@ -41,9 +41,6 @@
     <% name when is_binary(name) -> %>
       <%= name %> /
 
-    <% {name, nil} when is_binary(name) -> %>
-      <%= name %> /
-
     <% {name, link} when is_binary(name) and is_binary(link) -> %>
       <a href="<%= link %>"><%= name %></a> /
 
@@ -54,6 +51,9 @@
   {
   <%= for option <- @options do %>
     <%= case option do %>
+      <% {:games, %User{username: username}} -> %>
+        <a href="<%= Routes.user_game_path(@conn, :index, username) %>">Games</a>,
+
       <% {:games, %{user: %{username: username}, name: name, __struct__: struct}} -> %>
         <%= case struct do %>
           <% Arena -> %>
@@ -61,6 +61,9 @@
           <% Bot -> %>
             <a href="<%= Routes.user_bot_game_path(@conn, :index, username, name) %>">Games</a>,
         <% end %>
+
+      <% {:follow, %User{username: username}} -> %>
+          <a href="<%= Routes.user_follow_path(@conn, :follow, username) %>">Follow</a>,
 
       <% {:follow, %{user: %{username: username}, name: name, __struct__: struct}} -> %>
         <%= case struct do %>
@@ -73,16 +76,16 @@
       <% {:edit, %{user: %{username: username}, name: name, __struct__: struct}} -> %>
         <%= case struct do %>
           <% Arena -> %>
-            <a href="<%= Routes.user_arena_path(@conn, :edit, username, name) %>">Edit</a>
+            <a href="<%= Routes.user_arena_path(@conn, :edit, username, name) %>">Edit</a>,
           <% Bot -> %>
-            <a href="<%= Routes.user_bot_path(@conn, :edit, username, name) %>">Edit</a>
+            <a href="<%= Routes.user_bot_path(@conn, :edit, username, name) %>">Edit</a>,
         <% end %>
 
       <% {:admin, {:edit, %User{username: username}}} -> %>
-        <a href="<%= Routes.admin_user_path(@conn, :edit, username) %>">Edit</a>
+        <a href="<%= Routes.admin_user_path(@conn, :edit, username) %>">Edit</a>,
 
       <% {:new, resource} -> %>
-        <a href='<%= :erlang.apply(Routes, :"#{resource}_path", [@conn, :new]) %>'>New</a>
+        <a href='<%= :erlang.apply(Routes, :"#{resource}_path", [@conn, :new]) %>'>New</a>,
 
       <% {:inaccessible, name} -> %>
         <a class="disabled-link"><%= name %></a>,
