@@ -14,4 +14,12 @@
     <%= csrf_meta_tag() %>
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
+  <footer style="display: flex;">
+    <div style="padding: 25px 0px; margin: auto; display: flex; justify-content: center; align-items: center;">
+      <div style="color: gray;" >&copy; 2020 Flying Dutchman Games - </div>
+      <a href="https://github.com/FlyingDutchmanGames" style="height: max-content;">
+        <img style="margin-left: 5px;" width=15 src='<%= Routes.static_path(@conn, "/images/github-logo.svg") %>'>
+      </a>
+    </div>
+  </footer>
 </html>
