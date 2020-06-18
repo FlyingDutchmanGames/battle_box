@@ -9,7 +9,7 @@
       <div class="box-row arena">
         <div class="box-details">
           <div style="font-weight: bolder; padding-bottom: 10px;">ID: <%= game.id %></div>
-          <div>Arena: <a href='<%= Routes.user_arena_path(@conn, :show, @arena.user.username, @arena.name) %>'><%= game.arena.name %></a></div>
+          <div>Arena: <a href='<%= Routes.user_arena_path(@conn, :show, game.arena.user.username, game.arena.name) %>'><%= game.arena.name %></a></div>
           <div>Type: <%= game.game_type.title %></div>
           <div>Played: <%= humanize_seconds_ago(game.inserted_at) %></div>
         </div>
