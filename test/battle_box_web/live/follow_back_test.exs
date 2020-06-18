@@ -11,6 +11,7 @@ defmodule BattleBoxWeb.Live.FollowBackTest do
   @with_arena Map.merge(@user, %{"arena" => @arena})
 
   [
+    {"next-available", "Disable Auto Following Random"},
     {@user, "Disable Auto Following User (user-name)"},
     {@with_bot, "Disable Auto Following Bot (bot-name)"},
     {@with_arena, "Disable Auto Following Arena (arena-name)"}

@@ -28,14 +28,14 @@ defmodule BattleBoxWeb.Admin.UserControllerTest do
 
     test "a fake user is a 404", %{conn: conn} do
       conn = get(conn, "/admin/users/fake")
-      assert html_response(conn, 404) =~ "User (fake) not found"
+      assert html_response(conn, 404) =~ "User (fake) Not Found"
     end
   end
 
   describe "edit" do
     test "a fake user is a 404", %{conn: conn} do
       conn = get(conn, "/admin/users/fake/edit")
-      assert html_response(conn, 404) =~ "User (fake) not found"
+      assert html_response(conn, 404) =~ "User (fake) Not Found"
     end
 
     test "You get a form back", %{conn: conn, user: user} do

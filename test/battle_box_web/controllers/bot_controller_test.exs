@@ -119,7 +119,7 @@ defmodule BattleBoxWeb.BotControllerTest do
         |> get("/users/#{user.username}/bots/fake-bot/edit")
 
       html = html_response(conn, 404)
-      assert html =~ "Bot (fake-bot) Not Found for User (#{user.username})"
+      assert html =~ "Bot (fake-bot) for User (#{user.username}) Not Found"
     end
 
     test "trying to edit someone else's bot is an error", %{conn: conn, user: user} do
@@ -133,7 +133,7 @@ defmodule BattleBoxWeb.BotControllerTest do
         |> get("/users/#{user.username}/bots/#{bot.name}/edit")
 
       html = html_response(conn, 404)
-      assert html =~ "Bot (#{bot.name}) Not Found for User (#{user.username})"
+      assert html =~ "Bot (#{bot.name}) for User (#{user.username}) Not Found"
     end
 
     test "You can edit your own bot if it exists", %{user: user, conn: conn} do
@@ -166,7 +166,7 @@ defmodule BattleBoxWeb.BotControllerTest do
         |> put("/users/#{user.username}/bots/fake-bot", %{"bot" => %{"name" => "baz"}})
 
       html = html_response(conn, 404)
-      assert html =~ "Bot (fake-bot) Not Found for User (#{user.username})"
+      assert html =~ "Bot (fake-bot) for User (#{user.username}) Not Found"
     end
 
     test "trying to update someone else's bot is an error", %{conn: conn, user: user} do
@@ -180,7 +180,7 @@ defmodule BattleBoxWeb.BotControllerTest do
         |> put("/users/#{user.username}/bots/#{bot.name}", %{"bot" => %{"name" => "bar"}})
 
       html = html_response(conn, 404)
-      assert html =~ "Bot (#{bot.name}) Not Found for User (#{user.username})"
+      assert html =~ "Bot (#{bot.name}) for User (#{user.username}) Not Found"
     end
 
     test "You can update your own bot if it exists", %{user: user, conn: conn} do

@@ -1,6 +1,5 @@
 defmodule BattleBoxWeb.UserController do
   use BattleBoxWeb, :controller
-  alias BattleBoxWeb.PageView
   alias BattleBox.{Repo, User}
   import Ecto.Query
 
@@ -39,10 +38,7 @@ defmodule BattleBoxWeb.UserController do
         render(conn, "show.html", user: user, nav_segments: nav_segments, nav_options: nav_options)
 
       nil ->
-        conn
-        |> put_status(404)
-        |> put_view(PageView)
-        |> render("not_found.html", message: "User not found")
+        render404(conn, {User, username})
     end
   end
 

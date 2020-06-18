@@ -22,6 +22,7 @@ defmodule BattleBoxWeb.Router do
 
     get "/", PageController, :index
     get "/login", PageController, :login
+    get "/watch", FollowController, :follow
 
     resources "/games", GameController, only: [:show]
 

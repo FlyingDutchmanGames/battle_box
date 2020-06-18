@@ -21,6 +21,7 @@ defmodule BattleBoxWeb do
   def controller do
     quote do
       import Phoenix.LiveView.Controller
+      import BattleBoxWeb.Controllers.Helpers
       use Phoenix.Controller, namespace: BattleBoxWeb
 
       import Plug.Conn

@@ -1,6 +1,5 @@
 defmodule BattleBoxWeb.Admin.UserController do
   use BattleBoxWeb, :controller
-  alias BattleBoxWeb.PageView
   alias BattleBox.{Repo, User}
   import Ecto.Query
 
@@ -13,7 +12,7 @@ defmodule BattleBoxWeb.Admin.UserController do
         render(conn, "show.html", user: user, nav_segments: nav_segments, nav_options: nav_options)
 
       nil ->
-        render404(conn, username)
+        render404(conn, {User, username})
     end
   end
 
@@ -24,7 +23,7 @@ defmodule BattleBoxWeb.Admin.UserController do
         render(conn, "edit.html", user: user, changeset: changeset)
 
       nil ->
-        render404(conn, username)
+        render404(conn, {User, username})
     end
   end
 
@@ -43,7 +42,7 @@ defmodule BattleBoxWeb.Admin.UserController do
         end
 
       nil ->
-        render404(conn, username)
+        render404(conn, {User, username})
     end
   end
 
@@ -66,12 +65,5 @@ defmodule BattleBoxWeb.Admin.UserController do
 
   def to_page(page, conn, %{per_page: per_page}) do
     Routes.admin_user_path(conn, :index, %{page: page, per_page: per_page})
-  end
-
-  defp render404(conn, username) do
-    conn
-    |> put_status(404)
-    |> put_view(PageView)
-    |> render("not_found.html", message: "User (#{username}) not found")
   end
 end

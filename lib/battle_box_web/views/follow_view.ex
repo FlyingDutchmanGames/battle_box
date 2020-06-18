@@ -4,6 +4,9 @@ defmodule BattleBoxWeb.FollowView do
 
   def follow_back_target(follow) do
     case follow do
+      "next-available" ->
+        "Random"
+
       %{"arena" => name} ->
         "Arena (#{name})"
 

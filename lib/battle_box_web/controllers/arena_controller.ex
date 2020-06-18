@@ -1,7 +1,6 @@
 defmodule BattleBoxWeb.ArenaController do
   use BattleBoxWeb, :controller
   alias BattleBox.{Arena, Repo, User}
-  alias BattleBoxWeb.PageView
   import Ecto.Query
 
   def new(conn, %{"game_type" => game_type}) do
@@ -36,7 +35,7 @@ defmodule BattleBoxWeb.ArenaController do
         )
 
       nil ->
-        render404(conn, "Arena (#{arena_name}) not found")
+        render404(conn, {Arena, arena_name})
     end
   end
 
@@ -52,7 +51,7 @@ defmodule BattleBoxWeb.ArenaController do
         render(conn, "edit.html", changeset: changeset, arena: arena)
 
       nil ->
-        render404(conn, "Arena (#{name}) Not Found for User (#{user.username})")
+        render404(conn, {Arena, name, user.username})
     end
   end
 
@@ -89,7 +88,7 @@ defmodule BattleBoxWeb.ArenaController do
         )
 
       nil ->
-        render404(conn, "User (#{username}) not found")
+        render404(conn, {User, username})
     end
   end
 
@@ -118,7 +117,7 @@ defmodule BattleBoxWeb.ArenaController do
     |> Arena.preload_game_settings()
     |> case do
       nil ->
-        render404(conn, "Arena (#{name}) Not Found for User (#{user.username})")
+        render404(conn, {Arena, name, user.username})
 
       %Arena{} = arena ->
         arena
@@ -132,13 +131,6 @@ defmodule BattleBoxWeb.ArenaController do
             render(conn, "edit.html", changeset: changeset, arena: arena)
         end
     end
-  end
-
-  defp render404(conn, message) do
-    conn
-    |> put_status(404)
-    |> put_view(PageView)
-    |> render("not_found.html", message: message)
   end
 
   defp to_page(conn, %{"user_username" => username}, %{per_page: per_page}) do
