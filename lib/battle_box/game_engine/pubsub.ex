@@ -2,6 +2,8 @@ defmodule BattleBox.GameEngine.PubSub do
   use Supervisor
   alias BattleBox.GameEngine
 
+  @allowed_event_types [:game_update, :game_start, :bot_server_start, :bot_server_update]
+
   def subscribe_to_arena_events(game_engine, arena_id, events),
     do: subscribe(game_engine, {:arena, arena_id}, events)
 
@@ -43,7 +45,7 @@ defmodule BattleBox.GameEngine.PubSub do
         [{:bot, game_bot.bot.id}, {:user, game_bot.bot.user_id}]
       end)
 
-    topics = [{:game, game_id}, {:arena, get_arena_id(game)} | topics]
+    topics = [{:game, "*"}, {:game, game_id}, {:arena, get_arena_id(game)} | topics]
     dispatch_event_to_topics(game_engine, topics, :game_update, game_id)
   end
 
@@ -58,6 +60,7 @@ defmodule BattleBox.GameEngine.PubSub do
   end
 
   defp subscribe(game_engine, topic, events) do
+    :ok = validate_event_types!(events)
     {:ok, _pid} = Registry.register(registry_name(game_engine), topic, events)
     :ok
   end
@@ -82,5 +85,21 @@ defmodule BattleBox.GameEngine.PubSub do
   defp registry_name(game_engine) do
     GameEngine.names(game_engine).pubsub
     |> Module.concat(Registry)
+  end
+
+  defp validate_event_types!(events) do
+    result = events -- @allowed_event_types
+
+    unless result == [],
+      do:
+        raise(
+          ArgumentError,
+          """
+          Only Events Types #{inspect(@allowed_event_types)} are allowed to be subscribed to
+          instead received: #{inspect(events)}, which contains illegal events #{inspect(result)}
+          """
+        )
+
+    :ok
   end
 end
