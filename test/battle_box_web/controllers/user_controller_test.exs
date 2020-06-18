@@ -5,8 +5,8 @@ defmodule BattleBoxWeb.UserControllerTest do
 
   describe "show" do
     test "trying to view a non existant user is a not found 404", %{conn: conn} do
-      conn = conn |> get("/users/#{Ecto.UUID.generate()}")
-      assert html_response(conn, 404) =~ "User not found"
+      conn = conn |> get("/users/some-username")
+      assert html_response(conn, 404) =~ "User (some-username) Not Found"
     end
 
     test "you can view a user", %{conn: conn} do

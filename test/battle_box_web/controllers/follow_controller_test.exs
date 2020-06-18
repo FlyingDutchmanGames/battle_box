@@ -8,7 +8,7 @@ defmodule BattleBoxWeb.FollowControllerTest do
 
   test "an invalid user is a 404", %{conn: conn} do
     conn = conn |> get("/users/fake-user/follow")
-    assert html_response(conn, 404) =~ "User (fake-user) not found"
+    assert html_response(conn, 404) =~ "User (fake-user) Not Found"
   end
 
   test "You can do it for a real user", %{conn: conn, user: user} do

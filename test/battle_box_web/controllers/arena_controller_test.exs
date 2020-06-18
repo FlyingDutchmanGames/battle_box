@@ -24,7 +24,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
     test "A non existant arena triggers a 404", %{conn: conn, user: user} do
       conn = conn |> get("/users/#{user.username}/arenas/fake-arena")
 
-      assert html_response(conn, 404) =~ "Arena (fake-arena) not found"
+      assert html_response(conn, 404) =~ "Arena (fake-arena) Not Found"
     end
   end
 
@@ -99,7 +99,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
   describe "index" do
     test "it will 404 if the user isn't found", %{conn: conn} do
       conn = get(conn, "/users/FAKE_username/arenas")
-      assert html_response(conn, 404) =~ "User (FAKE_username) not found"
+      assert html_response(conn, 404) =~ "User (FAKE_username) Not Found"
     end
 
     test "it will show a user's arenas", %{conn: conn, user: user} do
@@ -129,7 +129,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
         |> get("/users/#{user.username}/arenas/fake-arena/edit")
 
       html = html_response(conn, 404)
-      assert html =~ "Arena (fake-arena) Not Found for User (#{user.username})"
+      assert html =~ "Arena (fake-arena) for User (#{user.username}) Not Found"
     end
 
     test "trying to edit someone else's arena is an error", %{conn: conn, user: user} do
@@ -145,7 +145,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
         |> get("/users/#{user.username}/arenas/#{arena.name}/edit")
 
       html = html_response(conn, 404)
-      assert html =~ "Arena (#{arena.name}) Not Found for User (#{user.username})"
+      assert html =~ "Arena (#{arena.name}) for User (#{user.username}) Not Found"
     end
 
     test "You can edit your own arena if it exists", %{user: user, conn: conn} do
@@ -178,7 +178,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
         |> put("/users/#{user.username}/arenas/fake-arena", %{"arena" => %{foo: "bar"}})
 
       html = html_response(conn, 404)
-      assert html =~ "Arena (fake-arena) Not Found for User (#{user.username})"
+      assert html =~ "Arena (fake-arena) for User (#{user.username}) Not Found"
     end
 
     test "trying to update someone else's arena is an error", %{conn: conn, user: user} do
@@ -194,7 +194,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
         |> put("/users/#{user.username}/arenas/#{arena.name}", %{"arena" => %{"name" => "bar"}})
 
       html = html_response(conn, 404)
-      assert html =~ "Arena (#{arena.name}) Not Found for User (#{user.username})"
+      assert html =~ "Arena (#{arena.name}) for User (#{user.username}) Not Found"
     end
 
     test "You can update your own arena if it exists", %{user: user, conn: conn} do

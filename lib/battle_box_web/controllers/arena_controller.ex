@@ -51,7 +51,7 @@ defmodule BattleBoxWeb.ArenaController do
         render(conn, "edit.html", changeset: changeset, arena: arena)
 
       nil ->
-        render404(conn, "Arena (#{name}) Not Found for User (#{user.username})")
+        render404(conn, {Arena, name, user.username})
     end
   end
 

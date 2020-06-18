@@ -9,7 +9,7 @@ defmodule BattleBoxWeb.Controllers.HelpersTest do
     {{Arena, "arena-name"}, "Arena (arena-name) Not Found"},
     {{Arena, "arena-name", "user-name"}, "Arena (arena-name) for User (user-name) Not Found"},
     {{User, "user-name"}, "User (user-name) Not Found"},
-    {"some random message", "some random message"},
+    {"some random message", "some random message"}
   ]
   |> Enum.each(fn {input, expected} ->
     test "rendering 404 for #{inspect(input)} yields #{expected}", %{conn: conn} do
