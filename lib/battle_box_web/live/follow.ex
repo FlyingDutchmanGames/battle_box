@@ -4,7 +4,7 @@ defmodule BattleBoxWeb.Live.Follow do
 
   def mount(_params, %{"follow" => :next_available} = session, socket) do
     if connected?(socket) do
-      :ok = GameEngine.subscribe_to_game_events(game_engine(), "*", [:game_start, :game_update])
+      :ok = GameEngine.subscribe_to_game_events(game_engine(), "*", [:game_update])
     end
 
     {:ok, assign(socket, follow_back: session["follow_back"])}
@@ -20,13 +20,13 @@ defmodule BattleBoxWeb.Live.Follow do
           Arena -> :subscribe_to_arena_events
         end
 
-      :ok = apply(GameEngine, func, [game_engine(), id, [:game_started, :game_update]])
+      :ok = apply(GameEngine, func, [game_engine(), id, [:game_update]])
     end
 
     {:ok, assign(socket, follow_back: session["follow_back"])}
   end
 
-  def handle_info({_topic, event, game_id}, socket) when event in [:game_update, :game_started] do
+  def handle_info({_topic, :game_update, game_id}, socket) do
     {:noreply,
      redirect(socket,
        to: Routes.game_path(socket, :show, game_id, %{follow: socket.assigns.follow_back})

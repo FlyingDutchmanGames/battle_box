@@ -1,7 +1,6 @@
 defmodule BattleBox.PubSubTest do
   use ExUnit.Case, async: true
   alias BattleBox.{Game, Bot, Arena, GameEngine}
-  import BattleBox.TestConvenienceHelpers, only: [named_proxy: 2]
 
   @bot_id Ecto.UUID.generate()
   @user_id Ecto.UUID.generate()
