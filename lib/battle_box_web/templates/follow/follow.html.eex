@@ -5,5 +5,5 @@
     </div>
   </div>
 
-  <%= live_render(@conn, Follow, session: %{"arena" => @arena, "bot" => @bot, "user" => @user}) %>
+  <%= live_render(@conn, Follow, session: %{"follow" => @follow, "follow_back" => @follow_back}) %>
 </div>
