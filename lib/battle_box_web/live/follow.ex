@@ -15,11 +15,7 @@ defmodule BattleBoxWeb.Live.Follow do
       :ok = apply(GameEngine, func, [game_engine(), id, [:game_started, :game_update]])
     end
 
-    {:ok,
-     assign(socket,
-       follow_back: session["follow_back"],
-       message: session["message"] || "Waiting for Game to Start"
-     )}
+    {:ok, assign(socket, follow_back: session["follow_back"])}
   end
 
   def handle_info({_topic, event, game_id}, socket) when event in [:game_update, :game_started] do
@@ -32,7 +28,7 @@ defmodule BattleBoxWeb.Live.Follow do
   def render(assigns) do
     ~L"""
     <div style="display: flex; justify-content: center; padding: 10px;">
-      <h1 class="blinking"><%= @message %></h1>
+      <h1 class="blinking">Waiting for Game to Start</h1>
     </div>
     """
   end
