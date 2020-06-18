@@ -1,6 +1,5 @@
 defmodule BattleBoxWeb.BotController do
   use BattleBoxWeb, :controller
-  alias BattleBoxWeb.PageView
   alias BattleBox.{Repo, Bot, User}
   import Ecto.Query
 
@@ -33,7 +32,7 @@ defmodule BattleBoxWeb.BotController do
     |> Repo.one()
     |> case do
       nil ->
-        render404(conn, "Bot (#{name}) Not Found for User (#{user.username})")
+        render404(conn, {Bot, name, user.username})
 
       %Bot{} = bot ->
         bot
@@ -66,8 +65,8 @@ defmodule BattleBoxWeb.BotController do
 
       render(conn, "show.html", bot: bot, nav_segments: nav_segments, nav_options: nav_options)
     else
-      {:user, nil} -> render404(conn, "User (#{username}) not found")
-      {:bot, nil} -> render404(conn, "Bot (#{name}) not found")
+      {:user, nil} -> render404(conn, {User, username})
+      {:bot, nil} -> render404(conn, {Bot, name, username})
     end
   end
 
@@ -82,7 +81,7 @@ defmodule BattleBoxWeb.BotController do
         render(conn, "edit.html", changeset: changeset, bot: bot)
 
       nil ->
-        render404(conn, "Bot (#{name}) Not Found for User (#{user.username})")
+        render404(conn, {Bot, name, user.username})
     end
   end
 
@@ -121,13 +120,6 @@ defmodule BattleBoxWeb.BotController do
       nil ->
         render404(conn, "User (#{username}) not found")
     end
-  end
-
-  defp render404(conn, message) do
-    conn
-    |> put_status(404)
-    |> put_view(PageView)
-    |> render("not_found.html", message: message)
   end
 
   defp to_page(conn, %{"user_username" => username}, %{per_page: per_page}) do
