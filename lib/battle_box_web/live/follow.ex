@@ -2,6 +2,14 @@ defmodule BattleBoxWeb.Live.Follow do
   use BattleBoxWeb, :live_view
   alias BattleBox.{GameEngine, Bot, Arena, User}
 
+  def mount(_params, %{"follow" => :next_available} = session, socket) do
+    if connected?(socket) do
+      :ok = GameEngine.subscribe_to_game_events(game_engine(), "*", [:game_start, :game_update])
+    end
+
+    {:ok, assign(socket, follow_back: session["follow_back"])}
+  end
+
   def mount(_params, %{"follow" => {type, id}} = session, socket)
       when is_binary(id) and type in [Bot, User, Arena] do
     if connected?(socket) do

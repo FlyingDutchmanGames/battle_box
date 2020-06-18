@@ -35,6 +35,9 @@ defmodule BattleBoxWeb.Live.FollowBack do
 
   defp follow_back_path(socket, follow) do
     case follow do
+      "next-available" ->
+        Routes.follow_path(socket, :follow)
+
       %{"arena" => arena_name, "user" => username} ->
         Routes.user_arena_follow_path(socket, :follow, username, arena_name)
 

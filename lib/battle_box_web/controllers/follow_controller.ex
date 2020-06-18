@@ -48,4 +48,12 @@ defmodule BattleBoxWeb.FollowController do
         end
     end
   end
+
+  def follow(conn, _params) do
+    render(conn, "follow.html", %{
+      nav_segments: ["Watch"],
+      follow: :next_available,
+      follow_back: "next-available"
+    })
+  end
 end
