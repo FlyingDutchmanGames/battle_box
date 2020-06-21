@@ -2,7 +2,7 @@
 
 <%= for segment <- @segments do %>
   <%= case segment do %>
-
+    <% :no_subject -> %>
     <% %User{username: username} -> %>
       <a href="<%= Routes.user_path(@conn, :index) %>">Users</a> /
       <a href="<%= Routes.user_path(@conn, :show, username) %>"><%= username %></a> /

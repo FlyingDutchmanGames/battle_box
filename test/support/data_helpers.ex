@@ -43,14 +43,27 @@ defmodule BattleBox.Test.DataHelpers do
   end
 
   def robot_game_arena(opts \\ %{}) do
-    (opts[:user] || create_user())
-    |> Ecto.build_assoc(:arenas)
-    |> Map.put(:command_time_minimum_ms, opts[:command_time_minimum_ms] || 20)
-    |> Arena.changeset(%{
-      "name" => opts[:arena_name] || "arena-name",
-      "game_type" => "robot_game",
-      "robot_game_settings" => %{}
-    })
-    |> Repo.insert()
+    opts = Enum.into(opts, %{})
+
+    user =
+      case opts do
+        %{user: user} ->
+          user
+
+        _ ->
+          {:ok, user} = create_user()
+          user
+      end
+
+    {:ok, _arena} =
+      user
+      |> Ecto.build_assoc(:arenas)
+      |> Map.put(:command_time_minimum_ms, opts[:command_time_minimum_ms] || 20)
+      |> Arena.changeset(%{
+        "name" => opts[:arena_name] || "arena-name",
+        "game_type" => "robot_game",
+        "robot_game_settings" => %{}
+      })
+      |> Repo.insert()
   end
 end

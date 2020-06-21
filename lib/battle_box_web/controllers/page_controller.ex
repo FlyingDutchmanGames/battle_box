@@ -6,6 +6,7 @@ defmodule BattleBoxWeb.PageController do
       {"Docs", nil},
       {"Users", Routes.user_path(conn, :index)},
       {"Watch", Routes.follow_path(conn, :follow)},
+      {"Games", Routes.game_path(conn, :index)},
       if(conn.assigns[:current_user] && conn.assigns.current_user.is_admin,
         do: {"Admin", Routes.admin_page_path(conn, :index)},
         else: {:inaccessible, "Admin"}

@@ -44,6 +44,9 @@ defmodule BattleBoxWeb.GameController do
 
   defp filter(query, subject) do
     case subject do
+      :no_subject ->
+        query
+
       %Arena{id: arena_id} ->
         query
         |> where(arena_id: ^arena_id)
@@ -92,11 +95,17 @@ defmodule BattleBoxWeb.GameController do
           nil -> {:error, {:not_found, {User, username}}}
           user -> {:ok, user}
         end
+
+      _ ->
+        {:ok, :no_subject}
     end
   end
 
   defp to_page(conn, subject, %{per_page: per_page}) do
     case subject do
+      :no_subject ->
+        &Routes.game_path(conn, :index, %{page: &1, per_page: per_page})
+
       %Arena{user: %{username: username}, name: name} ->
         &Routes.user_arena_game_path(conn, :index, username, name, %{page: &1, per_page: per_page})
 
