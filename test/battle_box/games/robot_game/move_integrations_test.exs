@@ -71,14 +71,16 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       |> Enum.map(&String.graphemes/1)
       |> Enum.map(&Enum.reject(&1, fn grapheme -> String.trim(grapheme) == "" end))
       |> Enum.reject(fn line -> line == [] end)
-
-    graph_with_indexes =
-      for {row, row_num} <- Enum.with_index(graphs),
-          {col, col_num} <- Enum.with_index(row),
-          do: {[row_num, col_num], col}
+      |> Enum.reverse()
 
     rows = length(graphs)
-    cols = graphs |> Enum.map(&length/1) |> Enum.max()
+    [cols] = Enum.uniq(for row <- graphs, do: length(row))
+
+    graph_with_indexes =
+      for {row, y} <- Enum.with_index(graphs),
+          {value, x} <- Enum.with_index(row),
+          do: {[x, y], value}
+
     terrain_header = <<rows::8, cols::8>>
 
     terrain_data =
