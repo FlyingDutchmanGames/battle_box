@@ -83,12 +83,12 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
     <<desired_rows::8, desired_cols::8, new_data::binary>>
   end
 
-  def at_location(terrain, [row, col]) do
+  def at_location(terrain, [x, y]) do
     <<rows::8, cols::8, data::binary>> = terrain
-    on_board? = row >= 0 && col >= 0 && row <= rows - 1 && col <= cols - 1
+    on_board? = x in 0..(cols - 1) && y in 0..(rows - 1)
 
     if on_board? do
-      offset = row * cols + col
+      offset = x + cols * y
 
       case :binary.at(data, offset) do
         0 -> :inaccessible
@@ -100,32 +100,14 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
     end
   end
 
-  def set_at_location(terrain, [row, col], type) do
+  def set_at_location(terrain, [x, y], type) do
     <<rows::8, cols::8, data::binary>> = terrain
-    offset = row * cols + col
+    offset = x + cols * y
     <<prefix::binary-size(offset), _replace::8, suffix::binary>> = data
     <<rows::8, cols::8, prefix::binary, type_to_int(type)::8, suffix::binary>>
   end
 
-  def inaccessible(terrain), do: get_type(terrain, 0)
-  def normal(terrain), do: get_type(terrain, 1)
-  def spawn(terrain), do: get_type(terrain, 2)
-
   def dimensions(<<rows::8, cols::8, _::binary>>), do: %{rows: rows, cols: cols}
-
-  defp get_type(terrain, type) do
-    <<_rows::8, cols::8, terrain_data::binary>> = terrain
-
-    for(<<terrain_val <- terrain_data>>, do: terrain_val)
-    |> Enum.with_index()
-    |> Enum.filter(fn {terrain_val, _offset} -> terrain_val == type end)
-    |> Enum.map(fn {_, offset} ->
-      row = Integer.floor_div(offset, cols)
-      col = rem(offset, cols)
-
-      [row, col]
-    end)
-  end
 
   defp type_to_int(type) do
     case type do
