@@ -24,21 +24,21 @@ defmodule BattleBoxWeb.Live.RobotGame.TerrainEditor do
     {:noreply, assign_terrain(socket, terrain)}
   end
 
-  def handle_event("apply-terrain-type", %{"row" => row, "col" => col}, socket) do
-    row = String.to_integer(row)
-    col = String.to_integer(col)
+  def handle_event("apply-terrain-type", %{"x" => x, "y" => y}, socket) do
+    x = String.to_integer(x)
+    y = String.to_integer(y)
 
     brush = socket.assigns.brush - 1
 
     terrain =
       for(
-        r <- (row - brush)..(row + brush),
-        c <- (col - brush)..(col + brush),
-        r > -1,
-        c > -1,
-        r < socket.assigns.rows,
-        c < socket.assigns.cols,
-        do: [r, c]
+        x <- (x - brush)..(x + brush),
+        y <- (y - brush)..(y + brush),
+        x > -1,
+        y > -1,
+        x < socket.assigns.rows,
+        y < socket.assigns.cols,
+        do: [x, y]
       )
       |> Enum.reduce(socket.assigns.terrain, fn loc, terrain ->
         Terrain.set_at_location(terrain, loc, socket.assigns.active)
