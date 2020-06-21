@@ -159,7 +159,7 @@ defmodule BattleBox.Games.RobotGame do
 
   def dimensions(game), do: Settings.Terrain.dimensions(game.terrain)
 
-  def spawns(game), do: Settings.Terrain.spawn(game.terrain)
+  def spawns(game), do: Settings.Terrain.spawns(game.terrain)
 
   def robots(game), do: robots_at_turn(game, game.turn)
 

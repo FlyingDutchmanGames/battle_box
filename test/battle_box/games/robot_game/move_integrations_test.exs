@@ -156,10 +156,10 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
     expected =
       case move_direction do
-        "▲" -> {-1, 0}
-        "▼" -> {1, 0}
-        "▶" -> {0, 1}
-        "◀" -> {0, -1}
+        "▲" -> {0, 1}
+        "▼" -> {0, -1}
+        "▶" -> {1, 0}
+        "◀" -> {-1, 0}
       end
 
     assert delta == expected
@@ -189,13 +189,13 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       "robot_id" => robot_id(location)
     }
 
-  defp move_move([row, col] = location, type) do
+  defp move_move([x, y] = location, type) do
     target =
       case type do
-        x when x in ["▲", "↑"] -> [row - 1, col]
-        x when x in ["▼", "↓"] -> [row + 1, col]
-        x when x in ["▶", "→"] -> [row, col + 1]
-        x when x in ["◀", "←"] -> [row, col - 1]
+        t when t in ["▲", "↑"] -> [x, y + 1]
+        t when t in ["▼", "↓"] -> [x, y - 1]
+        t when t in ["▶", "→"] -> [x + 1, y]
+        t when t in ["◀", "←"] -> [x - 1, y]
       end
 
     %{

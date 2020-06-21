@@ -3,7 +3,14 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
   alias BattleBox.Games.RobotGame.Settings.Terrain
   import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
 
-  @test_terrain ~t/0 0 1 1 2 2 0 0/
+  describe "spawns" do
+    test "it gives back the spawns" do
+      assert [] == Terrain.spawns(<<0, 0>>)
+      assert [[0, 0]] == Terrain.spawns(<<1, 1, 2>>)
+      assert [[0, 0], [0, 1]] == Terrain.spawns(<<2, 2, 2, 0, 2, 0>>)
+      assert [[0, 0], [2, 0]] == Terrain.spawns(<<1, 4, 2, 0, 2, 0>>)
+    end
+  end
 
   describe "default" do
     test "it has the correct number of spaces" do

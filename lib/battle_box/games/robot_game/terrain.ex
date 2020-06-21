@@ -109,6 +109,22 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
 
   def dimensions(<<rows::8, cols::8, _::binary>>), do: %{rows: rows, cols: cols}
 
+  def spawns(terrain), do: get_type(terrain, 2)
+
+  defp get_type(terrain, type) do
+    <<_rows::8, cols::8, terrain_data::binary>> = terrain
+
+    for(<<terrain_val <- terrain_data>>, do: terrain_val)
+    |> Enum.with_index()
+    |> Enum.filter(fn {terrain_val, _offset} -> terrain_val == type end)
+    |> Enum.map(fn {_, offset} ->
+      x = rem(offset, cols)
+      y = Integer.floor_div(offset, cols)
+
+      [x, y]
+    end)
+  end
+
   defp type_to_int(type) do
     case type do
       :inaccessible -> 0
