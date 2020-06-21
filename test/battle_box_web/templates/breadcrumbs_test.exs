@@ -42,6 +42,9 @@ defmodule BattleBoxWeb.Templates.BreadCrumbsTest do
          "/users/example-username/arenas",
          "/users/example-username/arenas/example-arena"
        ]},
+      # No Subject handling
+      {[:no_subject, :no_subject, @user, :no_subject], [], "/ Users / example-username /",
+       ["/", "/users", "/users/example-username"]},
       # Admin
       {[:admin], [], "/ Admin /", ["/", "/admin"]},
       {[:admin, {:admin, @user}], [], "/ Admin / Users / example-username /",
