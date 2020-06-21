@@ -1,24 +1,44 @@
 <svg viewBox="0 0 <%= Terrain.rows(@terrain) * 35 %> <%= Terrain.cols(@terrain) * 30 %>">
-  <%= for row <- 0..(Terrain.rows(@terrain) - 1), col <- 0..(Terrain.cols(@terrain) - 1) do %>
+  <%= for x <- 0..(Terrain.cols(@terrain) - 1), y <- 0..(Terrain.rows(@terrain) - 1) do %>
     <rect
-       x="<%= 35 * row %>"
-       y="<%= 30 * col %>"
+       x="<%= 35 * x %>"
+       y="<%= ((Terrain.rows(@terrain) - 1) * 30) - 30 * y %>"
        height="30"
        width="35"
        <%= if assigns[:phx_click] do %>
          phx-click="<%= @phx_click %>"
-         phx-value-row="<%= row %>"
-         phx-value-col="<%= col %>"
        <% end %>
+       phx-value-x="<%= x %>"
+       phx-value-y="<%= y %>"
        style="stroke: grey;"
-       class="terrain_<%= Terrain.at_location(@terrain, [row, col])  %>"/>
+       class="terrain_<%= Terrain.at_location(@terrain, [x, y])  %>"/>
   <% end %>
 
-  <%= for row <- 0..(Terrain.rows(@terrain)) do %>
-    <text x="<%= 35 * row + 17 %>" y="21" style="text-anchor: middle; fill: gray; user-select: none;"><%= row %></text>
+  <%= for row <- 0..(Terrain.rows(@terrain) - 1) do %>
+    <text
+      x="<%= 35 * row + 17 %>"
+      y="<%= 21 + (Terrain.cols(@terrain) - 1) * 30 %>"
+     <%= if assigns[:phx_click] do %>
+       phx-click="<%= @phx_click %>"
+     <% end %>
+      phx-value-x="<%= row %>"
+      phx-value-y="<%= 0 %>"
+      style="text-anchor: middle; fill: gray; user-select: none;">
+      <%= row %>
+    </text>
   <% end %>
 
-  <%= for col <- 1..(Terrain.cols(@terrain)) do %>
-    <text x="17" y="<%= 30 * col + 21 %>" style="text-anchor: middle; fill: gray; user-select: none;"><%= col %></text>
+  <%= for col <- 1..(Terrain.cols(@terrain) - 1) do %>
+    <text
+      x="17"
+      y="<%= ((Terrain.rows(@terrain) - 0) * 30) - (30 * col + 10) %>"
+     <%= if assigns[:phx_click] do %>
+       phx-click="<%= @phx_click %>"
+     <% end %>
+      phx-value-x="<%= 0 %>"
+      phx-value-y="<%= col %>"
+      style="text-anchor: middle; fill: gray; user-select: none;">
+      <%= col %>
+    </text>
   <% end %>
 </svg>
