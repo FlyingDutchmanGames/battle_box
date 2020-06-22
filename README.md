@@ -23,9 +23,6 @@
 - provide a way to change username
 - provide avatars that are not from github
 - Have a way to have users not from github
-#### Games
-- Historical Games Filtered/Paginated by [user, user + bot]
-- Better test the Game controller
 #### Clients
 - BattleBox Elixir Client
 - BattleBox Python Client
@@ -33,7 +30,6 @@
 - Update protocol to give the result of each move
 #### Robot Game
 - limit memory usage of game servers (they're currently at 2 mbs)
-- Fix terrain to be the right orientation
 - Manual GC?
 - Robot game give out random player ids / color coding based on player 
 - Make sure user input can't cause a game to crash (maybe changesets)
@@ -62,7 +58,6 @@
     - Load the credential for the host being connected to
 #### General
 - Handle when connection is closed on trying to send from connection server
-- Add "Games" to title bar
 - Api Key -> Key
 - Root Api Keys under users
 - Login return to

@@ -1,7 +1,7 @@
 <div class="page-content container">
   <div class="subhead">
     <div class="subhead-heading">
-      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments, nav_options: @nav_options) %>
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments, options: @nav_options) %>
     </div>
   </div>
   <p>API Keys for accessing Botskrieg</p>
