@@ -71,14 +71,16 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       |> Enum.map(&String.graphemes/1)
       |> Enum.map(&Enum.reject(&1, fn grapheme -> String.trim(grapheme) == "" end))
       |> Enum.reject(fn line -> line == [] end)
-
-    graph_with_indexes =
-      for {row, row_num} <- Enum.with_index(graphs),
-          {col, col_num} <- Enum.with_index(row),
-          do: {[row_num, col_num], col}
+      |> Enum.reverse()
 
     rows = length(graphs)
-    cols = graphs |> Enum.map(&length/1) |> Enum.max()
+    [cols] = Enum.uniq(for row <- graphs, do: length(row))
+
+    graph_with_indexes =
+      for {row, y} <- Enum.with_index(graphs),
+          {value, x} <- Enum.with_index(row),
+          do: {[x, y], value}
+
     terrain_header = <<rows::8, cols::8>>
 
     terrain_data =
@@ -156,10 +158,10 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
 
     expected =
       case move_direction do
-        "▲" -> {-1, 0}
-        "▼" -> {1, 0}
-        "▶" -> {0, 1}
-        "◀" -> {0, -1}
+        "▲" -> {0, 1}
+        "▼" -> {0, -1}
+        "▶" -> {1, 0}
+        "◀" -> {-1, 0}
       end
 
     assert delta == expected
@@ -189,13 +191,13 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       "robot_id" => robot_id(location)
     }
 
-  defp move_move([row, col] = location, type) do
+  defp move_move([x, y] = location, type) do
     target =
       case type do
-        x when x in ["▲", "↑"] -> [row - 1, col]
-        x when x in ["▼", "↓"] -> [row + 1, col]
-        x when x in ["▶", "→"] -> [row, col + 1]
-        x when x in ["◀", "←"] -> [row, col - 1]
+        t when t in ["▲", "↑"] -> [x, y + 1]
+        t when t in ["▼", "↓"] -> [x, y - 1]
+        t when t in ["▶", "→"] -> [x + 1, y]
+        t when t in ["◀", "←"] -> [x - 1, y]
       end
 
     %{

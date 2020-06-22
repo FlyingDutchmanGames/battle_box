@@ -2,7 +2,10 @@
   x="<%= @x %>"
   y="<%= @y %>"
   class="robot"
-  data-robot-id="<%= @robot.id %>">
+  data-robot-id="<%= @robot.id %>"
+  <%= if assigns[:loc] do %>
+    data-loc="<%= inspect(@loc) %>"
+  <% end %>>
   <rect
     x=2
     y=2

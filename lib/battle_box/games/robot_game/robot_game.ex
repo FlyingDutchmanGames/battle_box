@@ -159,7 +159,7 @@ defmodule BattleBox.Games.RobotGame do
 
   def dimensions(game), do: Settings.Terrain.dimensions(game.terrain)
 
-  def spawns(game), do: Settings.Terrain.spawn(game.terrain)
+  def spawns(game), do: Settings.Terrain.spawns(game.terrain)
 
   def robots(game), do: robots_at_turn(game, game.turn)
 
@@ -183,14 +183,14 @@ defmodule BattleBox.Games.RobotGame do
     |> Enum.filter(&(Terrain.at_location(terrain, &1) in [:spawn, :normal]))
   end
 
-  def adjacent_locations([row, col]) do
+  def adjacent_locations([x, y]) do
     [
-      [row + 1, col],
-      [row - 1, col],
-      [row, col + 1],
-      [row, col - 1]
+      [x + 1, y],
+      [x - 1, y],
+      [x, y + 1],
+      [x, y - 1]
     ]
-    |> Enum.filter(fn [row, col] -> row >= 0 && col >= 0 end)
+    |> Enum.filter(fn [x, y] -> x >= 0 && y >= 0 end)
   end
 
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
