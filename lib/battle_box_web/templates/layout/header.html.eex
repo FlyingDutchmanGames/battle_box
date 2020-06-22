@@ -14,6 +14,12 @@
       <a href="<%= Routes.user_arena_path(@conn, :index, @current_user.username) %>">Arenas</a>
     </div>
     <div class="nav-item">
+      <a href="<%= Routes.user_game_path(@conn, :index, @current_user.username) %>">Games</a>
+    </div>
+    <div class="nav-item">
+      <a href="<%= Routes.user_follow_path(@conn, :follow, @current_user.username) %>">Live</a>
+    </div>
+    <div class="nav-item">
       <a href="<%= Routes.api_key_path(@conn, :index) %>">Keys</a>
     </div>
     <%= if @current_user.is_admin do %>
