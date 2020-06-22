@@ -19,11 +19,8 @@
   <hr>
 
   <h1>Getting Started</h1>
-  <h2>Navigating Botskrieg</h2>
-  <h2>Sign Up/Login</h2>
-  <h2>Your first API Key</h2>
-  <h2>Picking a Client</h2>
-  <h2>What Game to Play</h2>
+  <p><a href='<%= Routes.docs_path(@conn, :docs, ["getting-started"]) %>'>Getting Started</a></p>
+  <p><a href="<%= Routes.docs_path(@conn, :docs, []) %>">Full Docs</a></p>
 
   <hr>
 

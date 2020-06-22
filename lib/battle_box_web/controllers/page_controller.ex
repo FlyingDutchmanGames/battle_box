@@ -3,7 +3,7 @@ defmodule BattleBoxWeb.PageController do
 
   def index(conn, _params) do
     navigation_options = [
-      {"Docs", nil},
+      {"Docs", Routes.docs_path(conn, :docs, [])},
       {"Users", Routes.user_path(conn, :index)},
       {"Watch", Routes.follow_path(conn, :follow)},
       {"Games", Routes.game_path(conn, :index)},

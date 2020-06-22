@@ -35,6 +35,11 @@ defmodule BattleBox.Games.RobotGame do
   def view_module, do: BattleBoxWeb.RobotGameView
   def players_for_settings(_), do: [1, 2]
 
+  def docs_tree,
+    do: %{
+      "rules" => %{}
+    }
+
   def disqualify(game, player) do
     winner = %{1 => 2, 2 => 1}[player]
     Map.put(game, :winner, winner)
