@@ -62,6 +62,7 @@
     - Load the credential for the host being connected to
 #### General
 - Handle when connection is closed on trying to send from connection server
+- Add "Games" to title bar
 - Api Key -> Key
 - Root Api Keys under users
 - Login return to

@@ -4,7 +4,9 @@
 
   <%= render("__terrain.html", terrain: @game_data.terrain) %>
 
-  <%= for {%{location: [row, col]} = robot, action} <- robot_actions(@game_data, @turn) do %>
-    <%= render("__robot.html", x: (35 * col), y: (30 * row), robot: robot, action: action) %>
+  <%= for {%{location: [x, y]} = robot, action} <- robot_actions(@game_data, @turn) do %>
+    <% x_offset = (35 * x) %>
+    <% y_offset = ((Terrain.rows(@game_data.terrain) - 1)  * 30) - (30 * y) %>
+    <%= render("__robot.html", x: x_offset, y: y_offset, robot: robot, action: action, loc: [x, y]) %>
   <% end %>
 </svg>

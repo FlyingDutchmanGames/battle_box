@@ -4,12 +4,12 @@ defmodule BattleBoxWeb.RobotGameView do
   alias BattleBox.Games.RobotGame.Settings.Terrain
   alias BattleBoxWeb.Live.RobotGame.TerrainEditor
 
-  def move_direction([from_row, from_col], [to_row, to_col]) do
-    case {from_row - to_row, from_col - to_col} do
-      {1, 0} -> :up
-      {-1, 0} -> :down
-      {0, -1} -> :right
-      {0, 1} -> :left
+  def move_direction([x1, y1], [x2, y2]) do
+    case {x2 - x1, y2 - y1} do
+      {0, 1} -> :up
+      {0, -1} -> :down
+      {-1, 0} -> :left
+      {1, 0} -> :right
     end
   end
 
