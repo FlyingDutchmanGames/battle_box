@@ -1,1 +1,136 @@
-<h1>Robot Game Rules</h1>
+<h1>Objective</h1>
+
+<p>You are the general of a robot army, your objective is to have the most robots on the board at the end of the game</p>
+<hr>
+
+<h1>Robots</h1>
+<div class="flex-center" style="justify-content: space-around;">
+  <%= render("_game.html", game_data: %RobotGame{terrain: <<1, 1, 1>>, events: [], robots_at_end_of_turn: %{-1 => [], 0 => [%{id: 1, location: [0, 0], hp: 50, player_id: 1}]}}, turn: 1) %>
+  <%= render("_game.html", game_data: %RobotGame{terrain: <<1, 1, 1>>, events: [], robots_at_end_of_turn: %{-1 => [], 0 => [%{id: 1, location: [0, 0], hp: 50, player_id: 2}]}}, turn: 1) %>
+  <%= render("_game.html", game_data: %RobotGame{terrain: <<1, 1, 1>>, events: [], robots_at_end_of_turn: %{-1 => [], 0 => [%{id: 1, location: [0, 0], hp: 50, player_id: 1}]}}, turn: 1) %>
+  <%= render("_game.html", game_data: %RobotGame{terrain: <<1, 1, 1>>, events: [], robots_at_end_of_turn: %{-1 => [], 0 => [%{id: 1, location: [0, 0], hp: 50, player_id: 2}]}}, turn: 1) %>
+</div>
+<p>Robots are color coded to a team, and display the number of hit points they have inside of them. When the hitpoint <b>(hp)</b> counter hits zero, the robot is removed from the board</p>
+
+<hr>
+<h1>Terrain</h1>
+<div style="display: grid; grid-template: 1fr / 1fr 1fr 1fr; grid-gap: 20px;">
+  <div>
+    <h3 style="text-align: center;">Normal</h3>
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: [], robots_at_end_of_turn: %{-1 => [], 0 => []}}, turn: 1) %>
+    </div>
+    <p style="text-align: center;">Robots can move into white spaces freely</p>
+  </div>
+
+  <div>
+    <h3 style="text-align: center;">Spawn</h3>
+    <% terrain = <<3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2>> %>
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: [], robots_at_end_of_turn: %{-1 => [], 0 => []}}, turn: 1) %>
+    </div>
+    <p style="text-align: center;">Robots can move into yellow (spawn) spaces freely</p>
+  </div>
+
+  <div>
+    <h3 style="text-align: center;">Inaccessible</h3>
+    <% terrain = <<3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0>> %>
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: [], robots_at_end_of_turn: %{-1 => [], 0 => []}}, turn: 1) %>
+    </div>
+    <p style="text-align: center;">Robots can <b>not</b> move into gray spaces</p>
+  </div>
+</div>
+
+<hr>
+<h1>Issuing Orders</h1>
+<div style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 10px;;">
+  <div style="padding: 10px;">
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [1, 1]}]} %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "guard", "robot_id" => 1}, effects: []}] %>
+
+    <h2 style="text-align: center;">Guarding</h2>
+
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: events, robots_at_end_of_turn: robots_at_end_of_turn}, turn: 1) %>
+    </div>
+
+    <p style="text-align: center;">Guarding reduces the amount of damage you take during the turn</p>
+  </div>
+
+  <div style="padding: 10px;">
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [1, 1]}]} %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "suicide", "robot_id" => 1}, effects: []}] %>
+
+    <h2 style="text-align: center;">Exploding</h2>
+    
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: events, robots_at_end_of_turn: robots_at_end_of_turn}, turn: 1) %>
+    </div>
+
+    <p style="text-align: center">A robot may explode and deal damage to all adjacent squares</p>
+  </div>
+
+  <div style="padding: 10px;">
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [0, 1]}]} %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "move", "robot_id" => 1, "target" => [1, 1]}, effects: []}] %>
+
+    <h2 style="text-align: center;">Moving</h2>
+    
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: events, robots_at_end_of_turn: robots_at_end_of_turn}, turn: 1) %>
+    </div>
+
+    <p style="text-align: center">A robot may move into an adjacent square.</p>
+  </div>
+
+  <div style="padding: 10px;">
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [1, 1]}]} %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "attack", "robot_id" => 1, target: [1,0]}, effects: []}] %>
+
+    <h2 style="text-align: center;">Attacking</h2>
+    
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: events, robots_at_end_of_turn: robots_at_end_of_turn}, turn: 1) %>
+    </div>
+
+    <p style="text-align: center">A robot may attack an adjacent square</p>
+  </div>
+</div>
+
+<hr>
+
+<h1>Damage Calculations</h1>
+
+<h2>Attack Damage</h2>
+
+<p>Attacking deals a random amount of damage to one adjacent squares where <pre>attack_damage_min &lt; damage &lt; attack_damage_max</pre></p>
+<p>Robots that are guarding receive <b>half</b> damage</p>
+
+<h2>Collision Damage</h2>
+
+<p>A robot will fail to move and take collision damage if any of the following are true</p>
+<ul>
+  <li>It attempts to move into an inaccessible square</li>
+  <li>It attempts to move into a square containing a robot, and that robot doesn't leave the square successfully during the same turn</li>
+  <li>It attempts to move into the same square as another robot is attempting to move to</li>
+</ul>
+<p>If a robot takes collision damage it will be calculated using the following formula:</p>
+<pre>collision_damage_min &lt; damage &lt; collision_damage_max</pre>
+<p>Robots that are guarding receive <b>no</b> collision damage</p>
+
+<h2>Explosion Damage</h2>
+
+<p>Exploding deals a random amount of damage to <b>all</b> adjacent squares where <pre>explode_damage_min &lt; damage &lt; explode_damage_max</pre></p>
+<p>Robots that are guarding receive <b>half</b> explosion damage</p>
+
+<hr>
+
+<h1>Spawning</h1>
+
+<hr>

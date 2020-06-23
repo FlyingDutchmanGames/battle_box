@@ -14,6 +14,9 @@
     <%= if @action == "guard" do %>
       style="stroke: green; stroke-dasharray: 5px;"
     <% end %>
+    <%= if @action == "suicide" do %>
+      style="stroke: orange; stroke-dasharray: 5px;"
+    <% end %>
     class="robot player_<%= @robot.player_id %>">
   </rect>
   <%= case @action do %>
