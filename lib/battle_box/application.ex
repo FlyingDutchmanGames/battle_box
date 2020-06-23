@@ -3,12 +3,12 @@ defmodule BattleBox.Application do
 
   def start(_type, _args) do
     children = [
-      # BattleBox.GameEngine,
+      BattleBox.GameEngine,
       BattleBox.Repo,
       {Phoenix.PubSub, [name: BattleBox.PubSub, adapter: Phoenix.PubSub.PG2]},
       BattleBoxWeb.Endpoint,
-      BattleBoxWeb.Telemetry
-      # {BattleBox.TcpConnectionServer, port: tcp_connection_server_port()}
+      BattleBoxWeb.Telemetry,
+      {BattleBox.TcpConnectionServer, port: tcp_connection_server_port()}
     ]
 
     opts = [strategy: :one_for_one, name: BattleBox.Supervisor]
