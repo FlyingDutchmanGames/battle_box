@@ -22,13 +22,13 @@ defmodule BattleBoxWeb.DocsController do
     render(conn, "documenation.html",
       nav_segments: nav_segments(conn, path),
       nav_options: nav_options(conn, path),
-      render_doc_mfa: render_doc_mfa(path, params),
+      content: content(path, params),
       params: params
     )
   end
 
   # Where the magic happens
-  defp render_doc_mfa(["games", game | rest], params) do
+  defp content(["games", game | rest], params) do
     module = game_type_name_to_module(game)
 
     template =
@@ -37,13 +37,11 @@ defmodule BattleBoxWeb.DocsController do
         rest -> "docs__#{Enum.join(rest, "__")}.html"
       end
 
-    {module.view_module, :render, [template, [params: params]]}
+    module.view_module.render(template, params: params)
   end
 
-  defp render_doc_mfa([], _params), do: {DocsView, :render, ["index.html"]}
-
-  defp render_doc_mfa(path, params),
-    do: {DocsView, :render, [Enum.join(path, "__") <> ".html", [params: params]]}
+  defp content([], _params), do: DocsView.render("index.html")
+  defp content(path, params), do: DocsView.render(Enum.join(path, "__") <> ".html", params: params)
 
   defp nav_segments(conn, []), do: [:docs]
 

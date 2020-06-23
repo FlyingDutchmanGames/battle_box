@@ -5,6 +5,5 @@
     </div>
   </div>
 
-  <% {m, f, a} = @render_doc_mfa %>
-  <%= apply(m, f, a) %>
+  <%= @content %>
 </div>
