@@ -35,8 +35,8 @@ defmodule BattleBox.Games.RobotGame.Event do
       <<rg_attack(robot_id, x, y), rest::binary>> ->
         {%{"type" => "attack", "robot_id" => robot_id, "target" => [x, y]}, rest}
 
-      <<rg_suicide(robot_id), rest::binary>> ->
-        {%{"type" => "suicide", "robot_id" => robot_id}, rest}
+      <<rg_explode(robot_id), rest::binary>> ->
+        {%{"type" => "explode", "robot_id" => robot_id}, rest}
 
       <<rg_guard(robot_id), rest::binary>> ->
         {%{"type" => "guard", "robot_id" => robot_id}, rest}
@@ -83,9 +83,9 @@ defmodule BattleBox.Games.RobotGame.Event do
           "attack" -> rg_attack(robot_id, x, y)
         end
 
-      %{"type" => type, "robot_id" => robot_id} when type in ["suicide", "guard", "noop"] ->
+      %{"type" => type, "robot_id" => robot_id} when type in ["explode", "guard", "noop"] ->
         case type do
-          "suicide" -> rg_suicide(robot_id)
+          "explode" -> rg_explode(robot_id)
           "guard" -> rg_guard(robot_id)
           "noop" -> rg_noop(robot_id)
         end

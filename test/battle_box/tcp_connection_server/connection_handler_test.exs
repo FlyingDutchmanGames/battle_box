@@ -198,8 +198,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                    "robot_hp" => _,
                    "spawn_every" => _,
                    "spawn_per_player" => _,
-                   "suicide_damage_max" => _,
-                   "suicide_damage_min" => _,
+                   "explode_damage_max" => _,
+                   "explode_damage_min" => _,
                    "terrain_base64" => _
                  }
                },

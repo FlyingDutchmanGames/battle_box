@@ -6,7 +6,7 @@ defmodule BattleBox.Games.RobotGame.EventHelpers do
   @death 1
   @move 2
   @attack 3
-  @suicide 4
+  @explode 4
   @guard 5
   @noop 6
 
@@ -51,9 +51,9 @@ defmodule BattleBox.Games.RobotGame.EventHelpers do
           >>
   end
 
-  defmacro rg_suicide(robot_id) do
+  defmacro rg_explode(robot_id) do
     quote do: <<
-            unquote(@suicide)::unquote(@code_size),
+            unquote(@explode)::unquote(@code_size),
             unquote(robot_id)::unquote(@robot_id_size)
           >>
   end

@@ -8,7 +8,7 @@ defmodule BattleBox.Games.RobotGame.EventTest do
 
   @move_move %{"type" => "move", "robot_id" => @robot_id, "target" => [0, 0]}
   @guard_move %{"type" => "guard", "robot_id" => @robot_id}
-  @suicide_move %{"type" => "suicide", "robot_id" => @robot_id}
+  @explode_move %{"type" => "explode", "robot_id" => @robot_id}
   @noop_move %{"type" => "noop", "robot_id" => @robot_id}
   @attack_move %{"type" => "attack", "robot_id" => @robot_id, "target" => [0, 0]}
 
@@ -32,7 +32,7 @@ defmodule BattleBox.Games.RobotGame.EventTest do
       # A little more realistic
       %{turn: 1, seq_num: 1, cause: @move_move, effects: [move_effect(@robot_id, 0, 0)]},
       %{turn: 1, seq_num: 1, cause: @guard_move, effects: [guard_effect(@robot_id)]},
-      %{turn: 1, seq_num: 1, cause: @suicide_move, effects: [remove_robot_effect(@robot_id)]},
+      %{turn: 1, seq_num: 1, cause: @explode_move, effects: [remove_robot_effect(@robot_id)]},
       %{turn: 1, seq_num: 1, cause: @noop_move, effects: []},
       %{turn: 1, seq_num: 1, cause: @attack_move, effects: [damage_effect(@robot_id, 20)]},
       # Robot creation

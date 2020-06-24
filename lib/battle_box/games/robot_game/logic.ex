@@ -29,9 +29,9 @@ defmodule BattleBox.Games.RobotGame.Logic do
 
     events =
       moves
-      |> Enum.filter(fn move -> move["type"] in ["suicide", "attack", "guard"] end)
+      |> Enum.filter(fn move -> move["type"] in ["explode", "attack", "guard"] end)
       |> Enum.map(fn
-        %{"type" => "suicide"} = move -> generate_suicide_event(game, move, guard_locations)
+        %{"type" => "explode"} = move -> generate_explode_event(game, move, guard_locations)
         %{"type" => "attack"} = move -> generate_attack_event(game, move, guard_locations)
         %{"type" => "guard"} = move -> generate_guard_event(move)
       end)
@@ -117,7 +117,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     %{cause: move, effects: effects}
   end
 
-  defp generate_suicide_event(game, move, guard_locations) do
+  defp generate_explode_event(game, move, guard_locations) do
     robot = get_robot(game, move["robot_id"])
 
     damage_effects =
@@ -127,8 +127,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
       |> Enum.map(fn %{id: affected_robot_id, location: location} ->
         damage =
           if location in guard_locations,
-            do: guarded_suicide_damage(game),
-            else: suicide_damage(game)
+            do: guarded_explode_damage(game),
+            else: explode_damage(game)
 
         damage_effect(affected_robot_id, damage)
       end)

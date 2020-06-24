@@ -13,8 +13,8 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
       add :collision_damage_min, :integer, null: false
       add :collision_damage_max, :integer, null: false
 
-      add :suicide_damage_min, :integer, null: false
-      add :suicide_damage_max, :integer, null: false
+      add :explode_damage_min, :integer, null: false
+      add :explode_damage_max, :integer, null: false
 
       add :max_turns, :integer, null: false
       add :terrain, :binary, null: false

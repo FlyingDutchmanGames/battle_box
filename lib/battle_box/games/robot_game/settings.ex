@@ -12,8 +12,8 @@ defmodule BattleBox.Games.RobotGame.Settings.Shared do
       field :collision_damage_min, :integer, default: 5
       field :collision_damage_max, :integer, default: 5
 
-      field :suicide_damage_min, :integer, default: 15
-      field :suicide_damage_max, :integer, default: 15
+      field :explode_damage_min, :integer, default: 15
+      field :explode_damage_max, :integer, default: 15
 
       field :terrain, :binary, default: BattleBox.Games.RobotGame.Settings.Terrain.default()
     end
@@ -41,8 +41,8 @@ defmodule BattleBox.Games.RobotGame.Settings do
     :robot_hp,
     :spawn_every,
     :spawn_per_player,
-    :suicide_damage_max,
-    :suicide_damage_min,
+    :explode_damage_max,
+    :explode_damage_min,
     :terrain
   ]
 
@@ -65,7 +65,7 @@ defmodule BattleBox.Games.RobotGame.Settings do
     |> validate_number(:robot_hp, greater_than_or_equal_to: 1, less_than_or_equal_to: 100)
     |> validate_number(:max_turns, greater_than_or_equal_to: 1, less_than_or_equal_to: 500)
     |> validate_less_than_or_equal_to(:attack_damage_min, :attack_damage_max)
-    |> validate_less_than_or_equal_to(:suicide_damage_min, :suicide_damage_max)
+    |> validate_less_than_or_equal_to(:explode_damage_min, :explode_damage_max)
     |> validate_less_than_or_equal_to(:collision_damage_min, :collision_damage_max)
     |> validate_change(:terrain_base64, fn :terrain_base64, terrain_base64 ->
       with {:decode, {:ok, terrain}} <- {:decode, Base.decode64(terrain_base64)},

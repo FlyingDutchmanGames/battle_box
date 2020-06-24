@@ -17,8 +17,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
             attack_damage_min: 1,
             attack_damage_max: 1,
             robot_hp: 50,
-            suicide_damage_min: 5,
-            suicide_damage_max: 5
+            explode_damage_min: 5,
+            explode_damage_max: 5
           }
         )
     }
@@ -155,12 +155,12 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     assert %{hp: 50} = RobotGame.get_robot(after_turn, 100)
   end
 
-  test "suicide removes the robot and damages adjacent squares", %{game: game} do
+  test "explode removes the robot and damages adjacent squares", %{game: game} do
     robot_spawns = ~g/1 2
                       4 6/
 
     player_1_moves = [
-      %{"type" => "suicide", "robot_id" => 100}
+      %{"type" => "explode", "robot_id" => 100}
     ]
 
     inital_game = RobotGame.put_events(game, robot_spawns) |> RobotGame.complete_turn()
@@ -173,11 +173,11 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
     assert %{hp: 50} = RobotGame.get_robot(after_turn, 600)
   end
 
-  test "You can't move into the square of a suiciding robot", %{game: game} do
+  test "You can't move into the square of a exploding robot", %{game: game} do
     robot_spawns = ~g/1 2/
 
     player_1_moves = [
-      %{"type" => "suicide", "robot_id" => 1}
+      %{"type" => "explode", "robot_id" => 1}
     ]
 
     player_2_moves = [

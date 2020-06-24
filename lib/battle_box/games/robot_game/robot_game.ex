@@ -136,8 +136,8 @@ defmodule BattleBox.Games.RobotGame do
         :spawn_enabled,
         :spawn_every,
         :spawn_per_player,
-        :suicide_damage_max,
-        :suicide_damage_min,
+        :explode_damage_max,
+        :explode_damage_min,
         :terrain
       ])
 
@@ -201,8 +201,8 @@ defmodule BattleBox.Games.RobotGame do
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
   def attack_damage(game), do: calc_damage(game.attack_damage_min, game.attack_damage_max)
 
-  def guarded_suicide_damage(game), do: Integer.floor_div(suicide_damage(game), 2)
-  def suicide_damage(game), do: calc_damage(game.suicide_damage_min, game.suicide_damage_max)
+  def guarded_explode_damage(game), do: Integer.floor_div(explode_damage(game), 2)
+  def explode_damage(game), do: calc_damage(game.explode_damage_min, game.explode_damage_max)
 
   def guarded_collision_damage(_game), do: 0
 
@@ -225,8 +225,8 @@ defmodule BattleBox.Games.RobotGame do
         :attack_damage_max,
         :collision_damage_min,
         :collision_damage_max,
-        :suicide_damage_min,
-        :suicide_damage_max
+        :explode_damage_min,
+        :explode_damage_max
       ])
 
     terrain = Base.encode64(game.terrain)

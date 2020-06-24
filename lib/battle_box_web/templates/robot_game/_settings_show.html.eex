@@ -16,9 +16,9 @@
     <div>Collision Damage Min: <%= @settings.collision_damage_min %></div>
     <div>Collision Damage Max: <%= @settings.collision_damage_max %></div>
 
-    <h3>Suicide Damage</h3>
-    <div>Suicide Damage Min: <%= @settings.suicide_damage_min %></div>
-    <div>Suicide Damage Max: <%= @settings.suicide_damage_max %></div>
+    <h3>Explore Damage</h3>
+    <div>Explore Damage Min: <%= @settings.explode_damage_min %></div>
+    <div>Explore Damage Max: <%= @settings.explode_damage_max %></div>
   </div>
 
   <div style="width: 70%;">
