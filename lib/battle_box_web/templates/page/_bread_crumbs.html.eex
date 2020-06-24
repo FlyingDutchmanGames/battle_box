@@ -3,6 +3,8 @@
 <%= for segment <- @segments do %>
   <%= case segment do %>
     <% :no_subject -> %>
+    <% :docs -> %>
+      <a href="<%= Routes.docs_path(@conn, :docs, []) %>">Docs</a> /
     <% %User{username: username} -> %>
       <a href="<%= Routes.user_path(@conn, :index) %>">Users</a> /
       <a href="<%= Routes.user_path(@conn, :show, username) %>"><%= username %></a> /

@@ -60,6 +60,7 @@
 - Handle when connection is closed on trying to send from connection server
 - Api Key -> Key
 - Root Api Keys under users
+- Change suicide -> explode
 - Login return to
 - "Not found" revaamp 
   - perserve bread crumbs

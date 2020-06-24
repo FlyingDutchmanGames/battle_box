@@ -1,0 +1,168 @@
+<h1>Objective</h1>
+
+<p>Win by having the most robots on the board after the last turn. The number of turns in the game is configurable and defaults to 100</p>
+<hr>
+
+<h1>Robots</h1>
+<div class="flex-center" style="justify-content: space-around;">
+  <%= render("_game.html", game_data: %RobotGame{terrain: <<1, 1, 1>>, events: [], robots_at_end_of_turn: %{-1 => [], 0 => [%{id: 1, location: [0, 0], hp: 50, player_id: 1}]}}, turn: 1) %>
+  <%= render("_game.html", game_data: %RobotGame{terrain: <<1, 1, 1>>, events: [], robots_at_end_of_turn: %{-1 => [], 0 => [%{id: 1, location: [0, 0], hp: 50, player_id: 2}]}}, turn: 1) %>
+  <%= render("_game.html", game_data: %RobotGame{terrain: <<1, 1, 1>>, events: [], robots_at_end_of_turn: %{-1 => [], 0 => [%{id: 1, location: [0, 0], hp: 50, player_id: 1}]}}, turn: 1) %>
+  <%= render("_game.html", game_data: %RobotGame{terrain: <<1, 1, 1>>, events: [], robots_at_end_of_turn: %{-1 => [], 0 => [%{id: 1, location: [0, 0], hp: 50, player_id: 2}]}}, turn: 1) %>
+</div>
+<p>Robots display their remaining hit points <b>(hp)</b>. Robot starting hit points are configurable, defaulting to 50</p>
+
+<hr>
+<h1>Game Board (Terrain)</h1>
+
+<p>
+The game board is a 0 indexed grid, with the origin in the bottom left corner.
+The size and composition of the board are configurable.
+The default configuration of the game board is shown below.
+</p>
+
+<p>
+Positions on the board are expressed as [x, y] coordinates.
+The board below has two robots on it, the red one is at position [8,9] and the blue one is at position [11, 12].
+Both Robots have 50 hitpoints <b>(hp)</b>.
+</p>
+
+<div class="flex-center">
+  <% robot1 = %{player_id: 1, id: 1, location: [8,9], hp: 50} %>
+  <% robot2 = %{player_id: 2, id: 1, location: [11,12], hp: 50} %>
+  <%= render("_game.html", game_data: %RobotGame{events: [], robots_at_end_of_turn: %{-1 => [], 0 => [robot1, robot2]}}, turn: 1) %>
+</div>
+
+<h2>Terrain Types</h2>
+<p>The Game board is made up of three types of squares:</p>
+<div style="display: grid; grid-template: 1fr / 1fr 1fr 1fr; grid-gap: 20px;">
+  <div>
+    <h3 style="text-align: center;">Inaccessible</h3>
+    <% terrain = <<3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0>> %>
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: [], robots_at_end_of_turn: %{-1 => [], 0 => []}}, turn: 1) %>
+    </div>
+    <p style="text-align: center;">Robots can <b>not</b> move into gray <b>(inaccesible/0)</b> spaces</p>
+  </div>
+
+  <div>
+    <h3 style="text-align: center;">Normal</h3>
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: [], robots_at_end_of_turn: %{-1 => [], 0 => []}}, turn: 1) %>
+    </div>
+    <p style="text-align: center;">Robots can move into white <b>(normal/1)</b> spaces</p>
+  </div>
+
+  <div>
+    <h3 style="text-align: center;">Spawn</h3>
+    <% terrain = <<3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2>> %>
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: [], robots_at_end_of_turn: %{-1 => [], 0 => []}}, turn: 1) %>
+    </div>
+    <p style="text-align: center;">Robots can move into yellow <b>(spawn/2)</b> spaces</p>
+  </div>
+</div>
+
+<hr>
+<h1>Robot Actions</h1>
+<p>Each turn, each robot may do one of the following</p>
+<div style="display: grid; grid-template-columns: 1fr 1fr; grid-gap: 10px;;">
+  <div style="padding: 10px;">
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [1, 1]}]} %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "guard", "robot_id" => 1}, effects: []}] %>
+
+    <h2 style="text-align: center;">Guarding</h2>
+
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: events, robots_at_end_of_turn: robots_at_end_of_turn}, turn: 1) %>
+    </div>
+
+    <p style="text-align: center;">Guarding reduces the amount of damage you take during the turn</p>
+  </div>
+
+  <div style="padding: 10px;">
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [1, 1]}]} %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "suicide", "robot_id" => 1}, effects: []}] %>
+
+    <h2 style="text-align: center;">Exploding</h2>
+    
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: events, robots_at_end_of_turn: robots_at_end_of_turn}, turn: 1) %>
+    </div>
+
+    <p style="text-align: center">A robot may explode and deal damage to all adjacent squares</p>
+  </div>
+
+  <div style="padding: 10px;">
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [0, 1]}]} %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "move", "robot_id" => 1, "target" => [1, 1]}, effects: []}] %>
+
+    <h2 style="text-align: center;">Moving</h2>
+    
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: events, robots_at_end_of_turn: robots_at_end_of_turn}, turn: 1) %>
+    </div>
+
+    <p style="text-align: center">A robot may move into an adjacent square.</p>
+  </div>
+
+  <div style="padding: 10px;">
+    <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
+    <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [1, 1]}]} %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "attack", "robot_id" => 1, target: [1,0]}, effects: []}] %>
+
+    <h2 style="text-align: center;">Attacking</h2>
+    
+    <div class="flex-center">
+      <%= render("_game.html", game_data: %RobotGame{terrain: terrain, events: events, robots_at_end_of_turn: robots_at_end_of_turn}, turn: 1) %>
+    </div>
+
+    <p style="text-align: center">A robot may attack an adjacent square</p>
+  </div>
+</div>
+
+<hr>
+
+<h1>Spawning</h1>
+<p>A spawning turn is any turn that is a multiple of the <b>spawn_every</b> setting. <b>spawn_every</b> defaults to 10 turns<p>
+<p>The number of robots that spawn per player is determined by the <b>spawn_per_player</b> setting. <b>spawn_per_player</b> defaults to 5 per player per spawning round</p>
+<p>If robot "A" is in a square that robot "B" spawns into, robot "A" is destroyed</p>
+
+<hr>
+
+<h1>Moving</h1>
+<p>A robot may may attempt to move into any adjacent square, so long as that square is on the board</p>
+<p>A robot will fail to move and take collision damage if</p>
+<ul>
+  <li>It attempts to move into an inaccessible square</li>
+  <li>It attempts to move into a square containing a robot, and that robot doesn't leave the square successfully during the same turn</li>
+  <li>Another robot attempts to move to the same square in the same turn</li>
+</ul>
+
+<hr>
+
+<h1>Damage Calculations</h1>
+
+<h2>Attack Damage</h2>
+
+<pre>attack_damage_min &lt; attack_damage &lt; attack_damage_max</pre>
+<p>Exploding deals a random amount of damage to <b>one</b> adjacent squares</p>
+<p>Robots that are guarding receive <b>half</b> attack damage</p>
+
+<h2>Collision Damage</h2>
+
+<pre>collision_damage_min &lt; collision_damage &lt; collision_damage_max</pre>
+<p>A robot will fail to move and take collision damage if</p>
+<p>A robot will <b>recieve</b> collision damage if a robot attempts to move into the space it occupies, and it doesn't successfully leave the square</p>
+<p>Robots that are guarding receive <b>no</b> collision damage</p>
+
+<h2>Explosion Damage</h2>
+
+<pre>explode_damage_min &lt; explode_damage &lt; explode_damage_max</pre></p>
+<p>Exploding deals a random amount of damage to <b>all</b> adjacent squares</p>
+<p>Robots that are guarding receive <b>half</b> explosion damage</p>
+

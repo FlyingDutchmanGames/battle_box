@@ -32,4 +32,16 @@ defmodule BattleBox.Utilities.Humanize do
         "#{Integer.floor_div(seconds_ago, @one_year_in_seconds)} year(s) ago"
     end
   end
+
+  def kebabify(string) do
+    Regex.replace(~r/\s+/, String.trim(string), "-")
+    |> String.downcase()
+  end
+
+  def unkebabify(string) do
+    string
+    |> String.split("-")
+    |> Enum.map(&String.capitalize/1)
+    |> Enum.join(" ")
+  end
 end
