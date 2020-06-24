@@ -84,8 +84,8 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       :attack_damage_max,
       :collision_damage_min,
       :collision_damage_max,
-      :suicide_damage_min,
-      :suicide_damage_max,
+      :explode_damage_min,
+      :explode_damage_max,
       :terrain,
       :spawn_enabled
     ]

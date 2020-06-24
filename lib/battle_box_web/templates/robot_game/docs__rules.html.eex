@@ -85,7 +85,7 @@ Both Robots have 50 hitpoints <b>(hp)</b>.
   <div style="padding: 10px;">
     <% terrain = <<3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1>> %>
     <% robots_at_end_of_turn = %{0 => [%{id: 1, player_id: 1, hp: 50, location: [1,1]}], -1 => [%{id: 1, player_id: 1, hp: 50, location: [1, 1]}]} %>
-    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "suicide", "robot_id" => 1}, effects: []}] %>
+    <% events = [%{turn: 1, seq_num: 0, cause: %{"type" => "explode", "robot_id" => 1}, effects: []}] %>
 
     <h2 style="text-align: center;">Exploding</h2>
     

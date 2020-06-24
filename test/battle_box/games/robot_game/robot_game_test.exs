@@ -19,8 +19,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
                max_turns: 400,
                robot_hp: 42,
                spawn_every: 45,
-               suicide_damage_max: 30,
-               suicide_damage_min: 15
+               explode_damage_max: 30,
+               explode_damage_min: 15
              } =
                RobotGame.new(%{
                  settings: %{
@@ -31,8 +31,8 @@ defmodule BattleBox.Games.RobotGame.GameTest do
                    max_turns: 400,
                    robot_hp: 42,
                    spawn_every: 45,
-                   suicide_damage_max: 30,
-                   suicide_damage_min: 15
+                   explode_damage_max: 30,
+                   explode_damage_min: 15
                  }
                })
     end
@@ -294,20 +294,20 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
-  describe "suicide_damage" do
+  describe "explode_damage" do
     test "it gets the value set in settings" do
       assert 42 =
-               RobotGame.suicide_damage(
-                 RobotGame.new(settings: %{suicide_damage_min: 42, suicide_damage_max: 42})
+               RobotGame.explode_damage(
+                 RobotGame.new(settings: %{explode_damage_min: 42, explode_damage_max: 42})
                )
     end
 
-    test "guarded suicide damage is 50% of regular damage rounding down to the integer" do
-      game = RobotGame.new(settings: %{suicide_damage_min: 10, suicide_damage_max: 10})
-      assert 5 == RobotGame.guarded_suicide_damage(game)
+    test "guarded explode damage is 50% of regular damage rounding down to the integer" do
+      game = RobotGame.new(settings: %{explode_damage_min: 10, explode_damage_max: 10})
+      assert 5 == RobotGame.guarded_explode_damage(game)
 
-      game = RobotGame.new(settings: %{suicide_damage_min: 9, suicide_damage_max: 9})
-      assert 4 == RobotGame.guarded_suicide_damage(game)
+      game = RobotGame.new(settings: %{explode_damage_min: 9, explode_damage_max: 9})
+      assert 4 == RobotGame.guarded_explode_damage(game)
     end
   end
 

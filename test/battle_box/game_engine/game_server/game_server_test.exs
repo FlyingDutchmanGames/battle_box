@@ -86,8 +86,8 @@ defmodule BattleBox.GameEngine.GameServerTest do
         attack_damage_max: game.robot_game.attack_damage_max,
         collision_damage_min: game.robot_game.collision_damage_min,
         collision_damage_max: game.robot_game.collision_damage_max,
-        suicide_damage_min: game.robot_game.suicide_damage_min,
-        suicide_damage_max: game.robot_game.suicide_damage_max,
+        explode_damage_min: game.robot_game.explode_damage_min,
+        explode_damage_max: game.robot_game.explode_damage_max,
         max_turns: game.robot_game.max_turns,
         terrain_base64: Base.encode64(Terrain.default())
       }

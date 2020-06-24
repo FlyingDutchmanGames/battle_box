@@ -26,8 +26,8 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
           robot_hp: nil,
           spawn_every: nil,
           spawn_per_player: nil,
-          suicide_damage_max: nil,
-          suicide_damage_min: nil,
+          explode_damage_max: nil,
+          explode_damage_min: nil,
           terrain_base64: nil
         })
 
@@ -36,12 +36,12 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
                :attack_damage_min,
                :collision_damage_max,
                :collision_damage_min,
+               :explode_damage_max,
+               :explode_damage_min,
                :max_turns,
                :robot_hp,
                :spawn_every,
                :spawn_per_player,
-               :suicide_damage_max,
-               :suicide_damage_min,
                :terrain_base64
              ]
     end
@@ -86,15 +86,15 @@ defmodule BattleBox.Games.RobotGame.SettingsTest do
           attack_damage_min: 2,
           collision_damage_max: 1,
           collision_damage_min: 2,
-          suicide_damage_max: 1,
-          suicide_damage_min: 2
+          explode_damage_max: 1,
+          explode_damage_min: 2
         })
 
       assert changeset.errors == [
                collision_damage_min:
                  {"collision_damage_min must be less than or equal to collision_damage_max", []},
-               suicide_damage_min:
-                 {"suicide_damage_min must be less than or equal to suicide_damage_max", []},
+               explode_damage_min:
+                 {"explode_damage_min must be less than or equal to explode_damage_max", []},
                attack_damage_min:
                  {"attack_damage_min must be less than or equal to attack_damage_max", []}
              ]
