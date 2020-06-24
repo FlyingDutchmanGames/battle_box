@@ -1,7 +1,6 @@
 defmodule BattleBoxWeb.DocsController do
   use BattleBoxWeb, :controller
   alias BattleBoxWeb.DocsView
-  import Phoenix.Naming, only: [humanize: 1]
   import BattleBox.InstalledGames, only: [installed_games: 0, game_type_name_to_module: 1]
   import BattleBox.Utilities.Humanize, only: [kebabify: 1, unkebabify: 1]
 
@@ -17,6 +16,8 @@ defmodule BattleBoxWeb.DocsController do
       "writing-a-client" => %{}
     }
   }
+
+  def paths, do: unnest(@nav_tree)
 
   def docs(conn, %{"path" => path} = params) do
     render(conn, "documenation.html",
@@ -41,9 +42,11 @@ defmodule BattleBoxWeb.DocsController do
   end
 
   defp content([], _params), do: DocsView.render("index.html")
-  defp content(path, params), do: DocsView.render(Enum.join(path, "__") <> ".html", params: params)
 
-  defp nav_segments(conn, []), do: [:docs]
+  defp content(path, params),
+    do: DocsView.render(Enum.join(path, "__") <> ".html", params: params)
+
+  defp nav_segments(_conn, []), do: [:docs]
 
   defp nav_segments(conn, path) do
     segments =
@@ -62,5 +65,11 @@ defmodule BattleBoxWeb.DocsController do
     for opt <- Map.keys(opts) do
       {unkebabify(opt), Routes.docs_path(conn, :docs, path ++ [opt])}
     end
+  end
+
+  defp unnest(subpath) do
+    Enum.flat_map(subpath, fn {category, subcategories} ->
+      [[category] | for(item <- unnest(subcategories), do: [category | item])]
+    end)
   end
 end
