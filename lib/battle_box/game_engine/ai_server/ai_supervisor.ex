@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.AiServer.AiSupervisor do
-  alias BattleBox.GameEngine
+  alias BattleBox.{GameEngine, GameEngine.AiServer}
   use DynamicSupervisor
 
   def start_link(%{names: names} = opts) do
@@ -13,7 +13,8 @@ defmodule BattleBox.GameEngine.AiServer.AiSupervisor do
 
   def start_ai(game_engine, %{logic_module: _} = opts) do
     ai_supervisor = GameEngine.names(game_engine).ai_supervisor
-    opts = Map.put_new(opts, :ai_server_id, Ecto.UUID.generate())
-    {:ok, _ai_server_pid} = DynamicSupervisor.start_child(ai_supervisor, {AiServer, opts})
+    {:ok, ai_server_pid} = DynamicSupervisor.start_child(ai_supervisor, {AiServer, opts})
+    {:ok, bot_server_pid} = AiServer.get_bot_server_pid(ai_server_pid)
+    {:ok, ai_server_pid, %{bot_server_pid: bot_server_pid}}
   end
 end

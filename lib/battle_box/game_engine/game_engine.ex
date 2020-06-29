@@ -46,6 +46,8 @@ defmodule BattleBox.GameEngine do
   defdelegate subscribe_to_bot_server_events(game_engine, bot_server_id, events),
     to: GameEnginePubSub
 
+  defdelegate start_ai(game_engine, opts), to: AiSup
+
   defdelegate start_bot(game_engine, opts), to: BotSup
   defdelegate get_bot_servers_with_user_id(game_engine, user_id), to: BotSup
   defdelegate get_bot_servers_with_bot_id(game_engine, bot_id), to: BotSup

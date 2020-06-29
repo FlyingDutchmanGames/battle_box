@@ -8,6 +8,6 @@ defmodule BattleBox.GameEngine.AiServer.AiSupervisorTest do
   end
 
   test "you can start the ai supervisor", %{ai_supervisor: ai_supervisor} do
-    assert Process.whereis(ai_supervisor) |> Process.alive?
+    assert Process.whereis(ai_supervisor) |> Process.alive?()
   end
 end
