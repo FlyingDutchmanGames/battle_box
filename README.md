@@ -17,8 +17,6 @@
 - add in server ais
 - Matchmaker queue live
 - set of default arenas with interesting terrains and bots
-#### Admin
-- Show number of bots/arenas/games by user
 #### Users
 - provide a way to change username
 - provide avatars that are not from github
@@ -63,6 +61,7 @@
 - Login return to
 - "Not found" revaamp 
   - perserve bread crumbs
+- Clean up matchspecs with Ex2Ms
 
 ### Nice to Haves
 
@@ -72,3 +71,5 @@
 - Pass timing info to the game so it can do move timing
 - Make all tests async by passing the ecto sandbox to all of the game engine
 - Rip out webpack/npm? It seems like we could eliminate a pretty huge dep if its basically static css and js
+- Admin - Show number of bots/arenas/games by user
+- Comprehensive Telemetry Metrics
