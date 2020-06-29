@@ -29,7 +29,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     %{arena: arena, bot: bot, key: key, user: user}
   end
 
-  test "you can start the supervisor server", %{bot_supervisor: bot_supervisor} do
+  test "you can start the bot supervisor", %{bot_supervisor: bot_supervisor} do
     assert Process.whereis(bot_supervisor) |> Process.alive?()
   end
 
