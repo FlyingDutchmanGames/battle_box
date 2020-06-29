@@ -1,6 +1,8 @@
 defmodule BattleBox.GameEngine.AiServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Bot, GameEngine, GameEngine.AiServer}
+  alias BattleBox.{Bot, GameEngine}
+
+  @user_id Ecto.UUID.generate()
 
   defmodule LogicModule do
   end
@@ -27,7 +29,7 @@ defmodule BattleBox.GameEngine.AiServerTest do
   end
 
   test "you can start the thing", context do
-    {:ok, ai_server, %{bot_server_pid: bot_server_pid}} =
+    {:ok, ai_server, %{bot_server: %{pid: bot_server_pid, id: bot_server_id}}} =
       GameEngine.start_ai(context.game_engine, %{
         bot: context.bot,
         arena: context.arena,
@@ -36,5 +38,6 @@ defmodule BattleBox.GameEngine.AiServerTest do
 
     assert Process.alive?(ai_server)
     assert Process.alive?(bot_server_pid)
+    assert %{pid: ^bot_server_pid} = GameEngine.get_bot_server(context.game_engine, bot_server_id)
   end
 end
