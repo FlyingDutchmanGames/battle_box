@@ -11,7 +11,7 @@ defmodule BattleBox.GameEngine.AiServer.AiSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one, extra_arguments: [init_arg])
   end
 
-  def start_ai(game_engine, %{logic_module: _} = opts) do
+  def start_ai(game_engine, %{logic: _} = opts) do
     ai_supervisor = GameEngine.names(game_engine).ai_supervisor
     DynamicSupervisor.start_child(ai_supervisor, {AiServer, opts})
   end
