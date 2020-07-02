@@ -1,14 +1,9 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
-  alias BattleBox.{Repo, Arena, Game, GameBot}
+  alias BattleBox.{Arena, Game, GameBot}
 
   def make_matches([_], _), do: []
 
-  def make_matches(enqueued_players, arena_id) do
-    %Arena{} =
-      arena =
-      Arena
-      |> Repo.get(arena_id)
-      |> Repo.preload(:user)
+  def make_matches(enqueued_players, arena) do
 
     settings = Arena.get_settings(arena)
     players = arena.game_type.players_for_settings(settings)
@@ -25,7 +20,6 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
     |> Enum.map(fn match ->
       game_bots =
         for {player, %{bot: bot}} <- match do
-          bot = Repo.preload(bot, :user)
           %GameBot{player: player, bot: bot}
         end
 
