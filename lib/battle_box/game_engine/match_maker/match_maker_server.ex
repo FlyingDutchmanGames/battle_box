@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.MatchMakerServer do
   use GenServer
-  alias BattleBox.GameEngine
+  alias BattleBox.{GameEngine, Arena, Repo}
   alias BattleBox.GameEngine.{MatchMaker, MatchMaker.MatchMakerLogic}
 
   @match_make_delay_ms 100
@@ -21,14 +21,25 @@ defmodule BattleBox.GameEngine.MatchMakerServer do
   end
 
   def handle_info(:match_make, %{names: names} = state) do
-    MatchMaker.arenas_with_queued_players(names.game_engine)
-    |> Enum.each(fn arena_id ->
-      MatchMaker.queue_for_arena(names.game_engine, arena_id)
-      |> MatchMakerLogic.make_matches(arena_id)
+    arenas =
+      names.game_engine
+      |> MatchMaker.arenas_with_queued_players()
+      |> Enum.map(&Repo.get!(Arena, &1))
+      |> Repo.preload(:user)
+      |> Enum.map(&Arena.preload_game_settings/1)
+
+    for arena <- arenas do
+      queue =
+        MatchMaker.queue_for_arena(names.game_engine, arena.id)
+        |> Enum.map(fn request ->
+          update_in(request.bot, &Repo.preload(&1, :user))
+        end)
+
+      MatchMakerLogic.make_matches(queue, arena)
       |> Enum.each(fn match_settings ->
         {:ok, _pid} = GameEngine.start_game(names.game_engine, match_settings)
       end)
-    end)
+    end
 
     schedule_match_make()
     {:noreply, state}

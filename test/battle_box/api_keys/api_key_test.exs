@@ -1,5 +1,5 @@
 defmodule BattleBox.ApiKeyTest do
-  use BattleBox.DataCase
+  use BattleBox.DataCase, async: false
   alias BattleBox.{ApiKey, User, Repo}
 
   @user_id Ecto.UUID.generate()
@@ -23,7 +23,7 @@ defmodule BattleBox.ApiKeyTest do
     end
 
     test "Name may not be longer than 30" do
-      name = :crypto.strong_rand_bytes(16) |> Base.encode16()
+      name = :crypto.strong_rand_bytes(17) |> Base.encode16()
       assert String.length(name) > 30
       changeset = ApiKey.changeset(%ApiKey{}, %{name: name})
       refute changeset.valid?
