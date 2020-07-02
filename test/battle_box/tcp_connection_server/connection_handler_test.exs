@@ -1,5 +1,5 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
-  use BattleBox.DataCase
+  use BattleBox.DataCase, async: false
   alias BattleBox.{ApiKey, Bot, User, GameEngine, TcpConnectionServer}
   import BattleBox.GameEngine, only: [get_connection: 2]
   import BattleBox.Connection.Message
@@ -233,6 +233,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     test "you get a game_cancelled if the other player dies",
          %{p1: %{socket: p1}, p2: %{socket: p2}} = context do
       :ok = GameEngine.force_match_make(context.game_engine)
+      Process.sleep(10)
       :ok = :gen_tcp.close(p2)
       assert_receive {:tcp, ^p1, game_req}
 
