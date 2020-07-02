@@ -13,8 +13,6 @@ defmodule BattleBox.GameEngine.AiServer.AiSupervisor do
 
   def start_ai(game_engine, %{logic_module: _} = opts) do
     ai_supervisor = GameEngine.names(game_engine).ai_supervisor
-    {:ok, ai_server_pid} = DynamicSupervisor.start_child(ai_supervisor, {AiServer, opts})
-    {:ok, bot_server_info} = AiServer.get_bot_server_info(ai_server_pid)
-    {:ok, ai_server_pid, %{bot_server: bot_server_info}}
+    DynamicSupervisor.start_child(ai_supervisor, {AiServer, opts})
   end
 end
