@@ -2,6 +2,7 @@ defmodule BattleBox.GameEngine do
   use Supervisor
   alias BattleBox.GameEngine.GameServer.GameSupervisor, as: GameSup
   alias BattleBox.GameEngine.BotServer.BotSupervisor, as: BotSup
+  alias BattleBox.GameEngine.AiServer.AiSupervisor, as: AiSup
   alias BattleBox.GameEngine.MatchMaker, as: MatchMakerSup
   alias BattleBox.GameEngine.PubSub, as: GameEnginePubSub
   alias BattleBox.GameEngine.MatchMakerServer
@@ -18,10 +19,12 @@ defmodule BattleBox.GameEngine do
     name = Keyword.fetch!(opts, :name)
 
     children = [
-      {Registry, keys: :unique, name: connection_registry_name(name)},
-      {Registry, keys: :unique, name: bot_registry_name(name)},
       {Registry, keys: :unique, name: game_registry_name(name)},
+      {Registry, keys: :unique, name: bot_registry_name(name)},
+      {Registry, keys: :unique, name: ai_registry_name(name)},
+      {Registry, keys: :unique, name: connection_registry_name(name)},
       {GameEnginePubSub, %{names: names(name)}},
+      {AiSup, %{names: names(name)}},
       {GameSup, %{names: names(name)}},
       {BotSup, %{names: names(name)}},
       {MatchMakerSup, %{names: names(name)}}
@@ -42,6 +45,8 @@ defmodule BattleBox.GameEngine do
 
   defdelegate subscribe_to_bot_server_events(game_engine, bot_server_id, events),
     to: GameEnginePubSub
+
+  defdelegate start_ai(game_engine, opts), to: AiSup
 
   defdelegate start_bot(game_engine, opts), to: BotSup
   defdelegate get_bot_servers_with_user_id(game_engine, user_id), to: BotSup
@@ -64,27 +69,31 @@ defmodule BattleBox.GameEngine do
 
   def names(name \\ @default_name) do
     %{
+      ai_registry: ai_registry_name(name),
+      ai_supervisor: ai_supervisor(name),
+      bot_registry: bot_registry_name(name),
+      bot_supervisor: bot_supervisor_name(name),
+      connection_registry: connection_registry_name(name),
       game_engine: name,
       game_registry: game_registry_name(name),
       game_supervisor: game_supervisor_name(name),
-      bot_registry: bot_registry_name(name),
-      bot_supervisor: bot_supervisor_name(name),
       match_maker: match_maker_name(name),
-      match_maker_server: match_maker_server_name(name),
       match_maker_registry: match_maker_registry_name(name),
-      connection_registry: connection_registry_name(name),
+      match_maker_server: match_maker_server_name(name),
       pubsub: pubsub_name(name)
     }
   end
 
-  defp game_registry_name(name), do: Module.concat(name, GameRegistry)
-  defp game_supervisor_name(name), do: Module.concat(name, GameSupervisor)
+  defp ai_registry_name(name), do: Module.concat(name, Ai.Registry)
+  defp ai_supervisor(name), do: Module.concat(name, AiSupervisor)
   defp bot_registry_name(name), do: Module.concat(name, BotRegistry)
   defp bot_supervisor_name(name), do: Module.concat(name, BotSupervisor)
-  defp match_maker_name(name), do: Module.concat(name, MatchMaker)
-  defp match_maker_server_name(name), do: Module.concat(name, MatchMaker.MatchMakerServer)
-  defp match_maker_registry_name(name), do: Module.concat(name, MatchMaker.Registry)
   defp connection_registry_name(name), do: Module.concat(name, Connection.Registry)
+  defp game_registry_name(name), do: Module.concat(name, GameRegistry)
+  defp game_supervisor_name(name), do: Module.concat(name, GameSupervisor)
+  defp match_maker_name(name), do: Module.concat(name, MatchMaker)
+  defp match_maker_registry_name(name), do: Module.concat(name, MatchMaker.Registry)
+  defp match_maker_server_name(name), do: Module.concat(name, MatchMaker.MatchMakerServer)
   defp pubsub_name(name), do: Module.concat(name, PubSub)
 
   defp get_process(registry, id, id_name) do
