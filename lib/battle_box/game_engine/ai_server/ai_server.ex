@@ -20,7 +20,7 @@ defmodule BattleBox.GameEngine.AiServer do
       ) do
     Process.monitor(game_server)
     :ok = GameServer.accept_game(game_server, player)
-    ai_state = state.logic.initialize.(game_request.settings)
+    ai_state = invoke(state.logic, :initialize, [game_request.settings])
 
     {:noreply,
      Map.merge(state, %{
@@ -32,18 +32,19 @@ defmodule BattleBox.GameEngine.AiServer do
   def handle_info({:commands_request, commands_request}, state) do
     %{game_state: game_state} = commands_request
 
-    {commands, ai_state}
-
-    state.logic.commands.(%{
-      ai_state: state.ai_state,
-      game_state: game_state,
-      settings: state.game_request.settings,
-      player: state.game_request.player
-    })
-    |> case do
-      {commands, ai_state} -> {commands, ai_state}
-      commands -> {commands, state.ai_state}
-    end
+    {commands, ai_state} =
+      invoke(state.logic, :commands, [
+        %{
+          ai_state: state.ai_state,
+          game_state: game_state,
+          settings: state.game_request.settings,
+          player: state.game_request.player
+        }
+      ])
+      |> case do
+        {commands, ai_state} -> {commands, ai_state}
+        commands -> {commands, state.ai_state}
+      end
 
     :ok =
       GameServer.submit_commands(
@@ -68,5 +69,15 @@ defmodule BattleBox.GameEngine.AiServer do
 
   def handle_info({:game_over, _result}, state) do
     {:stop, :normal, state}
+  end
+
+  defp invoke(logic, command, args) do
+    case logic do
+      logic when is_atom(logic) ->
+        apply(logic, command, args)
+
+      %{^command => func} ->
+        apply(func, args)
+    end
   end
 end
