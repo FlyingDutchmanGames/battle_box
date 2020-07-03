@@ -3,6 +3,8 @@ defmodule BattleBox.Games.RobotGame.Ais.ShelterInPlace do
 
   def name, do: "shelter-in-place"
   def description, do: "Always issues 'guard' commands to robots"
+  def creator, do: "the-notorious-gjp"
+  def difficulty, do: 1
 
   def initialize(_settings) do
     :ok

@@ -3,6 +3,8 @@ defmodule BattleBox.Games.RobotGame.Ais.Kansas do
 
   def name, do: "kansas"
   def description, do: "Tries its best to move to the center"
+  def difficulty, do: 2
+  def creator, do: "the-notorious-gjp"
 
   def initialize(_settings) do
     :ok

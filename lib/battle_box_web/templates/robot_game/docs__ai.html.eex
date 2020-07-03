@@ -1,0 +1,6 @@
+<%= for ai <- Enum.sort_by(RobotGame.ais, & &1.difficulty) do %>
+  <h1>"<%= ai.name %>"</h1>
+  <h2>Difficulty: <%= ai.difficulty %></h2>
+  <p><%= ai.description %></p>
+  <p style="font-weight: bold;">Created by: <%= ai.creator %></p>
+<% end %>

@@ -39,6 +39,7 @@ defmodule BattleBox.Games.RobotGame do
 
   def docs_tree,
     do: %{
+      "ai" => %{},
       "rules" => %{}
     }
 
