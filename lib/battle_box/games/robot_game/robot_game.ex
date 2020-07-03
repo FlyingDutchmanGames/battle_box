@@ -48,6 +48,11 @@ defmodule BattleBox.Games.RobotGame do
     Map.put(game, :winner, winner)
   end
 
+  def from_settings(settings) do
+    settings = Map.take(settings, Settings.shared_fields())
+    Map.merge(%__MODULE__{}, settings)
+  end
+
   def validate_moves(_game, :timeout, _player), do: []
 
   def validate_moves(game, moves, player) do

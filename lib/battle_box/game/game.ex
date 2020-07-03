@@ -35,6 +35,24 @@ defmodule BattleBox.Game do
     timestamps()
   end
 
+  def build(arena, players) do
+    game_bots = for {player, %{bot: bot}} <- players, do: %GameBot{player: player, bot: bot}
+
+    game_data =
+      arena
+      |> Arena.get_settings()
+      |> arena.game_type.from_settings()
+
+    %Game{
+      id: Ecto.UUID.generate(),
+      arena: arena,
+      arena_id: arena.id,
+      game_type: arena.game_type,
+      game_bots: game_bots
+    }
+    |> Map.put(arena.game_type.name, game_data)
+  end
+
   def game_data(game) do
     Map.get(game, game.game_type.name)
   end

@@ -17,27 +17,8 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
     enqueued_players
     |> match_players(players, grouper_function)
     |> Enum.map(fn match ->
-      game_bots =
-        for {player, %{bot: bot}} <- match do
-          %GameBot{player: player, bot: bot}
-        end
-
       player_pid_mapping = Map.new(for {player, %{pid: pid}} <- match, do: {player, pid})
-
-      game_data =
-        struct(arena.game_type)
-        |> Map.merge(Map.take(settings, arena.game_type.settings_module.shared_fields()))
-
-      game =
-        %Game{
-          id: Ecto.UUID.generate(),
-          arena: arena,
-          arena_id: arena.id,
-          game_type: arena.game_type,
-          game_bots: game_bots
-        }
-        |> Map.put(arena.game_type.name, game_data)
-
+      game = Game.build(arena, match)
       %{game: game, players: player_pid_mapping}
     end)
   end
