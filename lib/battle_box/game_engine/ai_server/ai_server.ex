@@ -32,13 +32,18 @@ defmodule BattleBox.GameEngine.AiServer do
   def handle_info({:commands_request, commands_request}, state) do
     %{game_state: game_state} = commands_request
 
-    {commands, ai_state} =
-      state.logic.commands.(%{
-        ai_state: state.ai_state,
-        game_state: game_state,
-        settings: state.game_request.settings,
-        player: state.game_request.player
-      })
+    {commands, ai_state}
+
+    state.logic.commands.(%{
+      ai_state: state.ai_state,
+      game_state: game_state,
+      settings: state.game_request.settings,
+      player: state.game_request.player
+    })
+    |> case do
+      {commands, ai_state} -> {commands, ai_state}
+      commands -> {commands, state.ai_state}
+    end
 
     :ok =
       GameServer.submit_commands(
