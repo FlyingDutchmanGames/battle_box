@@ -23,7 +23,10 @@ defmodule BattleBox.Utilities.UserIdentifierValidationTest do
       {"edit", {"Cannot be \"edit\"", []}},
       # Valid Identifiers
       {"foo", nil},
-      {"foo-bar", nil}
+      {"foo-bar", nil},
+      {"0123456789", nil},
+      {"abcdefghijklmnopqrstuvwxyz", nil},
+      {"ABCDEFGHIJKLMNOPQRSTUVWXYZ", nil}
     ]
     |> Enum.each(fn {name, errors} ->
       changeset =

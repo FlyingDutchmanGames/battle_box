@@ -21,7 +21,7 @@ defmodule BattleBox.Utilities.UserIdentifierValidation do
     changeset
     |> validate_required(field_name)
     |> validate_length(field_name, max: 39)
-    |> validate_format(field_name, ~r/^[a-zA-Z1-9-]+$/,
+    |> validate_format(field_name, ~r/^[a-zA-Z0-9-]+$/,
       message: "Can only contain alphanumeric characters or hyphens"
     )
     |> validate_change(field_name, fn ^field_name, value ->
