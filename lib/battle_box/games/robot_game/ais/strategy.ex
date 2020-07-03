@@ -1,9 +1,9 @@
 defmodule BattleBox.Games.RobotGame.Ais.Strategy do
   defmodule Utilites do
-    def manhattan_distance(%{"location" => location}, other),
+    def manhattan_distance(%{location: location}, other),
       do: manhattan_distance(location, other)
 
-    def manhattan_distance(other, %{"location" => location}),
+    def manhattan_distance(other, %{location: location}),
       do: manhattan_distance(other, location)
 
     def manhattan_distance([x1, y1], [x2, y2]) do
@@ -28,19 +28,22 @@ defmodule BattleBox.Games.RobotGame.Ais.Strategy do
 
         y1 < y2 ->
           [x1, y1 + 1]
+
+        x1 == x2 && y1 == y2 ->
+          [x1, y1]
       end
     end
   end
 
   defmodule Moves do
     def guard(%{id: robot_id}), do: %{"type" => "guard", "robot_id" => robot_id}
-    def suicide(%{id: robot_id}), do: %{"type" => "suicide", "robot_id" => robot_id}
+    def explode(%{id: robot_id}), do: %{"type" => "explode", "robot_id" => robot_id}
 
     def move(%{id: robot_id}, target),
       do: %{"type" => "move", "target" => target, "robot_id" => robot_id}
 
     def attack(%{id: robot_id}, target), do: attack(robot_id, target)
-    def attack(robot_id, %{"location" => target}), do: attack(robot_id, target)
+    def attack(robot_id, %{location: target}), do: attack(robot_id, target)
 
     def attack(robot_id, target),
       do: %{"type" => "attack", "target" => target, "robot_id" => robot_id}
