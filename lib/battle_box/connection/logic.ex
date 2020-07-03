@@ -71,7 +71,7 @@ defmodule BattleBox.Connection.Logic do
 
   def handle_client(reject_game(id), %{state: :game_acceptance} = data) do
     :ok = BotServer.reject_game(data.bot_server, id)
-    data = Map.put(data, :state, :playing)
+    data = Map.put(data, :state, :idle)
     {data, [], :continue}
   end
 
