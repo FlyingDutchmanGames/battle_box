@@ -36,7 +36,19 @@ defmodule BattleBox.Test.DataHelpers do
   end
 
   def create_bot(opts) do
-    opts[:user]
+    opts = Enum.into(opts, %{})
+
+    user =
+      case opts do
+        %{user: user} ->
+          user
+
+        _ ->
+          {:ok, user} = create_user()
+          user
+      end
+
+    user
     |> Ecto.build_assoc(:bots)
     |> Bot.changeset(%{name: opts[:bot_name]})
     |> Repo.insert()

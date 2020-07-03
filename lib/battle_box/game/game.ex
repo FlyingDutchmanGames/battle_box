@@ -36,7 +36,7 @@ defmodule BattleBox.Game do
   end
 
   def build(arena, players) do
-    game_bots = for {player, %{bot: bot}} <- players, do: %GameBot{player: player, bot: bot}
+    game_bots = for {player, bot} <- players, do: %GameBot{player: player, bot: bot}
 
     game_data =
       arena
