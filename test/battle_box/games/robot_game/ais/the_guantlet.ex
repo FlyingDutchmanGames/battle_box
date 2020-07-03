@@ -23,7 +23,9 @@ defmodule BattleBox.Games.RobotGame.Ais.TheGuantletTest do
     {:ok, GameEngine.names(name)}
   end
 
-  for challenger_1 <- RobotGame.ais(), challenger_2 <- RobotGame.ais() do
+  for challenger_1 <- RobotGame.ais(),
+      challenger_2 <- RobotGame.ais(),
+      challenger_1 <= challenger_2 do
     test "Robot Game: #{challenger_1.name} vs. #{challenger_2.name}", context do
       {:ok, ai_server1} =
         GameEngine.start_ai(context.game_engine, %{logic: unquote(challenger_1)})

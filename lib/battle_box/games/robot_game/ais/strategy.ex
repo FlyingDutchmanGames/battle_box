@@ -16,6 +16,7 @@ defmodule BattleBox.Games.RobotGame.Ais.Strategy do
   defmacro __using__(_opts) do
     quote do
       import BattleBox.Games.RobotGame.Ais.Strategy.Moves
+      alias BattleBox.Games.RobotGame.Settings.Terrain
     end
   end
 end

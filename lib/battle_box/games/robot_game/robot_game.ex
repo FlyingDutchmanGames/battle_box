@@ -4,7 +4,7 @@ defmodule BattleBox.Games.RobotGame do
   require __MODULE__.Settings.Shared
   alias BattleBox.Game
   alias __MODULE__.{Settings, Settings.Terrain, Event}
-  alias __MODULE__.Ais.{ShelterInPlace}
+  alias __MODULE__.Ais.{ShelterInPlace, Kansas}
   use Ecto.Schema
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -35,7 +35,7 @@ defmodule BattleBox.Games.RobotGame do
   def settings_module, do: Settings
   def view_module, do: BattleBoxWeb.RobotGameView
   def players_for_settings(_), do: [1, 2]
-  def ais, do: [ShelterInPlace]
+  def ais, do: [ShelterInPlace, Kansas]
 
   def docs_tree,
     do: %{
