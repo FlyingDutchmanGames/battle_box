@@ -95,26 +95,43 @@ defmodule BattleBox.GameEngine.AiServerTest do
   test "it can play a full game!", context do
     test_pid = self()
 
-    {:ok, ai_server} =
+    {:ok, ai_server1} =
       GameEngine.start_ai(context.game_engine, %{
         logic: %{
           initialize: fn _ -> send(test_pid, :got_game_request) end,
           commands: fn commands_request ->
-            send(test_pid, {:got_commands_request, commands_request})
+            send(test_pid, {1, :got_commands_request, commands_request.game_state.turn})
             {[], :ok}
           end
         }
       })
 
+    {:ok, ai_server2} =
+      GameEngine.start_ai(context.game_engine, %{
+        logic: %{
+          initialize: fn _ -> send(test_pid, :got_game_request) end,
+          commands: fn commands_request ->
+            send(test_pid, {2, :got_commands_request, commands_request.game_state.turn})
+            {[], :ok}
+          end
+        }
+      })
+
+    Process.monitor(ai_server1)
+    Process.monitor(ai_server2)
+
     {:ok, _game_server} =
       GameEngine.start_game(context.game_engine, %{
         game: context.game,
-        players: %{1 => self(), 2 => ai_server}
+        players: %{1 => ai_server2, 2 => ai_server1}
       })
 
-    assert_receive {:game_request, %{player: player, game_server: game_server}}
-    :ok = GameServer.accept_game(game_server, player)
-    assert_receive :got_game_request
-    assert_receive {:commands_request, _request}
+    for turn <- 0..99 do
+      assert_receive {1, :got_commands_request, ^turn}
+      assert_receive {2, :got_commands_request, ^turn}
+    end
+
+    assert_receive {:DOWN, _ref, :process, ^ai_server1, :normal}
+    assert_receive {:DOWN, _ref, :process, ^ai_server2, :normal}
   end
 end

@@ -60,4 +60,8 @@ defmodule BattleBox.GameEngine.AiServer do
   def handle_info({:game_cancelled, _game_id}, state) do
     {:stop, :normal, state}
   end
+
+  def handle_info({:game_over, _result}, state) do
+    {:stop, :normal, state}
+  end
 end
