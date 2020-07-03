@@ -18,6 +18,7 @@ defmodule BattleBox.GameEngine.AiServer do
         {:game_request, %{player: player, game_server: game_server} = game_request},
         state
       ) do
+    Process.monitor(game_server)
     :ok = GameServer.accept_game(game_server, player)
     ai_state = state.logic.initialize.(game_request.settings)
 
@@ -35,7 +36,7 @@ defmodule BattleBox.GameEngine.AiServer do
       state.logic.commands.(%{
         ai_state: state.ai_state,
         game_state: game_state,
-        settings: state.settings,
+        settings: state.game_request.settings,
         player: state.game_request.player
       })
 
@@ -47,5 +48,16 @@ defmodule BattleBox.GameEngine.AiServer do
       )
 
     {:noreply, Map.put(state, :ai_state, ai_state)}
+  end
+
+  def handle_info(
+        {:DOWN, _ref, :process, pid, _reason},
+        %{game_request: %{game_server: pid}} = state
+      ) do
+    {:stop, :normal, state}
+  end
+
+  def handle_info({:game_cancelled, _game_id}, state) do
+    {:stop, :normal, state}
   end
 end

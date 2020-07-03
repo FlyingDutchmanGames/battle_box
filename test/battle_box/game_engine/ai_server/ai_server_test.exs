@@ -51,4 +51,70 @@ defmodule BattleBox.GameEngine.AiServerTest do
     assert_receive :got_game_request
     assert_receive {:commands_request, _request}
   end
+
+  test "if the game dies, the ai server dies", context do
+    {:ok, ai_server} =
+      GameEngine.start_ai(context.game_engine, %{
+        logic: %{initialize: fn _ -> :ok end, commands: fn _ -> {:ok, :ok} end}
+      })
+
+    Process.monitor(ai_server)
+
+    {:ok, game_server} =
+      GameEngine.start_game(context.game_engine, %{
+        game: context.game,
+        players: %{1 => self(), 2 => ai_server}
+      })
+
+    assert Process.alive?(ai_server)
+    Process.sleep(10)
+    Process.exit(game_server, :kill)
+    assert_receive {:DOWN, _ref, :process, ^ai_server, :normal}
+  end
+
+  test "if the game is cancelled the ai server dies", context do
+    {:ok, ai_server} =
+      GameEngine.start_ai(context.game_engine, %{
+        logic: %{initialize: fn _ -> :ok end, commands: fn _ -> {:ok, :ok} end}
+      })
+
+    Process.monitor(ai_server)
+
+    {:ok, game_server} =
+      GameEngine.start_game(context.game_engine, %{
+        game: context.game,
+        players: %{1 => self(), 2 => ai_server}
+      })
+
+    assert Process.alive?(ai_server)
+    Process.sleep(10)
+    GameServer.reject_game(game_server, 1)
+    assert_receive {:DOWN, _ref, :process, ^ai_server, :normal}
+  end
+
+  test "it can play a full game!", context do
+    test_pid = self()
+
+    {:ok, ai_server} =
+      GameEngine.start_ai(context.game_engine, %{
+        logic: %{
+          initialize: fn _ -> send(test_pid, :got_game_request) end,
+          commands: fn commands_request ->
+            send(test_pid, {:got_commands_request, commands_request})
+            {[], :ok}
+          end
+        }
+      })
+
+    {:ok, _game_server} =
+      GameEngine.start_game(context.game_engine, %{
+        game: context.game,
+        players: %{1 => self(), 2 => ai_server}
+      })
+
+    assert_receive {:game_request, %{player: player, game_server: game_server}}
+    :ok = GameServer.accept_game(game_server, player)
+    assert_receive :got_game_request
+    assert_receive {:commands_request, _request}
+  end
 end
