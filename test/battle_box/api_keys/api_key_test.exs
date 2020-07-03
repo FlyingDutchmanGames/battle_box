@@ -23,9 +23,16 @@ defmodule BattleBox.ApiKeyTest do
     end
 
     test "Name may not be longer than 30" do
-      name = :crypto.strong_rand_bytes(17) |> Base.encode16()
-      assert String.length(name) > 30
+      name = :crypto.strong_rand_bytes(30) |> Base.encode16()
+      assert String.length(name) > 39
       changeset = ApiKey.changeset(%ApiKey{}, %{name: name})
+
+      assert changeset.errors == [
+               {:name,
+                {"should be at most %{count} character(s)",
+                 [count: 39, validation: :length, kind: :max, type: :string]}}
+             ]
+
       refute changeset.valid?
     end
   end
