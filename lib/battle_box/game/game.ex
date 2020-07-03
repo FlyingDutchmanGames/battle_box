@@ -43,7 +43,7 @@ defmodule BattleBox.Game do
       |> Arena.get_settings()
       |> arena.game_type.from_settings()
 
-    %Game{
+    %__MODULE__{
       id: Ecto.UUID.generate(),
       arena: arena,
       arena_id: arena.id,

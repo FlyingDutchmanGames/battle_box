@@ -1,5 +1,5 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
-  alias BattleBox.{Arena, Game, GameBot}
+  alias BattleBox.{Arena, Game}
 
   def make_matches([_], _), do: []
 

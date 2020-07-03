@@ -134,20 +134,7 @@ defmodule BattleBox.Games.RobotGame do
         %Settings{} = settings -> settings
         %{} = settings -> Map.merge(%Settings{}, settings)
       end
-      |> Map.take([
-        :attack_damage_max,
-        :attack_damage_min,
-        :collision_damage_max,
-        :collision_damage_min,
-        :max_turns,
-        :robot_hp,
-        :spawn_enabled,
-        :spawn_every,
-        :spawn_per_player,
-        :explode_damage_max,
-        :explode_damage_min,
-        :terrain
-      ])
+      |> Map.take(Settings.shared_fields())
 
     opts = Enum.into(opts, %{})
     opts = Map.put_new(opts, :id, Ecto.UUID.generate())

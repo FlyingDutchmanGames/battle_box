@@ -27,6 +27,7 @@
 - WebSocket interface
 - Update protocol to give the result of each move
 #### Robot Game
+- Remove `new` in favor of `from_settings`
 - limit memory usage of game servers (they're currently at 2 mbs)
 - Manual GC?
 - Robot game give out random player ids / color coding based on player 

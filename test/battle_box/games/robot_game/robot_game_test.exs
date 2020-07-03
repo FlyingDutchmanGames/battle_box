@@ -1,6 +1,6 @@
 defmodule BattleBox.Games.RobotGame.GameTest do
   use BattleBox.DataCase
-  alias BattleBox.Games.RobotGame
+  alias BattleBox.Games.{RobotGame, RobotGame.Settings}
   import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
   import BattleBox.Games.RobotGame.EventHelpers
   import BattleBox.Games.RobotGameTest.Helpers
@@ -43,6 +43,33 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "it will not override a passed id" do
       assert RobotGame.new(id: @game_id).id == @game_id
+    end
+  end
+
+  describe "from_settings" do
+    test "you can build a new game from settings" do
+      assert %{
+               attack_damage_max: 2,
+               attack_damage_min: 1,
+               collision_damage_max: 4,
+               collision_damage_min: 4,
+               max_turns: 400,
+               robot_hp: 42,
+               spawn_every: 45,
+               explode_damage_max: 30,
+               explode_damage_min: 15
+             } =
+               RobotGame.from_settings(%Settings{
+                 attack_damage_max: 2,
+                 attack_damage_min: 1,
+                 collision_damage_max: 4,
+                 collision_damage_min: 4,
+                 max_turns: 400,
+                 robot_hp: 42,
+                 spawn_every: 45,
+                 explode_damage_max: 30,
+                 explode_damage_min: 15
+               })
     end
   end
 
@@ -159,7 +186,7 @@ defmodule BattleBox.Games.RobotGame.GameTest do
 
     test "spawn_enabled: false is never a spawning round" do
       refute RobotGame.spawning_round?(
-               RobotGame.new(settings: %{spawn_enabled: false, spawn_every: 10, turn: 10})
+               RobotGame.new(%{spawn_enabled: false, spawn_every: 10, turn: 10})
              )
     end
   end
