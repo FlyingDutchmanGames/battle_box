@@ -1,7 +1,7 @@
-defmodule BattleBox.Games.RobotGame.Ais.ShelterInPlace do
+defmodule BattleBox.Games.RobotGame.Ais.Tortuga do
   use BattleBox.Games.RobotGame.Ais.Strategy
 
-  def name, do: "shelter-in-place"
+  def name, do: "tortuga"
   def description, do: "Always issues 'guard' commands to robots"
   def creator, do: "the-notorious-gjp"
   def difficulty, do: 1
