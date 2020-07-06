@@ -27,6 +27,47 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
            |> Process.alive?()
   end
 
+  describe "practice match" do
+    setup do
+      {:ok, arena} = robot_game_arena()
+      %{arena: arena}
+    end
+
+    test "You can start a practice match", context do
+      assert {:ok, %{game_id: game_id}} =
+               MatchMaker.practice_match(
+                 context.game_engine,
+                 context.arena,
+                 context.bot,
+                 "kansas"
+               )
+
+      assert_receive {:game_request, %{game_id: ^game_id}}
+    end
+
+    test "you can start a practice match if you match more than one bot", context do
+      assert {:ok, %{game_id: game_id}} =
+               MatchMaker.practice_match(
+                 context.game_engine,
+                 context.arena,
+                 context.bot,
+                 %{"difficulty" => %{"min" => 1}}
+               )
+
+      assert_receive {:game_request, %{game_id: ^game_id}}
+    end
+
+    test "You get an error if you ask for a nonsense opponent", context do
+      assert {:error, :no_opponent_matching} ==
+               MatchMaker.practice_match(
+                 context.game_engine,
+                 context.arena,
+                 context.bot,
+                 "fake-bot"
+               )
+    end
+  end
+
   test "you can enqueue yourself", %{bot: bot} = context do
     me = self()
 

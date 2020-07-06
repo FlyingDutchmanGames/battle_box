@@ -4,16 +4,6 @@ defmodule BattleBox.Games.AiOpponentTest do
   import BattleBox.Games.AiOpponent
   use ExUnit.Case, async: true
 
-  describe "opponent_module/1" do
-    test "it picks randomly from the available list" do
-      assert opponent_module(RobotGame, %{}) in RobotGame.ais()
-    end
-
-    test "if there are no matching choices it returns an error" do
-      assert opponent_module(RobotGame, "fake-name") == {:error, :no_opponent_matching}
-    end
-  end
-
   cases = [
     # asking with a nil opponent or an empty map yields all the modules
     {nil, RobotGame.ais()},
@@ -38,7 +28,8 @@ defmodule BattleBox.Games.AiOpponentTest do
   describe "oppoent_modules/2" do
     for {opponent, expected} <- cases do
       test "#{inspect(opponent)} => #{inspect(expected)}" do
-        assert opponent_modules(RobotGame, unquote(Macro.escape(opponent))) == unquote(expected)
+        assert opponent_modules(RobotGame, unquote(Macro.escape(opponent))) ==
+                 {:ok, unquote(expected)}
       end
     end
   end

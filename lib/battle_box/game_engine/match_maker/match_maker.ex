@@ -1,6 +1,32 @@
 defmodule BattleBox.GameEngine.MatchMaker do
   use Supervisor
-  alias BattleBox.{Bot, GameEngine, GameEngine.MatchMakerServer}
+  alias BattleBox.{Arena, Bot, Game, GameEngine, GameEngine.MatchMakerServer}
+  alias BattleBox.Games.AiOpponent
+
+  def practice_match(game_engine, arena, bot, opponent, pid \\ self()) do
+    [bot_player | ai_players] = Enum.shuffle(Arena.players(arena))
+
+    with {:mods, {:ok, mods}} when mods != [] <-
+           {:mods, AiOpponent.opponent_modules(arena.game_type, opponent)} do
+      combatants =
+        for player <- ai_players, into: %{} do
+          opponent_module = Enum.random(mods)
+          {:ok, bot} = Bot.system_bot(opponent_module.name)
+          {:ok, ai_server} = GameEngine.start_ai(game_engine, %{logic: opponent_module})
+          {player, %{bot: bot, pid: ai_server}}
+        end
+        |> Map.put(bot_player, %{bot: bot, pid: pid})
+
+      game = Game.build(arena, for({player, %{bot: bot}} <- combatants, do: {player, bot}))
+      player_pid_mapping = Map.new(for {player, %{pid: pid}} <- combatants, do: {player, pid})
+
+      {:ok, _pid} = GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
+
+      {:ok, %{game_id: game.id}}
+    else
+      {:mods, {:ok, []}} -> {:error, :no_opponent_matching}
+    end
+  end
 
   @doc """
   Joining a queue in a arena

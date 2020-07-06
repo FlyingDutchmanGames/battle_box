@@ -4,8 +4,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
   def make_matches([_], _), do: []
 
   def make_matches(enqueued_players, arena) do
-    settings = Arena.get_settings(arena)
-    players = arena.game_type.players_for_settings(settings)
+    players = Arena.players(arena)
 
     grouper_function =
       case arena do

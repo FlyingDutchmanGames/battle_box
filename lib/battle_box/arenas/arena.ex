@@ -91,6 +91,11 @@ defmodule BattleBox.Arena do
     Repo.preload(arena, arena.game_type.settings_module.name)
   end
 
+  def players(arena) do
+    settings = get_settings(arena)
+    arena.game_type.players_for_settings(settings)
+  end
+
   defp validate_command_time(changeset) do
     if get_field(changeset, :command_time_minimum_ms) >=
          get_field(changeset, :command_time_maximum_ms) do

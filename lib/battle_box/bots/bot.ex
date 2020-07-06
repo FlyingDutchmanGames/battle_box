@@ -14,6 +14,10 @@ defmodule BattleBox.Bot do
     timestamps()
   end
 
+  def system_bot(name) do
+    get_or_create_by_name(User.system_user(), name)
+  end
+
   def get_or_create_by_name(user, name) do
     # Below is the ideal implementation of this function.
     # At the current time (May 27, 2020, ecto 3.4.3),
