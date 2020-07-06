@@ -63,6 +63,17 @@ defmodule BattleBox.Connection.Logic do
     {data, [{:send, status_msg(data, :match_making)}], :continue}
   end
 
+  def handle_client(practice() = practice_request, %{state: :idle} = data) do
+    case BotServer.practice(data.bot_server, practice_request["opponent"]) do
+      :ok ->
+        data = Map.put(data, :state, :match_making)
+        {data, [{:send, status_msg(data, :match_making)}], :continue}
+
+      {:error, :no_opponent_matching} ->
+        {data, [{:send, encode_error("invalid_opponent")}], :continue}
+    end
+  end
+
   def handle_client(accept_game(id), %{state: :game_acceptance} = data) do
     :ok = BotServer.accept_game(data.bot_server, id)
     data = Map.put(data, :state, :playing)
@@ -70,6 +81,7 @@ defmodule BattleBox.Connection.Logic do
   end
 
   def handle_client(reject_game(id), %{state: :game_acceptance} = data) do
+    # TODO:// This is wrong, right??? It shouldn't put it in a playing state??
     :ok = BotServer.reject_game(data.bot_server, id)
     data = Map.put(data, :state, :playing)
     {data, [], :continue}

@@ -42,6 +42,12 @@ defmodule BattleBox.Connection.Message do
     end
   end
 
+  defmacro practice do
+    quote do
+      %{"action" => "practice"}
+    end
+  end
+
   defmacro accept_game(game_id) do
     quote do
       %{"action" => "accept_game", "game_id" => unquote(game_id)}

@@ -206,6 +206,20 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                "request_type" => "game_request"
              } = Jason.decode!(game_request)
     end
+
+    test "you can get put in a practice match", %{p1: %{socket: p1}} do
+      :ok = :gen_tcp.send(p1, encode(%{"action" => "practice", "opponent" => "kansas"}))
+      assert_receive {:tcp, ^p1, start_match_making}
+      assert %{"status" => "match_making"} = Jason.decode!(start_match_making)
+      assert_receive {:tcp, ^p1, game_request}
+      assert %{"request_type" => "game_request"} = Jason.decode!(game_request)
+    end
+
+    test "asking for a nonsense opponent will give you an error", %{p1: %{socket: p1}} do
+      :ok = :gen_tcp.send(p1, encode(%{"action" => "practice", "opponent" => "nonsense"}))
+      assert_receive {:tcp, ^p1, opponent_error}
+      assert %{"error" => "invalid_opponent"} = Jason.decode!(opponent_error)
+    end
   end
 
   describe "game acceptance" do
