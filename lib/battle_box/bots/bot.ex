@@ -15,7 +15,9 @@ defmodule BattleBox.Bot do
   end
 
   def system_bot(name) do
-    get_or_create_by_name(User.system_user(), name)
+    {:ok, bot} = get_or_create_by_name(User.system_user(), name)
+    bot = Repo.preload(bot, :user)
+    {:ok, bot}
   end
 
   def get_or_create_by_name(user, name) do
