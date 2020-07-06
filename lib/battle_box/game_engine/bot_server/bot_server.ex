@@ -14,6 +14,10 @@ defmodule BattleBox.GameEngine.BotServer do
     GenStateMachine.call(bot_server, :match_make, timeout)
   end
 
+  def practice(bot_server, opponent, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:practice, opponent}, timeout)
+  end
+
   def submit_commands(bot_server, command_id, commands, timeout \\ 5000) do
     GenStateMachine.call(bot_server, {:submit_commands, command_id, commands}, timeout)
   end
@@ -50,6 +54,16 @@ defmodule BattleBox.GameEngine.BotServer do
   def handle_event({:call, from}, :match_make, :options, data) do
     :ok = MatchMaker.join_queue(data.names.game_engine, data.arena.id, data.bot)
     {:next_state, :match_making, data, {:reply, from, :ok}}
+  end
+
+  def handle_event({:call, from}, {:practice, opponent}, :options, data) do
+    case MatchMaker.practice_match(data.names.game_engine, data.arena, data.bot, opponent) do
+      {:ok, _meta} ->
+        {:next_state, :match_making, data, {:reply, from, :ok}}
+
+      {:error, :no_opponent_matching} = err ->
+        {:keep_state_and_data, {:reply, from, err}}
+    end
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do

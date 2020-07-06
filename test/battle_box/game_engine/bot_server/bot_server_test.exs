@@ -102,6 +102,18 @@ defmodule BattleBox.GameEngine.BotServerTest do
     assert_receive {{:bot_server, ^id}, :bot_server_update, ^id}
   end
 
+  describe "practice" do
+    test "you can ask the bot server to practice", context do
+      :ok = BotServer.practice(context.p1_server, "kansas")
+      assert_receive {:p1_connection, {:game_request, _meta}}
+    end
+
+    test "asking for a nonsense opponent will give an error", context do
+      {:error, :no_opponent_matching} = BotServer.practice(context.p1_server, "nonsense")
+      refute_receive {:p1_connection, {:game_request, _meta}}
+    end
+  end
+
   describe "Matchmaking in a arena" do
     test "You can ask the bot server to match_make",
          %{p1_server: p1, bot: %{id: bot_id}} = context do
