@@ -41,4 +41,17 @@ defmodule BattleBox.UserTest do
       assert user2.username == "pass"
     end
   end
+
+  describe "system_user/0" do
+    test "If the system user doesn't exist, this function will create it" do
+      assert Repo.all(User) == []
+      %User{username: "Botskrieg", id: id} = User.system_user()
+      assert [%{username: "Botskrieg", id: ^id}] = Repo.all(User)
+    end
+
+    test "you can make multiple calls to `system_user`" do
+      assert %User{username: "Botskrieg", id: id} = User.system_user()
+      assert %User{username: "Botskrieg", id: ^id} = User.system_user()
+    end
+  end
 end
