@@ -378,7 +378,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert_receive {:tcp, ^p1, game_over}
       assert_receive {:tcp, ^p2, ^game_over}
 
-      assert %{"info" => "game_over", "result" => %{"winner" => _, "game_id" => ^game_id}} =
+      assert %{"info" => "game_over", "result" => %{"game_id" => ^game_id}} =
                Jason.decode!(game_over)
     end
   end

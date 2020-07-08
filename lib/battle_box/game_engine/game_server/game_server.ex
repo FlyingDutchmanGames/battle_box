@@ -152,17 +152,8 @@ defmodule BattleBox.GameEngine.GameServer do
   end
 
   def game_over_message(game) do
-    {:game_over,
-     %{
-       game_id: game.id,
-       score: Game.score(game),
-       winner: Game.winner(game)
-     }}
+    {:game_over, %{game_id: game.id, score: Game.score(game)}}
   end
 
-  defp initial_metadata(game),
-    do: %{
-      started_at: DateTime.utc_now(),
-      game: game
-    }
+  defp initial_metadata(game), do: %{started_at: DateTime.utc_now(), game: game}
 end
