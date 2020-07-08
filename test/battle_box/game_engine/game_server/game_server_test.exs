@@ -172,8 +172,8 @@ defmodule BattleBox.GameEngine.GameServerTest do
     :ok = GameServer.accept_game(pid, 2)
     :ok = GameServer.forfeit_game(pid, 1)
 
-    assert_receive {:player_1, {:game_over, %{winner: 2}}}
-    assert_receive {:player_2, {:game_over, %{winner: 2}}}
+    assert_receive {:player_1, {:game_over, %{}}}
+    assert_receive {:player_2, {:game_over, %{}}}
   end
 
   test "if you die its the same as a forefit", context do
@@ -188,7 +188,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     Process.exit(player_2_pid, :kill)
     assert_receive {:EXIT, ^player_2_pid, :killed}
 
-    assert_receive {:player_1, {:game_over, %{winner: 1}}}
+    assert_receive {:player_1, {:game_over, %{}}}
   end
 
   test "you can play a game! (and it persists it to the db when you're done)", context do
