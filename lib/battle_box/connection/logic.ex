@@ -36,6 +36,10 @@ defmodule BattleBox.Connection.Logic do
     {data, [{:send, encode_error("bot_instance_failure")}], :stop}
   end
 
+  def handle_client("PING", data) do
+    {data, [{:send, Jason.encode!("PONG")}], :continue}
+  end
+
   def handle_client(bot_token_auth(token, bot_name, arena_name), %{state: :unauthed} = data) do
     case GameEngine.start_bot(data.names.game_engine, %{
            token: token,
