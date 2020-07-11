@@ -27,6 +27,8 @@
 - WebSocket interface
 - Update protocol to give the result of each move
 #### Robot Game
+- Fix the weird rendering thing, where attacks and moves are no in the right place
+- Move rules into main robot game docs
 - Remove `new` in favor of `from_settings`
 - limit memory usage of game servers (they're currently at 2 mbs)
 - Manual GC?
@@ -43,28 +45,24 @@
 - Robot game rules docs
 #### ELO rankings
 - Provide optional ELOs to arenas
-#### Client
-- remake protocol from `arena_name` => `arena` `bot_name` => `bot` and make `bot` optional and default to `unnamed`
-- have a `use BattleBoxClient.Bot, game_type: RobotGame` macro
-  - MyBot.start(arena, opts \\ %{})
-    - opts
-      - credential: "TOKEN"
-      - uri: "battleboxs://botskrieg.com:4242"
-  - Choose host / protocol
-    `opt passed to start/2` `$BATTLE_BOX_SERVER_URI` `Application.get_env(:battle_box_client, :server_uri)` `battleboxs://botskrieg.com:4242` 
-  - implicitly load one of (in order) `opt passed to start/2` `$BATTLE_BOX_CREDENTIALS`, `$BATTLE_BOX_CRENDENTIAL_FILE`, `.battle_box_crendentials` `throw error with helpful info`
-    - {"localhost": { "token": "asdbasdafsdfas"}, "botskrieg.com": {"token": "asdasdfas"}} <- creds format
-    - Load the credential for the host being connected to
 #### General
+- Move arena into `practice` and `match_maker`
+- add ping and pong testers to tcp connetions
 - Handle when connection is closed on trying to send from connection server
 - Api Key -> Key
 - Root Api Keys under users
 - Login return to
 - "Not found" revaamp 
-  - perserve bread crumbs
+  - preserve bread crumbs
 - Clean up matchspecs with Ex2Ms
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
+#### Client
+- Add specs to the python client
+  - Provide an API key for a banned user
+  - Provide an api key for a user with a 0 connection limit
+  - Enforce that `not-real-arena` can never be made into an arena to give a fake arena for testing
+  - Create an arena with a 0 time ms so test failed move timings?
 
 ### Nice to Haves
 
