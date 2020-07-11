@@ -47,7 +47,6 @@
 - Provide optional ELOs to arenas
 #### General
 - Move arena into `practice` and `match_maker`
-- add ping and pong testers to tcp connetions
 - Handle when connection is closed on trying to send from connection server
 - Api Key -> Key
 - Root Api Keys under users

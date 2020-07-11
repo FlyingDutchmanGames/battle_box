@@ -76,6 +76,12 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
   end
 
+  test "You can PING the server", context do
+    {:ok, socket} = connect(context.port)
+    :ok = :gen_tcp.send(socket, encode("PING"))
+    assert_receive {:tcp, ^socket, "\"PONG\""}
+  end
+
   describe "joining a arena as a bot" do
     setup context do
       {:ok, socket} = connect(context.port)
