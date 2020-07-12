@@ -49,9 +49,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   setup context do
     %{
-      connection_request:
-        encode(%{"token" => context.key.token, "arena" => context.arena.name, "bot" => @bot_name}),
-      start_matchmaking_request: encode(%{"action" => "start_match_making"})
+      connection_request: encode(%{"token" => context.key.token, "bot" => @bot_name}),
+      start_matchmaking_request:
+        encode(%{"action" => "start_match_making", "arena" => context.arena.name})
     }
   end
 
@@ -82,14 +82,14 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     assert_receive {:tcp, ^socket, "\"PONG\""}
   end
 
-  describe "joining a arena as a bot" do
+  describe "joining as a bot" do
     setup context do
       {:ok, socket} = connect(context.port)
       %{socket: socket}
     end
 
     test "you can join", %{socket: socket, key: %{token: token}} do
-      bot_connect_req = encode(%{"token" => token, "arena" => @arena_name, "bot" => @bot_name})
+      bot_connect_req = encode(%{"token" => token, "bot" => @bot_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
@@ -102,24 +102,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
              } = Jason.decode!(msg)
     end
 
-    test "trying to join a arena that doesn't exist is an error", %{
-      socket: socket,
-      bot: bot,
-      key: key
-    } do
-      bot_connect_req = encode(%{"token" => key.token, "arena" => "FAKE", "bot" => bot.name})
-      :ok = :gen_tcp.send(socket, bot_connect_req)
-      assert_receive {:tcp, ^socket, msg}
-      assert %{"error" => %{"arena" => ["Arena not found"]}} = Jason.decode!(msg)
-    end
-
     test "trying to join while your user is banned is an error", %{
       socket: socket,
       bot: bot,
       key: key
     } do
       Repo.update_all(User, set: [is_banned: true])
-      bot_connect_req = encode(%{"token" => key.token, "arena" => @arena_name, "bot" => bot.name})
+      bot_connect_req = encode(%{"token" => key.token, "bot" => bot.name})
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => %{"user" => ["User is banned"]}} = Jason.decode!(msg)
@@ -141,9 +130,8 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert_receive {:DOWN, _, _, ^connection_pid, :normal}
     end
 
-    test "if you try to join as a bot that doesn't exist it fails", %{socket: socket} = context do
-      bot_connect_req =
-        encode(%{"token" => "FAKE", "arena" => context.arena.name, "bot" => @bot_name})
+    test "if you try to join as a bot that doesn't exist it fails", %{socket: socket} do
+      bot_connect_req = encode(%{"token" => "FAKE", "bot" => @bot_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
       assert_receive {:tcp, ^socket, msg}
@@ -159,7 +147,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         join_request =
           encode(%{
             "token" => context.key.token,
-            "arena" => context.arena.name,
             "bot" => @bot_name
           })
 
@@ -213,8 +200,13 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
              } = Jason.decode!(game_request)
     end
 
-    test "you can get put in a practice match", %{p1: %{socket: p1}} do
-      :ok = :gen_tcp.send(p1, encode(%{"action" => "practice", "opponent" => "kansas"}))
+    test "you can get put in a practice match", %{p1: %{socket: p1}, arena: arena} do
+      :ok =
+        :gen_tcp.send(
+          p1,
+          encode(%{"action" => "practice", "arena" => arena.name, "opponent" => "kansas"})
+        )
+
       assert_receive {:tcp, ^p1, start_match_making}
       assert %{"status" => "match_making"} = Jason.decode!(start_match_making)
       assert_receive {:tcp, ^p1, game_request}
@@ -222,7 +214,12 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     end
 
     test "asking for a nonsense opponent will give you an error", %{p1: %{socket: p1}} do
-      :ok = :gen_tcp.send(p1, encode(%{"action" => "practice", "opponent" => "nonsense"}))
+      :ok =
+        :gen_tcp.send(
+          p1,
+          encode(%{"action" => "practice", "arena" => @arena_name, "opponent" => "nonsense"})
+        )
+
       assert_receive {:tcp, ^p1, opponent_error}
       assert %{"error" => "invalid_opponent"} = Jason.decode!(opponent_error)
     end
@@ -236,7 +233,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         join_request =
           encode(%{
             "token" => context.key.token,
-            "arena" => context.arena.name,
             "bot" => @bot_name
           })
 
@@ -324,7 +320,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
           join_request =
             encode(%{
               "token" => context.key.token,
-              "arena" => context.arena.name,
               "bot" => context.bot.name
             })
 

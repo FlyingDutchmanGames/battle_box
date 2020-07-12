@@ -1,5 +1,5 @@
 defmodule BattleBox.Connection.Logic do
-  alias BattleBox.{GameEngine, GameEngine.BotServer}
+  alias BattleBox.{Arena, GameEngine, GameEngine.BotServer}
   import BattleBox.Connection.Message
 
   def init(data) do
@@ -60,25 +60,26 @@ defmodule BattleBox.Connection.Logic do
     end
   end
 
-  def handle_client(start_match_making(arena_name), %{state: :idle} = data) do
-    case BotServer.match_make(data.bot_server, arena_name) do
-      :ok ->
+  def handle_client(%{"action" => action, "arena" => arena_name} = req, %{state: :idle} = data)
+      when action in ["start_match_making", "practice"] do
+    Arena.from_name(arena_name)
+    |> case do
+      nil ->
+        {
+          data,
+          [{:send, encode_error(%{arena: ["Arena #{arena_name} does not exist"]})}],
+          :continue
+        }
+
+      arena ->
+        :ok =
+          case action do
+            "practice" -> BotServer.practice(data.bot_server, arena, req["opponent"])
+            "start_match_making" -> BotServer.match_make(data.bot_server, arena)
+          end
+
         data = Map.put(data, :state, :match_making)
         {data, [{:send, status_msg(data, :match_making)}], :continue}
-
-      {:error, error} ->
-        {data, [{:send, encode_error(error)}], :continue}
-    end
-  end
-
-  def handle_client(practice(arena_name) = practice_request, %{state: :idle} = data) do
-    case BotServer.practice(data.bot_server, arena_name, practice_request["opponent"]) do
-      :ok ->
-        data = Map.put(data, :state, :match_making)
-        {data, [{:send, status_msg(data, :match_making)}], :continue}
-
-      {:error, error} ->
-        {data, [{:send, encode_error(error)}], :continue}
     end
   end
 
