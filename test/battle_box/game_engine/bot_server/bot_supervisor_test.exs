@@ -85,7 +85,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     end
 
     test "you can't start a bot with an illegal name", context do
-      assert {:error, %{name: ["should be at most 39 character(s)"]}} =
+      assert {:error, %{bot: %{name: ["should be at most 39 character(s)"]}}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: :binary.copy("a", 40),

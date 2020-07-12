@@ -18,12 +18,17 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     with {:ok, user} <- ApiKey.authenticate(token),
          {:within_connection_limit?, true} <-
            {:within_connection_limit?, within_connection_limit?(game_engine, user)},
-         {:ok, bot} <- Bot.get_or_create_by_name(user, bot_name) do
+         {:bot, {:ok, bot}} <- {:bot, Bot.get_or_create_by_name(user, bot_name)} do
       start_bot(game_engine, %{connection: connection, bot: bot})
     else
-      {:within_connection_limit?, false} -> {:error, %{user: ["User connection limit exceeded"]}}
-      {:error, %Ecto.Changeset{} = changeset} -> {:error, BattleBox.changeset_errors(changeset)}
-      {:error, errors} -> {:error, errors}
+      {:within_connection_limit?, false} ->
+        {:error, %{user: ["User connection limit exceeded"]}}
+
+      {:bot, {:error, %Ecto.Changeset{} = changeset}} ->
+        {:error, %{bot: BattleBox.changeset_errors(changeset)}}
+
+      {:error, errors} ->
+        {:error, errors}
     end
   end
 

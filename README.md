@@ -14,7 +14,6 @@
 ### V1
 
 #### Arenas
-- add in server ais
 - Matchmaker queue live
 - set of default arenas with interesting terrains and bots
 #### Users
@@ -46,7 +45,6 @@
 #### ELO rankings
 - Provide optional ELOs to arenas
 #### General
-- Move arena specificer into `practice` and `match_maker`
 - Handle when connection is closed on trying to send from connection server
 - Api Key -> Key
 - Root Api Keys under users
@@ -56,6 +54,7 @@
 - Clean up matchspecs with Ex2Ms
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
+- Add matchmaker interface to the game engine
 #### Client
 - Add specs to the python client
   - Provide an API key for a banned user

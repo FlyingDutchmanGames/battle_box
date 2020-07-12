@@ -1,6 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{ApiKey, Bot, User, GameEngine, TcpConnectionServer}
+  alias BattleBox.{Bot, User, GameEngine, TcpConnectionServer}
   import BattleBox.GameEngine, only: [get_connection: 2]
   import BattleBox.Connection.Message
 
@@ -38,11 +38,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       |> Bot.changeset(%{name: @bot_name})
       |> Repo.insert()
 
-    {:ok, key} =
-      user
-      |> Ecto.build_assoc(:api_keys)
-      |> ApiKey.changeset(%{name: "test-key"})
-      |> Repo.insert()
+    {:ok, key} = create_key(user: user)
 
     %{user: user, arena: arena, bot: bot, key: key}
   end
@@ -221,7 +217,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         )
 
       assert_receive {:tcp, ^p1, opponent_error}
-      assert %{"error" => "invalid_opponent"} = Jason.decode!(opponent_error)
+
+      assert %{"error" => %{"opponent" => "No opponent matching (\"nonsense\")"}} =
+               Jason.decode!(opponent_error)
     end
   end
 

@@ -2,7 +2,7 @@ defmodule BattleBox.Connection.Logic do
   alias BattleBox.{Arena, GameEngine, GameEngine.BotServer}
   import BattleBox.Connection.Message
 
-  def init(data) do
+  def init(%{names: %{game_engine: _}} = data) do
     Map.put(data, :state, :unauthed)
   end
 
@@ -67,19 +67,29 @@ defmodule BattleBox.Connection.Logic do
       nil ->
         {
           data,
-          [{:send, encode_error(%{arena: ["Arena #{arena_name} does not exist"]})}],
+          [{:send, encode_error(%{arena: ["Arena \"#{arena_name}\" does not exist"]})}],
           :continue
         }
 
       arena ->
-        :ok =
-          case action do
-            "practice" -> BotServer.practice(data.bot_server, arena, req["opponent"])
-            "start_match_making" -> BotServer.match_make(data.bot_server, arena)
-          end
+        case action do
+          "practice" -> BotServer.practice(data.bot_server, arena, req["opponent"])
+          "start_match_making" -> BotServer.match_make(data.bot_server, arena)
+        end
+        |> case do
+          :ok ->
+            data = Map.put(data, :state, :match_making)
+            {data, [{:send, status_msg(data, :match_making)}], :continue}
 
-        data = Map.put(data, :state, :match_making)
-        {data, [{:send, status_msg(data, :match_making)}], :continue}
+          {:error, :no_opponent_matching} ->
+            {data,
+             [
+               {:send,
+                encode_error(%{
+                  opponent: "No opponent matching (#{Jason.encode!(req["opponent"])})"
+                })}
+             ], :continue}
+        end
     end
   end
 
