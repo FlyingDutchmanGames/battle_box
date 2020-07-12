@@ -58,8 +58,18 @@ defmodule BattleBox.GameEngine.MatchMaker do
     |> Enum.uniq()
   end
 
-  def dequeue_self(game_engine, arena) when is_atom(game_engine) do
-    :ok = Registry.unregister(match_maker_registry_name(game_engine), arena)
+  def dequeue_self(game_engine) when is_atom(game_engine) do
+    registry = match_maker_registry_name(game_engine)
+
+    for key <- Registry.keys(registry, self()) do
+      :ok = Registry.unregister(registry, key)
+    end
+
+    :ok
+  end
+
+  def dequeue_self(game_engine, arena_id) when is_atom(game_engine) do
+    :ok = Registry.unregister(match_maker_registry_name(game_engine), arena_id)
   end
 
   def start_link(%{names: names} = opts) do

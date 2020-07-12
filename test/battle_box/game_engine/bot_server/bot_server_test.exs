@@ -29,18 +29,16 @@ defmodule BattleBox.GameEngine.BotServerTest do
     %{arena: arena, bot: bot}
   end
 
-  setup %{arena: arena, bot: bot} do
+  setup %{bot: bot} do
     %{
       init_opts_p1: %{
         bot_server_id: @bot_1_server_id,
         bot: bot,
-        arena: arena,
         connection: named_proxy(:p1_connection)
       },
       init_opts_p2: %{
         bot_server_id: @bot_2_server_id,
         bot: bot,
-        arena: arena,
         connection: named_proxy(:p2_connection)
       }
     }
@@ -78,13 +76,13 @@ defmodule BattleBox.GameEngine.BotServerTest do
   end
 
   test "the bot server registers in the bot server registry",
-       %{p1_server: p1, p2_server: p2, bot: bot, arena: arena} = context do
+       %{p1_server: p1, p2_server: p2, bot: bot} = context do
     assert Registry.count(context.bot_registry) == 2
 
-    assert [{^p1, %{bot: ^bot, arena: ^arena, game_id: nil, started_at: %NaiveDateTime{}}}] =
+    assert [{^p1, %{bot: ^bot, game_id: nil, started_at: %NaiveDateTime{}}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)
 
-    assert [{^p2, %{bot: ^bot, arena: ^arena, game_id: nil, started_at: %NaiveDateTime{}}}] =
+    assert [{^p2, %{bot: ^bot, game_id: nil, started_at: %NaiveDateTime{}}}] =
              Registry.lookup(context.bot_registry, context.init_opts_p2.bot_server_id)
   end
 
@@ -97,19 +95,21 @@ defmodule BattleBox.GameEngine.BotServerTest do
       [:bot_server_update]
     )
 
-    :ok = BotServer.match_make(context.p1_server)
+    :ok = BotServer.match_make(context.p1_server, context.arena)
 
     assert_receive {{:bot_server, ^id}, :bot_server_update, ^id}
   end
 
   describe "practice" do
     test "you can ask the bot server to practice", context do
-      :ok = BotServer.practice(context.p1_server, "kansas")
+      :ok = BotServer.practice(context.p1_server, context.arena, "kansas")
       assert_receive {:p1_connection, {:game_request, _meta}}
     end
 
     test "asking for a nonsense opponent will give an error", context do
-      {:error, :no_opponent_matching} = BotServer.practice(context.p1_server, "nonsense")
+      {:error, :no_opponent_matching} =
+        BotServer.practice(context.p1_server, context.arena, "nonsense")
+
       refute_receive {:p1_connection, {:game_request, _meta}}
     end
   end
@@ -119,15 +119,15 @@ defmodule BattleBox.GameEngine.BotServerTest do
          %{p1_server: p1, bot: %{id: bot_id}} = context do
       assert [] == MatchMaker.queue_for_arena(context.game_engine, context.arena.id)
 
-      :ok = BotServer.match_make(context.p1_server)
+      :ok = BotServer.match_make(context.p1_server, context.arena)
 
       assert [%{bot: %{id: ^bot_id}, pid: ^p1}] =
                MatchMaker.queue_for_arena(context.game_engine, context.arena.id)
     end
 
     test "When a match is made it forwards the request to the connections", context do
-      :ok = BotServer.match_make(context.p1_server)
-      :ok = BotServer.match_make(context.p2_server)
+      :ok = BotServer.match_make(context.p1_server, context.arena)
+      :ok = BotServer.match_make(context.p2_server, context.arena)
       :ok = GameEngine.force_match_make(context.game_engine)
 
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
@@ -153,8 +153,8 @@ defmodule BattleBox.GameEngine.BotServerTest do
     |> Ecto.Changeset.put_change(:game_acceptance_time_ms, 1)
     |> Repo.update!()
 
-    :ok = BotServer.match_make(context.p1_server)
-    :ok = BotServer.match_make(context.p2_server)
+    :ok = BotServer.match_make(context.p1_server, context.arena)
+    :ok = BotServer.match_make(context.p2_server, context.arena)
     :ok = GameEngine.force_match_make(context.game_engine)
     assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
     assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
@@ -168,8 +168,8 @@ defmodule BattleBox.GameEngine.BotServerTest do
     |> Ecto.Changeset.put_change(:command_time_minimum_ms, 30)
     |> Repo.update!()
 
-    :ok = BotServer.match_make(context.p1_server)
-    :ok = BotServer.match_make(context.p2_server)
+    :ok = BotServer.match_make(context.p1_server, context.arena)
+    :ok = BotServer.match_make(context.p2_server, context.arena)
     :ok = GameEngine.force_match_make(context.game_engine)
     assert_receive {:p1_connection, {:game_request, %{game_id: game_id}}}
     assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
@@ -193,8 +193,8 @@ defmodule BattleBox.GameEngine.BotServerTest do
 
   describe "game acceptance" do
     setup context do
-      :ok = BotServer.match_make(context.p1_server)
-      :ok = BotServer.match_make(context.p2_server)
+      :ok = BotServer.match_make(context.p1_server, context.arena)
+      :ok = BotServer.match_make(context.p2_server, context.arena)
       :ok = GameEngine.force_match_make(context.game_engine)
     end
 
@@ -243,8 +243,8 @@ defmodule BattleBox.GameEngine.BotServerTest do
 
   describe "playing a game!" do
     setup context do
-      :ok = BotServer.match_make(context.p1_server)
-      :ok = BotServer.match_make(context.p2_server)
+      :ok = BotServer.match_make(context.p1_server, context.arena)
+      :ok = BotServer.match_make(context.p2_server, context.arena)
       :ok = GameEngine.force_match_make(context.game_engine)
 
       assert_receive {:p1_connection, {:game_request, %{game_id: game_id} = game_info}}

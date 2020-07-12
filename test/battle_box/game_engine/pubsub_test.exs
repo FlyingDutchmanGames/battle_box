@@ -109,12 +109,6 @@ defmodule BattleBox.PubSubTest do
           :bot_server_update
         ])
 
-      :ok =
-        GameEngine.subscribe_to_arena_events(context.game_engine, @arena_id, [
-          :bot_server_start,
-          :bot_server_update
-        ])
-
       Process.sleep(10)
       GameEngine.broadcast_bot_server_start(context.game_engine, context.bot_server)
       GameEngine.broadcast_bot_server_update(context.game_engine, context.bot_server)
@@ -124,8 +118,6 @@ defmodule BattleBox.PubSubTest do
       assert_receive {{:bot, @bot_id}, :bot_server_update, @bot_server_id}
       assert_receive {{:user, @user_id}, :bot_server_start, @bot_server_id}
       assert_receive {{:user, @user_id}, :bot_server_update, @bot_server_id}
-      assert_receive {{:arena, @arena_id}, :bot_server_start, @bot_server_id}
-      assert_receive {{:arena, @arena_id}, :bot_server_update, @bot_server_id}
     end
   end
 end

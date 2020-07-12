@@ -1,8 +1,8 @@
 defmodule BattleBox.Connection.Logic do
-  alias BattleBox.{GameEngine, GameEngine.BotServer}
+  alias BattleBox.{Arena, GameEngine, GameEngine.BotServer}
   import BattleBox.Connection.Message
 
-  def init(data) do
+  def init(%{names: %{game_engine: _}} = data) do
     Map.put(data, :state, :unauthed)
   end
 
@@ -40,10 +40,9 @@ defmodule BattleBox.Connection.Logic do
     {data, [{:send, Jason.encode!("PONG")}], :continue}
   end
 
-  def handle_client(bot_token_auth(token, bot_name, arena_name), %{state: :unauthed} = data) do
+  def handle_client(bot_token_auth(token, bot_name), %{state: :unauthed} = data) do
     case GameEngine.start_bot(data.names.game_engine, %{
            token: token,
-           arena_name: arena_name,
            bot_name: bot_name,
            connection: self()
          }) do
@@ -61,20 +60,36 @@ defmodule BattleBox.Connection.Logic do
     end
   end
 
-  def handle_client(start_match_making(), %{state: :idle} = data) do
-    :ok = BotServer.match_make(data.bot_server)
-    data = Map.put(data, :state, :match_making)
-    {data, [{:send, status_msg(data, :match_making)}], :continue}
-  end
+  def handle_client(%{"action" => action, "arena" => arena_name} = req, %{state: :idle} = data)
+      when action in ["start_match_making", "practice"] do
+    Arena.from_name(arena_name)
+    |> case do
+      nil ->
+        {
+          data,
+          [{:send, encode_error(%{arena: ["Arena \"#{arena_name}\" does not exist"]})}],
+          :continue
+        }
 
-  def handle_client(practice() = practice_request, %{state: :idle} = data) do
-    case BotServer.practice(data.bot_server, practice_request["opponent"]) do
-      :ok ->
-        data = Map.put(data, :state, :match_making)
-        {data, [{:send, status_msg(data, :match_making)}], :continue}
+      arena ->
+        case action do
+          "practice" -> BotServer.practice(data.bot_server, arena, req["opponent"])
+          "start_match_making" -> BotServer.match_make(data.bot_server, arena)
+        end
+        |> case do
+          :ok ->
+            data = Map.put(data, :state, :match_making)
+            {data, [{:send, status_msg(data, :match_making)}], :continue}
 
-      {:error, :no_opponent_matching} ->
-        {data, [{:send, encode_error("invalid_opponent")}], :continue}
+          {:error, :no_opponent_matching} ->
+            {data,
+             [
+               {:send,
+                encode_error(%{
+                  opponent: "No opponent matching (#{Jason.encode!(req["opponent"])})"
+                })}
+             ], :continue}
+        end
     end
   end
 

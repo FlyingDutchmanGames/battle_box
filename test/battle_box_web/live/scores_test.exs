@@ -29,14 +29,12 @@ defmodule BattleBoxWeb.Live.ScoresTest do
 
     {:ok, bot_server_1, _} =
       GameEngine.start_bot(context.game_engine, %{
-        arena: arena,
         bot: bot,
         connection: named_proxy(:player_1)
       })
 
     {:ok, bot_server_2, _} =
       GameEngine.start_bot(context.game_engine, %{
-        arena: arena,
         bot: bot,
         connection: named_proxy(:player_1)
       })
@@ -49,8 +47,8 @@ defmodule BattleBoxWeb.Live.ScoresTest do
       Process.link(context.bot_server_1)
       Process.link(context.bot_server_2)
 
-      :ok = BotServer.match_make(context.bot_server_1)
-      :ok = BotServer.match_make(context.bot_server_2)
+      :ok = BotServer.match_make(context.bot_server_1, context.arena)
+      :ok = BotServer.match_make(context.bot_server_2, context.arena)
       :ok = GameEngine.force_match_make(context.game_engine)
 
       Process.sleep(100)
@@ -60,8 +58,8 @@ defmodule BattleBoxWeb.Live.ScoresTest do
     end
 
     test "if the game server dies it disappears from the page", %{conn: conn} = context do
-      :ok = BotServer.match_make(context.bot_server_1)
-      :ok = BotServer.match_make(context.bot_server_2)
+      :ok = BotServer.match_make(context.bot_server_1, context.arena)
+      :ok = BotServer.match_make(context.bot_server_2, context.arena)
       :ok = GameEngine.force_match_make(context.game_engine)
       Process.sleep(20)
       {:ok, view, html} = live_isolated(conn, Scores, session: %{"arena" => context.arena})
@@ -78,8 +76,8 @@ defmodule BattleBoxWeb.Live.ScoresTest do
       {:ok, document} = Floki.parse_document(html)
       assert [] == Floki.find(document, ".live-score-card")
 
-      :ok = BotServer.match_make(context.bot_server_1)
-      :ok = BotServer.match_make(context.bot_server_2)
+      :ok = BotServer.match_make(context.bot_server_1, context.arena)
+      :ok = BotServer.match_make(context.bot_server_2, context.arena)
       :ok = GameEngine.force_match_make(context.game_engine)
 
       Process.sleep(20)

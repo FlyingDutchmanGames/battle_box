@@ -1,5 +1,5 @@
 defmodule BattleBox.Test.DataHelpers do
-  alias BattleBox.{User, Bot, Arena, Repo}
+  alias BattleBox.{ApiKey, User, Bot, Arena, Repo}
   import Ecto.Changeset
   import Phoenix.ConnTest
 
@@ -19,6 +19,25 @@ defmodule BattleBox.Test.DataHelpers do
     conn
     |> init_test_session(token: "foo")
     |> Plug.Conn.put_session(:user_id, user.id)
+  end
+
+  def create_key(opts \\ %{}) do
+    opts = Enum.into(opts, %{})
+
+    user =
+      case opts do
+        %{user: user} ->
+          user
+
+        _ ->
+          {:ok, user} = create_user()
+          user
+      end
+
+    user
+    |> Ecto.build_assoc(:api_keys)
+    |> ApiKey.changeset(%{name: "test-key"})
+    |> Repo.insert()
   end
 
   def create_user(opts \\ %{}) do

@@ -30,21 +30,9 @@ defmodule BattleBox.Connection.Message do
     encode(error)
   end
 
-  defmacro bot_token_auth(token, bot_name, arena_name) do
+  defmacro bot_token_auth(token, bot_name) do
     quote do
-      %{"token" => unquote(token), "bot" => unquote(bot_name), "arena" => unquote(arena_name)}
-    end
-  end
-
-  defmacro start_match_making do
-    quote do
-      %{"action" => "start_match_making"}
-    end
-  end
-
-  defmacro practice do
-    quote do
-      %{"action" => "practice"}
+      %{"token" => unquote(token), "bot" => unquote(bot_name)}
     end
   end
 

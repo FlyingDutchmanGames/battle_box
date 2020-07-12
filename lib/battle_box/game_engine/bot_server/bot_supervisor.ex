@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
   use DynamicSupervisor
-  alias BattleBox.{ApiKey, Bot, Arena, Repo, GameEngine, GameEngine.BotServer}
+  alias BattleBox.{ApiKey, Bot, Repo, GameEngine, GameEngine.BotServer}
 
   def start_link(%{names: names} = opts) do
     DynamicSupervisor.start_link(__MODULE__, opts, name: names.bot_supervisor)
@@ -13,23 +13,26 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
 
   def start_bot(
         game_engine,
-        %{connection: connection, arena_name: arena_name, token: token, bot_name: bot_name}
+        %{connection: connection, token: token, bot_name: bot_name}
       ) do
     with {:ok, user} <- ApiKey.authenticate(token),
          {:within_connection_limit?, true} <-
            {:within_connection_limit?, within_connection_limit?(game_engine, user)},
-         {:ok, bot} <- Bot.get_or_create_by_name(user, bot_name),
-         {:arena, %Arena{} = arena} <- {:arena, Repo.get_by(Arena, name: arena_name)} do
-      start_bot(game_engine, %{connection: connection, bot: bot, arena: arena})
+         {:bot, {:ok, bot}} <- {:bot, Bot.get_or_create_by_name(user, bot_name)} do
+      start_bot(game_engine, %{connection: connection, bot: bot})
     else
-      {:within_connection_limit?, false} -> {:error, %{user: ["User connection limit exceeded"]}}
-      {:arena, nil} -> {:error, %{arena: ["Arena not found"]}}
-      {:error, %Ecto.Changeset{} = changeset} -> {:error, BattleBox.changeset_errors(changeset)}
-      {:error, errors} -> {:error, errors}
+      {:within_connection_limit?, false} ->
+        {:error, %{user: ["User connection limit exceeded"]}}
+
+      {:bot, {:error, %Ecto.Changeset{} = changeset}} ->
+        {:error, %{bot: BattleBox.changeset_errors(changeset)}}
+
+      {:error, errors} ->
+        {:error, errors}
     end
   end
 
-  def start_bot(game_engine, %{arena: %Arena{}, bot: %Bot{} = bot, connection: _} = opts) do
+  def start_bot(game_engine, %{bot: %Bot{} = bot, connection: _} = opts) do
     bot_supervisor = GameEngine.names(game_engine).bot_supervisor
     opts = Map.put_new(opts, :bot_server_id, Ecto.UUID.generate())
     opts = update_in(opts.bot, fn bot -> Repo.preload(bot, :user) end)
