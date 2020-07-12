@@ -19,13 +19,13 @@ defmodule BattleBox.GameEngine.PubSub do
   def subscribe_to_bot_server_events(game_engine, bot_server_id, events),
     do: subscribe(game_engine, {:bot_server, bot_server_id}, events)
 
-  def broadcast_bot_server_start(game_engine, %{arena: arena, bot: bot, bot_server_id: id}) do
-    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}, {:arena, arena.id}]
+  def broadcast_bot_server_start(game_engine, %{bot: bot, bot_server_id: id}) do
+    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}]
     dispatch_event_to_topics(game_engine, topics, :bot_server_start, id)
   end
 
-  def broadcast_bot_server_update(game_engine, %{arena: arena, bot: bot, bot_server_id: id}) do
-    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}, {:arena, arena.id}]
+  def broadcast_bot_server_update(game_engine, %{bot: bot, bot_server_id: id}) do
+    topics = [{:bot_server, id}, {:bot, bot.id}, {:user, bot.user_id}]
     dispatch_event_to_topics(game_engine, topics, :bot_server_update, id)
   end
 

@@ -10,18 +10,12 @@ defmodule BattleBox.GameEngine.BotServer do
     GenStateMachine.call(bot_server, {:reject_game, game_id}, timeout)
   end
 
-  def match_make(bot_server, arena_name, timeout \\ 5000) do
-    case Arena.from_name(arena_name) do
-      nil -> {:error, :arena_not_found}
-      arena -> GenStateMachine.call(bot_server, {:match_make, arena}, timeout)
-    end
+  def match_make(bot_server, %Arena{} = arena, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:match_make, arena}, timeout)
   end
 
-  def practice(bot_server, arena_name, opponent, timeout \\ 5000) do
-    case Arena.from_name(arena_name) do
-      nil -> {:error, :arena_not_found}
-      arena -> GenStateMachine.call(bot_server, {:practice, arena, opponent}, timeout)
-    end
+  def practice(bot_server, %Arena{} = arena, opponent, timeout \\ 5000) do
+    GenStateMachine.call(bot_server, {:practice, arena, opponent}, timeout)
   end
 
   def submit_commands(bot_server, command_id, commands, timeout \\ 5000) do
