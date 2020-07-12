@@ -46,7 +46,7 @@
 #### ELO rankings
 - Provide optional ELOs to arenas
 #### General
-- Move arena into `practice` and `match_maker`
+- Move arena specificer into `practice` and `match_maker`
 - Handle when connection is closed on trying to send from connection server
 - Api Key -> Key
 - Root Api Keys under users

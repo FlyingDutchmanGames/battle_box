@@ -79,6 +79,10 @@ defmodule BattleBox.Arena do
     |> unique_constraint(:name)
   end
 
+  def from_name(name) do
+    Repo.get_by(__MODULE__, name: name)
+  end
+
   def get_settings(arena) do
     arena
     |> preload_game_settings

@@ -40,10 +40,9 @@ defmodule BattleBox.Connection.Logic do
     {data, [{:send, Jason.encode!("PONG")}], :continue}
   end
 
-  def handle_client(bot_token_auth(token, bot_name, arena_name), %{state: :unauthed} = data) do
+  def handle_client(bot_token_auth(token, bot_name), %{state: :unauthed} = data) do
     case GameEngine.start_bot(data.names.game_engine, %{
            token: token,
-           arena_name: arena_name,
            bot_name: bot_name,
            connection: self()
          }) do
@@ -61,20 +60,25 @@ defmodule BattleBox.Connection.Logic do
     end
   end
 
-  def handle_client(start_match_making(), %{state: :idle} = data) do
-    :ok = BotServer.match_make(data.bot_server)
-    data = Map.put(data, :state, :match_making)
-    {data, [{:send, status_msg(data, :match_making)}], :continue}
-  end
-
-  def handle_client(practice() = practice_request, %{state: :idle} = data) do
-    case BotServer.practice(data.bot_server, practice_request["opponent"]) do
+  def handle_client(start_match_making(arena_name), %{state: :idle} = data) do
+    case BotServer.match_make(data.bot_server, arena_name) do
       :ok ->
         data = Map.put(data, :state, :match_making)
         {data, [{:send, status_msg(data, :match_making)}], :continue}
 
-      {:error, :no_opponent_matching} ->
-        {data, [{:send, encode_error("invalid_opponent")}], :continue}
+      {:error, error} ->
+        {data, [{:send, encode_error(error)}], :continue}
+    end
+  end
+
+  def handle_client(practice(arena_name) = practice_request, %{state: :idle} = data) do
+    case BotServer.practice(data.bot_server, arena_name, practice_request["opponent"]) do
+      :ok ->
+        data = Map.put(data, :state, :match_making)
+        {data, [{:send, status_msg(data, :match_making)}], :continue}
+
+      {:error, error} ->
+        {data, [{:send, encode_error(error)}], :continue}
     end
   end
 

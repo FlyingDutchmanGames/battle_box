@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.{GameEngine, GameEngine.MatchMaker, GameEngine.GameServer}
+  alias BattleBox.{Arena, GameEngine, GameEngine.MatchMaker, GameEngine.GameServer}
 
   def accept_game(bot_server, game_id, timeout \\ 5000) do
     GenStateMachine.call(bot_server, {:accept_game, game_id}, timeout)
@@ -10,12 +10,18 @@ defmodule BattleBox.GameEngine.BotServer do
     GenStateMachine.call(bot_server, {:reject_game, game_id}, timeout)
   end
 
-  def match_make(bot_server, timeout \\ 5000) do
-    GenStateMachine.call(bot_server, :match_make, timeout)
+  def match_make(bot_server, arena_name, timeout \\ 5000) do
+    case Arena.from_name(arena_name) do
+      nil -> {:error, :arena_not_found}
+      arena -> GenStateMachine.call(bot_server, {:match_make, arena}, timeout)
+    end
   end
 
-  def practice(bot_server, opponent, timeout \\ 5000) do
-    GenStateMachine.call(bot_server, {:practice, opponent}, timeout)
+  def practice(bot_server, arena_name, opponent, timeout \\ 5000) do
+    case Arena.from_name(arena_name) do
+      nil -> {:error, :arena_not_found}
+      arena -> GenStateMachine.call(bot_server, {:practice, arena, opponent}, timeout)
+    end
   end
 
   def submit_commands(bot_server, command_id, commands, timeout \\ 5000) do
@@ -24,7 +30,7 @@ defmodule BattleBox.GameEngine.BotServer do
 
   def start_link(
         %{names: _} = config,
-        %{connection: _, bot: bot, arena: arena} = data
+        %{connection: _, bot: bot} = data
       ) do
     data = Map.put_new(data, :bot_server_id, Ecto.UUID.generate())
 
@@ -32,7 +38,7 @@ defmodule BattleBox.GameEngine.BotServer do
       name:
         {:via, Registry,
          {config.names.bot_registry, data.bot_server_id,
-          %{bot: bot, arena: arena, game_id: nil, started_at: NaiveDateTime.utc_now()}}}
+          %{bot: bot, game_id: nil, started_at: NaiveDateTime.utc_now()}}}
     )
   end
 
@@ -40,7 +46,7 @@ defmodule BattleBox.GameEngine.BotServer do
     :ok =
       GameEngine.broadcast_bot_server_start(
         data.names.game_engine,
-        Map.take(data, [:bot, :arena, :bot_server_id])
+        Map.take(data, [:bot, :bot_server_id])
       )
 
     Process.monitor(connection)
@@ -51,13 +57,13 @@ defmodule BattleBox.GameEngine.BotServer do
     {:stop, :normal}
   end
 
-  def handle_event({:call, from}, :match_make, :options, data) do
-    :ok = MatchMaker.join_queue(data.names.game_engine, data.arena.id, data.bot)
+  def handle_event({:call, from}, {:match_make, arena}, :options, data) do
+    :ok = MatchMaker.join_queue(data.names.game_engine, arena.id, data.bot)
     {:next_state, :match_making, data, {:reply, from, :ok}}
   end
 
-  def handle_event({:call, from}, {:practice, opponent}, :options, data) do
-    case MatchMaker.practice_match(data.names.game_engine, data.arena, data.bot, opponent) do
+  def handle_event({:call, from}, {:practice, arena, opponent}, :options, data) do
+    case MatchMaker.practice_match(data.names.game_engine, arena, data.bot, opponent) do
       {:ok, _meta} ->
         {:next_state, :match_making, data, {:reply, from, :ok}}
 
@@ -67,7 +73,7 @@ defmodule BattleBox.GameEngine.BotServer do
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
-    :ok = MatchMaker.dequeue_self(data.names.game_engine, data.arena.id)
+    :ok = MatchMaker.dequeue_self(data.names.game_engine)
     {:ok, data} = setup_game(data, game_info)
     {:next_state, :game_acceptance, data, {:next_event, :internal, :setup_game_acceptance}}
   end
@@ -189,7 +195,7 @@ defmodule BattleBox.GameEngine.BotServer do
     :ok =
       GameEngine.broadcast_bot_server_update(
         names.game_engine,
-        Map.take(data, [:bot, :arena, :bot_server_id])
+        Map.take(data, [:bot, :bot_server_id])
       )
 
     :keep_state_and_data
