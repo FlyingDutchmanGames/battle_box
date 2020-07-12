@@ -25,8 +25,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
       |> Repo.insert!()
       |> Repo.preload(:user)
 
-    {:ok, arena} = robot_game_arena(%{user: user, name: "BAR"})
-    %{arena: arena, bot: bot, key: key, user: user}
+    %{bot: bot, key: key, user: user}
   end
 
   test "you can start the bot supervisor", %{bot_supervisor: bot_supervisor} do
@@ -34,21 +33,19 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
   end
 
   describe "starting a bot" do
-    test "you can start a bot with a bot name, arena name, and a token", context do
+    test "you can start a bot with a bot name and a token", context do
       assert {:ok, server, %{user_id: @user_id, bot_server_id: <<_::288>>}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: context.bot.name,
-                 arena_name: context.arena.name,
                  connection: self()
                })
     end
 
-    test "you can start a bot with a bot/arena object pair", context do
+    test "you can start a bot", context do
       assert {:ok, server, %{user_id: @user_id, bot_server_id: <<_::288>>}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  bot: context.bot,
-                 arena: context.arena,
                  connection: self()
                })
     end
@@ -58,17 +55,6 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                BotSupervisor.start_bot(context.game_engine, %{
                  token: "ABCDEF",
                  bot_name: context.bot.name,
-                 arena_name: context.arena.name,
-                 connection: self()
-               })
-    end
-
-    test "starting a bot with an invalid arena name yields an error", context do
-      assert {:error, %{arena: ["Arena not found"]}} =
-               BotSupervisor.start_bot(context.game_engine, %{
-                 token: context.key.token,
-                 bot_name: context.bot.name,
-                 arena_name: "fake-arena",
                  connection: self()
                })
     end
@@ -77,7 +63,6 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
       params = %{
         token: context.key.token,
         bot_name: "whatever",
-        arena_name: context.arena.name,
         connection: self()
       }
 
@@ -92,7 +77,6 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: "new-name",
-                 arena_name: context.arena.name,
                  connection: self()
                })
 
@@ -105,7 +89,6 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: :binary.copy("a", 40),
-                 arena_name: context.arena.name,
                  connection: self()
                })
     end
@@ -117,7 +100,6 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: context.bot.name,
-                 arena_name: context.arena.name,
                  connection: self()
                })
     end
@@ -135,7 +117,6 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     test "it will not return the bots for a different user", context do
       assert {:ok, server1, %{user_id: @user_id}} =
                BotSupervisor.start_bot(context.game_engine, %{
-                 arena: context.arena,
                  bot: context.bot,
                  connection: self()
                })
@@ -147,26 +128,20 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                )
     end
 
-    test "getting by bot will return the bots servers for that bot",
-         %{bot: bot, arena: arena} = context do
+    test "getting by bot will return the bots servers for that bot", %{bot: bot} = context do
       assert {:ok, server1, %{user_id: @user_id}} =
                BotSupervisor.start_bot(context.game_engine, %{
-                 arena: arena,
                  bot: bot,
                  connection: self()
                })
 
       assert {:ok, server2, %{user_id: @user_id}} =
                BotSupervisor.start_bot(context.game_engine, %{
-                 arena: arena,
                  bot: bot,
                  connection: self()
                })
 
-      assert [
-               %{bot: ^bot, arena: ^arena, pid: pid1},
-               %{bot: ^bot, arena: ^arena, pid: pid2}
-             ] =
+      assert [%{bot: ^bot, pid: pid1}, %{bot: ^bot, pid: pid2}] =
                BotSupervisor.get_bot_servers_with_bot_id(context.game_engine, bot.id)
                |> Enum.sort()
 
@@ -174,26 +149,20 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
       assert pid2 in [server1, server2]
     end
 
-    test "getting by user will return the bots server for a user",
-         %{bot: bot, arena: arena} = context do
+    test "getting by user will return the bots server for a user", %{bot: bot} = context do
       assert {:ok, server1, %{user_id: @user_id}} =
                BotSupervisor.start_bot(context.game_engine, %{
-                 arena: arena,
                  bot: bot,
                  connection: self()
                })
 
       assert {:ok, server2, %{user_id: @user_id}} =
                BotSupervisor.start_bot(context.game_engine, %{
-                 arena: arena,
                  bot: bot,
                  connection: self()
                })
 
-      assert [
-               %{bot: ^bot, arena: ^arena, pid: pid1},
-               %{bot: ^bot, arena: ^arena, pid: pid2}
-             ] =
+      assert [%{bot: ^bot, pid: pid1}, %{bot: ^bot, pid: pid2}] =
                BotSupervisor.get_bot_servers_with_user_id(context.game_engine, @user_id)
                |> Enum.sort()
 
