@@ -37,11 +37,7 @@ defmodule BattleBox.Games.RobotGame do
   def players_for_settings(_), do: [1, 2]
   def ais, do: [Tortuga, Kansas, HoneyBadger]
 
-  def docs_tree,
-    do: %{
-      "ai" => %{},
-      "rules" => %{}
-    }
+  def docs_tree, do: %{}
 
   def disqualify(game, player) do
     winner = %{1 => 2, 2 => 1}[player]
