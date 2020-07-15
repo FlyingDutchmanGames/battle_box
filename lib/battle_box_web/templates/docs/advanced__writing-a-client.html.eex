@@ -8,7 +8,6 @@
 <ul>
   <li>Creating an SSL socket</li>
   <li>Reading and writing UTF-8</li>
-  <li>Decoding base64 encoded strings into binary</li>
   <li>Decoding and encoding JSON</li>
 </ul>
 
@@ -85,9 +84,10 @@ receive_message(connection) # PONG
 <pre>
 send_message(connection, {"bot": "some-bot-name", "token": "ldluatjpk4kh2nwye63mo7wowy"})
 receive_message(connection)
-# On successful authentication you will receive
-# {'bot_server_id': 'f58b34d7-ee1e-4d1f-8f0b-fe8b7ce139d5', 'connection_id': '25082c17-1481-4e39-9ebc-21045b46a18c', 'status': 'idle', 'user_id': 'b72235c2-b737-4a1d-977c-8249e772b11d'}
 </pre>
+
+<p>On successful authentication you will receive</p>
+<pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :idle, user_id: Ecto.UUID.generate()}, pretty: true) %></pre>
 
 <p>Don't worry about "bot_server_id", "connection_id", "user_id", those are for some advanced features that haven't shipped yet</p>
 
@@ -104,3 +104,60 @@ receive_message(connection)
 </pre>
 
 <hr>
+
+<h2>Starting a Practice Match</h2>
+<p>Start a practice match in the following manner</p>
+
+<pre><%= Jason.encode!(%{action: "practice", opponent: %{}, arena: "some-arena"}) %></pre>
+
+<p>The opponent attribute can be composed of name and difficulty selectors, a random ai that meets the selectors will be choosen</p>
+<pre>
+<%= Jason.encode!("exact-name") %> # Match "exact-name"
+<%= Jason.encode!(["exact-name-1", "exact-name-2"]) %> # Match "exact-name-1" or "exact-name-2"
+<%= Jason.encode!(%{name: "exact-name"}) %> # Match "exact-name"
+<%= Jason.encode!(%{name: ["exact-name-1", "exact-name-2"]}) %> # Match "exact-name-1" or "exact-name-2"
+<%= Jason.encode!(%{difficulty: 4}) %> # Match difficulty of exactly 4
+<%= Jason.encode!(%{difficulty: %{min: 1}}) %> # Match any difficulty greater than or equal to 1
+<%= Jason.encode!(%{difficulty: %{max: 10}}) %> # Match any difficulty greater than or equal to 1
+</pre>
+
+<pre>
+send_message(connection, {"action": "practice", "arena": "robot-game-default", "opponent": "kansas"})
+receive_message(connection)
+</pre>
+
+<p>On success, you'll recieve the following message</p>
+<pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :match_making, user_id: Ecto.UUID.generate()}, pretty: true) %></pre>
+
+<h3>Some errors you may encounter (not limited to)</h3>
+<pre>
+{'error': {'arena': ['Arena "some-arena" does not exist']}}
+{'error': {'opponent': 'No opponent matching ({"difficulty":{"min":2},"name":"not-real-opponent"})'}}
+</pre>
+
+<hr>
+
+<h2>Start Match Making</h2>
+<p>Start match making in an arena in the following manner</p>
+<pre><%= Jason.encode!(%{action: "start_match_making", arena: "some-arena"}) %></pre>
+
+<pre>
+send_message(connection, {"action": "start_match_making", "arena": "robot-game-default"})
+receive_message(connection)
+</pre>
+
+<p>On success, you'll recieve the following message</p>
+<pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :match_making, user_id: Ecto.UUID.generate()}, pretty: true) %></pre>
+
+<h3>Some errors you may encounter (not limited to)</h3>
+<pre>
+{'error': {'arena': ['Arena "some-arena" does not exist']}}
+</pre>
+
+<hr>
+
+<h2>Accepting a Game</h2>
+<p>While in the "match_making" state (either from match making or from a practice match) you will receive a message asking to accept a game</p>
+
+<p>You'll get a message the looks like the following</p>
+<pre><%= Jason.encode!(%{request_type: "game_request", game_info: %{player: 1, game_id: Ecto.UUID.generate(), settings: %{"[game specific" => "settings go here]"}}}, pretty: true) %></pre>
