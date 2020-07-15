@@ -1,1 +1,106 @@
 <h1>Writing A Client</h1>
+
+<p><i><b>Warning:</b> writing a client is an advanced subject for people who want to use programming languages outside the official clients, it is highly recommended for beginners to use the official clients</i></p>
+
+<h2>About this guide</h2>
+<p>This guide will go through the steps of building a botskrieg client. The examples are written in python3 and can be more or less translated into any language<p>
+<p>Your programming language will need to support the following things</p>
+<ul>
+  <li>Creating an SSL socket</li>
+  <li>Reading and writing UTF-8</li>
+  <li>Decoding base64 encoded strings into binary</li>
+  <li>Decoding and encoding JSON</li>
+</ul>
+
+<hr>
+
+<h2>Connecting to Botskrieg</h2>
+<p>Botskrieg currently supports TCP connections (with Websocket Connections on the way)</p>
+<h3>Setting up the connection</h3>
+
+<p>Use your language's socket libraries to connect to botskrieg, use SSL to connect to port 4242 on "botskrieg.com"</p>
+
+<pre>
+import socket
+import ssl
+
+connection = socket.create_connection(("botskrieg.com", 4242))
+context = ssl.create_default_context()
+connection = context.wrap_socket(connection, server_hostname="botskrieg.com")
+</pre>
+
+<hr>
+
+<h2>Reading and writing messages</h2>
+
+<p>The structure of messages is shown below. Messages coming from the server should be in this format. Messages going to the server should be encoded in the same way</p>
+<p>The first two bytes of the message represent the length in bytes of the JSON encoded data. The message length is Network Order (Big Endian) Unsigned 16 bit integer</p>
+<p>Message length is strictly limited to 2 ** 16 (65536) bytes</p>
+
+<div style="display: grid; grid-template-columns: 20% 80%; grid-gap: 10px; color: white; padding: 10px 20px; margin: 0px 40px; border: 2px solid black;">
+  <div style="background-color: orange; padding: 10px;"><i>length</i> (2 bytes)</div>
+  <div style="background-color: blue; padding: 10px;">JSON Encoded Message Data (<i>length</i> bytes)</div>
+</div>
+
+<p>A special ping message can be sent to the server to test your encoding</p>
+
+<p><i>This uses the `connection` object from the previous example</i></p>
+<pre>
+import json
+import struct
+
+def send_message(connection, msg):
+  msg_bytes = str.encode(json.dumps(msg))
+  header = struct.pack("!H", len(msg_bytes)) # b'\x00\x06'
+  connection.sendall(header + msg_bytes)
+
+def receive_message(connection):
+  msg_size_bytes = connection.recv(2)
+  (msg_size,) = struct.unpack("!H", msg_size_bytes)
+  message_json = connection.recv(msg_size)
+  message = json.loads(message_json)
+  return message
+
+send_message(connection, "PING")
+receive_message(connection) # PONG
+</pre>
+
+<hr>
+
+<h2>Authenticating</h2>
+<p>After creating an account on botskrieg create an API key here (<a href="<%= Routes.api_key_path(BattleBoxWeb.Endpoint, :new) %>">New API Key</a>)</p>
+<p>To authenticate, send the bot name and token in a JSON object of the following form</p>
+<pre><%= Jason.encode!(%{"token" => "{YOUR KEY HERE}", "bot" => "some-bot-name"}, pretty: true) %></pre>
+
+<p>Bot names can be any string providing the name meets the following rules</p>
+<ul>
+  <li>May only contain alphanumeric characters or hyphens. <b>~r/^[a-zA-Z0-9-]+$/</b></li>
+  <li>Cannot begin or end with a hyphen.</li>
+  <li>Cannot have two hypens in a row</li>
+  <li>Maximum is 39 characters.</li>
+  <li>Cannot be in the reserved words (or contain bad words)</li>
+</ul>
+
+<p><i>This builds on the functions from the previous examples</i></p>
+<pre>
+send_message(connection, {"bot": "some-bot-name", "token": "ldluatjpk4kh2nwye63mo7wowy"})
+receive_message(connection)
+# On successful authentication you will receive
+# {'bot_server_id': 'f58b34d7-ee1e-4d1f-8f0b-fe8b7ce139d5', 'connection_id': '25082c17-1481-4e39-9ebc-21045b46a18c', 'status': 'idle', 'user_id': 'b72235c2-b737-4a1d-977c-8249e772b11d'}
+</pre>
+
+<p>Don't worry about "bot_server_id", "connection_id", "user_id", those are for some advanced features that haven't shipped yet</p>
+
+<h3>Some authentication errors you may encounter (not limited to)</h2>
+<pre>
+{'error': {'token': ['Invalid API Key']}}
+{'error': {'user': ['User is banned']}}
+{'error': {'user': ['User connection limit exceeded']}}
+{'error': {'bot': {'name': ['Can only contain alphanumeric characters or hyphens']}}}
+{'error': {'bot': {'name': ['should be at most 39 character(s)']}}}
+{'error': {'bot': {'name': ['Cannot end with a hyphen']}}}
+{'error': {'bot': {'name': ['Cannot start with a hyphen']}}}
+{'error': {'bot': {'name': ['Cannot contain two hyphens in a row']}}}
+</pre>
+
+<hr>
