@@ -12,7 +12,6 @@ defmodule BattleBoxWeb.DocsController do
     "getting-started" => %{},
     "games" => @game_docs,
     "advanced" => %{
-      "wire-protocol" => %{},
       "writing-a-client" => %{}
     }
   }
