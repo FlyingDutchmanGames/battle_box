@@ -160,4 +160,28 @@ receive_message(connection)
 <p>While in the "match_making" state (either from match making or from a practice match) you will receive a message asking to accept a game</p>
 
 <p>You'll get a message the looks like the following</p>
-<pre><%= Jason.encode!(%{request_type: "game_request", game_info: %{player: 1, game_id: Ecto.UUID.generate(), settings: %{"[game specific" => "settings go here]"}}}, pretty: true) %></pre>
+<pre><%= Jason.encode!(%{request_type: "game_request", game_info: %{player: 1, game_id: "{some uuid}", settings: %{"{game_specific_keys}" => "{game_specific_vals}"}}}, pretty: true) %></pre>
+
+<p>To accept the game send the following message</p>
+<pre><%= Jason.encode!(%{action: "accept_game", game_id: "{the game_id from the request}"}, pretty: true) %></pre>
+<pre>
+# After getting into the match making state
+game_request = receive_message(connection)
+send_message(connection, {"action": "accept_game", "game_id": game_request["game_info"]["game_id"]}
+</pre>
+
+<p>The game request settings key will also contain information specifc to the game you're playing, see the specifics for each supported game below</p>
+
+<hr>
+
+<h2>Playing a Game (The Commands Request)</h2>
+
+<h3>When the Commands Deadline is Missed</h2>
+
+<hr>
+
+<h2>When the Game is Cancelled</h2>
+
+<hr>
+
+<hr>When the Game is Over</h2>
