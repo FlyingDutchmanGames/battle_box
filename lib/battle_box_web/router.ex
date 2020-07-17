@@ -2,6 +2,7 @@ defmodule BattleBoxWeb.Router do
   use BattleBoxWeb, :router
   alias BattleBox.{Repo, User}
   import Phoenix.LiveDashboard.Router
+  alias BattleBoxWeb.Plugs.{RequireAdmin, RequireLoggedIn, RequireNotBanned, FetchUser}
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -9,13 +10,14 @@ defmodule BattleBoxWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :fetch_user
+    plug FetchUser
     plug :put_root_layout, {BattleBoxWeb.LayoutView, :root}
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
+  pipeline :api, do: plug(:accepts, ["json"])
+  pipeline :require_admin, do: plug(RequireAdmin)
+  pipeline :require_logged_in, do: plug(RequireLoggedIn)
+  pipeline :require_not_banned, do: plug(RequireNotBanned)
 
   scope "/", BattleBoxWeb do
     pipe_through :browser
@@ -89,37 +91,6 @@ defmodule BattleBoxWeb.Router do
       resources "/users", UserController, except: [:new, :create], param: "username"
 
       live_dashboard "/dashboard", metrics: BattleBoxWeb.Telemetry
-    end
-  end
-
-  defp require_logged_in(conn, _) do
-    case conn.assigns.current_user do
-      %User{} -> conn
-      nil -> conn |> redirect(to: "/login") |> halt()
-    end
-  end
-
-  defp require_not_banned(conn, _) do
-    case conn.assigns.current_user do
-      %User{is_banned: false} -> conn
-      _ -> conn |> redirect(to: "/banned") |> halt()
-    end
-  end
-
-  defp require_admin(conn, _) do
-    case conn.assigns.current_user do
-      %User{is_admin: true} -> conn
-      _ -> conn |> redirect(to: "/") |> halt()
-    end
-  end
-
-  defp fetch_user(conn, _) do
-    with id when not is_nil(id) <- get_session(conn, "user_id"),
-         %User{} = user <- Repo.get(User, id) do
-      assign(conn, :current_user, user)
-    else
-      _ ->
-        assign(conn, :current_user, nil)
     end
   end
 end

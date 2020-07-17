@@ -51,7 +51,6 @@
 - Login return to
 - "Not found" revaamp 
   - preserve bread crumbs
-- Clean up matchspecs with Ex2Ms
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
 - Add matchmaker interface to the game engine
