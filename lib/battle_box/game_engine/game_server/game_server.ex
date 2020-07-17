@@ -145,6 +145,7 @@ defmodule BattleBox.GameEngine.GameServer do
      %{
        game_server: self(),
        game_id: game.id,
+       game_type: game.game_type.name,
        player: player,
        accept_time: game.arena.game_acceptance_time_ms,
        settings: Game.settings(game)

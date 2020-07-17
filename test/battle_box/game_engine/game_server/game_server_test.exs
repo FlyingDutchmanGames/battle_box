@@ -78,6 +78,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
       game_server: pid,
       game_id: game.id,
       accept_time: 2000,
+      game_type: :robot_game,
       settings: %{
         spawn_every: game.robot_game.spawn_every,
         spawn_per_player: game.robot_game.spawn_per_player,
