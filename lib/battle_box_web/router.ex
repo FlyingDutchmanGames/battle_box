@@ -1,6 +1,5 @@
 defmodule BattleBoxWeb.Router do
   use BattleBoxWeb, :router
-  alias BattleBox.{Repo, User}
   import Phoenix.LiveDashboard.Router
   alias BattleBoxWeb.Plugs.{RequireAdmin, RequireLoggedIn, RequireNotBanned, FetchUser}
 

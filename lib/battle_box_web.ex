@@ -1,20 +1,11 @@
 defmodule BattleBoxWeb do
-  alias BattleBox.GameEngine.GameEngineProvider
-
   def live_view do
     quote do
       use Phoenix.LiveView
       alias BattleBoxWeb.Router.Helpers, as: Routes
 
       @endpoint BattleBoxWeb.Endpoint
-      @game_engine_provider Application.get_env(
-                              :battle_box,
-                              :game_engine_provider,
-                              GameEngineProvider
-                            )
-      def game_engine do
-        @game_engine_provider.game_engine()
-      end
+      import BattleBox.GameEngine.Provider, only: [game_engine: 0]
     end
   end
 
@@ -30,14 +21,7 @@ defmodule BattleBoxWeb do
       import Phoenix.LiveView.Controller
       import BattleBox.Utilities.Paginator, only: [paginate: 2, pagination_info: 1]
 
-      @game_engine_provider Application.get_env(
-                              :battle_box,
-                              :game_engine_provider,
-                              GameEngineProvider
-                            )
-      def game_engine do
-        @game_engine_provider.game_engine()
-      end
+      import BattleBox.GameEngine.Provider, only: [game_engine: 0]
     end
   end
 
