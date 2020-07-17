@@ -9,7 +9,7 @@ defmodule BattleBoxWeb.ConnCase do
       import BattleBox.Test.DataHelpers
       alias BattleBox.Repo
       @endpoint BattleBoxWeb.Endpoint
-      alias BattleBox.GameEngineProvider.Mock, as: GameEngineProvider
+      alias BattleBox.GameEngine.Provider, as: GameEngineProvider
     end
   end
 

@@ -2,14 +2,14 @@ defmodule BattleBoxWeb.Live.BotServersTest do
   alias BattleBoxWeb.Live.BotServers
   use BattleBoxWeb.ConnCase
   import Phoenix.LiveViewTest
-  alias BattleBox.{Arena, Bot, GameEngine, GameEngineProvider.Mock}
+  alias BattleBox.{Arena, Bot, GameEngine, GameEngine}
 
   @user_id Ecto.UUID.generate()
 
   setup %{test: name} do
     {:ok, _pid} = GameEngine.start_link(name: name)
-    Mock.set_game_engine(name)
-    on_exit(fn -> Mock.reset!() end)
+    GameEngine.Provider.set_game_engine(name)
+    on_exit(fn -> GameEngine.Provider.reset!() end)
     GameEngine.names(name)
   end
 
