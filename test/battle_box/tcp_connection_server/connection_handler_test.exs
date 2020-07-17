@@ -177,6 +177,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert %{
                "game_info" => %{
                  "game_id" => <<_::288>> = game_id,
+                 "game_type" => "robot_game",
                  "player" => _,
                  "settings" => %{
                    "attack_damage_max" => _,
