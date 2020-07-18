@@ -15,6 +15,8 @@
 
 #### Arenas
 - Matchmaker queue live
+- Move Arena Live into its own page instead of the main arena page
+- Add "Auto Follow Arena" when you click on a live game from the arena's live game page
 - set of default arenas with interesting terrains and bots
 #### Users
 - provide a way to change username
