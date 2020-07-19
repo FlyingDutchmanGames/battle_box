@@ -19,6 +19,7 @@
 
 <p>Use your language's socket libraries to connect to botskrieg, use SSL to connect to port 4242 on "botskrieg.com"</p>
 
+<p>Python3 Example Code:</p>
 <pre>
 import socket
 import ssl
@@ -43,7 +44,8 @@ connection = context.wrap_socket(connection, server_hostname="botskrieg.com")
 
 <p>A special ping message can be sent to the server to test your encoding</p>
 
-<p><i>This uses the `connection` object from the previous example</i></p>
+<p>Python3 Example Code:</p>
+<p><i>This uses the "connection" object from the previous example</i></p>
 <pre>
 import json
 import struct
@@ -80,6 +82,7 @@ receive_message(connection) # PONG
   <li>Cannot be in the reserved words (or contain bad words)</li>
 </ul>
 
+<p>Python3 Example Code:</p>
 <p><i>This builds on the functions from the previous examples</i></p>
 <pre>
 send_message(connection, {"bot": "some-bot-name", "token": "ldluatjpk4kh2nwye63mo7wowy"})
@@ -93,14 +96,21 @@ receive_message(connection)
 
 <h3>Some authentication errors you may encounter (not limited to)</h2>
 <pre>
-{'error': {'token': ['Invalid API Key']}}
-{'error': {'user': ['User is banned']}}
-{'error': {'user': ['User connection limit exceeded']}}
-{'error': {'bot': {'name': ['Can only contain alphanumeric characters or hyphens']}}}
-{'error': {'bot': {'name': ['should be at most 39 character(s)']}}}
-{'error': {'bot': {'name': ['Cannot end with a hyphen']}}}
-{'error': {'bot': {'name': ['Cannot start with a hyphen']}}}
-{'error': {'bot': {'name': ['Cannot contain two hyphens in a row']}}}
+<%= Jason.encode!(%{error: %{token: ["Invalid API Key"]}}) %>
+
+<%= Jason.encode!(%{error: %{user: ["User is banned"]}}) %>
+
+<%= Jason.encode!(%{error: %{user: ["User connection limit exceeded"]}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["Can only contain alphanumeric characters or hyphens"]}}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["should be at most 39 character(s)"]}}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["Cannot end with a hyphen"]}}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["Cannot start with a hyphen"]}}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["Cannot contain two hyphens in a row"]}}}) %>
 </pre>
 
 <hr>
@@ -121,6 +131,7 @@ receive_message(connection)
 <%= Jason.encode!(%{difficulty: %{max: 10}}) %> # Match any difficulty greater than or equal to 1
 </pre>
 
+<p>Python3 Example Code:</p>
 <pre>
 send_message(connection, {"action": "practice", "arena": "robot-game-default", "opponent": "kansas"})
 receive_message(connection)
@@ -131,8 +142,9 @@ receive_message(connection)
 
 <h3>Some errors you may encounter (not limited to)</h3>
 <pre>
-{'error': {'arena': ['Arena "some-arena" does not exist']}}
-{'error': {'opponent': 'No opponent matching ({"difficulty":{"min":2},"name":"not-real-opponent"})'}}
+<%= Jason.encode!(%{error: %{arena: ["Arena \"some-arena\" does not exist"]}}) %>
+
+<%= Jason.encode!(%{error: %{opponent: ["No opponent matching ({\"difficulty\":{\"min\":2},\"name\":\"not-real-opponent\"})"]}}) %>
 </pre>
 
 <hr>
@@ -141,6 +153,7 @@ receive_message(connection)
 <p>Start match making in an arena in the following manner</p>
 <pre><%= Jason.encode!(%{action: "start_match_making", arena: "some-arena"}) %></pre>
 
+<p>Python3 Example Code:</p>
 <pre>
 send_message(connection, {"action": "start_match_making", "arena": "robot-game-default"})
 receive_message(connection)
@@ -150,13 +163,11 @@ receive_message(connection)
 <pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :match_making, user_id: Ecto.UUID.generate()}, pretty: true) %></pre>
 
 <h3>Some errors you may encounter (not limited to)</h3>
-<pre>
-{'error': {'arena': ['Arena "some-arena" does not exist']}}
-</pre>
+<pre><%= Jason.encode!(%{error: %{arena: ["Arena \"some-arena\" does not exist"]}}) %></pre>
 
 <hr>
 
-<h2>Accepting a Game</h2>
+<h2>Accepting/Rejecting a Game</h2>
 <p>While in the "match_making" state (either from match making or from a practice match) you will receive a message asking to accept a game</p>
 
 <p>You'll get a message the looks like the following</p>

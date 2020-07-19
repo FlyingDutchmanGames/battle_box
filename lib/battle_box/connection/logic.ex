@@ -86,7 +86,7 @@ defmodule BattleBox.Connection.Logic do
              [
                {:send,
                 encode_error(%{
-                  opponent: "No opponent matching (#{Jason.encode!(req["opponent"])})"
+                  opponent: ["No opponent matching (#{Jason.encode!(req["opponent"])})"]
                 })}
              ], :continue}
         end
