@@ -2,23 +2,24 @@
 
 <p><i><b>Warning:</b> writing a client is an advanced subject for people who want to use programming languages outside the official clients, it is highly recommended for beginners to use the official clients</i></p>
 
-<h2>About this guide</h2>
-<p>This guide will go through the steps of building a botskrieg client. The examples are written in python3 and can be more or less translated into any language<p>
+<h2>About This Guide</h2>
+<p>This guide will go through the steps of building a botskrieg client. The examples are written in Python3 and can be more or less translated into any language<p>
 <p>Your programming language will need to support the following things</p>
 <ul>
-  <li>Creating an SSL socket</li>
+  <li>Creating an SSL TCP socket</li>
   <li>Reading and writing UTF-8</li>
   <li>Decoding and encoding JSON</li>
 </ul>
 
 <hr>
 
-<h2>Connecting to Botskrieg</h2>
+<h2 id="connecting">Connecting to Botskrieg</h2>
 <p>Botskrieg currently supports TCP connections (with Websocket Connections on the way)</p>
 <h3>Setting up the connection</h3>
 
 <p>Use your language's socket libraries to connect to botskrieg, use SSL to connect to port 4242 on "botskrieg.com"</p>
 
+<p>Python3 Example Code:</p>
 <pre>
 import socket
 import ssl
@@ -28,13 +29,29 @@ context = ssl.create_default_context()
 connection = context.wrap_socket(connection, server_hostname="botskrieg.com")
 </pre>
 
+<h3>A Note on BattleBox Development Servers</h3>
+
+<p>Its useful to developers of the server to be able to point clients towards their development servers. As a matter of convention, it would be nice to allow your client to accept a parameter specifying the URI of the server to connect to. Since most dev servers are run without SSL, its nice if your client can handle unencrypted TCP connections</p>
+
+<p>As a matter of convention, please use the scheme <b>"battleboxs://"</b> to specify a SSL TCP connection, and <b>"battlebox://"</b> to specify a plaintext TCP connection</p>
+
+<p>Some Examples:</p>
+<ul>
+  <li><b>battlebox://localhost:4000</b> - A plain text TCP connection to localhost on port 4000 </li>
+  <li><b>battleboxs://localhost:4000</b> - An SSL TCP connection to localhost on port 4000 </li>
+  <li><b>battlebox://not-a-real-domain.com:4242</b> - A plain text TCP connection to not-a-real-domain.com on port 4242 </li>
+  <li><b>battleboxs://not-a-real-domain.com:4242</b> - An SSL TCP connection to not-a-real-domain.com on port 4242 </li>
+</ul>
+
+<p>Most users will not run development servers, so default to <b>battleboxs://botskrieg.com:4242</b></p>
+
 <hr>
 
-<h2>Reading and writing messages</h2>
+<h2 id="message-format">Reading and Writing Messages</h2>
 
 <p>The structure of messages is shown below. Messages coming from the server should be in this format. Messages going to the server should be encoded in the same way</p>
 <p>The first two bytes of the message represent the length in bytes of the JSON encoded data. The message length is Network Order (Big Endian) Unsigned 16 bit integer</p>
-<p>Message length is strictly limited to 2 ** 16 (65536) bytes</p>
+<p>Message length is strictly limited to 2 ** 16 (65536) bytes. <b>Your client should enforce this limit, as attempting to send a message larger than 65536 bytes will render the connection unusable</b></p>
 
 <div style="display: grid; grid-template-columns: 20% 80%; grid-gap: 10px; color: white; padding: 10px 20px; margin: 0px 40px; border: 2px solid black;">
   <div style="background-color: orange; padding: 10px;"><i>length</i> (2 bytes)</div>
@@ -43,7 +60,8 @@ connection = context.wrap_socket(connection, server_hostname="botskrieg.com")
 
 <p>A special ping message can be sent to the server to test your encoding</p>
 
-<p><i>This uses the `connection` object from the previous example</i></p>
+<p>Python3 Example Code:</p>
+<p><i>This uses the "connection" object from the previous example</i></p>
 <pre>
 import json
 import struct
@@ -66,7 +84,7 @@ receive_message(connection) # PONG
 
 <hr>
 
-<h2>Authenticating</h2>
+<h2 id="auth">Authenticating</h2>
 <p>After creating an account on botskrieg create an API key here (<a href="<%= Routes.api_key_path(BattleBoxWeb.Endpoint, :new) %>">New API Key</a>)</p>
 <p>To authenticate, send the bot name and token in a JSON object of the following form</p>
 <pre><%= Jason.encode!(%{"token" => "{YOUR KEY HERE}", "bot" => "some-bot-name"}, pretty: true) %></pre>
@@ -80,9 +98,10 @@ receive_message(connection) # PONG
   <li>Cannot be in the reserved words (or contain bad words)</li>
 </ul>
 
+<p>Python3 Example Code:</p>
 <p><i>This builds on the functions from the previous examples</i></p>
 <pre>
-send_message(connection, {"bot": "some-bot-name", "token": "ldluatjpk4kh2nwye63mo7wowy"})
+send_message(connection, {"bot": "some-bot-name", "token": "{your token here}"})
 receive_message(connection)
 </pre>
 
@@ -91,21 +110,28 @@ receive_message(connection)
 
 <p>Don't worry about "bot_server_id", "connection_id", "user_id", those are for some advanced features that haven't shipped yet</p>
 
-<h3>Some authentication errors you may encounter (not limited to)</h2>
+<h3>Some Authentication Errors You May Encounter (not limited to)</h2>
 <pre>
-{'error': {'token': ['Invalid API Key']}}
-{'error': {'user': ['User is banned']}}
-{'error': {'user': ['User connection limit exceeded']}}
-{'error': {'bot': {'name': ['Can only contain alphanumeric characters or hyphens']}}}
-{'error': {'bot': {'name': ['should be at most 39 character(s)']}}}
-{'error': {'bot': {'name': ['Cannot end with a hyphen']}}}
-{'error': {'bot': {'name': ['Cannot start with a hyphen']}}}
-{'error': {'bot': {'name': ['Cannot contain two hyphens in a row']}}}
+<%= Jason.encode!(%{error: %{token: ["Invalid API Key"]}}) %>
+
+<%= Jason.encode!(%{error: %{user: ["User is banned"]}}) %>
+
+<%= Jason.encode!(%{error: %{user: ["User connection limit exceeded"]}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["Can only contain alphanumeric characters or hyphens"]}}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["should be at most 39 character(s)"]}}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["Cannot end with a hyphen"]}}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["Cannot start with a hyphen"]}}}) %>
+
+<%= Jason.encode!(%{error: %{bot: %{name: ["Cannot contain two hyphens in a row"]}}}) %>
 </pre>
 
 <hr>
 
-<h2>Starting a Practice Match</h2>
+<h2 id="practice">Starting a Practice Match</h2>
 <p>Start a practice match in the following manner</p>
 
 <pre><%= Jason.encode!(%{action: "practice", opponent: %{}, arena: "some-arena"}) %></pre>
@@ -121,6 +147,7 @@ receive_message(connection)
 <%= Jason.encode!(%{difficulty: %{max: 10}}) %> # Match any difficulty greater than or equal to 1
 </pre>
 
+<p>Python3 Example Code:</p>
 <pre>
 send_message(connection, {"action": "practice", "arena": "robot-game-default", "opponent": "kansas"})
 receive_message(connection)
@@ -129,18 +156,20 @@ receive_message(connection)
 <p>On success, you'll recieve the following message</p>
 <pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :match_making, user_id: Ecto.UUID.generate()}, pretty: true) %></pre>
 
-<h3>Some errors you may encounter (not limited to)</h3>
+<h3>Some Errors You May Encounter (Not Limited to)</h3>
 <pre>
-{'error': {'arena': ['Arena "some-arena" does not exist']}}
-{'error': {'opponent': 'No opponent matching ({"difficulty":{"min":2},"name":"not-real-opponent"})'}}
+<%= Jason.encode!(%{error: %{arena: ["Arena \"some-arena\" does not exist"]}}) %>
+
+<%= Jason.encode!(%{error: %{opponent: ["No opponent matching ({\"difficulty\":{\"min\":2},\"name\":\"not-real-opponent\"})"]}}) %>
 </pre>
 
 <hr>
 
-<h2>Start Match Making</h2>
+<h2 id="match-making">Start Match Making</h2>
 <p>Start match making in an arena in the following manner</p>
 <pre><%= Jason.encode!(%{action: "start_match_making", arena: "some-arena"}) %></pre>
 
+<p>Python3 Example Code:</p>
 <pre>
 send_message(connection, {"action": "start_match_making", "arena": "robot-game-default"})
 receive_message(connection)
@@ -149,39 +178,163 @@ receive_message(connection)
 <p>On success, you'll recieve the following message</p>
 <pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :match_making, user_id: Ecto.UUID.generate()}, pretty: true) %></pre>
 
-<h3>Some errors you may encounter (not limited to)</h3>
-<pre>
-{'error': {'arena': ['Arena "some-arena" does not exist']}}
-</pre>
+<h3>Some Errors You May Encounter (Not Limited to)</h3>
+<pre><%= Jason.encode!(%{error: %{arena: ["Arena \"some-arena\" does not exist"]}}) %></pre>
 
 <hr>
 
-<h2>Accepting a Game</h2>
+<h2 id="game-request">Accepting/Rejecting a Game (The Game Request)</h2>
 <p>While in the "match_making" state (either from match making or from a practice match) you will receive a message asking to accept a game</p>
 
 <p>You'll get a message the looks like the following</p>
-<pre><%= Jason.encode!(%{request_type: "game_request", game_info: %{player: 1, game_id: "{some uuid}", settings: %{"{game_specific_keys}" => "{game_specific_vals}"}}}, pretty: true) %></pre>
+<pre><%= Jason.encode!(%{request_type: "game_request", game_type: "robot_game", game_info: %{player: 1, game_id: "{some uuid}", settings: %{"{game_specific_keys}" => "{game_specific_vals}"}}}, pretty: true) %></pre>
+
+<h3>Accepting</h3>
 
 <p>To accept the game send the following message</p>
 <pre><%= Jason.encode!(%{action: "accept_game", game_id: "{the game_id from the request}"}, pretty: true) %></pre>
+
+<p>Python3 Example Code:</p>
 <pre>
-# After getting into the match making state
+# After getting into the match making state, accept the game as follows
 game_request = receive_message(connection)
 send_message(connection, {"action": "accept_game", "game_id": game_request["game_info"]["game_id"]}
 </pre>
 
-<p>The game request settings key will also contain information specifc to the game you're playing, see the specifics for each supported game below</p>
+<p>The game request settings key will also contain information specific to the game you're playing, see the specifics for each supported game below</p>
+
+<p><i>Important, check the "game_type" key to make sure that the arena game type is compatible with the type of code being run</i></p>
+
+<h3>Rejecting</h3>
+
+<p>If the game type key is not the one that is expected, you should "reject" the game and warn the user</p>
+<pre><%= Jason.encode!(%{action: "reject_game", game_id: "{the game_id from the request}"}, pretty: true) %></pre>
+<p>Python3 Example Code:</p>
+<pre>
+# If you need to reject a game, do the following
+game_request = receive_message(connection)
+send_message(connection, {"action": "reject_game", "game_id": game_request["game_info"]["game_id"]}
+</pre>
+
+<p>Note: if you don't respond to a game request within a certain amount of time (currently 2 seconds but subject to change), you automatically reject the game. As a courtesy if your client isn't able to play a game, promptly reject the game</p>
 
 <hr>
 
-<h2>Playing a Game (The Commands Request)</h2>
+<h2 id="commands-request">Playing a Game (The Commands Request)</h2>
+
+<p>For each time during the game in which your bot will need to take action, you will receive a "commands request"</p>
+<pre><%= Jason.encode!(%{commands_request: %{game_id: "{The game_id from the game request}", game_state: %{"{game_specific_key_1}" => "{game_specific_val_1}", "{game_specific_key_2}" => "{game_specific_val_2}" }, maximum_time: 1000, minimum_time: 250, player: 2, request_id: "{request id}" }, request_type: "commands_request"}, pretty: true) %></pre>
+
+<h3>Explanation of the Commands Request</h3>
+
+<ul>
+  <li><b>request_type</b>: Key to signify that this a request for commands</li>
+  <li><b>commands_request</b>: Top level which holds the commands request info
+    <ul>
+      <li><b>game_id</b>: The UUID that corresponds to the game, this will match the game request</li>
+      <li><b>game_state</b>: A object containing game type specific keys and values, see the wire protocol for each individual game for more information</li>
+      <li><b>minimum_time</b>: the amount of milliseconds before the response will be acknowledged by the server. You may send your response before this deadline (highly recommended) the server will hold the response until this amount of time has elapsed. If the minimum time is 1000 (ms), then each turn will take at minimum 1 second. The reason minimum times exist is to make sure other games happening concurrently get a fair time slice.</li>
+      <li><b>maximum_time</b>: The amount of time in milliseconds before your response to this request will not be accepted. If your bot misses the deadline, the specific game will decide how to handle it. It is always in your best interest to return something before the timeout</li>
+      <li><b>player</b>: The integer corresponding to the player you are in this game</li>
+      <li><b>request_id</b>: An opaque JSON term that represents this request for commands. The request_id is currently implemented as a UUID, but may change in the future to any valid JSON term (including an object). Use this value to respond to this commands request</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Responding to a Commands Request</h3>
+
+<p>In order to respond to a commands request, send a message in the following form</p>
+
+<pre><%= Jason.encode!(%{action: "send_commands", request_id: "{request_id_from_commands_request}", commands: "{game specific type}"}, pretty: true) %></pre>
+
+<p>Python3 Example Code:</p>
+<pre>
+commands_request = receive_message(connection)
+commands = create_commands(commands_request) # some user provided implementation of game logic
+send_message(connection, {
+  "action": "send_commands",
+  "request_id": commands_request["commands_request"]["request_id"],
+  "commands": commands
+})
+</pre>
 
 <h3>When the Commands Deadline is Missed</h2>
+
+<p>In certain cases you may not respond to the server in time. The server will respond in the following way</p>
+
+<pre><%= Jason.encode!(%{error: "invalid_commands_submission", request_id: "{your request id}"}, pretty: true) %></pre>
+
+<p>This error could mean either</p>
+
+<ol>
+  <li>You have an error in your logic around pulling the <b>request_id</b> out of the commands request (unlikely and fixable)</li>
+  <li>You have not responded in time to the server for whatever reason (Your code took too long, the internet was flaky, ...etc)</li>
+</ol>
+
+<p>The second case if very likely in the normal course of game play. It is <b><i>HIGHLY</i></b> recommend to handle this case</p>
 
 <hr>
 
 <h2>When the Game is Cancelled</h2>
 
+<p>In certain circumstances a game may be cancelled, most likely this is the result of one of the other players rejecting the game, but can also occur in some circumstances when the game code on the server throws an exception.</p>
+
+<p>In the case a game is cancelled you will receive the following message</p>
+<pre><%= Jason.encode!(%{info: "game_cancelled", game_id: "{game id}"}, pretty: true) %></pre>
+
+<p>Following this message all things related to this game are over</p>
+
+<p>The client TCP connection can be reused, and you can issue a "start_match_making" or "practice" command to play again</p>
+
 <hr>
 
-<hr>When the Game is Over</h2>
+<h2>When the Game is Over</h2>
+
+<p>The game will eventually end, either through the natural end of the game, or an opponent disconnecting. <b>The end of the game can potentially happen at any time</b></p>
+
+<p>When the game ends you will receive a message that looks like this</p>
+
+<pre><%= Jason.encode!(%{info: "game_over", result: %{game_id: "{game_id}", score: %{"1" => 10, "2" => 4, "{some player id}" => "{some score}"}}}, pretty: true) %></pre>
+
+<p>Once this message is received, no further actions on the current game</p>
+
+<p>Player IDs will <b>Always</b> be integers, scores themselves may be integers or may be any JSON term. See the specific game's wire protocol to know how scoring works</p>
+
+<p>The TCP can <i>(should)</i> can be reused by issuing a "start_match_making" or "practice" command</p>
+
+<hr>
+
+<h2>Other Topics</h2>
+
+<h3>Assorted Errors</h3>
+
+<h4>Invalid Message Sent</h4>
+
+<p>If your client sends an unexpected message to the server, the server will respond with the following error</p>
+
+<pre><%= Jason.encode!(%{error: "invalid_msg_sent"}, pretty: true) %></pre>
+
+<p>This error is especially tricky because a message can be valid in some contexts, but valid in others (i.e. while submitting a valid commands request, your opponent disconnects ending the game causing the commands request to become invalid). Long term the goal is to provide more actionable information within the error, but I'm still figuring out how to do that</p>
+
+<h4>Invalid Json</h4>
+
+<p>If you send the server JSON it isn't able to parse it will respond with the following message</p>
+
+<pre><%= Jason.encode!(%{error: "invalid_json"}, pretty: true) %></pre>
+
+<p>This is likely caused by one of the following reasons</p>
+<ul>
+  <li>Your message encoding is incorrect, double check the above section on sending messages</li>
+  <li>You attempted to send a message greater than 2 ** 16 (65536) bytes</li>
+</ul>
+
+<h4>Bot Instance Failure</h4>
+
+<p>Though technically it <i>should</i> never happen, you may receive the following error</p>
+<pre><%= Jason.encode!(%{error: "bot_instance_failure"}, pretty: true) %></pre>
+
+<p>Bot instance failures happen when the server code throws an exception, and represent a logic error in the server code</p>
+
+<p>Bot instance failures are unrecoverable, the server will likely close the TCP connection, and if it does not, you should close the connection as it is unusable</p>
+
+<p>Bot intance failures show up in the server logs, and will be debugged by the maintainers</p>

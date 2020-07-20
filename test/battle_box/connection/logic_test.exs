@@ -163,7 +163,8 @@ defmodule BattleBox.Connection.LogicTest do
           data
         )
 
-      assert %{"error" => %{"opponent" => "No opponent matching (\"fake\")"}} = Jason.decode!(msg)
+      assert %{"error" => %{"opponent" => ["No opponent matching (\"fake\")"]}} =
+               Jason.decode!(msg)
     end
 
     test "practice with a valid arena succeeds", %{arena: arena, key: key, names: names} do

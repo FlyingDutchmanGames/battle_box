@@ -219,7 +219,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert_receive {:tcp, ^p1, opponent_error}
 
-      assert %{"error" => %{"opponent" => "No opponent matching (\"nonsense\")"}} =
+      assert %{"error" => %{"opponent" => ["No opponent matching (\"nonsense\")"]}} =
                Jason.decode!(opponent_error)
     end
   end
