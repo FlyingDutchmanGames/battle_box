@@ -12,7 +12,9 @@ defmodule BattleBoxWeb.DocsController do
     "getting-started" => %{},
     "games" => @game_docs,
     "advanced" => %{
-      "writing-a-client" => %{}
+      "writing-a-client" => %{
+        "a-simple-client" => %{}
+      }
     }
   }
 

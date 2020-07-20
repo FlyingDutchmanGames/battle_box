@@ -1,0 +1,74 @@
+<h1>A Simple Example Client</h1>
+
+<p>The goal of this is to show the <i><b>MINIMUM</b></i> to connect to a battlebox compatible server</p>
+
+<p>This client code is not:</p>
+<ul>
+  <li>Able to recover from errors</li>
+  <li>Unit Tested</li>
+  <li>User friendly</li>
+</ul>
+
+<p>The Following is Python3 code using only the Python3 standard library, be sure to replace the token with one you generate</p>
+<pre>
+import json
+import struct
+import socket
+import ssl
+
+# TODO:// REPLACE YOUR TOKEN HERE
+TOKEN = "{YOUR TOKEN HERE}"
+PORT = 4242
+HOST ="botskrieg.com"
+BOT = "my-bot"
+
+def create_commands(commands_request, settings):
+    # Implement your robot game logic here
+    return []
+
+def send_message(connection, msg):
+  msg_bytes = str.encode(json.dumps(msg))
+  header = struct.pack("!H", len(msg_bytes))
+  connection.sendall(header + msg_bytes)
+
+def receive_message(connection):
+  msg_size_bytes = connection.recv(2)
+  (msg_size,) = struct.unpack("!H", msg_size_bytes)
+  message_json = connection.recv(msg_size)
+  message = json.loads(message_json)
+  return message
+
+connection = socket.create_connection((HOST, PORT))
+context = ssl.create_default_context()
+connection = context.wrap_socket(connection, server_hostname=HOST)
+
+send_message(connection, {"bot": BOT, "token": TOKEN})
+status = receive_message(connection)
+print("Status after Connecting:", status)
+assert status.get("status") == "idle"
+
+send_message(connection, {"action": "practice", "arena": "robot-game-default", "opponent": {}})
+status = receive_message(connection)
+print("Status after practice command:", status)
+assert status.get("status") == "match_making"
+
+game_request = receive_message(connection)
+print("Game Request:", game_request)
+settings = game_request["game_info"]["settings"]
+assert game_request.get("request_type") == "game_request"
+send_message(connection, {"action": "accept_game", "game_id": game_request["game_info"]["game_id"]})
+
+while True:
+    msg = receive_message(connection)
+    if msg.get("request_type") == "commands_request":
+        print("Commands Request:", msg)
+        commands = create_commands(msg["commands_request"], settings)
+        send_message(connection, {
+          "action": "send_commands",
+          "request_id": msg["commands_request"]["request_id"],
+          "commands": commands
+        })
+    elif msg.get("info") == "game_over":
+        print("Results: ", msg)
+        break
+</pre>
