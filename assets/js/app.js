@@ -4,6 +4,7 @@ import robot_game_css from "../css/robot_game.css"
 import not_found_css from "../css/not_found.css"
 import settings_css from "../css/settings.css"
 import game_viewer_css from "../css/game_viewer.css"
+import docs_css from "../css/docs.css"
 
 import "phoenix_html"
 import {Socket} from "phoenix"

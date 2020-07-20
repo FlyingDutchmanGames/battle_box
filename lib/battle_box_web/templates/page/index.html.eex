@@ -60,19 +60,5 @@
     <li>Minimize dependencies, strive for 100% Elixir/Erlang dependencies</li>
     <li>Optimize the server for ease of setup</li>
   </ul>
-
-  <hr>
-
-  <h1>Other</h1>
-
-  <h2>What the heck is an Erlang? (Why Build Botskrieg in Such a Niche Language?)</h2>
-  <p><a href="https://www.erlang.org/">Erlang</a> (and <a href="https://elixir-lang.org/">Elixir</a>) are programming languages designed to build large scale concurrent applications. Erlang/Elixir are a good fit for the design of Botskrieg, handling large numbers of current connections gracefully.</p>
-  <h3>Elixir/Erlang Resources</h3>
-  <ul>
-    <li><a href="https://www.phoenixframework.org/">Phoenix</a></li>
-    <li><a href="https://pragprog.com/titles/sbsockets/">Real-Time Phoenix</a></li>
-    <li><a href="https://learnyousomeerlang.com/">Learn You Some Erlang (for Great Good)</a></li>
-    <li><a href="https://www.phoenixframework.org/blog/the-road-to-2-million-websocket-connections">The Road to 2 Million Websocket Connections</a></li>
-  </ul>
 </div>
 
