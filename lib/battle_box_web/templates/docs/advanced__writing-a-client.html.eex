@@ -51,7 +51,7 @@ connection = context.wrap_socket(connection, server_hostname="botskrieg.com")
 
 <p>The structure of messages is shown below. Messages coming from the server should be in this format. Messages going to the server should be encoded in the same way</p>
 <p>The first two bytes of the message represent the length in bytes of the JSON encoded data. The message length is Network Order (Big Endian) Unsigned 16 bit integer</p>
-<p>Message length is strictly limited to 2 ** 16 (65536) bytes</p>
+<p>Message length is strictly limited to 2 ** 16 (65536) bytes. <b>Your client should enforce this limit, as attempting to send a message larger than 65536 bytes will render the connection unusable</b></p>
 
 <div style="display: grid; grid-template-columns: 20% 80%; grid-gap: 10px; color: white; padding: 10px 20px; margin: 0px 40px; border: 2px solid black;">
   <div style="background-color: orange; padding: 10px;"><i>length</i> (2 bytes)</div>
@@ -277,14 +277,64 @@ send_message(connection, {
 
 <h2>When the Game is Cancelled</h2>
 
+<p>In certain circumstances a game may be cancelled, most likely this is the result of one of the other players rejecting the game, but can also occur in some circumstances when the game code on the server throws an exception.</p>
+
+<p>In the case a game is cancelled you will receive the following message</p>
+<pre><%= Jason.encode!(%{info: "game_cancelled", game_id: "{game id}"}, pretty: true) %></pre>
+
+<p>Following this message all things related to this game are over</p>
+
+<p>The client TCP connection can be reused, and you can issue a "start_match_making" or "practice" command to play again</p>
+
 <hr>
 
 <h2>When the Game is Over</h2>
+
+<p>The game will eventually end, either through the natural end of the game, or an opponent disconnecting. <b>The end of the game can potentially happen at any time</b></p>
+
+<p>When the game ends you will receive a message that looks like this</p>
+
+<pre><%= Jason.encode!(%{info: "game_over", result: %{game_id: "{game_id}", score: %{"1" => 10, "2" => 4, "{some player id}" => "{some score}"}}}, pretty: true) %></pre>
+
+<p>Once this message is received, no further actions on the current game</p>
+
+<p>Player IDs will <b>Always</b> be integers, scores themselves may be integers or may be any JSON term. See the specific game's wire protocol to know how scoring works</p>
+
+<p>The TCP can <i>(should)</i> can be reused by issuing a "start_match_making" or "practice" command</p>
 
 <hr>
 
 <h2>Other Topics</h2>
 
-<h3>Bot Instance Failure</h3>
+<h3>Assorted Errors</h3>
 
-<h3>Reconnection Logic</h3>
+<h4>Invalid Message Sent</h4>
+
+<p>If your client sends an unexpected message to the server, the server will respond with the following error</p>
+
+<pre><%= Jason.encode!(%{error: "invalid_msg_sent"}, pretty: true) %></pre>
+
+<p>This error is especially tricky because a message can be valid in some contexts, but valid in others (i.e. while submitting a valid commands request, your opponent disconnects ending the game causing the commands request to become invalid). Long term the goal is to provide more actionable information within the error, but I'm still figuring out how to do that</p>
+
+<h4>Invalid Json</h4>
+
+<p>If you send the server JSON it isn't able to parse it will respond with the following message</p>
+
+<pre><%= Jason.encode!(%{error: "invalid_json"}, pretty: true) %></pre>
+
+<p>This is likely caused by one of the following reasons</p>
+<ul>
+  <li>Your message encoding is incorrect, double check the above section on sending messages</li>
+  <li>You attempted to send a message greater than 2 ** 16 (65536) bytes</li>
+</ul>
+
+<h4>Bot Instance Failure</h4>
+
+<p>Though technically it <i>should</i> never happen, you may receive the following error</p>
+<pre><%= Jason.encode!(%{error: "bot_instance_failure"}, pretty: true) %></pre>
+
+<p>Bot instance failures happen when the server code throws an exception, and represent a logic error in the server code</p>
+
+<p>Bot instance failures are unrecoverable, the server will likely close the TCP connection, and if it does not, you should close the connection as it is unusable</p>
+
+<p>Bot intance failures show up in the server logs, and will be debugged by the maintainers</p>
