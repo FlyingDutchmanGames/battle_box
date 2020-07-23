@@ -1,1 +1,279 @@
 <h1>Productionizing</h1>
+
+<p><b><i>This document is a work in progress... Use at your own risk...</i></b></p>
+<p>This is roughly how botskrieg.com is running, this document is currently mostly for me if I need to re setup the server</p>
+<p>Long term, I'd like to make it easy enough to run one of these servers that my college professors could do it without much issue</p>
+
+<hr>
+
+<h2>Outside the Server Setup</h2>
+
+<h3>Get a Domain</h3>
+<p>Any domain will work so long as you own it</p>
+<p>I personally use AWS for my registrar and then point my name servers at Digital Ocean</p>
+<p>From this point on I will refer to your domain as <i><b>$BATTLE_BOX_HOST</b></i></p>
+
+<h3>Register a Github Oauth Application</h3>
+<p>To provide sign-in battle box needs a Github Oauth application, go <a href="https://github.com/settings/applications/new">here</a> to create one</p>
+<p>Set the Authorization Callback URL to `$BATTLE_BOX_HOST/auth/github/callback` (for me `https://botskrieg.com/auth/github/callback`)</p>
+<p>Save the values for the Client ID and Client Secret</p>
+
+<h3>Get a Server From Digital Ocean (or Whoever)</h3> 
+<p>I'm using the 5$ a month 1gb 1vcpu instance <a href="https://www.digitalocean.com/pricing/">here</a></p>
+<p>If you're considering using Digital Ocean, think about using <a href="https://m.do.co/c/e72236f4c547">my referrer link (https://m.do.co/c/e72236f4c547)</a>. You'll get free credits, and if you decide to keep using Digital Ocean, I'll get credits which will go towards botskrieg.com</p>
+<p>I'm using the <a href="https://marketplace.digitalocean.com/apps/docker">Digital Ocean Prebuilt Docker Image</a>, if you'd like to use something else, make sure that Docker is available</p>
+
+<h3>Configure the DNS record for $BATTLE_BOX_HOST to point to your server</h3>
+<p>I use the Linux "dig" utility to check that the dns is correctly provisioned, I can see that botskrieg.com is pointing at 68.183.104.42 which is the same as I see in the digital ocean droplet management console</p>
+
+<pre>
+$ dig botskrieg.com
+
+; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; botskrieg.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 62775
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;botskrieg.com.		IN	A
+
+;; ANSWER SECTION:
+botskrieg.com.	3588	IN	A	68.183.104.42
+
+;; Query time: 66 msec
+;; SERVER: 8.8.8.8#53(8.8.8.8)
+;; WHEN: Sun Mar 01 20:11:30 EST 2020
+;; MSG SIZE  rcvd: 62
+</pre>
+
+<h3>Allow Network Traffic into your Server</h3>
+<p>In the <a href="https://cloud.digitalocean.com/networking/firewalls">Digital Ocean Firewall Settings</a> create a Firewall that allows the following inbound rules, and apply it to your server</p>
+
+<ol>
+  <li>Port 22 (SSH)</li>
+  <li>Port 80 (HTTP to be redirected to HTTP 443)</li>
+  <li>Port 443 (HTTPS)</li>
+  <li>Port 4242 (BattleBox TCP Connections)</li>
+</ol>
+
+<hr>
+
+<h2>Inside the Server Setup</h2>
+
+<p>SSH into your server to run the following steps</p>
+
+<h3>Export your Domain Name as an ENV Var</h3>
+
+<p>Replace botskrieg.com with your domain name</p>
+<pre>export BATTLE_BOX_HOST=botskrieg.com</pre>
+
+<h3>Update your Server</h3>
+
+<pre>apt update &amp;&amp; apt upgrade</pre>
+
+<h3>Configure your Firewall</h3>
+
+<pre>
+ufw allow ssh/tcp
+ufw allow http/tcp
+ufw allow https/tcp
+ufw allow 4242
+ufw logging on
+yes | ufw enable
+ufw status
+</pre>
+
+<h3>Install Certbot</h3>
+
+<pre>
+echo 'deb http://deb.debian.org/debian stretch-backports main' &gt;&gt; /etc/apt/sources.list
+gpg --keyserver pgp.mit.edu --recv-keys 7638D0442B90D010 8B48AD6246925553
+gpg --armor --export 7638D0442B90D010 | apt-key add -
+gpg --armor --export 8B48AD6246925553 | apt-key add -
+apt update
+apt install certbot python-certbot-nginx -t stretch-backports
+</pre>
+
+<h3>Create the "battle_box" User Who Will Run the App</h3>
+
+<pre>
+useradd battle_box
+mkdir /srv/battle_box
+chown battle_box:battle_box /srv/battle_box
+</pre>
+
+<h3>Install Postgres (and Create the "battle_box" Database)</h3>
+
+<pre>
+apt install postgresql postgresql-contrib
+sudo -u postgres createuser --echo --no-createdb --pwprompt --no-superuser battle_box
+sudo -u postgres createdb battle_box
+</pre>
+
+<h3>Install NGINX</h3>
+
+<pre>apt install nginx</pre>
+
+<h3>Configuring NGINX and getting SSL certs</h3>
+
+<p>This has to be done in two steps, so that lets encrypt can get its certs and then we configure nginx to listen on 4242 with the lets encrypt certs</p>
+
+<pre>
+cat | envsubst '$BATTLE_BOX_HOST' &gt; /etc/nginx/sites-available/default &lt;&lt;'CONF'
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  server_name $BATTLE_BOX_HOST;
+  location ~ /.well-known {
+    root /var/www/html;
+    allow all;
+  }
+  location / {
+    proxy_pass http://127.0.0.1:4000/;
+    proxy_http_version 1.1;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+}
+CONF
+</pre>
+
+<p>Run Certbot</p>
+<pre>certbot --nginx</pre>
+
+<p>Setup streaming for TCP connections using the Let's Encrypt Certs</p>
+
+<pre>
+cat | envsubst '$BATTLE_BOX_HOST' &gt; /etc/nginx/nginx.conf &lt;&lt;'CONF'
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+
+events {
+	worker_connections 768;
+}
+
+http {
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 65;
+	types_hash_max_size 2048;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
+	ssl_prefer_server_ciphers on;
+
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
+
+	gzip on;
+
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+}
+
+stream {
+  server {
+	  listen 4242 ssl;
+	  proxy_pass 127.0.0.1:4001;
+	  ssl_certificate /etc/letsencrypt/live/$BATTLE_BOX_HOST/fullchain.pem;
+	  ssl_certificate_key /etc/letsencrypt/live/$BATTLE_BOX_HOST/privkey.pem;
+  }
+}
+CONF
+</pre>
+
+<h3>Create your ENV file</h3>
+
+<p>You can generate secrets in the following way</p>
+
+<pre>$ openssl rand -base64 36</pre>
+
+<p><i>Be sure to fill in these values</i></p>
+
+<pre>
+cat | envsubst &gt; /etc/default/battle_box &lt;&lt;CONF
+BATTLE_BOX_HOST=$BATTLE_BOX_HOST
+BATTLE_BOX_SECRET_KEY_BASE=$FILL_ME_IN
+BATTLE_BOX_DATABASE_URL=$FILL_ME_IN
+BATTLE_BOX_GITHUB_CLIENT_ID=$FILL_ME_IN
+BATTLE_BOX_GITHUB_CLIENT_SECRET=$FILL_ME_IN
+BATTLE_BOX_LIVE_VIEW_SALT=$FILL_ME_IN
+CONF
+</pre>
+
+<h3>Building the Image</h3>
+
+<p>Clone the Repo</p>
+
+<pre>
+git clone https://github.com/FlyingDutchmanGames/battle_box.git
+</pre>
+
+<p>Build the image</p>
+
+<pre>
+cd battle_box
+docker build . -t battle_box:`git rev-parse HEAD`
+docker build . -t battle_box:master
+</pre>
+
+<h3>Creating the System Service</h3>
+
+<p>Create a directory to hold the configs</p>
+
+<pre>mkdir /srv/battle_box</pre>
+
+<p>Create the service config</p>
+
+<pre>
+cat &gt; /etc/systemd/system/battle_box.service &lt;&lt;CONF
+[Unit]
+Description=BattleBox
+After=network.target
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/srv/battle_box
+ExecStart=/usr/bin/docker run -p 4000 -p 4001 --network="host" --env-file=/etc/default/battle_box battle_box:master
+Restart=on-failure
+RestartSec=5
+Environment=LANG=en_US.UTF-8
+SyslogIdentifier=battle_box
+RemainAfterExit=no
+[Install]
+WantedBy=multi-user.target
+CONF
+</pre>
+
+<p>Enable the service</p>
+
+<pre>systemctl enable battle_box.service</pre>
+
+<h2>The Running Server</h2>
+
+<h3>Get an Interactive Elixir Console</h3>
+
+<p>Get into the Docker container</p>
+<pre>docker exec -it `docker ps | grep battle_box | awk '{print $1}'` /bin/bash</pre>
+
+<p>Once inside</p>
+<pre>./battle_box/bin/battle_box remote</pre>
+
+<h3>Running Migrations</h3>
+<p>While in an Elixir console on the running server</p>
+<pre>
+iex(battle_box@botskreig)1&gt; BattleBox.Release.migrate()
+</pre>
