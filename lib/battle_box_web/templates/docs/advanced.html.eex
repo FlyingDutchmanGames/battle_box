@@ -1,1 +1,25 @@
+<% writing_a_client = Routes.docs_path(@conn, :docs, ["advanced", "writing-a-client"]) %>
+<% developing = Routes.docs_path(@conn, :docs, ["advanced", "developing"]) %>
+<% productionizing = Routes.docs_path(@conn, :docs, ["advanced", "productionizing"]) %>
+<% architecture = Routes.docs_path(@conn, :docs, ["advanced", "productionizing"]) %>
+
 <h1>Advanced</h1>
+
+<ul class="docs-toc">
+  <li><a href="<%= writing_a_client %>">Writing a Client</a></li>
+  <li><a href="<%= architecture  %>">Architecture</a></li>
+  <li><a href="<%= developing %>">Developing</a></li>
+  <li><a href="<%= productionizing  %>">Productionizing</a></li>
+</ul>
+
+<h2>Writing a Client</h1>
+<p>Interested in playing Botskreig in your favorite programming language? <a href="<%= writing_a_client %>">Checkout the writing a client guide here</a>
+
+<h2>Architecture</h2>
+<p>Interested in how Botskrieg works under the hood? <a href="<%= architecture %>">Checkout these docs</a></p>
+
+<h2>Developing</h2>
+<p>Interested in running a Battle Box server locally? <a href="<%= developing %>">Checkout the developing guide here</a></p>
+
+<h2>Running your own Battle Box Server</h2>
+<p>Interested in running your own production battle box server? <a href="<%= productionizing %>">Checkout the production checklist</a></p>

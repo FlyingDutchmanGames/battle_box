@@ -12,6 +12,9 @@ defmodule BattleBoxWeb.DocsController do
     "getting-started" => %{},
     "games" => @game_docs,
     "advanced" => %{
+      "architecture" => %{},
+      "developing" => %{},
+      "productionizing" => %{},
       "writing-a-client" => %{
         "a-simple-client" => %{}
       }
@@ -24,13 +27,13 @@ defmodule BattleBoxWeb.DocsController do
     render(conn, "documenation.html",
       nav_segments: nav_segments(conn, path),
       nav_options: nav_options(conn, path),
-      content: content(path, params),
+      content: content(conn, path, params),
       params: params
     )
   end
 
   # Where the magic happens
-  defp content(["games", game | rest], params) do
+  defp content(conn, ["games", game | rest], params) do
     module = game_type_name_to_module(game)
 
     template =
@@ -39,13 +42,13 @@ defmodule BattleBoxWeb.DocsController do
         rest -> "docs__#{Enum.join(rest, "__")}.html"
       end
 
-    module.view_module.render(template, params: params)
+    module.view_module.render(template, params: params, conn: conn)
   end
 
-  defp content([], _params), do: DocsView.render("index.html")
+  defp content(_conn, [], _params), do: DocsView.render("index.html")
 
-  defp content(path, params),
-    do: DocsView.render(Enum.join(path, "__") <> ".html", params: params)
+  defp content(conn, path, params),
+    do: DocsView.render(Enum.join(path, "__") <> ".html", params: params, conn: conn)
 
   defp nav_segments(_conn, []), do: [:docs]
 
