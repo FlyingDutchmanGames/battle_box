@@ -25,11 +25,11 @@
 #### Clients
 - BattleBox Elixir Client
 - BattleBox Python Client
+- BattleBox Node Client
+- BattleBox Ruby Client
 - WebSocket interface
 - Update protocol to give the result of each move
 #### Robot Game
-- Fix the weird rendering thing, where attacks and moves are no in the right place
-- Move rules into main robot game docs
 - Remove `new` in favor of `from_settings`
 - limit memory usage of game servers (they're currently at 2 mbs)
 - Manual GC?
@@ -40,9 +40,7 @@
 - Robot Game Settings
   - Reorgainze the code
   - Add in team spawns
-#### Static Site
-- Dynamically created docs
-- Wire protocol docs
+#### Docs
 - Robot game rules docs
 #### ELO rankings
 - Provide optional ELOs to arenas
@@ -56,12 +54,6 @@
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
 - Add matchmaker interface to the game engine
-#### Client
-- Add specs to the python client
-  - Provide an API key for a banned user
-  - Provide an api key for a user with a 0 connection limit
-  - Enforce that `not-real-arena` can never be made into an arena to give a fake arena for testing
-  - Create an arena with a 0 time ms so test failed move timings?
 
 ### Nice to Haves
 
