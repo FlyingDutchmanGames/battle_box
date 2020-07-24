@@ -1,2 +1,20 @@
+<% advanced = Routes.docs_path(@conn, :docs, ["advanced"]) %>
+<% games = Routes.docs_path(@conn, :docs, ["games"]) %>
+<% getting_started = Routes.docs_path(@conn, :docs, ["getting-started"]) %>
+
 <h1>Botskrieg Documentaion</h1>
-<h2>Navigating Botskrieg</h1>
+
+<ul class="docs-toc">
+  <li><a href="<%= getting_started %>">Getting Started</a></li>
+  <li><a href="<%= games %>">Games</a></li>
+  <li><a href="<%= advanced %>">Advanced</a></li>
+</ul>
+
+<h2>Getting Started</h2>
+<p>New here? <a href="<%= getting_started %>">Checkout this guide for getting started here</a></p>
+
+<h2>Games</h2>
+<p>Checkout the selection of games <a href="<%= games %>">here</a></p>
+
+<h2>Advanced Topics</h2>
+<p>Want to build a custom client? Write your own game? Run your own server? <a href="<%= advanced %>">Checkout the advanced topics</a></p>

@@ -45,7 +45,7 @@ defmodule BattleBoxWeb.DocsController do
     module.view_module.render(template, params: params, conn: conn)
   end
 
-  defp content(_conn, [], _params), do: DocsView.render("index.html")
+  defp content(conn, [], params), do: DocsView.render("index.html", params: params, conn: conn)
 
   defp content(conn, path, params),
     do: DocsView.render(Enum.join(path, "__") <> ".html", params: params, conn: conn)

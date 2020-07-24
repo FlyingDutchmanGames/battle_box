@@ -1,12 +1,23 @@
 <h1>Getting Started</h1>
 
+<p>Welcome to Botskrieg! The OpenSource Bot Battle Platform</p>
+
 <h2>Signup/Login</h2>
+
+<p>If you don't have a GitHub account, make one now</p>
+
+<p><a href="https://github.com/join">GitHub Signup</a></p>
+
+<p>Once you have a GitHub account, Oauth Botskrieg. <a href="<%= Routes.github_login_path(@conn, :github_login) %>">Click here to Oauth</a></p>
 
 <h2>Authentication (Getting an API Key)</h2>
 
-<h2>Choosing a Client</h2>
-<h3>Elixir Client</h3>
-<h3>Python Client</h3>
-<h3 style="color: gray; user-select: none;">JS in the Browser (Coming Soon)</h3>
+<p>Generate an API key <a href="<%= Routes.api_key_path(@conn, :new) %>">here</a></p>
 
-<h2>What Game to Play</h2>
+<p>Make sure you save the token somewhere, it will not be available again</p>
+
+<h2>Choosing a Client</h2>
+
+<h3>Python Client</h3>
+
+<p>Fan of Python? <a href="https://github.com/FlyingDutchmanGames/battle_box_client_py">Checkout the the official Python 3 Client</a></p>
