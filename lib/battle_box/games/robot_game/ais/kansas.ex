@@ -34,7 +34,7 @@ defmodule BattleBox.Games.RobotGame.Ais.Kansas do
             [x - 1, y]
 
           true ->
-            [x - 1, y]
+            [x + 1, y]
         end
 
       move(robot, target)
