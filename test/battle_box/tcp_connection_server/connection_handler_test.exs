@@ -94,8 +94,10 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                "status" => "idle",
                "connection_id" => connection_id,
                "bot_server_id" => <<_::288>>,
-               "user_id" => @user_id
+               "watch" => watch_links
              } = Jason.decode!(msg)
+
+      assert %{"bot" => _, "user" => _} = watch_links
     end
 
     test "trying to join while your user is banned is an error", %{

@@ -1,7 +1,7 @@
 defmodule BattleBox.Connection.LogicTest do
   alias BattleBox.GameEngine
   use BattleBox.DataCase, async: false
-  alias BattleBox.Connection.Logic
+  alias BattleBox.{Repo, Connection.Logic}
 
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
@@ -56,10 +56,10 @@ defmodule BattleBox.Connection.LogicTest do
                Jason.decode!(msg)
     end
 
-    test "when you provide a good name/key it starts correctly", %{
-      names: names,
-      key: %{user_id: user_id} = key
-    } do
+    test "when you provide a good name/key it starts correctly", %{names: names, key: key} do
+      key = Repo.preload(key, :user)
+      user = key.user
+
       assert {%{state: :idle}, [{:monitor, bot_server_pid}, {:send, msg}], :continue} =
                Logic.handle_message(
                  {:client,
@@ -76,8 +76,15 @@ defmodule BattleBox.Connection.LogicTest do
                "bot_server_id" => _,
                "status" => "idle",
                "connection_id" => "1234",
-               "user_id" => ^user_id
+               "watch" => watch_links
              } = Jason.decode!(msg)
+
+      expected = %{
+        "user" => "http://localhost:4002/users/#{user.username}/follow",
+        "bot" => "http://localhost:4002/users/#{user.username}/bots/bot-name/follow"
+      }
+
+      assert watch_links == expected
     end
   end
 

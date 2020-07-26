@@ -46,9 +46,10 @@ defmodule BattleBox.Connection.Logic do
            bot_name: bot_name,
            connection: self()
          }) do
-      {:ok, bot_server, %{user_id: _, bot_server_id: _} = bot_server_info} ->
+      {:ok, bot_server, %{bot: bot, bot_server_id: _} = bot_server_info} ->
         data =
           data
+          |> Map.put(:bot, bot)
           |> Map.put(:bot_server, bot_server)
           |> Map.put(:state, :idle)
           |> Map.merge(bot_server_info)
