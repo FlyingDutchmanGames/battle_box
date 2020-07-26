@@ -106,9 +106,9 @@ receive_message(connection)
 </pre>
 
 <p>On successful authentication you will receive</p>
-<pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :idle, user_id: Ecto.UUID.generate()}, pretty: true) %></pre>
+<pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :idle, watch: %{bot: "{some url}", user: "{some url"}}, pretty: true) %></pre>
 
-<p>Don't worry about "bot_server_id", "connection_id", "user_id", those are for some advanced features that haven't shipped yet</p>
+<p>Watch Links can be displayed to the user who can watch their bot/user play in browser</p>
 
 <h3>Some Authentication Errors You May Encounter (not limited to)</h2>
 <pre>
@@ -176,7 +176,7 @@ receive_message(connection)
 </pre>
 
 <p>On success, you'll recieve the following message</p>
-<pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :match_making, user_id: Ecto.UUID.generate()}, pretty: true) %></pre>
+<pre><%= Jason.encode!(%{bot_server_id: Ecto.UUID.generate(), connection_id: Ecto.UUID.generate(), status: :match_making, watch: %{bot: "{some url}", user: "{some url"}}, pretty: true) %></pre>
 
 <h3>Some Errors You May Encounter (Not Limited to)</h3>
 <pre><%= Jason.encode!(%{error: %{arena: ["Arena \"some-arena\" does not exist"]}}) %></pre>

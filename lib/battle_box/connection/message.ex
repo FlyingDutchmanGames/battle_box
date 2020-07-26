@@ -1,4 +1,7 @@
 defmodule BattleBox.Connection.Message do
+  alias BattleBoxWeb.Endpoint
+  alias BattleBoxWeb.Router.Helpers, as: Routes
+
   def game_over(result) do
     encode(%{"info" => "game_over", "result" => result})
   end
@@ -15,8 +18,8 @@ defmodule BattleBox.Connection.Message do
     encode(%{
       status: status,
       connection_id: data.connection_id,
-      user_id: data.user_id,
-      bot_server_id: data.bot_server_id
+      bot_server_id: data.bot_server_id,
+      watch: watch_info(data)
     })
   end
 
@@ -59,4 +62,17 @@ defmodule BattleBox.Connection.Message do
   end
 
   def encode(msg), do: Jason.encode!(msg)
+
+  defp watch_info(data) do
+    case data do
+      %{bot: %{user: %{username: username}, name: bot_name}} ->
+        %{
+          user: Routes.user_follow_url(Endpoint, :follow, username),
+          bot: Routes.user_bot_follow_url(Endpoint, :follow, username, bot_name)
+        }
+
+      _ ->
+        %{}
+    end
+  end
 end
