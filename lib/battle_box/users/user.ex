@@ -1,6 +1,8 @@
 defmodule BattleBox.User do
   use Ecto.Schema
   alias BattleBox.{Repo, Bot, Arena, ApiKey}
+  alias BattleBoxWeb.Router.Helpers, as: Routes
+  alias BattleBoxWeb.Endpoint
   import Ecto.Changeset
   import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
 
@@ -47,7 +49,7 @@ defmodule BattleBox.User do
         # :shrug:, -1 will work for now, eventually when auth is reworked this will be a nullable
         # field or stored on a different table
         github_id: -1,
-        avatar_url: "/images/botskrieg-user-profile-pic.svg",
+        avatar_url: Routes.generated_avatar_url(Endpoint, :avatar, @system_username),
         username: @system_username
       }
       |> Repo.insert(conflict_target: :username, on_conflict: :nothing)
