@@ -19,6 +19,10 @@ defmodule BattleBoxWeb.Router do
   pipeline :require_not_banned, do: plug(RequireNotBanned)
 
   scope "/", BattleBoxWeb do
+    get "/generated_avatar/:username", GeneratedAvatarController, :avatar
+  end
+
+  scope "/", BattleBoxWeb do
     pipe_through :browser
 
     get "/", PageController, :index
