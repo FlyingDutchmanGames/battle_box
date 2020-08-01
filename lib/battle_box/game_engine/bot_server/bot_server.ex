@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
-  alias BattleBox.{Arena, GameEngine, GameEngine.MatchMaker, GameEngine.GameServer}
+  alias BattleBox.{Arena, GameEngine, GameEngine.GameServer}
 
   def accept_game(bot_server, game_id, timeout \\ 5000) do
     GenStateMachine.call(bot_server, {:accept_game, game_id}, timeout)
@@ -52,12 +52,12 @@ defmodule BattleBox.GameEngine.BotServer do
   end
 
   def handle_event({:call, from}, {:match_make, arena}, :options, data) do
-    :ok = MatchMaker.join_queue(data.names.game_engine, arena.id, data.bot)
+    :ok = GameEngine.join_queue(data.names.game_engine, arena.id, data.bot)
     {:next_state, :match_making, data, {:reply, from, :ok}}
   end
 
   def handle_event({:call, from}, {:practice, arena, opponent}, :options, data) do
-    case MatchMaker.practice_match(data.names.game_engine, arena, data.bot, opponent) do
+    case GameEngine.practice_match(data.names.game_engine, arena, data.bot, opponent) do
       {:ok, _meta} ->
         {:next_state, :match_making, data, {:reply, from, :ok}}
 
@@ -67,7 +67,7 @@ defmodule BattleBox.GameEngine.BotServer do
   end
 
   def handle_event(:info, {:game_request, game_info}, :match_making, data) do
-    :ok = MatchMaker.dequeue_self(data.names.game_engine)
+    :ok = GameEngine.dequeue_self(data.names.game_engine)
     {:ok, data} = setup_game(data, game_info)
     {:next_state, :game_acceptance, data, {:next_event, :internal, :setup_game_acceptance}}
   end

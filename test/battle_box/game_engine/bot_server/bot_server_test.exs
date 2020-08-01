@@ -1,7 +1,6 @@
 defmodule BattleBox.GameEngine.BotServerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{GameEngine, Repo, Bot, Arena}
-  alias BattleBox.GameEngine.{MatchMaker, BotServer}
+  alias BattleBox.{GameEngine, GameEngine.BotServer, Repo, Bot, Arena}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
   @user_id Ecto.UUID.generate()
@@ -117,12 +116,12 @@ defmodule BattleBox.GameEngine.BotServerTest do
   describe "Matchmaking in a arena" do
     test "You can ask the bot server to match_make",
          %{p1_server: p1, bot: %{id: bot_id}} = context do
-      assert [] == MatchMaker.queue_for_arena(context.game_engine, context.arena.id)
+      assert [] == GameEngine.queue_for_arena(context.game_engine, context.arena.id)
 
       :ok = BotServer.match_make(context.p1_server, context.arena)
 
       assert [%{bot: %{id: ^bot_id}, pid: ^p1}] =
-               MatchMaker.queue_for_arena(context.game_engine, context.arena.id)
+               GameEngine.queue_for_arena(context.game_engine, context.arena.id)
     end
 
     test "When a match is made it forwards the request to the connections", context do

@@ -33,6 +33,13 @@ defmodule BattleBox.GameEngine do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
+  defdelegate practice_match(game_engine, arena, bot, opponent, pid \\ self()), to: MatchMakerSup
+  defdelegate join_queue(game_engine, arena, bot, pid \\ self()), to: MatchMakerSup
+  defdelegate queue_for_arena(game_engine, arena), to: MatchMakerSup
+  defdelegate dequeue_self(game_engine), to: MatchMakerSup
+  defdelegate dequeue_self(game_engine, arena_id), to: MatchMakerSup
+  defdelegate arenas_with_queued_players(game_engine), to: MatchMakerSup
+
   defdelegate subscribe_to_bot_events(game_engine, bot_id, events), to: GameEnginePubSub
   defdelegate subscribe_to_user_events(game_engine, user_id, events), to: GameEnginePubSub
   defdelegate subscribe_to_arena_events(game_engine, arena_id, events), to: GameEnginePubSub
