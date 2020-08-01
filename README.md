@@ -15,7 +15,6 @@
 
 #### Arenas
 - Matchmaker queue live
-- Move Arena Live into its own page instead of the main arena page
 - Add "Auto Follow Arena" when you click on a live game from the arena's live game page
 - set of default arenas with interesting terrains and bots
 #### Users
@@ -40,8 +39,6 @@
 - Robot Game Settings
   - Reorgainze the code
   - Add in team spawns
-#### Docs
-- Robot game rules docs
 #### ELO rankings
 - Provide optional ELOs to arenas
 #### General
@@ -53,7 +50,6 @@
   - preserve bread crumbs
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
-- Add matchmaker interface to the game engine
 
 ### Nice to Haves
 
