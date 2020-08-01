@@ -14,15 +14,29 @@ defmodule BattleBoxWeb.ArenaControllerTest do
     test "you can view a arena", %{conn: conn, user: user} do
       {:ok, arena} = robot_game_arena(user: user, arena_name: "test-name")
 
-      conn =
-        conn
-        |> get("/users/#{user.username}/arenas/#{arena.name}")
+      conn = get(conn, "/users/#{user.username}/arenas/#{arena.name}")
 
       assert html_response(conn, 200) =~ "test-name"
     end
 
     test "A non existant arena triggers a 404", %{conn: conn, user: user} do
       conn = conn |> get("/users/#{user.username}/arenas/fake-arena")
+
+      assert html_response(conn, 404) =~ "Arena (fake-arena) Not Found"
+    end
+  end
+
+  describe "scoreboard" do
+    test "you can view a arena", %{conn: conn, user: user} do
+      {:ok, arena} = robot_game_arena(user: user, arena_name: "test-name")
+
+      conn = get(conn, "/users/#{user.username}/arenas/#{arena.name}/scoreboard")
+
+      assert html_response(conn, 200) =~ "test-name"
+    end
+
+    test "A non existant arena triggers a 404", %{conn: conn, user: user} do
+      conn = conn |> get("/users/#{user.username}/arenas/fake-arena/scoreboard")
 
       assert html_response(conn, 404) =~ "Arena (fake-arena) Not Found"
     end

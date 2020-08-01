@@ -46,6 +46,7 @@ defmodule BattleBoxWeb.Router do
       end
 
       resources "/arenas", ArenaController, only: [:show, :index], param: "name" do
+        get "/scoreboard", ArenaController, :scoreboard
         get "/follow", FollowController, :follow
         resources "/games", GameController, only: [:index]
       end

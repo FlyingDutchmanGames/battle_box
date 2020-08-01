@@ -20,6 +20,8 @@ defmodule BattleBoxWeb.ArenaController do
         nav_segments = [{arena.user, :arenas}, arena.name]
 
         nav_options = [
+          {"Scoreboard",
+           Routes.user_arena_arena_path(conn, :scoreboard, arena.user.username, arena_name)},
           {:games, arena},
           {:follow, arena},
           if(conn.assigns[:current_user] && conn.assigns.current_user.id == arena.user_id,
@@ -33,6 +35,19 @@ defmodule BattleBoxWeb.ArenaController do
           nav_segments: nav_segments,
           nav_options: nav_options
         )
+
+      nil ->
+        render404(conn, {Arena, arena_name})
+    end
+  end
+
+  def scoreboard(conn, %{"arena_name" => arena_name}) do
+    Repo.get_by(Arena, name: arena_name)
+    |> Repo.preload(:user)
+    |> case do
+      %Arena{} = arena ->
+        nav_segments = [{arena.user, :arenas}, arena, "Scoreboard"]
+        render(conn, "scoreboard.html", arena: arena, nav_segments: nav_segments)
 
       nil ->
         render404(conn, {Arena, arena_name})

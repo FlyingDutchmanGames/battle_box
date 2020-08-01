@@ -1,0 +1,13 @@
+
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments) %>
+    </div>
+  </div>
+
+  <h1>Live Games</h1>
+  <div class="box">
+    <%= live_render(@conn, Scores, session: %{"arena" => @arena}) %>
+  </div>
+</div>
