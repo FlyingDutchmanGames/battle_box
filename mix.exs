@@ -9,6 +9,13 @@ defmodule BattleBox.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
       aliases: aliases(),
       deps: deps()
     ]
@@ -39,13 +46,15 @@ defmodule BattleBox.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:floki, ">= 0.25.0", only: :test},
       {:gen_state_machine, "~> 2.0"},
       {:gun, "~> 1.3"},
       # When Gun 2 comes out, update Gun and remove the override
       {:cowlib, "~> 2.8", override: true},
       {:bypass, "~> 1.0", only: :test},
-      {:observer_cli, "~> 1.5"}
+      {:observer_cli, "~> 1.5"},
+      # Dev
+      {:excoveralls, "~> 0.10", only: :test},
+      {:floki, ">= 0.25.0", only: :test}
     ]
   end
 
