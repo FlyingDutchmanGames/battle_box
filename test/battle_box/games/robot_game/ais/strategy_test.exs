@@ -11,11 +11,7 @@ defmodule BattleBox.Games.RobotGame.Ais.StrategyTest do
   end
 
   describe "manhattan_distance/2" do
-    test "it gives the manhattan_distance between two points (also robots)" do
-      assert manhattan_distance([0, 0], [0, 0]) == 0.0
-      assert manhattan_distance([0, 0], [0, 1]) == 1.0
-      assert manhattan_distance([0, 0], [0, -1]) == 1.0
-      assert manhattan_distance([0, 0], [3, 4]) == 5.0
+    test "You can pass robots to it" do
       assert manhattan_distance(%{location: [0, 0]}, %{location: [3, 4]}) == 5.0
     end
   end

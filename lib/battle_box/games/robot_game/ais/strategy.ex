@@ -1,16 +1,15 @@
 defmodule BattleBox.Games.RobotGame.Ais.Strategy do
   defmodule Utilites do
+    alias BattleBox.Utilities.Grid
+
     def manhattan_distance(%{location: location}, other),
       do: manhattan_distance(location, other)
 
     def manhattan_distance(other, %{location: location}),
       do: manhattan_distance(other, location)
 
-    def manhattan_distance([x1, y1], [x2, y2]) do
-      a_squared = :math.pow(x2 - x1, 2)
-      b_squared = :math.pow(y2 - y1, 2)
-      :math.pow(a_squared + b_squared, 0.5)
-    end
+    def manhattan_distance([_x1, _y1] = loc1, [_x2, _y2] = loc2),
+      do: Grid.manhattan_distance(loc1, loc2)
 
     def towards(%{location: location}, other), do: towards(location, other)
     def towards(other, %{location: location}), do: towards(other, location)
