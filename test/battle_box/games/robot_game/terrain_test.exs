@@ -73,6 +73,16 @@ defmodule BattleBox.Games.RobotGame.Settings.TerrainTest do
     end
   end
 
+  describe "location_accessible?/2" do
+    test "it gives accessible for everything besides :inaccessible" do
+      terrain = <<1, 3, 0, 1, 2>>
+      refute Terrain.location_accessible?(terrain, [-1, -1])
+      refute Terrain.location_accessible?(terrain, [0, 0])
+      assert Terrain.location_accessible?(terrain, [1, 0])
+      assert Terrain.location_accessible?(terrain, [2, 0])
+    end
+  end
+
   describe "resize" do
     test "it get to the right size" do
       assert <<10::8, 10::8, _rest::binary>> = Terrain.resize(<<1, 1, 0>>, 10, 10)

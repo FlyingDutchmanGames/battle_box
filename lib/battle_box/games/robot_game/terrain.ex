@@ -83,6 +83,10 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
     <<desired_rows::8, desired_cols::8, new_data::binary>>
   end
 
+  def location_accessible?(terrain, [_x, _y] = loc) do
+    at_location(terrain, loc) != :inaccessible
+  end
+
   def at_location(terrain, [x, y]) do
     <<rows::8, cols::8, data::binary>> = terrain
     on_board? = x in 0..(cols - 1) && y in 0..(rows - 1)
