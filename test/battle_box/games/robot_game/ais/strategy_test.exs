@@ -1,13 +1,19 @@
 defmodule BattleBox.Games.RobotGame.Ais.StrategyTest do
   use ExUnit.Case, async: true
   import BattleBox.Games.RobotGame.Ais.Strategy.{Utilites, Moves}
+  import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
+
+  @terrain ~t/1 1
+              1 1/
 
   describe "towards/2" do
-    assert towards([0, 0], [0, 1]) == [0, 1]
-    assert towards([0, 0], [0, 2]) == [0, 1]
-    assert towards([0, 0], [1, 0]) == [1, 0]
-    assert towards([0, 0], [2, 0]) == [1, 0]
-    assert towards([0, 0], [0, 0]) == [0, 0]
+    test "Terrain does the right thing" do
+      assert towards([0, 0], [0, 1], @terrain) == [0, 1]
+      assert towards([0, 0], [0, 2], @terrain) == [0, 1]
+      assert towards([0, 0], [1, 0], @terrain) == [1, 0]
+      assert towards([0, 0], [2, 0], @terrain) == [1, 0]
+      assert towards([0, 0], [0, 0], @terrain) == [0, 0]
+    end
   end
 
   describe "manhattan_distance/2" do

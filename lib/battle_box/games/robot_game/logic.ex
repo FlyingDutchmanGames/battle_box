@@ -94,7 +94,8 @@ defmodule BattleBox.Games.RobotGame.Logic do
     robot = get_robot(game, move["robot_id"])
 
     attack_conditions = %{
-      attack_target_adjacent?: move["target"] in adjacent_locations(robot.location),
+      attack_target_adjacent?:
+        move["target"] in available_adjacent_locations(game, robot.location),
       guarded?: move["target"] in guard_locations,
       target_space_occupant: get_robot_at_location(game, move["target"])
     }
@@ -121,7 +122,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     robot = get_robot(game, move["robot_id"])
 
     damage_effects =
-      adjacent_locations(robot.location)
+      available_adjacent_locations(game, robot.location)
       |> Enum.map(&get_robot_at_location(game, &1))
       |> Enum.reject(&is_nil/1)
       |> Enum.map(fn %{id: affected_robot_id, location: location} ->
@@ -165,7 +166,7 @@ defmodule BattleBox.Games.RobotGame.Logic do
     moves_to_location = Enum.filter(movements, &(&1["target"] == move["target"]))
 
     space_info = %{
-      move_target_adjacent?: move["target"] in adjacent_locations(robot.location),
+      move_target_adjacent?: move["target"] in available_adjacent_locations(game, robot.location),
       valid_terrain?: Terrain.at_location(game.terrain, move["target"]) in [:normal, :spawn],
       contention?: length(moves_to_location) > 1,
       current_occupant: robot_currently_at_location,

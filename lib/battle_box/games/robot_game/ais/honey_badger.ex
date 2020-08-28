@@ -10,13 +10,12 @@ defmodule BattleBox.Games.RobotGame.Ais.HoneyBadger do
     :ok
   end
 
-  def commands(%{game_state: %{robots: robots}, player: player}) do
+  def commands(%{game_state: %{robots: robots}, player: player, settings: %{terrain: terrain}}) do
     my_robots = for robot <- robots, robot.player_id == player, do: robot
     enemies = for robot <- robots, robot.player_id != player, do: robot
 
     for robot <- my_robots do
-      adjacent_enemies =
-        for enemy <- enemies, enemy.location in adjacent_locations(robot), do: enemy
+      adjacent_enemies = for enemy <- enemies, adjacent?(enemy, robot), do: enemy
 
       closest_enemy = Enum.min_by(enemies, &manhattan_distance(robot, &1), fn -> nil end)
 
@@ -25,7 +24,7 @@ defmodule BattleBox.Games.RobotGame.Ais.HoneyBadger do
           attack(robot, enemy)
 
         %{closest_enemy: closest_enemy} when not is_nil(closest_enemy) ->
-          move(robot, towards(robot, closest_enemy))
+          move(robot, towards(robot, closest_enemy, terrain))
 
         _ ->
           guard(robot)
