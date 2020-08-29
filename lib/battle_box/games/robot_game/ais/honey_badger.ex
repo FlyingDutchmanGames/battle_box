@@ -6,11 +6,12 @@ defmodule BattleBox.Games.RobotGame.Ais.HoneyBadger do
   def difficulty, do: 4
   def creator, do: "the-notorious-gjp"
 
-  def initialize(_settings) do
-    :ok
+  def initialize(%{terrain_base64: base64}) do
+    terrain = Base.decode64!(base64)
+    %{terrain: terrain}
   end
 
-  def commands(%{game_state: %{robots: robots}, player: player, settings: %{terrain: terrain}}) do
+  def commands(%{game_state: %{robots: robots}, player: player, ai_state: %{terrain: terrain}}) do
     my_robots = for robot <- robots, robot.player_id == player, do: robot
     enemies = for robot <- robots, robot.player_id != player, do: robot
 
