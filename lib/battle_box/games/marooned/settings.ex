@@ -17,7 +17,7 @@ defmodule BattleBox.Games.Marooned.Settings do
     timestamps()
   end
 
-  def changest(settings, params) do
+  def changeset(settings, params) do
     settings
     |> cast(params, [:rows, :cols])
     |> validate_required([:rows, :cols])

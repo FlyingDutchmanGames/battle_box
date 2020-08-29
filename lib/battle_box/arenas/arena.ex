@@ -44,7 +44,7 @@ defmodule BattleBox.Arena do
     field :bot_self_play, :boolean, default: true
     field :user_self_play, :boolean, default: true
 
-    field :game_type, GameType, default: BattleBox.Games.RobotGame
+    field :game_type, GameType
 
     has_many :games, Game
     belongs_to :user, User
@@ -57,6 +57,7 @@ defmodule BattleBox.Arena do
   end
 
   def changeset(arena, params \\ %{}) do
+
     arena
     |> cast(params, @params)
     |> validate_required(@params)

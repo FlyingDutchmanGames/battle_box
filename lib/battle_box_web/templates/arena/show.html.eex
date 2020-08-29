@@ -22,6 +22,6 @@
 
     <h2><%= @arena.game_type.title %> Settings</h2>
     <hr>
-    <%= @arena.game_type.view.render("_settings_show.html", settings: Arena.get_settings(@arena)) %>
+    <%= @arena.game_type.view_module.render("_settings_show.html", settings: Arena.get_settings(@arena)) %>
   </div>
 </div>

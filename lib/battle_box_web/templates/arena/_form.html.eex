@@ -47,7 +47,7 @@
 <div>
   <% game_module = Phoenix.HTML.FormData.input_value(@conn, @form, :game_type) |> game_type_name_to_module %>
   <%= inputs_for @form, game_module.settings_module.name, fn settings -> %>
-    <%= game_module.view.render("_settings_form.html", settings: settings, conn: @conn) %>
+    <%= game_module.view_module.render("_settings_form.html", settings: settings, conn: @conn) %>
   <% end %>
 </div>
 <hr>

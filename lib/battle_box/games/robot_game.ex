@@ -29,7 +29,6 @@ defmodule BattleBox.Games.RobotGame do
   end
 
   def color, do: "green"
-  def view, do: BattleBoxWeb.RobotGameView
   def title, do: "Robot Game"
   def name, do: :robot_game
   def settings_module, do: Settings
