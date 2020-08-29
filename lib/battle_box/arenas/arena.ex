@@ -57,7 +57,6 @@ defmodule BattleBox.Arena do
   end
 
   def changeset(arena, params \\ %{}) do
-
     arena
     |> cast(params, @params)
     |> validate_required(@params)
