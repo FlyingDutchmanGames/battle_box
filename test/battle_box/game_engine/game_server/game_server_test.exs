@@ -1,5 +1,6 @@
 defmodule BattleBox.GameEngine.GameServerTest do
-  alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame, Games.Marooned}
+  alias BattleBox.{Game, GameEngine, GameEngine.GameServer}
+  alias BattleBox.InstalledGames
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
@@ -13,7 +14,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
     %{user: user}
   end
 
-  for game_type <- [RobotGame, Marooned] do
+  for game_type <- InstalledGames.installed_games() do
     describe "GameServer (with #{game_type.title}})" do
       setup do
         {:ok, user} = create_user()
@@ -34,8 +35,9 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
         init_opts =
           update_in(init_opts.game, fn game ->
-            game = put_in(game.game_type, unquote(game_type))
-            game = Map.put(game, unquote(game_type).name, struct(unquote(game_type)))
+            game.game_type
+            |> put_in(unquote(game_type))
+            |> Map.put(unquote(game_type).name, struct(unquote(game_type)))
           end)
 
         %{
@@ -114,41 +116,6 @@ defmodule BattleBox.GameEngine.GameServerTest do
         assert_receive {:player_1, {:game_over, %{}}}
       end
 
-      test "you can play a game! (and it persists it to the db when you're done)", context do
-        {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
-
-        ref = Process.monitor(pid)
-
-        assert_receive {:player_1,
-                        {:game_request, %{game_server: ^pid, player: 1, game_id: game_id}}}
-
-        assert_receive {:player_2,
-                        {:game_request, %{game_server: ^pid, player: 2, game_id: ^game_id}}}
-
-        assert :ok = GameServer.accept_game(pid, 1)
-        assert :ok = GameServer.accept_game(pid, 2)
-
-        Stream.unfold(0, fn _turn ->
-          receive do
-            {:player_1, {:commands_request, %{}}} ->
-              GameServer.submit_commands(pid, 1, :timeout)
-
-            {:player_2, {:commands_request, %{}}} ->
-              GameServer.submit_commands(pid, 2, :timeout)
-          after
-            50 ->
-              nil
-          end
-        end)
-
-        assert_receive {:player_1, {:game_over, %{game_id: ^game_id}}}
-        assert_receive {:player_2, {:game_over, %{game_id: ^game_id}}}
-        assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
-
-        loaded_game = Repo.get(Game, game_id)
-        refute is_nil(loaded_game)
-      end
-
       test "the starting of the game server will send init messages to p1 & p2", context do
         {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
         game = context.init_opts.game
@@ -157,8 +124,8 @@ defmodule BattleBox.GameEngine.GameServerTest do
           game_server: pid,
           game_id: game.id,
           accept_time: 2000,
-          game_type: game.__struct__.name,
-          settings: BattleBoxGame.settings(game)
+          game_type: game.game_type.name,
+          settings: Game.settings(game)
         }
 
         expected_p1 = {:player_1, {:game_request, Map.put(expected, :player, 1)}}
@@ -194,7 +161,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
         :ok = GameServer.accept_game(pid, 2)
 
         game_id = context.init_opts.game.id
-        game_state = BattleBoxGame.commands_request(context.init_opts.game)
+        %{1 => p1_state, 2 => p2_state} = Game.commands_requests(context.init_opts.game)
 
         assert_receive {:player_1,
                         {:commands_request,
@@ -202,7 +169,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
                            game_id: ^game_id,
                            maximum_time: 1000,
                            minimum_time: 20,
-                           game_state: ^game_state,
+                           game_state: ^p1_state,
                            player: 1
                          }}}
 
@@ -212,7 +179,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
                            game_id: ^game_id,
                            maximum_time: 1000,
                            minimum_time: 20,
-                           game_state: ^game_state,
+                           game_state: ^p2_state,
                            player: 2
                          }}}
       end
@@ -226,6 +193,45 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
         assert_receive {:player_1, {:game_over, %{}}}
         assert_receive {:player_2, {:game_over, %{}}}
+      end
+
+      test "you can play a game! (and it persists it to the db when you're done)", context do
+        {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+
+        ref = Process.monitor(pid)
+
+        assert_receive {:player_1,
+                        {:game_request, %{game_server: ^pid, player: 1, game_id: game_id}}}
+
+        assert_receive {:player_2,
+                        {:game_request, %{game_server: ^pid, player: 2, game_id: ^game_id}}}
+
+        assert :ok = GameServer.accept_game(pid, 1)
+        assert :ok = GameServer.accept_game(pid, 2)
+
+        Stream.unfold([], fn game_overs ->
+          receive do
+            {:player_1, {:commands_request, %{}}} ->
+              GameServer.submit_commands(pid, 1, :timeout)
+              {:ok, game_overs}
+
+            {:player_2, {:commands_request, %{}}} ->
+              GameServer.submit_commands(pid, 2, :timeout)
+              {:ok, game_overs}
+
+            {player, {:game_over, %{game_id: ^game_id}}} when player in [:player_1, :player_2] ->
+              nil
+          after
+            200 ->
+              raise "Fail for taking toooo long"
+          end
+        end)
+        |> Stream.run()
+
+        assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+
+        loaded_game = Repo.get(Game, game_id)
+        refute is_nil(loaded_game)
       end
     end
   end

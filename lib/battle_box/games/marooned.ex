@@ -40,5 +40,9 @@ defmodule BattleBox.Games.Marooned do
     def calculate_turn(_game, _commands), do: raise("not Implemented")
     def score(_game), do: raise("not Implemented")
     def winner(_game), do: raise("not Implemented")
+
+    def turn_info(game) do
+      raise("Not Implemetned")
+    end
   end
 end
