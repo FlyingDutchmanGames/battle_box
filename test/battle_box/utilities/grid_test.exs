@@ -4,7 +4,7 @@ defmodule BattleBox.Utilities.GridTest do
   alias BattleBox.Utilities.Grid
 
   describe "manhattan_distance/2" do
-    test "it gives the manhattan_distance between two points (also robots)" do
+    test "it gives the manhattan_distance between two points" do
       assert Grid.manhattan_distance([0, 0], [0, 0]) == 0.0
       assert Grid.manhattan_distance([0, 0], [0, 1]) == 1.0
       assert Grid.manhattan_distance([0, 0], [0, -1]) == 1.0
