@@ -294,7 +294,7 @@ send_message(connection, {
 
 <p>When the game ends you will receive a message that looks like this</p>
 
-<pre><%= Jason.encode!(%{info: "game_over", result: %{game_id: "{game_id}", score: %{"1" => 10, "2" => 4, "{some player id}" => "{some score}"}}}, pretty: true) %></pre>
+<pre><%= Jason.encode!(%{info: "game_over", watch: "{link to watch game}", game_id: "{game_id}", result: %{"1" => 10, "2" => 4, "{some player id}" => "{some score}"}}, pretty: true) %></pre>
 
 <p>Once this message is received, no further actions on the current game</p>
 
