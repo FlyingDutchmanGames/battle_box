@@ -10,7 +10,7 @@ defmodule BattleBox.Games.RobotGameTest.Helpers do
       |> Enum.map(&Enum.reject(&1, fn grapheme -> String.trim(grapheme) == "" end))
 
     graph_with_indexes =
-      for {row, row_num} <- Enum.with_index(graphs),
+      for {row, row_num} <- Enum.with_index(Enum.reverse(graphs)),
           {col, col_num} <- Enum.with_index(row),
           do: {[row_num, col_num], col}
 

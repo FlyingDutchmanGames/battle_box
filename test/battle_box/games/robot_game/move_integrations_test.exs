@@ -9,8 +9,8 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
     terrain = ~t/1 1
                  1 1/
 
-    robot_spawns = ~g/1 0
-                      0 0/
+    robot_spawns = ~g/0 0
+                      1 0/
 
     game =
       RobotGame.new(settings: %{terrain: terrain, spawn_enabled: false})

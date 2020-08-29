@@ -89,8 +89,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   end
 
   test "If you move into a square being attacked you take damage", %{game: game} do
-    robot_spawns = ~g/1 0
-                      0 2/
+    robot_spawns = ~g/0 2
+                      1 0/
 
     player_1_moves = [
       %{"type" => "attack", "target" => [1, 0], "robot_id" => 100}
@@ -111,8 +111,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   end
 
   test "A robot can suffer multiple attacks", %{game: game} do
-    robot_spawns = ~g/1 2
-                      4 0/
+    robot_spawns = ~g/4 0
+                      1 2/
 
     player_2_moves = [
       %{"type" => "attack", "target" => [0, 0], "robot_id" => 200},
@@ -127,8 +127,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   end
 
   test "Trying to attack a non adjacent square does not work", %{game: game} do
-    robot_spawns = ~g/1 0
-                      0 2/
+    robot_spawns = ~g/0 2
+                      1 0/
 
     player_2_moves = [
       %{"type" => "attack", "target" => [0, 0], "robot_id" => 200}
@@ -156,8 +156,8 @@ defmodule BattleBox.Games.RobotGame.DamageIntegrationTest do
   end
 
   test "explode removes the robot and damages adjacent squares", %{game: game} do
-    robot_spawns = ~g/1 2
-                      4 6/
+    robot_spawns = ~g/4 6
+                      1 2/
 
     player_1_moves = [
       %{"type" => "explode", "robot_id" => 100}

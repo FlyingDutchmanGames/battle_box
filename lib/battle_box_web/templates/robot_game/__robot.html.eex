@@ -20,7 +20,7 @@
     class="robot player_<%= @robot.player_id %>">
   </rect>
   <%= case @action do %>
-    <% {action, direction} -> %>
+    <% {action, direction} when direction in [:up, :down, :left, :right] -> %>
       <rect
         <%= case direction do %>
           <% :up -> %>
