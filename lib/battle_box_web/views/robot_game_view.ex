@@ -10,6 +10,7 @@ defmodule BattleBoxWeb.RobotGameView do
       {0, -1} -> :down
       {-1, 0} -> :left
       {1, 0} -> :right
+      _ -> :unknown
     end
   end
 
