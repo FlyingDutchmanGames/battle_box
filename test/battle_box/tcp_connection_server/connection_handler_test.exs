@@ -380,8 +380,12 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert_receive {:tcp, ^p1, game_over}
       assert_receive {:tcp, ^p2, ^game_over}
 
-      assert %{"info" => "game_over", "result" => %{"game_id" => ^game_id}} =
-               Jason.decode!(game_over)
+      assert %{
+               "info" => "game_over",
+               "game_id" => ^game_id,
+               "result" => %{"1" => _, "2" => _},
+               "watch" => "http://localhost:4002/games/" <> ^game_id
+             } = Jason.decode!(game_over)
     end
   end
 
