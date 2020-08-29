@@ -27,13 +27,15 @@ defmodule BattleBox.Games.Marooned do
 
   def docs_tree, do: %{}
 
+  def settings(game), do: Map.take(game, [:rows, :cols])
+
   defimpl BattleBoxGame do
-    # alias BattleBox.Games.Marooned
+    alias BattleBox.Games.Marooned
 
     def initialize(_game), do: raise("Not Implemented")
     def disqualify(_game, _player), do: raise("Not Implemented")
     def over?(_game), do: raise("not Implemented")
-    def settings(_game), do: raise("not Implemented")
+    def settings(game), do: Marooned.settings(game)
     def commands_requests(_game), do: raise("not Implemented")
     def calculate_turn(_game, _commands), do: raise("not Implemented")
     def score(_game), do: raise("not Implemented")
