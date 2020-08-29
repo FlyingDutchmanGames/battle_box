@@ -69,7 +69,7 @@ defmodule BattleBox.Test.DataHelpers do
 
     user
     |> Ecto.build_assoc(:bots)
-    |> Bot.changeset(%{name: opts[:bot_name]})
+    |> Bot.changeset(%{name: opts[:bot_name] || "some-bot-name"})
     |> Repo.insert()
   end
 
