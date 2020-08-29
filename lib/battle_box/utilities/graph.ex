@@ -1,4 +1,6 @@
 defmodule BattleBox.Utilities.Graph do
+  @iter_limit 2500
+
   defmodule State do
     @enforce_keys [:start_loc, :end_loc, :open, :heuristic, :neighbors]
     defstruct [
@@ -10,7 +12,8 @@ defmodule BattleBox.Utilities.Graph do
       :neighbors,
       :open,
       :start_loc,
-      came_from: %{}
+      came_from: %{},
+      iteration: 0
     ]
   end
 
@@ -32,13 +35,19 @@ defmodule BattleBox.Utilities.Graph do
           cost_from_start: %{start_loc => 0}
         })
 
+  defp do_a_star(%State{iteration: iteration}) when iteration > @iter_limit,
+    do: {:error, :iterations_exceeded}
+
   defp do_a_star(%State{} = state) do
+    state = update_in(state.iteration, &(&1 + 1))
+
     with {:open_empty?, false} <- {:open_empty?, MapSet.size(state.open) == 0},
          best = Enum.min_by(state.open, &state.estimated_cost_to_end[&1]),
          {:complete?, false} <- {:complete?, best == state.end_loc} do
       neighbors = state.neighbors.(best)
 
       state = update_in(state.open, &MapSet.delete(&1, best))
+      state = update_in(state.closed, &MapSet.put(&1, best))
 
       neighbors
       |> Enum.reject(fn neighbor -> neighbor in state.closed end)

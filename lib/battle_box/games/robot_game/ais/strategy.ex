@@ -19,8 +19,9 @@ defmodule BattleBox.Games.RobotGame.Ais.Strategy do
       neighbors = &Terrain.available_adjacent_locations(terrain, &1)
 
       case Graph.a_star(loc1, loc2, neighbors, &Grid.manhattan_distance/2) do
-        {:ok, [next_loc | _]} -> next_loc
-        {:error, :no_path} -> loc1
+        {:ok, [^loc1, next_loc | _]} -> next_loc
+        {:ok, [^loc2]} -> loc2
+        {:error, _error} -> loc1
       end
     end
 

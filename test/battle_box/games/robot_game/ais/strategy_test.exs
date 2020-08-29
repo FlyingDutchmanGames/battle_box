@@ -3,16 +3,22 @@ defmodule BattleBox.Games.RobotGame.Ais.StrategyTest do
   import BattleBox.Games.RobotGame.Ais.Strategy.{Utilites, Moves}
   import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
 
-  @terrain ~t/1 1
-              1 1/
+  @terrain ~t/1 1 1
+              1 1 1
+              1 1 1/
 
   describe "towards/2" do
-    test "Terrain does the right thing" do
-      assert towards([0, 0], [0, 1], @terrain) == [0, 1]
-      assert towards([0, 0], [0, 2], @terrain) == [0, 1]
-      assert towards([0, 0], [1, 0], @terrain) == [1, 0]
-      assert towards([0, 0], [2, 0], @terrain) == [1, 0]
-      assert towards([0, 0], [0, 0], @terrain) == [0, 0]
+    for {start, target, next_step} <- [
+          {[0, 0], [0, 1], [0, 1]},
+          {[0, 0], [0, 2], [0, 1]},
+          {[0, 0], [1, 0], [1, 0]},
+          {[0, 0], [2, 0], [1, 0]},
+          {[0, 0], [0, 0], [0, 0]},
+          {[0, 0], [1_000, 1_000], [0, 0]}
+        ] do
+      test "towards(#{inspect(start)}, #{inspect(target)}, @terrain) => #{inspect(next_step)}" do
+        assert towards(unquote(start), unquote(target), @terrain) == unquote(next_step)
+      end
     end
   end
 

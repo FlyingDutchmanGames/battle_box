@@ -39,5 +39,30 @@ defmodule BattleBox.Utilities.GraphTest do
                  &manhattan_distance/2
                )
     end
+
+    test "It can handle when a graph is bidirection" do
+      assert {:ok, [[0, 0], [0, 1], [1, 1]]} ==
+               a_star(
+                 [0, 0],
+                 [1, 1],
+                 fn
+                   [0, 0] -> [[0, 1], [1, 0]]
+                   [0, 1] -> [[1, 1], [0, 0]]
+                   [1, 0] -> [[1, 1], [0, 0]]
+                   [1, 1] -> [[1, 0], [0, 1]]
+                 end,
+                 &manhattan_distance/2
+               )
+    end
+
+    test "It will run out of iterations" do
+      assert {:error, :iterations_exceeded} ==
+               a_star(
+                 [0, 0],
+                 [1_000_000, 1_000_000],
+                 fn [x, y] -> [[x + 1, y]] end,
+                 &manhattan_distance/2
+               )
+    end
   end
 end
