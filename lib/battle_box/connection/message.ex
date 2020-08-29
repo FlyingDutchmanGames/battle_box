@@ -2,8 +2,13 @@ defmodule BattleBox.Connection.Message do
   alias BattleBoxWeb.Endpoint
   alias BattleBoxWeb.Router.Helpers, as: Routes
 
-  def game_over(result) do
-    encode(%{"info" => "game_over", "result" => result})
+  def game_over(%{game_id: game_id, score: score}) do
+    encode(%{
+      info: "game_over",
+      game_id: game_id,
+      result: score,
+      watch: Routes.game_url(Endpoint, :show, game_id)
+    })
   end
 
   def commands_request(request) do
