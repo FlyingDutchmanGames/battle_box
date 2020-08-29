@@ -3,6 +3,12 @@ defmodule BattleBox.Games.RobotGame.Ais.Strategy do
     alias BattleBox.Utilities.{Grid, Graph}
     alias BattleBox.Games.RobotGame.Settings.Terrain
 
+    def available_adjacent_locations(%{location: location}, terrain),
+      do: available_adjacent_locations(location, terrain)
+
+    def available_adjacent_locations([_x, _y] = location, terrain),
+      do: Terrain.available_adjacent_locations(terrain, location)
+
     def manhattan_distance(%{location: location}, other),
       do: manhattan_distance(location, other)
 
