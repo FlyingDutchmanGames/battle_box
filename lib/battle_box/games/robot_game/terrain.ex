@@ -83,6 +83,11 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
     <<desired_rows::8, desired_cols::8, new_data::binary>>
   end
 
+  def location_accessible?(terrain, [_x, _y] = loc),
+    do: at_location(terrain, loc) != :inaccessible
+
+  def adjacent?([x1, y1], [x2, y2]), do: abs(x1 - x2) + abs(y2 - y1) == 1
+
   def at_location(terrain, [x, y]) do
     <<rows::8, cols::8, data::binary>> = terrain
     on_board? = x in 0..(cols - 1) && y in 0..(rows - 1)
@@ -123,6 +128,11 @@ defmodule BattleBox.Games.RobotGame.Settings.Terrain do
 
       [x, y]
     end)
+  end
+
+  def available_adjacent_locations(terrain, [x, y]) do
+    [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]
+    |> Enum.filter(&location_accessible?(terrain, &1))
   end
 
   defp type_to_int(type) do

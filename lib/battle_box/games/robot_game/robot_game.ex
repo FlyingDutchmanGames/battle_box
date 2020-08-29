@@ -173,23 +173,8 @@ defmodule BattleBox.Games.RobotGame do
   def get_robot_at_location(robots, location) when is_list(robots),
     do: Enum.find(robots, fn robot -> robot.location == location end)
 
-  def available_adjacent_locations(%{terrain: terrain}, location) do
-    location
-    |> adjacent_locations
-    |> Enum.filter(&(Terrain.at_location(terrain, &1) in [:spawn, :normal]))
-  end
-
-  def adjacent_locations(%{location: location}), do: adjacent_locations(location)
-
-  def adjacent_locations([x, y]) do
-    [
-      [x + 1, y],
-      [x - 1, y],
-      [x, y + 1],
-      [x, y - 1]
-    ]
-    |> Enum.filter(fn [x, y] -> x >= 0 && y >= 0 end)
-  end
+  def available_adjacent_locations(%{terrain: terrain}, location),
+    do: Terrain.available_adjacent_locations(terrain, location)
 
   def guarded_attack_damage(game), do: Integer.floor_div(attack_damage(game), 2)
   def attack_damage(game), do: calc_damage(game.attack_damage_min, game.attack_damage_max)
@@ -252,22 +237,22 @@ defmodule BattleBox.Games.RobotGame do
 
   def calc_damage(same, same), do: same
   def calc_damage(min, max), do: min + :rand.uniform(max - min)
-end
 
-defimpl BattleBoxGame, for: BattleBox.Games.RobotGame do
-  alias BattleBox.Games.RobotGame
-  def initialize(game), do: RobotGame.set_robots_at_turn(game)
-  def disqualify(game, player), do: RobotGame.disqualify(game, player)
-  def over?(game), do: RobotGame.over?(game)
-  def settings(game), do: RobotGame.settings(game)
-  def commands_requests(game), do: RobotGame.commands_requests(game)
-  def calculate_turn(game, commands), do: RobotGame.Logic.calculate_turn(game, commands)
-  def score(game), do: RobotGame.score(game)
-  def winner(game), do: game.winner
+  defimpl BattleBoxGame do
+    alias BattleBox.Games.RobotGame
+    def initialize(game), do: RobotGame.set_robots_at_turn(game)
+    def disqualify(game, player), do: RobotGame.disqualify(game, player)
+    def over?(game), do: RobotGame.over?(game)
+    def settings(game), do: RobotGame.settings(game)
+    def commands_requests(game), do: RobotGame.commands_requests(game)
+    def calculate_turn(game, commands), do: RobotGame.Logic.calculate_turn(game, commands)
+    def score(game), do: RobotGame.score(game)
+    def winner(game), do: game.winner
 
-  def turn_info(game),
-    do: %{
-      current_turn: game.turn,
-      max_turn: game.max_turns
-    }
+    def turn_info(game),
+      do: %{
+        current_turn: game.turn,
+        max_turn: game.max_turns
+      }
+  end
 end

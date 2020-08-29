@@ -1,21 +1,29 @@
 defmodule BattleBox.Games.RobotGame.Ais.StrategyTest do
   use ExUnit.Case, async: true
   import BattleBox.Games.RobotGame.Ais.Strategy.{Utilites, Moves}
+  import BattleBox.Games.RobotGame.Settings.Terrain.Helpers
+
+  @terrain ~t/1 1 1
+              1 1 1
+              1 1 1/
 
   describe "towards/2" do
-    assert towards([0, 0], [0, 1]) == [0, 1]
-    assert towards([0, 0], [0, 2]) == [0, 1]
-    assert towards([0, 0], [1, 0]) == [1, 0]
-    assert towards([0, 0], [2, 0]) == [1, 0]
-    assert towards([0, 0], [0, 0]) == [0, 0]
+    for {start, target, next_step} <- [
+          {[0, 0], [0, 1], [0, 1]},
+          {[0, 0], [0, 2], [0, 1]},
+          {[0, 0], [1, 0], [1, 0]},
+          {[0, 0], [2, 0], [1, 0]},
+          {[0, 0], [0, 0], [0, 0]},
+          {[0, 0], [1_000, 1_000], [0, 0]}
+        ] do
+      test "towards(#{inspect(start)}, #{inspect(target)}, @terrain) => #{inspect(next_step)}" do
+        assert towards(unquote(start), unquote(target), @terrain) == unquote(next_step)
+      end
+    end
   end
 
   describe "manhattan_distance/2" do
-    test "it gives the manhattan_distance between two points (also robots)" do
-      assert manhattan_distance([0, 0], [0, 0]) == 0.0
-      assert manhattan_distance([0, 0], [0, 1]) == 1.0
-      assert manhattan_distance([0, 0], [0, -1]) == 1.0
-      assert manhattan_distance([0, 0], [3, 4]) == 5.0
+    test "You can pass robots to it" do
       assert manhattan_distance(%{location: [0, 0]}, %{location: [3, 4]}) == 5.0
     end
   end

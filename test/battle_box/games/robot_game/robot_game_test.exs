@@ -338,16 +338,6 @@ defmodule BattleBox.Games.RobotGame.GameTest do
     end
   end
 
-  describe "adjacent_locations/1" do
-    test "it doesn't provide negative locations" do
-      assert [[1, 0], [0, 1]] == RobotGame.adjacent_locations([0, 0])
-    end
-
-    test "it provides the adjacent locations" do
-      assert [[2, 1], [0, 1], [1, 2], [1, 0]] = RobotGame.adjacent_locations([1, 1])
-    end
-  end
-
   describe "available_adjacent_locations/2" do
     test "provides up down left and right when all are available" do
       terrain = ~t/111
