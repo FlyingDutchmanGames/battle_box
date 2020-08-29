@@ -1,6 +1,5 @@
 defmodule BattleBox.GameEngine.GameServerTest do
   alias BattleBox.{Game, GameEngine, GameEngine.GameServer, Games.RobotGame, Games.Marooned}
-  alias BattleBox.Games.RobotGame.Settings.Terrain
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
