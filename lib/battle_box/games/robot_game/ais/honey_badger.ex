@@ -15,6 +15,8 @@ defmodule BattleBox.Games.RobotGame.Ais.HoneyBadger do
     my_robots = for robot <- robots, robot.player_id == player, do: robot
     enemies = for robot <- robots, robot.player_id != player, do: robot
 
+    occupied_spaces = for %{location: location} <- robots, do: location
+
     for robot <- my_robots do
       adjacent_enemies = for enemy <- enemies, adjacent?(enemy, robot), do: enemy
 
@@ -31,5 +33,16 @@ defmodule BattleBox.Games.RobotGame.Ais.HoneyBadger do
           guard(robot)
       end
     end
+    |> Enum.group_by(& &1["type"])
+    |> Enum.map(fn
+      {"move", moves} ->
+        moves
+        |> Enum.uniq_by(& &1["target"])
+        |> Enum.reject(&(&1["target"] in occupied_spaces))
+
+      {_command, commands} ->
+        commands
+    end)
+    |> List.flatten()
   end
 end
