@@ -13,6 +13,10 @@ defmodule BattleBox.Games.Marooned do
 
     field :rows, :integer, default: 10
     field :cols, :integer, default: 10
+    field :events, {:array, Event}, default: []
+
+    field :winner, :integer, virtual: true
+    field :next_player, :integer, default: 1
 
     timestamps()
   end
@@ -25,23 +29,42 @@ defmodule BattleBox.Games.Marooned do
   def players_for_settings(_), do: [1, 2]
   def ais, do: []
 
+  def from_settings(%{rows: rows, cols: cols}), do: %__MODULE__{rows: rows, cols: cols}
+
   def docs_tree, do: %{}
 
-  def settings(game), do: Map.take(game, [:rows, :cols])
-
   defimpl BattleBoxGame do
-    alias BattleBox.Games.Marooned
+    alias BattleBox.Games.{Marooned, Marooned.Logic}
 
     def initialize(_game), do: raise("Not Implemented")
-    def disqualify(_game, _player), do: raise("Not Implemented")
+
+    def disqualify(game, player) do
+      winner = %{1 => 2, 2 => 1}[player]
+      Map.put(game, :winner, winner)
+    end
+
+    def settings(game) do
+      Map.take(game, [:rows, :cols])
+    end
+
+    def commands_requests(game) do
+      %{
+        game.next_player => %{
+          removed_squares: [],
+          positions: %{
+            1 => [0, 0],
+            2 => [1, 1]
+          }
+        }
+      }
+    end
+
     def over?(_game), do: raise("not Implemented")
-    def settings(game), do: Marooned.settings(game)
-    def commands_requests(_game), do: raise("not Implemented")
-    def calculate_turn(_game, _commands), do: raise("not Implemented")
+    def calculate_turn(game, commands), do: Logic.calculate_turn(game, commands)
     def score(_game), do: raise("not Implemented")
     def winner(_game), do: raise("not Implemented")
 
-    def turn_info(game) do
+    def turn_info(_game) do
       raise("Not Implemetned")
     end
   end
