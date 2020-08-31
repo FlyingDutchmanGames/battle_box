@@ -4,7 +4,7 @@ defmodule BattleBox.Games.Marooned.Helpers do
   def sigil_m(game, _modifiers) do
     graphs =
       game
-      |> String.downcase
+      |> String.downcase()
       |> String.split("\n")
       |> Enum.map(&String.graphemes/1)
       |> Enum.reject(fn x -> x == [] end)
@@ -23,10 +23,16 @@ defmodule BattleBox.Games.Marooned.Helpers do
 
     removed = for {loc, "x"} <- graph_with_indexes, do: loc
 
+    player_starting_locations =
+      for {loc, player} when player in ~w(1 2) <- graph_with_indexes,
+          into: %{},
+          do: {String.to_integer(player), loc}
+
     %Marooned{
       rows: rows,
       cols: cols,
-      starting_removed_locations: removed
+      starting_removed_locations: removed,
+      player_starting_locations: player_starting_locations
     }
   end
 end

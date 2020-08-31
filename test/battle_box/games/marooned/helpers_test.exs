@@ -13,17 +13,10 @@ defmodule BattleBox.Games.Marooned.HelpersTest do
     assert game_data.rows == 4
     assert game_data.cols == 3
     assert Enum.sort(game_data.starting_removed_locations) == Enum.sort([[1, 1], [0, 2], [2, 2]])
+    assert %{1 => [1, 3], 2 => [1, 0]} == game_data.player_starting_locations
   end
 
   describe "errors" do
-    test "its an error not to have both players on the board" do
-      assert_raise(RuntimeError, fn ->
-        ~m/0 0 0
-         0 0 0
-         0 0 0/
-      end)
-    end
-
     test "its an error to have non uniform length or height" do
       %{message: message} =
         assert_raise(RuntimeError, fn ->
