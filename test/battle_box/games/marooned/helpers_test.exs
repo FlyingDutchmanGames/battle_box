@@ -6,12 +6,13 @@ defmodule BattleBox.Games.Marooned.HelpersTest do
 
   test "it works" do
     assert game_data = ~m/0 1 0
-         x 0 x
-         0 x 0
-         0 2 0/
+                          x 0 x
+                          0 x 0
+                          0 2 0/
 
     assert game_data.rows == 4
     assert game_data.cols == 3
+    assert Enum.sort(game_data.starting_removed_locations) == Enum.sort([[1, 1], [0, 2], [2, 2]])
   end
 
   describe "errors" do
