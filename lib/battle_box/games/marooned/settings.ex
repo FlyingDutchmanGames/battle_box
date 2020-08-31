@@ -1,4 +1,5 @@
 defmodule BattleBox.Games.Marooned.Settings do
+  alias BattleBox.Games.Marooned.Types.Location
   alias BattleBox.Arena
   use Ecto.Schema
   import Ecto.Changeset
@@ -13,6 +14,7 @@ defmodule BattleBox.Games.Marooned.Settings do
 
     field :rows, :integer, default: 10
     field :cols, :integer, default: 10
+    field :starting_removed_locations, {:array, Location}, default: []
 
     timestamps()
   end

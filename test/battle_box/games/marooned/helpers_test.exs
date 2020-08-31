@@ -5,8 +5,7 @@ defmodule BattleBox.Games.Marooned.HelpersTest do
   import BattleBox.Games.Marooned.Helpers
 
   test "it works" do
-    assert game_data =
-      ~m/0 1 0
+    assert game_data = ~m/0 1 0
          x 0 x
          0 x 0
          0 2 0/

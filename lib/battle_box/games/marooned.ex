@@ -4,6 +4,7 @@ defmodule BattleBox.Games.Marooned do
   alias BattleBox.Game
 
   alias __MODULE__.Settings
+  alias __MODULE__.Types.{Event, Location}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -14,6 +15,7 @@ defmodule BattleBox.Games.Marooned do
     field :rows, :integer, default: 10
     field :cols, :integer, default: 10
     field :events, {:array, Event}, default: []
+    field :starting_removed_locations, {:array, Location}, default: []
 
     field :winner, :integer, virtual: true
     field :next_player, :integer, default: 1
