@@ -1,6 +1,5 @@
 defmodule BattleBox.Games.Marooned.HelpersTest do
   use ExUnit.Case, async: true
-  alias BattleBox.Games.Marooned
 
   import BattleBox.Games.Marooned.Helpers
 

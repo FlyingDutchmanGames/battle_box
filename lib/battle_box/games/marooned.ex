@@ -12,6 +12,7 @@ defmodule BattleBox.Games.Marooned do
   schema "marooned_games" do
     belongs_to :game, Game
 
+    field :turn, :integer, default: 0
     field :rows, :integer, default: 10
     field :cols, :integer, default: 10
     field :events, {:array, Event}, default: []
