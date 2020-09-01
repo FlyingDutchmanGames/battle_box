@@ -32,7 +32,23 @@ defmodule BattleBox.Games.Marooned.Logic do
 
     game = update_in(game.events, &[event | &1])
     game = update_in(game.turn, &(&1 + 1))
-    update_next_player(game)
+    game = update_in(game.next_player, &opponent/1)
+
+    if over?(game),
+      do: Map.put(game, :winner, opponent(game.next_player)),
+      else: game
+  end
+
+  def winner(game), do: game.winner
+
+  def over?(game) do
+    available_adjacent_locations(game, game.next_player) == []
+  end
+
+  def score(game) do
+    for {player, _} <- player_positions(game),
+        into: %{},
+        do: available_adjacent_locations(game, player)
   end
 
   def player_positions(game, turn \\ nil) do
@@ -96,7 +112,5 @@ defmodule BattleBox.Games.Marooned.Logic do
     ) -- [[x, y]]
   end
 
-  defp update_next_player(game), do: update_in(game.next_player, &opponent/1)
-
-  defp opponent(player), do: %{1 => 2, 2 => 1}[player]
+  def opponent(player), do: %{1 => 2, 2 => 1}[player]
 end
