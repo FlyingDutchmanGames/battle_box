@@ -30,6 +30,39 @@ defmodule BattleBox.Games.Marooned.LogicTest do
     end
   end
 
+  describe "over?" do
+    test "A game is over if the next player up can't move" do
+      game1 = ~m/x x x
+                 x 1 x
+                 x 2 x/
+
+      game2 = ~m/x x x
+                 x 1 x
+                 x x x/
+
+      game3 = ~m/x 1 x
+                 x x x
+                 0 0 0/
+
+      assert Logic.over?(game1)
+      assert Logic.over?(game2)
+      assert Logic.over?(game3)
+    end
+
+    test "A game is not over if there is an opportunity to move" do
+      game1 = ~m/x x x
+                 x 1 x
+                 x 0 x/
+
+      game2 = ~m/x 1 x
+                 x 0 x
+                 0 0 0/
+
+      refute Logic.over?(game1)
+      refute Logic.over?(game2)
+    end
+  end
+
   describe "calculate_turn/2" do
     test "you can issue a valid move" do
       game = ~m/0 1 0
