@@ -92,7 +92,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
       assert Logic.over?(game3)
     end
 
-    test "A game is not over if there is an opportunity to move" do
+    test "A game is not over if there is an opportunity for the next player to move" do
       game1 = ~m/x x x
                  x 1 x
                  x 0 x/
@@ -103,6 +103,34 @@ defmodule BattleBox.Games.Marooned.LogicTest do
 
       refute Logic.over?(game1)
       refute Logic.over?(game2)
+    end
+
+    test "The game is not over if the next player can go even if the other player has lost" do
+      game1 = ~m/0 1 x
+                 x x x
+                 x 2 x/
+
+      refute Logic.over?(game1)
+    end
+  end
+
+  describe "winner/1" do
+    test "If the winner is explictly set, thats the winner" do
+      game = ~m/0 0 0
+                0 1 0
+                0 0 0/
+
+      game = Map.put(game, :winner, 1)
+      assert Logic.winner(game) == 1
+    end
+
+    test "The game is only over if the next player can't move" do
+      game = ~m/0 0 0
+                0 1 0
+                0 0 0/
+
+      game = Map.put(game, :winner, 1)
+      assert Logic.winner(game) == 1
     end
   end
 
@@ -118,19 +146,24 @@ defmodule BattleBox.Games.Marooned.LogicTest do
 
   describe "calculate_turn/2" do
     test "you can issue a valid move" do
-      game = ~m/0 1 0
-                0 0 0
-                0 2 0/
+      start = ~m/0 1 0
+                 0 0 0
+                 0 2 0/
 
-      assert game.turn == 0
-      assert %{1 => [1, 2], 2 => [1, 0]} = Logic.player_positions(game)
-      assert [] = Logic.removed_locations(game)
+      after_turn = Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [1, 1]}})
 
-      game = Logic.calculate_turn(game, %{1 => %{"remove" => [0, 0], "move_to" => [1, 1]}})
+      expected = ~m/0 0 0
+                    0 1 0
+                    x 2 0/
 
-      assert game.turn == 1
-      assert %{1 => [1, 1], 2 => [1, 0]} = Logic.player_positions(game)
-      assert [[0, 0]] = Logic.removed_locations(game)
+      compare_games(after_turn, expected)
     end
+  end
+
+  defp compare_games(actual, expected) do
+    import Logic
+
+    assert player_positions(actual) == player_positions(expected)
+    assert removed_locations(actual) == removed_locations(expected)
   end
 end

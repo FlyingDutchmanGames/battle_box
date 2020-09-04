@@ -5,6 +5,12 @@ defmodule BattleBox.Games.Marooned.Logic do
     available_to_move_to = available_adjacent_locations_for_player(game, game.next_player)
     available_to_be_removed = available_to_be_removed(game)
 
+    commands =
+      case commands[game.next_player] do
+        commands when is_map(commands) -> commands
+        _anythin_else -> %{}
+      end
+
     to =
       if commands["to"] in available_to_move_to do
         commands["to"]
