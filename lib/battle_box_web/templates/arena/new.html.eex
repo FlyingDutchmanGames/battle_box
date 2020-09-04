@@ -5,6 +5,7 @@
     </div>
   </div>
   <%= form_for @changeset, Routes.arena_path(@conn, :create), fn form -> %>
+     <input name="arena[game_type]" type="hidden" value="<%= Ecto.Changeset.get_field(@changeset, :game_type).name %>">
     <%= render("_form.html", form: form, conn: @conn) %>
     <%= submit "Create Arena", class: "btn btn-primary" %>
   <% end %>

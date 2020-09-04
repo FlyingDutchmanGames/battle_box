@@ -1,0 +1,11 @@
+<h2 style="font-weight: bold;">Marooned Settings</h2>
+
+<div class="form-group">
+  <label>Rows: <%= number_input(@settings, :rows, class: "form-control") %></label><br>
+  <%= error_tag @settings, :rows %>
+</div>
+
+<div class="form-group">
+  <label>Cols: <%= number_input(@settings, :cols, class: "form-control") %></label><br>
+  <%= error_tag @settings, :cols %>
+</div>

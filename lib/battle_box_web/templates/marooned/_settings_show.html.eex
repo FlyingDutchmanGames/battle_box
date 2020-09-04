@@ -1,0 +1,4 @@
+<div>
+  <div>Rows: <%= @settings.rows %></div>
+  <div>Cols: <%= @settings.cols %></div>
+</div>

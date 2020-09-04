@@ -15,7 +15,7 @@ defmodule BattleBox.Games.RobotGame do
     field :events, {:array, Event}, default: []
     belongs_to :game, Game
 
-    field :winner, :string, virtual: true
+    field :winner, :integer, virtual: true
     field :robots_at_end_of_turn, :map, virtual: true, default: %{-1 => []}
     field :robot_id_seq, :integer, default: 0, virtual: true
     field :spawn_enabled, :boolean, default: true, virtual: true
@@ -29,7 +29,6 @@ defmodule BattleBox.Games.RobotGame do
   end
 
   def color, do: "green"
-  def view, do: BattleBoxWeb.RobotGameView
   def title, do: "Robot Game"
   def name, do: :robot_game
   def settings_module, do: Settings
@@ -49,6 +48,7 @@ defmodule BattleBox.Games.RobotGame do
     Map.merge(%__MODULE__{}, settings)
   end
 
+  # TODO:// Moves => Commands
   def validate_moves(_game, :timeout, _player), do: []
 
   def validate_moves(game, moves, player) do

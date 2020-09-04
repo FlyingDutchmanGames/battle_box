@@ -31,7 +31,7 @@
   <%= for col <- 1..(Terrain.cols(@terrain) - 1) do %>
     <text
       x="17"
-      y="<%= ((Terrain.rows(@terrain) - 0) * 30) - (30 * col + 10) %>"
+      y="<%= (Terrain.rows(@terrain) * 30) - (30 * col + 10) %>"
      <%= if assigns[:phx_click] do %>
        phx-click="<%= @phx_click %>"
      <% end %>

@@ -44,7 +44,7 @@ defmodule BattleBox.Arena do
     field :bot_self_play, :boolean, default: true
     field :user_self_play, :boolean, default: true
 
-    field :game_type, GameType, default: BattleBox.Games.RobotGame
+    field :game_type, GameType
 
     has_many :games, Game
     belongs_to :user, User
@@ -115,7 +115,12 @@ defmodule BattleBox.Arena do
 
   defp validate_game_settings(changeset) do
     game_type = get_field(changeset, :game_type)
-    cast_assoc(changeset, game_type.settings_module.name, required: true)
+
+    if game_type do
+      cast_assoc(changeset, game_type.settings_module.name, required: true)
+    else
+      changeset
+    end
   end
 
   defp milliseconds(milliseconds), do: milliseconds

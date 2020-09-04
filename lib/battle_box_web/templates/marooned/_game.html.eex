@@ -1,0 +1,47 @@
+<% removed_locations = removed_locations(@game_data, @turn) %>
+<svg viewBox="0 0 <%= @game_data.rows * 35 %> <%= @game_data.cols * 30 %>">
+  <%= for x <- 0..(@game_data.cols - 1), y <- 0..(@game_data.rows - 1) do %>
+    <% fill = if [x, y] in removed_locations, do: "black", else: "white" %>
+    <rect
+       x="<%= 35 * x %>"
+       y="<%= ((@game_data.cols - 1) * 30) - 30 * y %>"
+       height="30"
+       width="35"
+       phx-value-x="<%= x %>"
+       phx-value-y="<%= y %>"
+       style="stroke: grey; fill: <%= fill %>;"/>
+  <% end %>
+
+  <%= for row <- 0..(@game_data.rows - 1) do %>
+    <text
+      x="<%= 35 * row + 17 %>"
+      y="<%= 21 + (@game_data.cols - 1) * 30 %>"
+      phx-value-x="<%= row %>"
+      phx-value-y="<%= 0 %>"
+      style="text-anchor: middle; fill: gray; user-select: none;">
+      <%= row %>
+    </text>
+  <% end %>
+
+  <%= for col <- 1..(@game_data.cols - 1) do %>
+    <text
+      x="17"
+      y="<%= (@game_data.rows * 30) - (30 * col + 10) %>"
+      phx-value-x="<%= 0 %>"
+      phx-value-y="<%= col %>"
+      style="text-anchor: middle; fill: gray; user-select: none;">
+      <%= col %>
+    </text>
+  <% end %>
+
+  <%= for {player, [x, y]} <- player_positions(@game_data, @turn) do %>
+    <rect
+      x="<%= (35 * x) + 2 %>"
+      y="<%= (((@game_data.cols - 1) * 30) - 30 * y) + 2 %>"
+      height="26"
+      width="31"
+      class="robot player_<%= player %>"
+    />
+  <% end %>
+
+</svg>

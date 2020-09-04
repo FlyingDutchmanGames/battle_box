@@ -118,7 +118,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
 
     test "it will show a user's arenas", %{conn: conn, user: user} do
       for i <- [1, 2, 3] do
-        {:ok, _} = robot_game_arena(user: user, arena_name: "test-name-#{i}")
+        {:ok, _} = robot_game_arena(%{user: user, arena_name: "test-name-#{i}"})
       end
 
       conn = get(conn, "/users/#{user.username}/arenas")
@@ -147,11 +147,8 @@ defmodule BattleBoxWeb.ArenaControllerTest do
     end
 
     test "trying to edit someone else's arena is an error", %{conn: conn, user: user} do
-      {:ok, arena} =
-        Arena.changeset(%Arena{user_id: Ecto.UUID.generate(), name: "foo"}, %{
-          "robot_game_settings" => %{}
-        })
-        |> Repo.insert()
+      {:ok, some_other_user} = create_user()
+      {:ok, arena} = robot_game_arena(%{user: some_other_user})
 
       conn =
         conn
@@ -163,11 +160,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
     end
 
     test "You can edit your own arena if it exists", %{user: user, conn: conn} do
-      {:ok, arena} =
-        user
-        |> Ecto.build_assoc(:arenas)
-        |> Arena.changeset(%{"name" => "foo", "robot_game_settings" => %{}})
-        |> Repo.insert()
+      {:ok, arena} = robot_game_arena(%{user: user})
 
       conn =
         conn
@@ -196,11 +189,8 @@ defmodule BattleBoxWeb.ArenaControllerTest do
     end
 
     test "trying to update someone else's arena is an error", %{conn: conn, user: user} do
-      {:ok, arena} =
-        Arena.changeset(%Arena{user_id: Ecto.UUID.generate(), name: "foo"}, %{
-          "robot_game_settings" => %{}
-        })
-        |> Repo.insert()
+      {:ok, some_other_user} = create_user()
+      {:ok, arena} = robot_game_arena(%{user: some_other_user})
 
       conn =
         conn
@@ -212,11 +202,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
     end
 
     test "You can update your own arena if it exists", %{user: user, conn: conn} do
-      {:ok, %{id: arena_id} = arena} =
-        user
-        |> Ecto.build_assoc(:arenas)
-        |> Arena.changeset(%{"name" => "foo", "robot_game_settings" => %{}})
-        |> Repo.insert()
+      {:ok, %{id: arena_id} = arena} = robot_game_arena(%{user: user})
 
       conn =
         conn

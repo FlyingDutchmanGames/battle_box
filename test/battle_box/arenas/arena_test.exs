@@ -21,13 +21,13 @@ defmodule BattleBox.ArenaTest do
 
   describe "validations" do
     test "Name must not be blank" do
-      changeset = Arena.changeset(%Arena{}, %{name: ""})
+      changeset = Arena.changeset(%Arena{}, %{game_type: "robot_game", name: ""})
       assert changeset.errors[:name] == {"can't be blank", [validation: :required]}
     end
 
     test "Name may not be longer than 39" do
       name = :binary.copy("a", 40)
-      changeset = Arena.changeset(%Arena{}, %{name: name})
+      changeset = Arena.changeset(%Arena{}, %{game_type: "robot_game", name: name})
 
       assert changeset.errors[:name] ==
                {"should be at most %{count} character(s)",
@@ -47,13 +47,15 @@ defmodule BattleBox.ArenaTest do
     end
 
     test "game acceptance time must be in range" do
-      changeset = Arena.changeset(%Arena{}, %{game_acceptance_time_ms: 999})
+      changeset =
+        Arena.changeset(%Arena{}, %{game_type: "robot_game", game_acceptance_time_ms: 999})
 
       assert changeset.errors[:game_acceptance_time_ms] ==
                {"must be greater than or equal to %{number}",
                 [{:validation, :number}, {:kind, :greater_than_or_equal_to}, {:number, 1000}]}
 
-      changeset = Arena.changeset(%Arena{}, %{game_acceptance_time_ms: 10001})
+      changeset =
+        Arena.changeset(%Arena{}, %{game_type: "robot_game", game_acceptance_time_ms: 10001})
 
       assert changeset.errors[:game_acceptance_time_ms] ==
                {"must be less than %{number}",
@@ -61,20 +63,29 @@ defmodule BattleBox.ArenaTest do
     end
 
     test "command time minimum must be in range" do
-      changeset = Arena.changeset(%Arena{}, %{command_time_minimum_ms: 249})
+      changeset =
+        Arena.changeset(%Arena{}, %{game_type: "robot_game", command_time_minimum_ms: 249})
 
       assert changeset.errors[:command_time_minimum_ms] ==
                {"must be greater than or equal to %{number}",
                 [validation: :number, kind: :greater_than_or_equal_to, number: 250]}
 
       changeset =
-        Arena.changeset(%Arena{}, %{command_time_minimum_ms: 1001, command_time_maximum_ms: 999})
+        Arena.changeset(%Arena{}, %{
+          game_type: "robot_game",
+          command_time_minimum_ms: 1001,
+          command_time_maximum_ms: 999
+        })
 
       assert changeset.errors[:command_time_minimum_ms] ==
                {"Minimum command time must be less than maximum command time", []}
 
       changeset =
-        Arena.changeset(%Arena{}, %{command_time_minimum_ms: 1001, command_time_maximum_ms: 1002})
+        Arena.changeset(%Arena{}, %{
+          game_type: "robot_game",
+          command_time_minimum_ms: 1001,
+          command_time_maximum_ms: 1002
+        })
 
       assert changeset.errors[:command_time_minimum_ms] ==
                {"must be less than %{number}",
@@ -82,13 +93,15 @@ defmodule BattleBox.ArenaTest do
     end
 
     test "command time maximum must be in range" do
-      changeset = Arena.changeset(%Arena{}, %{command_time_maximum_ms: 249})
+      changeset =
+        Arena.changeset(%Arena{}, %{game_type: "robot_game", command_time_maximum_ms: 249})
 
       assert changeset.errors[:command_time_maximum_ms] ==
                {"must be greater than or equal to %{number}",
                 [validation: :number, kind: :greater_than_or_equal_to, number: 250]}
 
-      changeset = Arena.changeset(%Arena{}, %{command_time_maximum_ms: 10001})
+      changeset =
+        Arena.changeset(%Arena{}, %{game_type: "robot_game", command_time_maximum_ms: 10001})
 
       assert changeset.errors[:command_time_maximum_ms] ==
                {"must be less than %{number}",

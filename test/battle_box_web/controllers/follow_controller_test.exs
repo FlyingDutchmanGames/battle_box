@@ -23,7 +23,7 @@ defmodule BattleBoxWeb.FollowControllerTest do
   end
 
   test "you can do it with a arena", %{conn: conn, user: user} do
-    {:ok, arena} = robot_game_arena(user: user, arena_name: "test-name")
+    {:ok, arena} = robot_game_arena(%{user: user, arena_name: "test-name"})
 
     conn = conn |> get("/users/#{user.username}/arenas/#{arena.name}/follow")
     html = html_response(conn, 200)

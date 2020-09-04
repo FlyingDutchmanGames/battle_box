@@ -38,5 +38,8 @@ defmodule BattleBox.Repo.Migrations.CreateRobotGames do
       shared()
       timestamps()
     end
+
+    create index("robot_games", :game_id, unique: true)
+    create index("robot_game_settings", :arena_id)
   end
 end
