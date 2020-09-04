@@ -6,7 +6,7 @@ defmodule BattleBox.Repo.Migrations.CreateMaroonedGames do
       add :rows, :integer, null: false
       add :cols, :integer, null: false
       add :starting_removed_locations, {:array, :binary}, null: false, default: []
-      add :player_starting_locations, {:array, :binary}, null: false
+      add :player_starting_locations, {:array, :binary}
     end
   end
 

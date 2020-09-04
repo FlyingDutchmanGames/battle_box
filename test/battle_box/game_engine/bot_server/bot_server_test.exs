@@ -2,7 +2,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{GameEngine, GameEngine.BotServer, Repo, Arena}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
-  alias BattleBox.InstalledGames
+  alias BattleBox.{InstalledGames, Games.AiOpponent}
 
   @bot_1_server_id Ecto.UUID.generate()
   @bot_2_server_id Ecto.UUID.generate()
@@ -103,7 +103,8 @@ defmodule BattleBox.GameEngine.BotServerTest do
       end
 
       test "you can ask the bot server to practice", context do
-        :ok = BotServer.practice(context.p1_server, context.arena, "kansas")
+        {:ok, [opponent | _]} = AiOpponent.opponent_modules(unquote(game_type))
+        :ok = BotServer.practice(context.p1_server, context.arena, opponent.name)
         assert_receive {:p1_connection, {:game_request, _meta}}
       end
 
@@ -173,15 +174,30 @@ defmodule BattleBox.GameEngine.BotServerTest do
         assert_receive {:p2_connection, {:game_request, %{game_id: ^game_id}}}
         assert :ok = BotServer.accept_game(context.p1_server, game_id)
         assert :ok = BotServer.accept_game(context.p2_server, game_id)
-        assert_receive {:p1_connection, {:commands_request, %{request_id: id1}}}
-        assert_receive {:p2_connection, {:commands_request, %{request_id: id2}}}
-        :ok = BotServer.submit_commands(context.p1_server, id1, [])
-        :ok = BotServer.submit_commands(context.p2_server, id2, [])
-        # We don't get asked for more commands for at least 30 ms
-        refute_receive {_, {:commands_request, %{}}}, 30
-        # Then we get asked for commands
-        assert_receive {:p1_connection, {:commands_request, %{}}}
-        assert_receive {:p2_connection, {:commands_request, %{}}}
+
+        commands_requests =
+          Stream.unfold(:unused, fn _ ->
+            receive do
+              {connection, {:commands_request, %{request_id: id, game_state: %{turn: 0}}}} ->
+                server =
+                  %{p1_connection: context.p1_server, p2_connection: context.p2_server}[
+                    connection
+                  ]
+
+                :ok = BotServer.submit_commands(server, id, [])
+                {connection, :ok}
+
+              {_connection, {:commands_request, game_state: %{turn: 1}}} ->
+                raise "Recieved turn 1 commands request too soon!"
+            after
+              30 ->
+                nil
+            end
+          end)
+          |> Enum.into([])
+
+        assert length(commands_requests) >= 1
+        assert_receive {_connection, {:commands_request, %{game_state: %{turn: 1}}}}
       end
 
       test "trying to accept or reject a game you're not currently watching yield :ok", context do
@@ -223,13 +239,9 @@ defmodule BattleBox.GameEngine.BotServerTest do
         :ok = BotServer.accept_game(context.p1_server, game_id)
         :ok = BotServer.accept_game(context.p2_server, game_id)
 
-        assert_receive {:p1_connection,
+        assert_receive {_connection_id,
                         {:commands_request,
                          %{game_id: ^game_id, maximum_time: max, minimum_time: min}}}
-
-        assert_receive {:p2_connection,
-                        {:commands_request,
-                         %{game_id: ^game_id, maximum_time: ^max, minimum_time: ^min}}}
 
         assert [{_pid, %{game_id: ^game_id}}] =
                  Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)
@@ -237,16 +249,18 @@ defmodule BattleBox.GameEngine.BotServerTest do
 
       test "you can submit back a commands request", context do
         {:ok, _} = accept_game(context)
-        assert_receive {:p1_connection, {:commands_request, %{request_id: id}}}
-        :ok = BotServer.submit_commands(context.p1_server, id, [])
+        assert_receive {proxy_id, {:commands_request, %{request_id: id}}}
+        server = %{p1_connection: context.p1_server, p2_connection: context.p2_server}[proxy_id]
+        :ok = BotServer.submit_commands(server, id, [])
       end
 
       test "trying to submit the wrong commands raises an error", context do
         {:ok, _} = accept_game(context)
-        assert_receive {:p1_connection, {:commands_request, _}}
+        assert_receive {proxy_id, {:commands_request, _}}
+        server = %{p1_connection: context.p1_server, p2_connection: context.p2_server}[proxy_id]
 
         {:error, :invalid_commands_submission} =
-          BotServer.submit_commands(context.p1_server, "INVALID", [])
+          BotServer.submit_commands(server, "INVALID", [])
       end
 
       test "game server dies => game cancelled notification", context do
@@ -254,8 +268,9 @@ defmodule BattleBox.GameEngine.BotServerTest do
         # Bot 1 in the "playing" state after submitting his commands
         # Bot 2 in the commands input state, waiting on his commands
         %{p1_server: p1_server} = context
-        assert_receive {:p1_connection, {:commands_request, %{request_id: id}}}
-        :ok = BotServer.submit_commands(context.p1_server, id, [])
+        assert_receive {proxy_id, {:commands_request, %{request_id: id, player: 1}}}
+        server = %{p1_connection: context.p1_server, p2_connection: context.p2_server}[proxy_id]
+        :ok = BotServer.submit_commands(server, id, [])
 
         [{game_server_pid, _}] = Registry.lookup(context.game_registry, game_id)
         Process.exit(game_server_pid, :kill)

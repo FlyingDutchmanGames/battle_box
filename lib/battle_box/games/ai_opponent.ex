@@ -1,4 +1,6 @@
 defmodule BattleBox.Games.AiOpponent do
+  def opponent_modules(game_type, opponent \\ nil)
+
   def opponent_modules(game_type, nil), do: opponent_modules(game_type, %{})
 
   def opponent_modules(game_type, name) when is_binary(name) or is_list(name),
