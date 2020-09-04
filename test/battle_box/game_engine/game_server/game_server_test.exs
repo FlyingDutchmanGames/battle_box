@@ -161,27 +161,20 @@ defmodule BattleBox.GameEngine.GameServerTest do
         :ok = GameServer.accept_game(pid, 2)
 
         game_id = context.init_opts.game.id
-        %{1 => p1_state, 2 => p2_state} = Game.commands_requests(context.init_opts.game)
 
-        assert_receive {:player_1,
-                        {:commands_request,
-                         %{
-                           game_id: ^game_id,
-                           maximum_time: 1000,
-                           minimum_time: 20,
-                           game_state: ^p1_state,
-                           player: 1
-                         }}}
+        for {player, game_state} <- Game.commands_requests(context.init_opts.game) do
+          proxy = :"player_#{player}"
 
-        assert_receive {:player_2,
-                        {:commands_request,
-                         %{
-                           game_id: ^game_id,
-                           maximum_time: 1000,
-                           minimum_time: 20,
-                           game_state: ^p2_state,
-                           player: 2
-                         }}}
+          assert_receive {^proxy,
+                          {:commands_request,
+                           %{
+                             game_id: ^game_id,
+                             maximum_time: 1000,
+                             minimum_time: 20,
+                             game_state: ^game_state,
+                             player: ^player
+                           }}}
+        end
       end
 
       test "if you forefit, you get a game over message/ the other player wins", context do

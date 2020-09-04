@@ -75,7 +75,7 @@ defmodule BattleBox.Games.Marooned.Logic do
         {player, location}
       end)
 
-    Map.merge(game.player_starting_locations, recent_positions)
+    Map.merge(player_starting_locations(game), recent_positions)
   end
 
   def removed_locations(game, turn \\ nil) do
@@ -116,6 +116,8 @@ defmodule BattleBox.Games.Marooned.Logic do
         do: [x, y]
   end
 
+  def opponent(player), do: %{1 => 2, 2 => 1}[player]
+
   defp adjacent([x, y]) do
     for(
       offset_x <- [-1, 0, 1],
@@ -124,5 +126,12 @@ defmodule BattleBox.Games.Marooned.Logic do
     ) -- [[x, y]]
   end
 
-  def opponent(player), do: %{1 => 2, 2 => 1}[player]
+  defp player_starting_locations(game) do
+    if game.player_starting_locations do
+      game.player_starting_locations
+    else
+      x = div(game.cols, 2)
+      %{1 => [x, 0], 2 => [x, game.rows - 1]}
+    end
+  end
 end
