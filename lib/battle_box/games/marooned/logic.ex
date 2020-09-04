@@ -2,7 +2,7 @@ defmodule BattleBox.Games.Marooned.Logic do
   import BattleBox.Utilities.Grid, only: [manhattan_distance: 2]
 
   def calculate_turn(game, commands) do
-    available_to_move_to = available_adjacent_locations(game, game.next_player)
+    available_to_move_to = available_adjacent_locations_for_player(game, game.next_player)
     available_to_be_removed = available_to_be_removed(game)
 
     to =
@@ -23,7 +23,7 @@ defmodule BattleBox.Games.Marooned.Logic do
         commands["remove"]
       else
         enemy_adjacent_opportunities =
-          available_adjacent_locations(game, opponent(game.next_player))
+          available_adjacent_locations_for_player(game, opponent(game.next_player))
 
         Enum.min_by(enemy_adjacent_opportunities, &manhattan_distance(&1, [0, 0]))
       end
@@ -46,7 +46,7 @@ defmodule BattleBox.Games.Marooned.Logic do
   end
 
   def over?(game) do
-    available_adjacent_locations(game, game.next_player) == []
+    available_adjacent_locations_for_player(game, game.next_player) == []
   end
 
   def score(game, turn \\ nil) do
@@ -54,7 +54,7 @@ defmodule BattleBox.Games.Marooned.Logic do
 
     for {player, _} <- player_positions(game, turn),
         into: %{},
-        do: {player, length(available_adjacent_locations(game, player, turn))}
+        do: {player, length(available_adjacent_locations_for_player(game, player, turn))}
   end
 
   def player_positions(game, turn \\ nil) do
@@ -94,7 +94,7 @@ defmodule BattleBox.Games.Marooned.Logic do
         do: [row, col]
   end
 
-  def available_adjacent_locations(game, player, turn \\ nil) do
+  def available_adjacent_locations_for_player(game, player, turn \\ nil) do
     turn = turn || game.turn
 
     %{^player => current_position} = player_positions = player_positions(game, turn)
