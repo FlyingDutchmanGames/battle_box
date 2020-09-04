@@ -6,10 +6,8 @@ defmodule BattleBox.InstalledGames do
 
   def installed_games, do: @games
 
-  for game <- @games do
-    def game_type_name_to_module(unquote(game)), do: unquote(game)
-    def game_type_name_to_module(unquote(game.name)), do: unquote(game)
-    def game_type_name_to_module(unquote("#{game.name}")), do: unquote(game)
-    def game_type_name_to_module(unquote(kebabify(game.title))), do: unquote(game)
+  for game <- @games,
+      id <- Enum.uniq([game, game.name, to_string(game.name), kebabify(game.title)]) do
+    def game_type_name_to_module(unquote(id)), do: unquote(game)
   end
 end
