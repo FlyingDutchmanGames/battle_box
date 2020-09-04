@@ -259,8 +259,7 @@ defmodule BattleBox.GameEngine.BotServerTest do
         assert_receive {proxy_id, {:commands_request, _}}
         server = %{p1_connection: context.p1_server, p2_connection: context.p2_server}[proxy_id]
 
-        {:error, :invalid_commands_submission} =
-          BotServer.submit_commands(server, "INVALID", [])
+        {:error, :invalid_commands_submission} = BotServer.submit_commands(server, "INVALID", [])
       end
 
       test "game server dies => game cancelled notification", context do

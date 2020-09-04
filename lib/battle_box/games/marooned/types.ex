@@ -58,7 +58,9 @@ defmodule BattleBox.Games.Marooned.Types do
         do: {:ok, event(turn, player, removed_x, removed_y, to_x, to_y)}
 
     def load(event(turn, player, removed_x, removed_y, to_x, to_y)),
-      do: {:ok, %{player: player, removed_location: [removed_x, removed_y], to: [to_x, to_y]}}
+      do:
+        {:ok,
+         %{turn: turn, player: player, removed_location: [removed_x, removed_y], to: [to_x, to_y]}}
   end
 
   defmodule PlayerStartingLocations do
