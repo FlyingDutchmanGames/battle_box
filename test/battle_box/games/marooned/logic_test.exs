@@ -30,6 +30,24 @@ defmodule BattleBox.Games.Marooned.LogicTest do
     end
   end
 
+  describe "score" do
+    test "A player's score is 0 if there is no squares to move to" do
+      game = ~m/x x x
+                x 1 x
+                x 2 x/
+
+      assert %{1 => 0, 2 => 0} == Logic.score(game)
+    end
+
+    test "A player's score is equal to the number of open adjacent squares" do
+      game = ~m/0 0 0
+                0 1 0
+                0 2 0/
+
+      assert %{1 => 7, 2 => 4} == Logic.score(game)
+    end
+  end
+
   describe "over?" do
     test "A game is over if the next player up can't move" do
       game1 = ~m/x x x
