@@ -18,12 +18,8 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
       |> ApiKey.changeset(%{name: "test-key"})
       |> Repo.insert()
 
-    bot =
-      user
-      |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "test-bot"})
-      |> Repo.insert!()
-      |> Repo.preload(:user)
+    {:ok, bot} = create_bot(%{user: user})
+    bot = Repo.preload(bot, :user)
 
     %{bot: bot, key: key, user: user}
   end

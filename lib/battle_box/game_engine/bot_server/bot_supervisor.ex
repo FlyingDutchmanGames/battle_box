@@ -11,20 +11,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     DynamicSupervisor.init(strategy: :one_for_one, extra_arguments: [init_arg])
   end
 
-  def start_bot(
-        game_engine,
-        %{connection: connection, token: token, bot_name: bot_name}
-      ) do
-    with {:ok, user} <- ApiKey.authenticate(token) do
-      start_bot(game_engine, %{connection: connection, user: user})
-    else
-      {:error, errors} ->
-        {:error, errors}
-    end
-  end
-
   def start_bot(game_engine, %{bot: %Bot{} = bot, connection: _} = opts) do
-    bot = Repo.preload(bot, :user)
     bot_supervisor = GameEngine.names(game_engine).bot_supervisor
     opts = Map.put_new(opts, :bot_server_id, Ecto.UUID.generate())
     opts = update_in(opts.bot, fn bot -> Repo.preload(bot, :user) end)
@@ -33,16 +20,30 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
   end
 
   def start_bot(game_engine, %{user: %User{} = user, bot_name: bot_name, connection: _} = opts) do
-    with {:bot, {:ok, bot}} <- {:bot, Bot.get_or_create_by_name(user, bot_name)},
+    with {:banned?, false} <- {:banned?, user.is_banned},
+         {:bot, {:ok, bot}} <- {:bot, Bot.get_or_create_by_name(user, bot_name)},
          {:within_connection_limit?, true} <-
            {:within_connection_limit?, within_connection_limit?(game_engine, user)} do
       start_bot(game_engine, Map.put(opts, :bot, bot))
     else
+      {:banned?, true} ->
+        {:error, %{user: ["User is banned"]}}
+
       {:within_connection_limit?, false} ->
         {:error, %{user: ["User connection limit exceeded"]}}
 
       {:bot, {:error, %Ecto.Changeset{} = changeset}} ->
         {:error, %{bot: BattleBox.changeset_errors(changeset)}}
+
+      {:error, errors} ->
+        {:error, errors}
+    end
+  end
+
+  def start_bot(game_engine, %{token: token, connection: _, bot_name: _} = opts) do
+    case ApiKey.authenticate(token) do
+      {:ok, user} ->
+        start_bot(game_engine, Map.put(opts, :user, user))
 
       {:error, errors} ->
         {:error, errors}
