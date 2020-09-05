@@ -17,17 +17,6 @@ defmodule BattleBox.Utilities.UserIdentifierValidation do
   # Cannot have two hypens in a row
   # Maximum is 39 characters.
   # Cannot be in the reserved words
-  def validate_user_identifer(identifier) when is_binary(identifier) do
-    changeset =
-      {%{}, %{identifier: :string}}
-      |> Ecto.Changeset.cast(%{identifier: identifier}, [:identifier])
-      |> validate_user_identifer(:identifier)
-
-    if changeset.errors == [],
-      do: :ok,
-      else: {:error, for({:identifier, {msg, _}} <- changeset.errors, do: msg)}
-  end
-
   def validate_user_identifer(changeset, field_name) do
     changeset
     |> validate_required(field_name)

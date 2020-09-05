@@ -1,6 +1,6 @@
 defmodule BattleBox.Utilities.UserIdentifierValidationTest do
   import BattleBox.Utilities.UserIdentifierValidation,
-    only: [validate_user_identifer: 1, validate_user_identifer: 2]
+    only: [validate_user_identifer: 2]
 
   alias BattleBox.Bot
   import Ecto.Changeset
@@ -29,18 +29,6 @@ defmodule BattleBox.Utilities.UserIdentifierValidationTest do
     {"abcdefghijklmnopqrstuvwxyz", nil},
     {"ABCDEFGHIJKLMNOPQRSTUVWXYZ", nil}
   ]
-
-  test "you can use it on raw strings" do
-    @test_cases
-    |> Enum.each(fn
-      {name, nil} ->
-        assert validate_user_identifer(name) == :ok
-
-      {name, {error, _}} ->
-        assert {:error, returned_errors} = validate_user_identifer(name)
-        assert error in returned_errors
-    end)
-  end
 
   test "identifers follow the rules when used in changesets" do
     for {name, errors} <- @test_cases do

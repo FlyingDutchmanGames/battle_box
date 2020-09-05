@@ -22,7 +22,35 @@ defmodule BattleBox.Connection.LogicTest do
     end
   end
 
-  describe "authing" do
+  describe "auth_type => challenge" do
+    test "Using an invalid bot name yields an immediate error" do
+      assert {%{state: :unauthed}, [{:send, msg}], :continue} =
+               Logic.handle_message(
+                 {:client, %{"auth_type" => "challenge", "bot" => :binary.copy("a", 40)}},
+                 %{state: :unauthed}
+               )
+
+      assert %{"error" => %{"bot" => %{"name" => ["should be at most 39 character(s)"]}}} =
+               Jason.decode!(msg)
+    end
+
+    test "using auth_type => challenge yields the url of the challenge" do
+      assert {%{state: :auth_challenge},
+              [
+                {:send,
+                 %{
+                   "auth_challenge" => "http://localhost:4002/connections/some-connection-id/auth"
+                 }}
+              ],
+              :continue} =
+               Logic.handle_message(
+                 {:client, %{"auth_type" => "challenge", "bot" => "some-valid-name"}},
+                 %{state: :unauthed, connection_id: "some-connection-id"}
+               )
+    end
+  end
+
+  describe "authing via api key" do
     setup do
       {:ok, key} = create_key()
       %{key: key}

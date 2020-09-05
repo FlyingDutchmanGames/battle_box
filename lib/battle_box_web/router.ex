@@ -60,6 +60,9 @@ defmodule BattleBoxWeb.Router do
       get "/bots", UserRedirectController, :bots
       get "/arenas", UserRedirectController, :arenas
 
+      get "/connections/:connection_id/auth", ConnectionController, :authorize
+      post "/connections/:connection_id/auth", ConnectionController, :authorize
+
       resources "/keys", ApiKeyController
       resources "/bots", BotController, only: [:create, :new], param: "name"
       resources "/arenas", ArenaController, only: [:create, :new], param: "name"

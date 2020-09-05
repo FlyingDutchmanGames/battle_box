@@ -33,9 +33,19 @@ defmodule BattleBox.Connection.Message do
     encode(%{"game_info" => game_info, "request_type" => "game_request"})
   end
 
+  def auth_challenge(connection_id) do
+    %{"auth_challenge" => Routes.connection_url(Endpoint, :authorize, connection_id)}
+  end
+
   def encode_error(error_msg, additional \\ %{}) do
     error = Map.merge(%{error: error_msg}, additional)
     encode(error)
+  end
+
+  defmacro bot_challenge_auth(bot_name) do
+    quote do
+      %{"bot" => unquote(bot_name), "auth_type" => "challenge"}
+    end
   end
 
   defmacro bot_token_auth(token, bot_name) do
