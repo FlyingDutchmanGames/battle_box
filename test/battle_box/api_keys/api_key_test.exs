@@ -54,11 +54,6 @@ defmodule BattleBox.ApiKeyTest do
       assert NaiveDateTime.diff(NaiveDateTime.utc_now(), key.last_used) < 2
     end
 
-    test "A banned user is banned", %{key: key} do
-      {1, nil} = Repo.update_all(User, set: [is_banned: true])
-      assert {:error, %{user: ["User is banned"]}} == ApiKey.authenticate(key.token)
-    end
-
     test "an invalid token doesn't work" do
       assert {:error, %{token: ["Invalid API Key"]}} == ApiKey.authenticate("INVALID_TOKEN")
     end
