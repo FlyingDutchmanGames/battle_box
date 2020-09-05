@@ -34,7 +34,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
 
   describe "starting a bot" do
     test "you can start a bot with a bot name and a token", context do
-      assert {:ok, server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
+      assert {:ok, _server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: context.bot.name,
@@ -42,8 +42,17 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                })
     end
 
+    test "you can start a bot with user and a bot name", context do
+      assert {:ok, _server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 user: context.user,
+                 bot_name: "some-bot-name",
+                 connection: self()
+               })
+    end
+
     test "you can start a bot", context do
-      assert {:ok, server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
+      assert {:ok, _server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  bot: context.bot,
                  connection: self()
@@ -60,16 +69,26 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     end
 
     test "starting a bot when you're at your limit fails", context do
-      params = %{
-        token: context.key.token,
-        bot_name: "whatever",
-        connection: self()
-      }
-
-      assert {:ok, _pid, _params} = BotSupervisor.start_bot(context.game_engine, params)
+      assert {:ok, _pid, _params} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 token: context.key.token,
+                 bot_name: "whatever",
+                 connection: self()
+               })
 
       assert {:error, %{user: ["User connection limit exceeded"]}} =
-               BotSupervisor.start_bot(context.game_engine, params)
+               BotSupervisor.start_bot(context.game_engine, %{
+                 token: context.key.token,
+                 bot_name: "whatever",
+                 connection: self()
+               })
+
+      assert {:error, %{user: ["User connection limit exceeded"]}} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 user: context.user,
+                 bot_name: "whatever",
+                 connection: self()
+               })
     end
 
     test "starting a bot that doesn't exist creates it", context do
@@ -91,14 +110,29 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
                  bot_name: :binary.copy("a", 40),
                  connection: self()
                })
+
+      assert {:error, %{bot: %{name: ["should be at most 39 character(s)"]}}} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 user: context.user,
+                 bot_name: :binary.copy("a", 40),
+                 connection: self()
+               })
     end
 
     test "starting a bot with a banned user fails", context do
       Repo.update_all(User, set: [is_banned: true])
+      user = Repo.one(User)
 
       assert {:error, %{user: ["User is banned"]}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
+                 bot_name: context.bot.name,
+                 connection: self()
+               })
+
+      assert {:error, %{user: ["User is banned"]}} =
+               BotSupervisor.start_bot(context.game_engine, %{
+                 user: user,
                  bot_name: context.bot.name,
                  connection: self()
                })

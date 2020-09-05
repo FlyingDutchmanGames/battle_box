@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
   use DynamicSupervisor
-  alias BattleBox.{ApiKey, Bot, Repo, GameEngine, GameEngine.BotServer}
+  alias BattleBox.{ApiKey, User, Bot, Repo, GameEngine, GameEngine.BotServer}
 
   def start_link(%{names: names} = opts) do
     DynamicSupervisor.start_link(__MODULE__, opts, name: names.bot_supervisor)
@@ -15,18 +15,9 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
         game_engine,
         %{connection: connection, token: token, bot_name: bot_name}
       ) do
-    with {:ok, user} <- ApiKey.authenticate(token),
-         {:within_connection_limit?, true} <-
-           {:within_connection_limit?, within_connection_limit?(game_engine, user)},
-         {:bot, {:ok, bot}} <- {:bot, Bot.get_or_create_by_name(user, bot_name)} do
-      start_bot(game_engine, %{connection: connection, bot: bot})
+    with {:ok, user} <- ApiKey.authenticate(token) do
+      start_bot(game_engine, %{connection: connection, user: user})
     else
-      {:within_connection_limit?, false} ->
-        {:error, %{user: ["User connection limit exceeded"]}}
-
-      {:bot, {:error, %Ecto.Changeset{} = changeset}} ->
-        {:error, %{bot: BattleBox.changeset_errors(changeset)}}
-
       {:error, errors} ->
         {:error, errors}
     end
@@ -39,6 +30,23 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisor do
     opts = update_in(opts.bot, fn bot -> Repo.preload(bot, :user) end)
     {:ok, bot_server} = DynamicSupervisor.start_child(bot_supervisor, {BotServer, opts})
     {:ok, bot_server, %{bot: bot, bot_server_id: opts.bot_server_id}}
+  end
+
+  def start_bot(game_engine, %{user: %User{} = user, bot_name: bot_name, connection: _} = opts) do
+    with {:bot, {:ok, bot}} <- {:bot, Bot.get_or_create_by_name(user, bot_name)},
+         {:within_connection_limit?, true} <-
+           {:within_connection_limit?, within_connection_limit?(game_engine, user)} do
+      start_bot(game_engine, Map.put(opts, :bot, bot))
+    else
+      {:within_connection_limit?, false} ->
+        {:error, %{user: ["User connection limit exceeded"]}}
+
+      {:bot, {:error, %Ecto.Changeset{} = changeset}} ->
+        {:error, %{bot: BattleBox.changeset_errors(changeset)}}
+
+      {:error, errors} ->
+        {:error, errors}
+    end
   end
 
   def within_connection_limit?(game_engine, user) do
