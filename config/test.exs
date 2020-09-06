@@ -9,7 +9,7 @@ config :battle_box, BattleBox.Repo,
 
 config :battle_box, BattleBoxWeb.Endpoint,
   http: [port: 4002],
-  server: false
+  server: true
 
 # pick a random port
 config :battle_box, BattleBox.TcpConnectionServer, port: 0
