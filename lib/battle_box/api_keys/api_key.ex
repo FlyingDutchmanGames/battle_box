@@ -34,9 +34,6 @@ defmodule BattleBox.ApiKey do
       nil ->
         {:error, %{token: ["Invalid API Key"]}}
 
-      %__MODULE__{user: %User{is_banned: true}} ->
-        {:error, %{user: ["User is banned"]}}
-
       %__MODULE__{user: %User{} = user} = key ->
         mark_used!(key)
         {:ok, user}

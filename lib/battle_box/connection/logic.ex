@@ -1,6 +1,8 @@
 defmodule BattleBox.Connection.Logic do
+  import BattleBox.Utilities.UserIdentifierValidation, only: [validate_user_identifer: 2]
   alias BattleBox.{Arena, GameEngine, GameEngine.BotServer}
   import BattleBox.Connection.Message
+  import BattleBox, only: [changeset_errors: 1]
 
   def init(%{names: %{game_engine: _}} = data) do
     Map.put(data, :state, :unauthed)
@@ -36,29 +38,40 @@ defmodule BattleBox.Connection.Logic do
     {data, [{:send, encode_error("bot_instance_failure")}], :stop}
   end
 
+  def handle_system({:auth, user}, %{state: :auth_challenge, bot_name: bot_name} = data) do
+    GameEngine.start_bot(data.names.game_engine, %{
+      user: user,
+      bot_name: bot_name,
+      connection: self()
+    })
+    |> handle_bot_server_start_result(data)
+  end
+
   def handle_client("PING", data) do
     {data, [{:send, Jason.encode!("PONG")}], :continue}
   end
 
-  def handle_client(bot_token_auth(token, bot_name), %{state: :unauthed} = data) do
-    case GameEngine.start_bot(data.names.game_engine, %{
-           token: token,
-           bot_name: bot_name,
-           connection: self()
-         }) do
-      {:ok, bot_server, %{bot: bot, bot_server_id: _} = bot_server_info} ->
-        data =
-          data
-          |> Map.put(:bot, bot)
-          |> Map.put(:bot_server, bot_server)
-          |> Map.put(:state, :idle)
-          |> Map.merge(bot_server_info)
+  def handle_client(bot_challenge_auth(bot_name), %{state: :unauthed} = data) do
+    changeset =
+      {%{}, %{name: :string}}
+      |> Ecto.Changeset.cast(%{name: bot_name}, [:name])
+      |> validate_user_identifer(:name)
 
-        {data, [{:monitor, bot_server}, {:send, status_msg(data, :idle)}], :continue}
-
-      {:error, error} ->
-        {data, [{:send, encode_error(error)}], :continue}
+    if changeset.valid? do
+      data = Map.merge(data, %{state: :auth_challenge, bot_name: bot_name})
+      {data, [{:send, auth_challenge(data.connection_id)}], :continue}
+    else
+      {data, [{:send, encode_error(%{bot: changeset_errors(changeset)})}], :continue}
     end
+  end
+
+  def handle_client(bot_token_auth(token, bot_name), %{state: :unauthed} = data) do
+    GameEngine.start_bot(data.names.game_engine, %{
+      token: token,
+      bot_name: bot_name,
+      connection: self()
+    })
+    |> handle_bot_server_start_result(data)
   end
 
   def handle_client(%{"action" => action, "arena" => arena_name} = req, %{state: :idle} = data)
@@ -120,5 +133,22 @@ defmodule BattleBox.Connection.Logic do
 
   def handle_client(_msg, data) do
     {data, [{:send, encode_error("invalid_msg_sent")}], :continue}
+  end
+
+  defp handle_bot_server_start_result(result, data) do
+    case result do
+      {:ok, bot_server, %{bot: bot, bot_server_id: _} = bot_server_info} ->
+        data =
+          data
+          |> Map.put(:bot, bot)
+          |> Map.put(:bot_server, bot_server)
+          |> Map.put(:state, :idle)
+          |> Map.merge(bot_server_info)
+
+        {data, [{:monitor, bot_server}, {:send, status_msg(data, :idle)}], :continue}
+
+      {:error, error} ->
+        {data, [{:send, encode_error(error)}], :continue}
+    end
   end
 end

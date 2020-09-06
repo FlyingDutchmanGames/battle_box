@@ -55,7 +55,6 @@
 
 - Impersonation
 - Game Engine Stats Server/Interface (# Live Games, # Most Active arena, # Connections)?
-- Build TicTacToe/Othello/ as proof of game engine extendability
 - Pass timing info to the game so it can do move timing
 - Make all tests async by passing the ecto sandbox to all of the game engine
 - Rip out webpack/npm? It seems like we could eliminate a pretty huge dep if its basically static css and js
