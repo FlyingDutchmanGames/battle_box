@@ -4,6 +4,7 @@ defmodule BattleBoxWeb.ChannelCase do
   using do
     quote do
       import Phoenix.ChannelTest
+      import BattleBox.Test.DataHelpers
 
       @endpoint BattleBoxWeb.Endpoint
     end

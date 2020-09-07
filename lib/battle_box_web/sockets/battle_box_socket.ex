@@ -46,25 +46,24 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocket do
     end
   end
 
+  def handle_info({:stop, reason}, data), do: {:stop, reason, data}
   def handle_info(msg, data), do: handle_msg({:system, msg}, data)
 
-  def terminate(_reason, _data) do
+  def terminate(reason, _data) do
     :ok
   end
 
   defp handle_msg(msg, data) do
     {data, actions, continue?} = Logic.handle_message(msg, data)
 
-    for {:monitor, pid} <- actions, do: Process.monitor(pid)
+    for {:monitor, pid} <- actions,
+        do: Process.monitor(pid)
 
-    case continue? do
-      :continue ->
-        if actions[:send],
-          do: {:reply, :ok, Jason.encode(actions[:send]), data},
-          else: {:ok, data}
+    if continue? == :stop,
+      do: send(self(), {:stop, :normal})
 
-      :stop ->
-        {:stop, :normal, data}
-    end
+    if actions[:send],
+      do: {:reply, :ok, {:text, actions[:send]}, data},
+      else: {:ok, data}
   end
 end

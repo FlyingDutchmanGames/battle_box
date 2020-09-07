@@ -26,7 +26,6 @@
 - BattleBox Python Client
 - BattleBox Node Client
 - BattleBox Ruby Client
-- WebSocket interface
 - Update protocol to give the result of each move
 #### Robot Game
 - Remove `new` in favor of `from_settings`
@@ -50,12 +49,12 @@
   - preserve bread crumbs
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
+- Debug Messages in the protocol
 
 ### Nice to Haves
 
 - Impersonation
 - Game Engine Stats Server/Interface (# Live Games, # Most Active arena, # Connections)?
-- Build TicTacToe/Othello/ as proof of game engine extendability
 - Pass timing info to the game so it can do move timing
 - Make all tests async by passing the ecto sandbox to all of the game engine
 - Rip out webpack/npm? It seems like we could eliminate a pretty huge dep if its basically static css and js
