@@ -7,9 +7,7 @@ defmodule BattleBoxWeb.Endpoint do
     signing_salt: "Kqw9AiPm"
   ]
 
-  socket "/socket", BattleBoxWeb.UserSocket,
-    websocket: true,
-    longpoll: false
+  socket "/battle_box", BattleBoxWeb.Sockets.BattleBoxSocket, websocket: true, longpoll: false
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 

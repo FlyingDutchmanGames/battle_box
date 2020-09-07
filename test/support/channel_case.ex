@@ -3,7 +3,8 @@ defmodule BattleBoxWeb.ChannelCase do
 
   using do
     quote do
-      use Phoenix.ChannelTest
+      import Phoenix.ChannelTest
+      import BattleBox.Test.DataHelpers
 
       @endpoint BattleBoxWeb.Endpoint
     end

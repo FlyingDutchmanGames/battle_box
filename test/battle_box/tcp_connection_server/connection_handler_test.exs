@@ -1,6 +1,6 @@
 defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Bot, User, GameEngine, TcpConnectionServer}
+  alias BattleBox.{User, GameEngine, TcpConnectionServer}
   import BattleBox.GameEngine, only: [get_connection: 2]
   import BattleBox.Connection.Message
 
@@ -32,15 +32,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     {:ok, arena} =
       robot_game_arena(user: user, arena_name: @arena_name, command_time_minimum_ms: 1)
 
-    {:ok, bot} =
-      user
-      |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: @bot_name})
-      |> Repo.insert()
-
     {:ok, key} = create_key(user: user)
 
-    %{user: user, arena: arena, bot: bot, key: key}
+    %{user: user, arena: arena, key: key}
   end
 
   setup context do
@@ -100,14 +94,9 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert %{"bot" => _, "user" => _} = watch_links
     end
 
-    test "trying to join while your user is banned is an error", %{
-      socket: socket,
-      bot: bot,
-      key: key
-    } do
+    test "trying to join while your user is banned is an error", %{ socket: socket, } = context do
       Repo.update_all(User, set: [is_banned: true])
-      bot_connect_req = encode(%{"token" => key.token, "bot" => bot.name})
-      :ok = :gen_tcp.send(socket, bot_connect_req)
+      :ok = :gen_tcp.send(socket, context.connection_request)
       assert_receive {:tcp, ^socket, msg}
       assert %{"error" => %{"user" => ["User is banned"]}} = Jason.decode!(msg)
     end
@@ -128,7 +117,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert_receive {:DOWN, _, _, ^connection_pid, :normal}
     end
 
-    test "if you try to join as a bot that doesn't exist it fails", %{socket: socket} do
+    test "if you try to join with a bad token it fails", %{socket: socket} do
       bot_connect_req = encode(%{"token" => "FAKE", "bot" => @bot_name})
 
       :ok = :gen_tcp.send(socket, bot_connect_req)
@@ -312,7 +301,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
     end
   end
 
-  describe "moves requests" do
+  describe "commands requests" do
     setup context do
       players =
         for player <- [:p1, :p2] do
@@ -321,7 +310,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
           join_request =
             encode(%{
               "token" => context.key.token,
-              "bot" => context.bot.name
+              "bot" => @bot_name
             })
 
           :ok = :gen_tcp.send(socket, join_request)
