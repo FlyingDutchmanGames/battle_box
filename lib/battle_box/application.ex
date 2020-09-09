@@ -3,8 +3,9 @@ defmodule BattleBox.Application do
 
   def start(_type, _args) do
     children = [
-      BattleBox.GameEngine,
       BattleBox.Repo,
+      BattleBox.Release.Migrator,
+      BattleBox.GameEngine,
       {Phoenix.PubSub, [name: BattleBox.PubSub, adapter: Phoenix.PubSub.PG2]},
       BattleBoxWeb.Endpoint,
       BattleBoxWeb.Telemetry,
