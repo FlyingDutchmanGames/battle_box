@@ -90,7 +90,8 @@ defmodule BattleBox.GameEngine.GameServer do
     commands = Map.put(data.commands, player, commands)
 
     if Enum.all?(Map.values(commands)) do
-      data = update_in(data.game, &Game.calculate_turn(&1, commands))
+      %{game: game, debug: debug, info: info} = Game.calculate_turn(data.game, commands)
+      data = put_in(data.game, game)
 
       if Game.over?(data.game),
         do: {:keep_state, data, {:next_event, :internal, :finalize}},

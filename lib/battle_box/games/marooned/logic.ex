@@ -38,7 +38,9 @@ defmodule BattleBox.Games.Marooned.Logic do
 
     game = update_in(game.events, &[event | &1])
     game = update_in(game.turn, &(&1 + 1))
-    update_in(game.next_player, &opponent/1)
+    game = update_in(game.next_player, &opponent/1)
+
+    %{game: game, debug: %{}, info: %{}}
   end
 
   def winner(game) do
