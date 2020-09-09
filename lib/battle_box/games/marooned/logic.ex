@@ -1,19 +1,61 @@
 defmodule BattleBox.Games.Marooned.Logic do
+  alias BattleBox.Game.Error.Timeout
+
+  alias BattleBox.Games.Marooned.Error.{
+    CannotMoveIntoOpponent,
+    CannotMoveIntoRemovedSquare,
+    CannotMoveOffBoard,
+    CannotRemoveASpaceAlreadyRemoved,
+    CannotRemoveASpaceOffTheBoard,
+    CannotRemoveSameSpaceAsMoveTo,
+    CannotRemoveSameSpaceAsMoveTo,
+    CannotRemoveSpaceOpponentIsOn,
+    InvalidInputFormat
+  }
+
   import BattleBox.Utilities.Grid, only: [manhattan_distance: 2]
 
   def calculate_turn(game, commands) do
+    {command, input_error} =
+      case commands[game.next_player] do
+        %{"to" => [a, b], "remove" => [c, d]} = command
+        when is_integer(a) and is_integer(b) and is_integer(c) and is_integer(d) ->
+          with {:integers?, true} <- {:integers?, Enum.all?([a, b, c, d], &is_integer/1)},
+               {:same_space?, false} <- {:same_space?, [a, b] == [c, d]} do
+            {command, nil}
+          else
+            {:integers?, false} -> {command, %InvalidInputFormat{input: command}}
+            {:same_space?, true} -> {command, %CannotRemoveSameSpaceAsMoveTo{target: [a, b]}}
+          end
+
+        :timeout ->
+          {%{}, %Timeout{}}
+
+        command when is_map(command) ->
+          {command, %InvalidInputFormat{input: command}}
+
+        other ->
+          {%{}, %InvalidInputFormat{input: other}}
+      end
+
     available_to_move_to = available_adjacent_locations_for_player(game, game.next_player)
     available_to_be_removed = available_to_be_removed(game)
 
-    commands =
-      case commands[game.next_player] do
-        commands when is_map(commands) -> commands
-        _anythin_else -> %{}
+    remove =
+      if command["remove"] in available_to_be_removed do
+        command["remove"]
+      else
+        enemy_adjacent_opportunities =
+          available_adjacent_locations_for_player(game, opponent(game.next_player))
+
+        Enum.min_by(enemy_adjacent_opportunities, &manhattan_distance(&1, [0, 0]), fn ->
+          Enum.random(available_to_be_removed)
+        end)
       end
 
     to =
-      if commands["to"] in available_to_move_to do
-        commands["to"]
+      if command["to"] in (available_to_move_to -- [remove]) do
+        command["to"]
       else
         Enum.max_by(available_to_move_to, fn location ->
           Enum.sum(
@@ -24,23 +66,15 @@ defmodule BattleBox.Games.Marooned.Logic do
         end)
       end
 
-    remove =
-      if commands["remove"] in available_to_be_removed do
-        commands["remove"]
-      else
-        enemy_adjacent_opportunities =
-          available_adjacent_locations_for_player(game, opponent(game.next_player))
-
-        Enum.min_by(enemy_adjacent_opportunities, &manhattan_distance(&1, [0, 0]))
-      end
-
     event = %{turn: game.turn, player: game.next_player, removed_location: remove, to: to}
+
+    debug = %{game.next_player => Enum.reject([input_error], &is_nil/1)}
 
     game = update_in(game.events, &[event | &1])
     game = update_in(game.turn, &(&1 + 1))
     game = update_in(game.next_player, &opponent/1)
 
-    %{game: game, debug: %{}, info: %{}}
+    %{game: game, debug: debug, info: %{}}
   end
 
   def winner(game) do
@@ -54,7 +88,11 @@ defmodule BattleBox.Games.Marooned.Logic do
   end
 
   def over?(game) do
-    available_adjacent_locations_for_player(game, game.next_player) == []
+    case available_adjacent_locations_for_player(game, game.next_player) do
+      [] -> true
+      [only_option] -> [only_option] == available_to_be_removed(game)
+      [_opt1, _opt2 | _rest] -> false
+    end
   end
 
   def score(game, turn \\ nil) do
@@ -95,11 +133,11 @@ defmodule BattleBox.Games.Marooned.Logic do
     removed = removed_locations(game, turn)
     occupied = Map.values(player_positions(game, turn))
 
-    for row <- 0..(game.rows - 1),
-        col <- 0..(game.cols - 1),
-        [row, col] not in removed,
-        [row, col] not in occupied,
-        do: [row, col]
+    for x <- 0..(game.cols - 1),
+        y <- 0..(game.rows - 1),
+        [x, y] not in removed,
+        [x, y] not in occupied,
+        do: [x, y]
   end
 
   def available_adjacent_locations_for_player(game, player, turn \\ nil) do

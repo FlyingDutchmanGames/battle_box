@@ -93,6 +93,14 @@ defmodule BattleBox.GameEngine.GameServer do
       %{game: game, debug: debug, info: info} = Game.calculate_turn(data.game, commands)
       data = put_in(data.game, game)
 
+      for {player, msg} <- debug do
+        send(data.players[player], debug_info(data.game, msg))
+      end
+
+      for {player, msg} <- info do
+        send(data.players[player], game_info(data.game, msg))
+      end
+
       if Game.over?(data.game),
         do: {:keep_state, data, {:next_event, :internal, :finalize}},
         else: {:repeat_state, data, {:next_event, :internal, :collect_commands}}
@@ -138,6 +146,22 @@ defmodule BattleBox.GameEngine.GameServer do
        minimum_time: game.arena.command_time_minimum_ms,
        maximum_time: game.arena.command_time_maximum_ms,
        player: player
+     }}
+  end
+
+  defp game_info(game, game_info) do
+    {:game_info,
+     %{
+       game_id: game.id,
+       game_info: game_info
+     }}
+  end
+
+  defp debug_info(game, debug) do
+    {:debug_info,
+     %{
+       game_id: game.id,
+       debug_info: debug
      }}
   end
 

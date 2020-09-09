@@ -2,6 +2,8 @@ defmodule BattleBox.Games.Marooned.LogicTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.Marooned.Logic
   import BattleBox.Games.Marooned.Helpers
+  alias BattleBox.Games.Marooned.Error
+  alias BattleBox.Game.Error.Timeout
 
   describe "opponent/1" do
     test "it gives the mortal enemy of a player" do
@@ -47,11 +49,15 @@ defmodule BattleBox.Games.Marooned.LogicTest do
     end
 
     test "It returns the spaces that can be removed" do
-      game = ~m/x 0 x
-                0 1 0
-                x 2 x/
+      game1 = ~m/x 0 x
+                 0 1 0
+                 x 2 x/
 
-      assert [[0, 1], [1, 2], [2, 1]] == Logic.available_to_be_removed(game)
+      assert [[0, 1], [1, 2], [2, 1]] == Logic.available_to_be_removed(game1)
+
+      game2 = ~m/0 1 2/
+
+      assert [[0, 0]] = Logic.available_to_be_removed(game2)
     end
   end
 
@@ -92,21 +98,25 @@ defmodule BattleBox.Games.Marooned.LogicTest do
       assert Logic.over?(game3)
     end
 
+    test "The game is over if the only space that can be removed is one that the player can move to" do
+      assert Logic.over?(~m/0 1 2/)
+    end
+
     test "A game is not over if there is an opportunity for the next player to move" do
-      game1 = ~m/x x x
+      game1 = ~m/x 0 x
                  x 1 x
                  x 0 x/
 
-      game2 = ~m/x 1 x
+      game2 = ~m/0 1 x
                  x 0 x
-                 0 0 0/
+                 0 x 0/
 
       refute Logic.over?(game1)
       refute Logic.over?(game2)
     end
 
     test "The game is not over if the next player can go even if the other player has lost" do
-      game1 = ~m/0 1 x
+      game1 = ~m/0 1 0
                  x x x
                  x 2 x/
 
@@ -136,15 +146,44 @@ defmodule BattleBox.Games.Marooned.LogicTest do
 
   describe "player_positions/1/2" do
     test "It can give the player positions" do
-      game = ~m/0 1 0
-                0 0 0
-                0 2 0/
+      game1 = ~m/0 1 0
+                 0 0 0
+                 0 2 0/
 
-      assert %{1 => [1, 2], 2 => [1, 0]} == Logic.player_positions(game)
+      assert %{1 => [1, 2], 2 => [1, 0]} == Logic.player_positions(game1)
+
+      game2 = ~m/0 1 2/
+
+      assert %{1 => [1, 0], 2 => [2, 0]} == Logic.player_positions(game2)
     end
   end
 
   describe "calculate_turn/2" do
+    test "timeouts yield the proper error" do
+      start = ~m/0 1 2/
+      assert %{debug: %{1 => [%Timeout{}]}} = Logic.calculate_turn(start, %{1 => :timeout})
+    end
+
+    for input <- [
+          [],
+          [1, 2],
+          "foo",
+          %{},
+          %{"foo" => "bar"},
+          %{"remove" => [1, 2]},
+          %{"to" => [1, 2]},
+          %{"remove" => [1, 2], "to" => "foo"}
+        ] do
+      test "the input #{inspect(input)} is improperly formatted and yields an error" do
+        start = ~m/0 1 2/
+
+        expected_error = %Error.InvalidInputFormat{input: unquote(Macro.escape(input))}
+
+        assert %{debug: %{1 => [^expected_error]}} =
+                 Logic.calculate_turn(start, %{1 => unquote(Macro.escape(input))})
+      end
+    end
+
     test "you can issue a valid move" do
       start = ~m/0 1 0
                  0 0 0
@@ -158,6 +197,15 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                     x 2 0/
 
       compare_games(after_turn, expected)
+    end
+
+    test "you can't move to the same place you're removing" do
+      start = ~m/0 1 0
+                 0 0 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveSameSpaceAsMoveTo{target: [0, 0]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 0]}})
     end
   end
 
