@@ -179,9 +179,54 @@ defmodule BattleBox.Games.Marooned.LogicTest do
 
         expected_error = %Error.InvalidInputFormat{input: unquote(Macro.escape(input))}
 
-        assert %{debug: %{1 => [^expected_error]}} =
-                 Logic.calculate_turn(start, %{1 => unquote(Macro.escape(input))})
+        %{debug: %{1 => error}} =
+          Logic.calculate_turn(start, %{1 => unquote(Macro.escape(input))})
+
+        assert expected_error in error
       end
+    end
+
+    test "You can't remove the space your opponent is on" do
+      start = ~m/0 1 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveSpaceAPlayerIsOn{target: [1, 0]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [1, 0], "to" => [0, 1]}})
+    end
+
+    test "You can't remove the space you're on" do
+      start = ~m/0 1 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveSpaceAPlayerIsOn{target: [1, 1]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [1, 1], "to" => [0, 1]}})
+    end
+
+    test "You can't remove an already removed space" do
+      start = ~m/0 1 0
+                 x 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveASpaceAlreadyRemoved{target: [0, 0]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 1]}})
+    end
+
+    test "you can't remove a square that is out of bounds" do
+      start = ~m/0 1 0
+                 0 2 0/
+
+      for bad_square <- [[-1, 0], [0, -1], [0, 10], [10, 0]] do
+        %{debug: %{1 => [%Error.CannotRemoveASpaceOutsideTheBoard{target: ^bad_square}]}} =
+          Logic.calculate_turn(start, %{1 => %{"remove" => bad_square, "to" => [0, 1]}})
+      end
+    end
+
+    test "you can't move to the same place you're removing" do
+      start = ~m/0 1 0
+                 0 0 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveSameSpaceAsMoveTo{target: [0, 0]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 0]}})
     end
 
     test "you can issue a valid move" do
@@ -197,15 +242,6 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                     x 2 0/
 
       compare_games(after_turn, expected)
-    end
-
-    test "you can't move to the same place you're removing" do
-      start = ~m/0 1 0
-                 0 0 0
-                 0 2 0/
-
-      %{debug: %{1 => [%Error.CannotRemoveSameSpaceAsMoveTo{target: [0, 0]}]}} =
-        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 0]}})
     end
   end
 

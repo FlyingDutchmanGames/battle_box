@@ -7,51 +7,21 @@ defmodule BattleBox.Games.Marooned.Logic do
     CannotMoveOffBoard,
     CannotRemoveASpaceAlreadyRemoved,
     CannotRemoveASpaceOffTheBoard,
+    CannotRemoveASpaceOutsideTheBoard,
+    CannotRemoveASpaceOutsideTheBoard,
     CannotRemoveSameSpaceAsMoveTo,
     CannotRemoveSameSpaceAsMoveTo,
-    CannotRemoveSpaceOpponentIsOn,
+    CannotRemoveSpaceAPlayerIsOn,
     InvalidInputFormat
   }
 
   import BattleBox.Utilities.Grid, only: [manhattan_distance: 2]
 
   def calculate_turn(game, commands) do
-    {command, input_error} =
-      case commands[game.next_player] do
-        %{"to" => [a, b], "remove" => [c, d]} = command
-        when is_integer(a) and is_integer(b) and is_integer(c) and is_integer(d) ->
-          with {:integers?, true} <- {:integers?, Enum.all?([a, b, c, d], &is_integer/1)},
-               {:same_space?, false} <- {:same_space?, [a, b] == [c, d]} do
-            {command, nil}
-          else
-            {:integers?, false} -> {command, %InvalidInputFormat{input: command}}
-            {:same_space?, true} -> {command, %CannotRemoveSameSpaceAsMoveTo{target: [a, b]}}
-          end
-
-        :timeout ->
-          {%{}, %Timeout{}}
-
-        command when is_map(command) ->
-          {command, %InvalidInputFormat{input: command}}
-
-        other ->
-          {%{}, %InvalidInputFormat{input: other}}
-      end
+    {command, input_error} = validate_command(commands[game.next_player])
+    {remove, remove_error} = validate_remove(game, command["remove"])
 
     available_to_move_to = available_adjacent_locations_for_player(game, game.next_player)
-    available_to_be_removed = available_to_be_removed(game)
-
-    remove =
-      if command["remove"] in available_to_be_removed do
-        command["remove"]
-      else
-        enemy_adjacent_opportunities =
-          available_adjacent_locations_for_player(game, opponent(game.next_player))
-
-        Enum.min_by(enemy_adjacent_opportunities, &manhattan_distance(&1, [0, 0]), fn ->
-          Enum.random(available_to_be_removed)
-        end)
-      end
 
     to =
       if command["to"] in (available_to_move_to -- [remove]) do
@@ -68,7 +38,7 @@ defmodule BattleBox.Games.Marooned.Logic do
 
     event = %{turn: game.turn, player: game.next_player, removed_location: remove, to: to}
 
-    debug = %{game.next_player => Enum.reject([input_error], &is_nil/1)}
+    debug = %{game.next_player => Enum.reject([input_error, remove_error], &is_nil/1)}
 
     game = update_in(game.events, &[event | &1])
     game = update_in(game.turn, &(&1 + 1))
@@ -173,5 +143,54 @@ defmodule BattleBox.Games.Marooned.Logic do
       x = div(game.cols, 2)
       %{1 => [x, 0], 2 => [x, game.rows - 1]}
     end
+  end
+
+  defp validate_command(%{"to" => [a, b], "remove" => [c, d]} = command) do
+    with {:integers?, true} <- {:integers?, Enum.all?([a, b, c, d], &is_integer/1)},
+         {:same_space?, false} <- {:same_space?, [a, b] == [c, d]} do
+      {command, nil}
+    else
+      {:integers?, false} -> {command, %InvalidInputFormat{input: command}}
+      {:same_space?, true} -> {command, %CannotRemoveSameSpaceAsMoveTo{target: [a, b]}}
+    end
+  end
+
+  defp validate_command(:timeout), do: {%{}, %Timeout{}}
+
+  defp validate_command(command) when is_map(command),
+    do: {command, %InvalidInputFormat{input: command}}
+
+  defp validate_command(other), do: {%{}, %InvalidInputFormat{input: other}}
+
+  defp validate_remove(game, nil), do: {random_removal_space(game), nil}
+
+  defp validate_remove(game, [x, y]) do
+    with {:taken?, false} <- {:taken?, [x, y] in Map.values(player_positions(game))},
+         {:already_removed?, false} <- {:already_removed?, [x, y] in removed_locations(game)},
+         {:in_bounds?, true} <- {:in_bounds?, 0 <= x && x < game.cols && 0 <= y && y < game.rows} do
+      {[x, y], nil}
+    else
+      {:taken?, true} ->
+        {random_removal_space(game), %CannotRemoveSpaceAPlayerIsOn{target: [x, y]}}
+
+      {:already_removed?, true} ->
+        {random_removal_space(game), %CannotRemoveASpaceAlreadyRemoved{target: [x, y]}}
+
+      {:in_bounds?, false} ->
+        {random_removal_space(game), %CannotRemoveASpaceOutsideTheBoard{target: [x, y]}}
+    end
+  end
+
+  defp validate_remove(game, _invalid_type), do: {random_removal_space(game), nil}
+
+  defp random_removal_space(game) do
+    available_to_be_removed = available_to_be_removed(game)
+
+    enemy_adjacent_opportunities =
+      available_adjacent_locations_for_player(game, opponent(game.next_player))
+
+    Enum.min_by(enemy_adjacent_opportunities, &manhattan_distance(&1, [0, 0]), fn ->
+      Enum.random(available_to_be_removed)
+    end)
   end
 end

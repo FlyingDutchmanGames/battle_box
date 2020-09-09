@@ -61,7 +61,7 @@ defmodule BattleBox.Games.Marooned.Error do
     end
   end
 
-  defmodule CannotRemoveSpaceOpponentIsOn do
+  defmodule CannotRemoveSpaceAPlayerIsOn do
     @enforce_keys [:target]
     defstruct [:target]
 
@@ -91,7 +91,7 @@ defmodule BattleBox.Games.Marooned.Error do
     end
   end
 
-  defmodule CannotRemoveASpaceOffTheBoard do
+  defmodule CannotRemoveASpaceOutsideTheBoard do
     @enforce_keys [:target]
     defstruct [:target]
 
