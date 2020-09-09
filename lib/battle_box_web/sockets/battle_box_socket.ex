@@ -49,7 +49,7 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocket do
   def handle_info({:stop, reason}, data), do: {:stop, reason, data}
   def handle_info(msg, data), do: handle_msg({:system, msg}, data)
 
-  def terminate(reason, _data) do
+  def terminate(_reason, _data) do
     :ok
   end
 

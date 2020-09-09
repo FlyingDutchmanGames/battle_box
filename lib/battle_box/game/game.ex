@@ -58,18 +58,25 @@ defmodule BattleBox.Game do
   end
 
   def calculate_turn(game, commands) do
-    game = update_game_data(game, &BattleBoxGame.calculate_turn(&1, commands))
+    %{game: after_turn, debug: debug, info: info} =
+      BattleBoxGame.calculate_turn(game_data(game), commands)
+
+    game = update_game_data(game, fn _ -> after_turn end)
+
     scores = score(game)
     winner = winner(game)
 
-    update_in(game.game_bots, fn bots ->
-      for bot <- bots,
-          do: %{
-            bot
-            | score: scores[bot.player],
-              winner: winner == bot.player
-          }
-    end)
+    game =
+      update_in(game.game_bots, fn bots ->
+        for bot <- bots,
+            do: %{
+              bot
+              | score: scores[bot.player],
+                winner: winner == bot.player
+            }
+      end)
+
+    %{game: game, debug: debug, info: info}
   end
 
   def changeset(game, params \\ %{}) do

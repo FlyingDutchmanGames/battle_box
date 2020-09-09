@@ -16,13 +16,13 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       RobotGame.new(settings: %{terrain: terrain, spawn_enabled: false})
       |> RobotGame.put_events(robot_spawns)
 
-    assert %{location: [0, 0]} =
-             game
-             |> Logic.calculate_turn(%{
-               1 => [%{"type" => "move", "target" => [1, 1], "robot_id" => 1}],
-               2 => []
-             })
-             |> RobotGame.get_robot(100)
+    %{game: game} =
+      Logic.calculate_turn(game, %{
+        1 => [%{"type" => "move", "target" => [1, 1], "robot_id" => 1}],
+        2 => []
+      })
+
+    assert %{location: [0, 0]} = RobotGame.get_robot(game, 100)
   end
 
   # 0 - Invalid
@@ -115,7 +115,7 @@ defmodule BattleBox.Games.RobotGame.MoveIntegrationTest do
       |> Enum.filter(fn {_, val} -> is_robot?(val) end)
       |> Enum.map(fn {location, type} -> robot_move(location, type) end)
 
-    after_turn = Logic.calculate_turn(initial_game, %{1 => moves, 2 => []})
+    %{game: after_turn} = Logic.calculate_turn(initial_game, %{1 => moves, 2 => []})
 
     graph_with_indexes
     |> Enum.filter(fn {_, val} -> is_robot?(val) end)

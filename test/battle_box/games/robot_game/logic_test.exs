@@ -12,7 +12,7 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       game = RobotGame.new(settings: %{terrain: @test_terrain, spawn_per_player: 1})
 
       assert length(RobotGame.robots(game)) == 0
-      game = Logic.calculate_turn(game, %{1 => [], 2 => []})
+      %{game: game} = Logic.calculate_turn(game, %{1 => [], 2 => []})
       assert length(RobotGame.robots(game)) == 2
 
       assert [[0, 0], [1, 1]] ==
@@ -34,11 +34,12 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       test_robots_spawn = ~g/0 2
                              1 0/
 
-      robots =
+      %{game: game} =
         RobotGame.new(settings: %{terrain: @test_terrain, spawn_per_player: 1})
         |> RobotGame.put_events(test_robots_spawn)
         |> Logic.calculate_turn(%{1 => [], 2 => []})
-        |> RobotGame.robots()
+
+      robots = RobotGame.robots(game)
 
       assert length(robots) == 2
       Enum.each(robots, fn robot -> refute robot.id in [100, 200] end)
@@ -50,28 +51,30 @@ defmodule BattleBox.Games.RobotGame.LogicTest do
       test_robots_spawn = ~g/0 0
                              1 0/
 
-      assert [%{id: 100, location: [0, 1]}] =
-               RobotGame.new(settings: %{terrain: @test_terrain}, spawn_enabled: false)
-               |> RobotGame.put_events(test_robots_spawn)
-               |> Logic.calculate_turn(%{
-                 1 => [%{"type" => "move", "robot_id" => 100, "target" => [0, 1]}],
-                 2 => []
-               })
-               |> RobotGame.robots()
+      %{game: game} =
+        RobotGame.new(settings: %{terrain: @test_terrain}, spawn_enabled: false)
+        |> RobotGame.put_events(test_robots_spawn)
+        |> Logic.calculate_turn(%{
+          1 => [%{"type" => "move", "robot_id" => 100, "target" => [0, 1]}],
+          2 => []
+        })
+
+      assert [%{id: 100, location: [0, 1]}] = RobotGame.robots(game)
     end
 
     test "You can not move to a non adjacent square" do
       test_robots_spawn = ~g/0 0
                              1 0/
 
-      assert [%{id: 100, location: [0, 0]}] =
-               RobotGame.new(settings: %{terrain: @test_terrain}, spawn_enabled: false)
-               |> RobotGame.put_events(test_robots_spawn)
-               |> Logic.calculate_turn(%{
-                 1 => [%{"type" => "move", "robot_id" => 100, "target" => [1, 1]}],
-                 2 => []
-               })
-               |> RobotGame.robots()
+      %{game: game} =
+        RobotGame.new(settings: %{terrain: @test_terrain}, spawn_enabled: false)
+        |> RobotGame.put_events(test_robots_spawn)
+        |> Logic.calculate_turn(%{
+          1 => [%{"type" => "move", "robot_id" => 100, "target" => [1, 1]}],
+          2 => []
+        })
+
+      assert [%{id: 100, location: [0, 0]}] = RobotGame.robots(game)
     end
   end
 end
