@@ -281,7 +281,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                  0 0 0
                  0 2 0/
 
-      %{game: after_turn} =
+      %{game: after_turn, debug: %{1 => []}, info: %{1 => event, 2 => event}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [1, 1]}})
 
       expected = ~m/0 0 0
@@ -289,6 +289,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                     x 2 0/
 
       compare_games(after_turn, expected)
+      assert %{player: 1, removed_location: [0, 0], to: [1, 1], turn: 0} == event
     end
   end
 

@@ -24,14 +24,22 @@ defmodule BattleBox.Games.Marooned.Logic do
     event = %{turn: game.turn, player: game.next_player, removed_location: remove, to: to}
 
     debug = %{
-      game.next_player => Enum.reject([input_error, remove_error, to_error], &is_nil/1)
+      game.next_player =>
+        Enum.reject(
+          [
+            input_error,
+            remove_error,
+            to_error
+          ],
+          &is_nil/1
+        )
     }
 
     game = update_in(game.events, &[event | &1])
     game = update_in(game.turn, &(&1 + 1))
     game = update_in(game.next_player, &opponent/1)
 
-    %{game: game, debug: debug, info: %{}}
+    %{game: game, debug: debug, info: %{1 => event, 2 => event}}
   end
 
   def winner(game) do
@@ -78,7 +86,7 @@ defmodule BattleBox.Games.Marooned.Logic do
   def removed_locations(game, turn \\ nil) do
     events =
       if turn,
-        do: Enum.filter(game.events, &(&1.turn <= turn)),
+        do: Enum.filter(game.events, &(&1.turn < turn)),
         else: game.events
 
     for(%{removed_location: location} <- events, do: location) ++ game.starting_removed_locations
@@ -152,20 +160,21 @@ defmodule BattleBox.Games.Marooned.Logic do
   defp validate_remove(game, player, nil), do: {random_removal_space(game, player), nil}
 
   defp validate_remove(game, player, [x, y]) when is_integer(x) and is_integer(y) do
-    with {:taken?, false} <- {:taken?, [x, y] in Map.values(player_positions(game))},
-         {:already_removed?, false} <- {:already_removed?, [x, y] in removed_locations(game)},
-         {:in_bounds?, true} <- {:in_bounds?, 0 <= x && x < game.cols && 0 <= y && y < game.rows} do
-      {[x, y], nil}
-    else
-      {:taken?, true} ->
-        {random_removal_space(game, player), %CannotRemoveSquareAPlayerIsOn{target: [x, y]}}
+    error =
+      with {:taken?, false} <- {:taken?, [x, y] in Map.values(player_positions(game))},
+           {:already_removed?, false} <- {:already_removed?, [x, y] in removed_locations(game)},
+           {:in_bounds?, true} <-
+             {:in_bounds?, 0 <= x && x < game.cols && 0 <= y && y < game.rows} do
+        :no_error
+      else
+        {:taken?, true} -> %CannotRemoveSquareAPlayerIsOn{target: [x, y]}
+        {:already_removed?, true} -> %CannotRemoveASquareAlreadyRemoved{target: [x, y]}
+        {:in_bounds?, false} -> %CannotRemoveASquareOutsideTheBoard{target: [x, y]}
+      end
 
-      {:already_removed?, true} ->
-        {random_removal_space(game, player), %CannotRemoveASquareAlreadyRemoved{target: [x, y]}}
-
-      {:in_bounds?, false} ->
-        {random_removal_space(game, player), %CannotRemoveASquareOutsideTheBoard{target: [x, y]}}
-    end
+    if error == :no_error,
+      do: {[x, y], nil},
+      else: {random_removal_space(game, player), error}
   end
 
   defp validate_remove(game, player, _invalid_type), do: {random_removal_space(game, player), nil}
@@ -175,28 +184,25 @@ defmodule BattleBox.Games.Marooned.Logic do
   defp validate_to(game, player, [x, y]) when is_integer(x) and is_integer(y) do
     %{^player => current_position} = player_positions = player_positions(game)
 
-    with {:is_cur_loc?, false} <- {:is_cur_loc?, [x, y] == current_position},
-         {:in_bounds?, true} <- {:in_bounds?, 0 <= x && x < game.cols && 0 <= y && y < game.rows},
-         {:taken?, false} <- {:taken?, [x, y] in Map.values(player_positions)},
-         {:already_removed?, false} <- {:already_removed?, [x, y] in removed_locations(game)},
-         {:adjacent?, true} <- {:adjacent?, [x, y] in adjacent(current_position)} do
-      {[x, y], nil}
-    else
-      {:is_cur_loc?, true} ->
-        {random_to_space(game, player), %CannotMoveToSquareYouAlreadyOccupy{target: [x, y]}}
+    error =
+      with {:is_cur_loc?, false} <- {:is_cur_loc?, [x, y] == current_position},
+           {:in_bounds?, true} <-
+             {:in_bounds?, 0 <= x && x < game.cols && 0 <= y && y < game.rows},
+           {:taken?, false} <- {:taken?, [x, y] in Map.values(player_positions)},
+           {:already_removed?, false} <- {:already_removed?, [x, y] in removed_locations(game)},
+           {:adjacent?, true} <- {:adjacent?, [x, y] in adjacent(current_position)} do
+        :no_error
+      else
+        {:is_cur_loc?, true} -> %CannotMoveToSquareYouAlreadyOccupy{target: [x, y]}
+        {:taken?, true} -> %CannotMoveIntoOpponent{target: [x, y]}
+        {:already_removed?, true} -> %CannotMoveIntoRemovedSquare{target: [x, y]}
+        {:in_bounds?, false} -> %CannotMoveOffBoard{target: [x, y]}
+        {:adjacent?, false} -> %CannotMoveToNonAdjacentSquare{target: [x, y]}
+      end
 
-      {:taken?, true} ->
-        {random_to_space(game, player), %CannotMoveIntoOpponent{target: [x, y]}}
-
-      {:already_removed?, true} ->
-        {random_to_space(game, player), %CannotMoveIntoRemovedSquare{target: [x, y]}}
-
-      {:in_bounds?, false} ->
-        {random_to_space(game, player), %CannotMoveOffBoard{target: [x, y]}}
-
-      {:adjacent?, false} ->
-        {random_to_space(game, player), %CannotMoveToNonAdjacentSquare{target: [x, y]}}
-    end
+    if error == :no_error,
+      do: {[x, y], nil},
+      else: {random_to_space(game, player), error}
   end
 
   defp validate_to(game, player, _invalid_type), do: {random_to_space(game, player), nil}
