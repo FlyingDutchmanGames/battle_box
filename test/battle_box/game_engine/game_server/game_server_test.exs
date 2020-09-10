@@ -1,6 +1,5 @@
 defmodule BattleBox.GameEngine.GameServerTest do
   alias BattleBox.{Game, GameEngine, GameEngine.GameServer}
-  alias BattleBox.Game.Error.Timeout
   alias BattleBox.InstalledGames
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
@@ -204,22 +203,22 @@ defmodule BattleBox.GameEngine.GameServerTest do
         Stream.unfold([], fn _ ->
           receive do
             {:player_1, {:commands_request, %{}}} ->
-              GameServer.submit_commands(pid, 1, :timeout)
+              GameServer.submit_commands(pid, 1, "something wildly invalid")
               {:ok, :ok}
 
             {:player_2, {:commands_request, %{}}} ->
-              GameServer.submit_commands(pid, 2, :timeout)
+              GameServer.submit_commands(pid, 2, "something wildly invalid")
               {:ok, :ok}
 
             {_player, {:debug_info, debug}} ->
-              assert %{debug_info: %Timeout{}, game_id: ^game_id} = debug
+              assert %{debug_info: %{}, game_id: ^game_id} = debug
               nil
           after
             200 ->
               flunk("#{unquote(game_type)} didn't send out debug info")
           end
         end)
-        |> Stream.run
+        |> Stream.run()
       end
 
       test "it will send out game_info", context do
@@ -252,7 +251,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
               flunk("#{unquote(game_type)} didn't send out game info")
           end
         end)
-        |> Stream.run
+        |> Stream.run()
       end
 
       test "you can play a game! (and it persists it to the db when you're done)", context do

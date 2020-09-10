@@ -3,7 +3,6 @@ defmodule BattleBox.Games.Marooned.LogicTest do
   alias BattleBox.Games.Marooned.Logic
   import BattleBox.Games.Marooned.Helpers
   alias BattleBox.Games.Marooned.Error
-  alias BattleBox.Game.Error.Timeout
 
   describe "opponent/1" do
     test "it gives the mortal enemy of a player" do
@@ -159,9 +158,9 @@ defmodule BattleBox.Games.Marooned.LogicTest do
   end
 
   describe "calculate_turn/2" do
-    test "timeouts yield the proper error" do
+    test "timeouts yields no errors" do
       start = ~m/0 1 2/
-      assert %{debug: %{1 => [%Timeout{}]}} = Logic.calculate_turn(start, %{1 => :timeout})
+      assert %{debug: %{1 => []}} = Logic.calculate_turn(start, %{1 => :timeout})
     end
 
     for input <- [

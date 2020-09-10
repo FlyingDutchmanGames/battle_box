@@ -1,6 +1,4 @@
 defmodule BattleBox.Games.Marooned.Logic do
-  alias BattleBox.Game.Error.Timeout
-
   alias BattleBox.Games.Marooned.Error.{
     CannotMoveIntoOpponent,
     CannotMoveIntoRemovedSquare,
@@ -142,7 +140,7 @@ defmodule BattleBox.Games.Marooned.Logic do
     end
   end
 
-  defp validate_command(:timeout), do: {%{}, %Timeout{}}
+  defp validate_command(:timeout), do: {%{}, nil}
 
   defp validate_command(command) when is_map(command),
     do: {command, %InvalidInputFormat{input: command}}
