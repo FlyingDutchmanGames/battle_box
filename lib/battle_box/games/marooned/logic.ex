@@ -5,13 +5,12 @@ defmodule BattleBox.Games.Marooned.Logic do
     CannotMoveIntoOpponent,
     CannotMoveIntoRemovedSquare,
     CannotMoveOffBoard,
-    CannotRemoveASpaceAlreadyRemoved,
-    CannotRemoveASpaceOffTheBoard,
-    CannotRemoveASpaceOutsideTheBoard,
-    CannotRemoveASpaceOutsideTheBoard,
-    CannotRemoveSameSpaceAsMoveTo,
-    CannotRemoveSameSpaceAsMoveTo,
-    CannotRemoveSpaceAPlayerIsOn,
+    CannotMoveToNonAdjacentSquare,
+    CannotMoveToSquareYouAlreadyOccupy,
+    CannotRemoveASquareAlreadyRemoved,
+    CannotRemoveASquareOutsideTheBoard,
+    CannotRemoveSameSquareAsMoveTo,
+    CannotRemoveSquareAPlayerIsOn,
     InvalidInputFormat
   }
 
@@ -19,26 +18,14 @@ defmodule BattleBox.Games.Marooned.Logic do
 
   def calculate_turn(game, commands) do
     {command, input_error} = validate_command(commands[game.next_player])
-    {remove, remove_error} = validate_remove(game, command["remove"])
-
-    available_to_move_to = available_adjacent_locations_for_player(game, game.next_player)
-
-    to =
-      if command["to"] in (available_to_move_to -- [remove]) do
-        command["to"]
-      else
-        Enum.max_by(available_to_move_to, fn location ->
-          Enum.sum(
-            for {player, position} <- player_positions(game),
-                player != game.next_player,
-                do: manhattan_distance(position, location)
-          )
-        end)
-      end
+    {remove, remove_error} = validate_remove(game, game.next_player, command["remove"])
+    {to, to_error} = validate_to(game, game.next_player, command["to"])
 
     event = %{turn: game.turn, player: game.next_player, removed_location: remove, to: to}
 
-    debug = %{game.next_player => Enum.reject([input_error, remove_error], &is_nil/1)}
+    debug = %{
+      game.next_player => Enum.reject([input_error, remove_error, to_error], &is_nil/1)
+    }
 
     game = update_in(game.events, &[event | &1])
     game = update_in(game.turn, &(&1 + 1))
@@ -151,7 +138,7 @@ defmodule BattleBox.Games.Marooned.Logic do
       {command, nil}
     else
       {:integers?, false} -> {command, %InvalidInputFormat{input: command}}
-      {:same_space?, true} -> {command, %CannotRemoveSameSpaceAsMoveTo{target: [a, b]}}
+      {:same_space?, true} -> {command, %CannotRemoveSameSquareAsMoveTo{target: [a, b]}}
     end
   end
 
@@ -162,35 +149,75 @@ defmodule BattleBox.Games.Marooned.Logic do
 
   defp validate_command(other), do: {%{}, %InvalidInputFormat{input: other}}
 
-  defp validate_remove(game, nil), do: {random_removal_space(game), nil}
+  defp validate_remove(game, player, nil), do: {random_removal_space(game, player), nil}
 
-  defp validate_remove(game, [x, y]) do
+  defp validate_remove(game, player, [x, y]) when is_integer(x) and is_integer(y) do
     with {:taken?, false} <- {:taken?, [x, y] in Map.values(player_positions(game))},
          {:already_removed?, false} <- {:already_removed?, [x, y] in removed_locations(game)},
          {:in_bounds?, true} <- {:in_bounds?, 0 <= x && x < game.cols && 0 <= y && y < game.rows} do
       {[x, y], nil}
     else
       {:taken?, true} ->
-        {random_removal_space(game), %CannotRemoveSpaceAPlayerIsOn{target: [x, y]}}
+        {random_removal_space(game, player), %CannotRemoveSquareAPlayerIsOn{target: [x, y]}}
 
       {:already_removed?, true} ->
-        {random_removal_space(game), %CannotRemoveASpaceAlreadyRemoved{target: [x, y]}}
+        {random_removal_space(game, player), %CannotRemoveASquareAlreadyRemoved{target: [x, y]}}
 
       {:in_bounds?, false} ->
-        {random_removal_space(game), %CannotRemoveASpaceOutsideTheBoard{target: [x, y]}}
+        {random_removal_space(game, player), %CannotRemoveASquareOutsideTheBoard{target: [x, y]}}
     end
   end
 
-  defp validate_remove(game, _invalid_type), do: {random_removal_space(game), nil}
+  defp validate_remove(game, player, _invalid_type), do: {random_removal_space(game, player), nil}
 
-  defp random_removal_space(game) do
-    available_to_be_removed = available_to_be_removed(game)
+  defp validate_to(game, player, nil), do: {random_to_space(game, player), nil}
 
-    enemy_adjacent_opportunities =
-      available_adjacent_locations_for_player(game, opponent(game.next_player))
+  defp validate_to(game, player, [x, y]) when is_integer(x) and is_integer(y) do
+    %{^player => current_position} = player_positions = player_positions(game)
+
+    with {:is_cur_loc?, false} <- {:is_cur_loc?, [x, y] == current_position},
+         {:in_bounds?, true} <- {:in_bounds?, 0 <= x && x < game.cols && 0 <= y && y < game.rows},
+         {:taken?, false} <- {:taken?, [x, y] in Map.values(player_positions)},
+         {:already_removed?, false} <- {:already_removed?, [x, y] in removed_locations(game)},
+         {:adjacent?, true} <- {:adjacent?, [x, y] in adjacent(current_position)} do
+      {[x, y], nil}
+    else
+      {:is_cur_loc?, true} ->
+        {random_to_space(game, player), %CannotMoveToSquareYouAlreadyOccupy{target: [x, y]}}
+
+      {:taken?, true} ->
+        {random_to_space(game, player), %CannotMoveIntoOpponent{target: [x, y]}}
+
+      {:already_removed?, true} ->
+        {random_to_space(game, player), %CannotMoveIntoRemovedSquare{target: [x, y]}}
+
+      {:in_bounds?, false} ->
+        {random_to_space(game, player), %CannotMoveOffBoard{target: [x, y]}}
+
+      {:adjacent?, false} ->
+        {random_to_space(game, player), %CannotMoveToNonAdjacentSquare{target: [x, y]}}
+    end
+  end
+
+  defp validate_to(game, player, _invalid_type), do: {random_to_space(game, player), nil}
+
+  defp random_removal_space(game, player) do
+    enemy_adjacent_opportunities = available_adjacent_locations_for_player(game, opponent(player))
 
     Enum.min_by(enemy_adjacent_opportunities, &manhattan_distance(&1, [0, 0]), fn ->
-      Enum.random(available_to_be_removed)
+      game
+      |> available_to_be_removed()
+      |> Enum.random()
+    end)
+  end
+
+  defp random_to_space(game, player) do
+    available_adjacent_locations_for_player(game, player)
+    |> Enum.max_by(fn location ->
+      Enum.sum(
+        for {some_player, position} when some_player != player <- player_positions(game),
+            do: manhattan_distance(position, location)
+      )
     end)
   end
 end

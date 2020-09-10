@@ -16,6 +16,36 @@ defmodule BattleBox.Games.Marooned.Error do
     end
   end
 
+  defmodule CannotMoveToNonAdjacentSquare do
+    @enforce_keys [:target]
+    defstruct [:target]
+
+    defimpl Error do
+      def level(_), do: :warn
+
+      def to_human(%{target: _target}) do
+        """
+        You have to move adjacently
+        """
+      end
+    end
+  end
+
+  defmodule CannotMoveToSquareYouAlreadyOccupy do
+    @enforce_keys [:target]
+    defstruct [:target]
+
+    defimpl Error do
+      def level(_), do: :warn
+
+      def to_human(%{target: _target}) do
+        """
+        You can't move into the space you're already in
+        """
+      end
+    end
+  end
+
   defmodule CannotMoveIntoOpponent do
     @enforce_keys [:target]
     defstruct [:target]
@@ -23,7 +53,7 @@ defmodule BattleBox.Games.Marooned.Error do
     defimpl Error do
       def level(_), do: :warn
 
-      def to_human(%{input: _input}) do
+      def to_human(%{target: _target}) do
         """
         You can't move into an opponent
         """
@@ -38,7 +68,7 @@ defmodule BattleBox.Games.Marooned.Error do
     defimpl Error do
       def level(_), do: :warn
 
-      def to_human(%{input: _input}) do
+      def to_human(%{target: _target}) do
         """
         You can't move off the board
         """
@@ -53,7 +83,7 @@ defmodule BattleBox.Games.Marooned.Error do
     defimpl Error do
       def level(_), do: :warn
 
-      def to_human(%{input: input}) do
+      def to_human(%{target: _target}) do
         """
         You can't move into a removed space!
         """
@@ -61,7 +91,7 @@ defmodule BattleBox.Games.Marooned.Error do
     end
   end
 
-  defmodule CannotRemoveSpaceAPlayerIsOn do
+  defmodule CannotRemoveSquareAPlayerIsOn do
     @enforce_keys [:target]
     defstruct [:target]
 
@@ -76,7 +106,7 @@ defmodule BattleBox.Games.Marooned.Error do
     end
   end
 
-  defmodule CannotRemoveASpaceAlreadyRemoved do
+  defmodule CannotRemoveASquareAlreadyRemoved do
     @enforce_keys [:target]
     defstruct [:target]
 
@@ -91,7 +121,7 @@ defmodule BattleBox.Games.Marooned.Error do
     end
   end
 
-  defmodule CannotRemoveASpaceOutsideTheBoard do
+  defmodule CannotRemoveASquareOutsideTheBoard do
     @enforce_keys [:target]
     defstruct [:target]
 
@@ -106,7 +136,7 @@ defmodule BattleBox.Games.Marooned.Error do
     end
   end
 
-  defmodule CannotRemoveSameSpaceAsMoveTo do
+  defmodule CannotRemoveSameSquareAsMoveTo do
     @enforce_keys [:target]
     defstruct [:target]
 
