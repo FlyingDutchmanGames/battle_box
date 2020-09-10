@@ -1,5 +1,6 @@
 defmodule BattleBox.GameEngine.GameServerTest do
   alias BattleBox.{Game, GameEngine, GameEngine.GameServer}
+  alias BattleBox.Game.Error.Timeout
   alias BattleBox.InstalledGames
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
@@ -186,6 +187,72 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
         assert_receive {:player_1, {:game_over, %{}}}
         assert_receive {:player_2, {:game_over, %{}}}
+      end
+
+      test "it will send out debug info", context do
+        {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+
+        assert_receive {:player_1,
+                        {:game_request, %{game_server: ^pid, player: 1, game_id: game_id}}}
+
+        assert_receive {:player_2,
+                        {:game_request, %{game_server: ^pid, player: 2, game_id: ^game_id}}}
+
+        assert :ok = GameServer.accept_game(pid, 1)
+        assert :ok = GameServer.accept_game(pid, 2)
+
+        Stream.unfold([], fn _ ->
+          receive do
+            {:player_1, {:commands_request, %{}}} ->
+              GameServer.submit_commands(pid, 1, :timeout)
+              {:ok, :ok}
+
+            {:player_2, {:commands_request, %{}}} ->
+              GameServer.submit_commands(pid, 2, :timeout)
+              {:ok, :ok}
+
+            {_player, {:debug_info, debug}} ->
+              assert %{debug_info: %Timeout{}, game_id: ^game_id} = debug
+              nil
+          after
+            200 ->
+              flunk("#{unquote(game_type)} didn't send out debug info")
+          end
+        end)
+        |> Stream.run
+      end
+
+      test "it will send out game_info", context do
+        {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
+
+        assert_receive {:player_1,
+                        {:game_request, %{game_server: ^pid, player: 1, game_id: game_id}}}
+
+        assert_receive {:player_2,
+                        {:game_request, %{game_server: ^pid, player: 2, game_id: ^game_id}}}
+
+        assert :ok = GameServer.accept_game(pid, 1)
+        assert :ok = GameServer.accept_game(pid, 2)
+
+        Stream.unfold([], fn _ ->
+          receive do
+            {:player_1, {:commands_request, %{}}} ->
+              GameServer.submit_commands(pid, 1, :timeout)
+              {:ok, :ok}
+
+            {:player_2, {:commands_request, %{}}} ->
+              GameServer.submit_commands(pid, 2, :timeout)
+              {:ok, :ok}
+
+            {_player, {:game_info, info}} ->
+              assert %{game_id: ^game_id, game_info: %{}} = info
+              nil
+          after
+            200 ->
+              flunk("#{unquote(game_type)} didn't send out game info")
+          end
+        end)
+        |> Stream.run
       end
 
       test "you can play a game! (and it persists it to the db when you're done)", context do

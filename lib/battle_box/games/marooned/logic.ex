@@ -24,22 +24,14 @@ defmodule BattleBox.Games.Marooned.Logic do
     event = %{turn: game.turn, player: game.next_player, removed_location: remove, to: to}
 
     debug = %{
-      game.next_player =>
-        Enum.reject(
-          [
-            input_error,
-            remove_error,
-            to_error
-          ],
-          &is_nil/1
-        )
+      game.next_player => Enum.reject([input_error, remove_error, to_error], &is_nil/1)
     }
 
     game = update_in(game.events, &[event | &1])
     game = update_in(game.turn, &(&1 + 1))
     game = update_in(game.next_player, &opponent/1)
 
-    %{game: game, debug: debug, info: %{1 => event, 2 => event}}
+    %{game: game, debug: debug, info: %{1 => [event], 2 => [event]}}
   end
 
   def winner(game) do

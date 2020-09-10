@@ -93,11 +93,11 @@ defmodule BattleBox.GameEngine.GameServer do
       %{game: game, debug: debug, info: info} = Game.calculate_turn(data.game, commands)
       data = put_in(data.game, game)
 
-      for {player, msg} <- debug do
+      for {player, msgs} <- debug, msg <- msgs do
         send(data.players[player], debug_info(data.game, msg))
       end
 
-      for {player, msg} <- info do
+      for {player, msgs} <- info, msg <- msgs do
         send(data.players[player], game_info(data.game, msg))
       end
 
