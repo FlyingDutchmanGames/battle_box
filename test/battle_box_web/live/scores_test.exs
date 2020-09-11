@@ -19,7 +19,7 @@ defmodule BattleBoxWeb.Live.ScoresTest do
 
   setup context do
     {:ok, user} = create_user(user_id: @user_id)
-    {:ok, arena} = robot_game_arena(%{arena_name: "test-arena", user: user})
+    {:ok, arena} = marooned_arena(%{arena_name: "test-arena", user: user})
 
     {:ok, bot} =
       user

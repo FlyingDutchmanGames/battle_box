@@ -10,7 +10,7 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
     Game,
     GameEngine,
     GameEngine.GameServer,
-    Games.RobotGame
+    Games.Marooned
   }
 
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
@@ -20,7 +20,7 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
 
   setup do
     {:ok, user} = create_user(%{user_id: @user_id})
-    {:ok, arena} = robot_game_arena(user: user, arena_name: "test-arena")
+    {:ok, arena} = marooned_arena(user: user, arena_name: "test-arena")
 
     {:ok, bot} =
       user
@@ -49,23 +49,20 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
   end
 
   test "it can load a game from the database", %{conn: conn} = context do
-    robot_game =
-      %RobotGame{}
-      |> RobotGame.complete_turn()
-      |> RobotGame.complete_turn()
+    marooned = %Marooned{}
 
     {:ok, %{id: id}} =
       %Game{
         arena: context.arena,
         arena_id: context.arena.id,
-        game_type: RobotGame,
-        robot_game: robot_game,
+        game_type: Marooned,
+        marooned: marooned,
         game_bots: context.game_bots
       }
       |> Repo.insert()
 
     {:ok, _view, html} = live_isolated(conn, GameViewer, session: %{"game_id" => id})
-    assert html =~ "TURN: 1 / 100"
+    assert html =~ "TURN: 1"
   end
 
   describe "live game watching" do
@@ -91,8 +88,8 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
             arena: arena,
             arena_id: arena.id,
             game_bots: game_bots,
-            game_type: RobotGame,
-            robot_game: %RobotGame{}
+            game_type: Marooned,
+            marooned: %Marooned{}
           }
         })
 
@@ -104,7 +101,7 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
 
     test "it can display a game in progress", %{conn: conn} do
       {:ok, _view, html} = live_isolated(conn, GameViewer, session: %{"game_id" => @game_id})
-      assert html =~ "TURN: 0 / 100"
+      assert html =~ "TURN: 0"
       assert html =~ "LIVE"
     end
 
@@ -112,31 +109,28 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
          %{conn: conn} = context do
       {:ok, view, html} = live_isolated(conn, GameViewer, session: %{"game_id" => @game_id})
       Process.link(view.pid)
-      assert html =~ "TURN: 0 / 100"
+      assert html =~ "TURN: 0"
 
-      Enum.each(1..9, fn _ ->
+      Enum.each(1..3, fn _ ->
         :ok = GameServer.submit_commands(context.game_server, 1, [])
         :ok = GameServer.submit_commands(context.game_server, 2, [])
       end)
 
       Process.sleep(10)
-      assert %{"turn" => "8"} = Regex.named_captures(~r/TURN: (?<turn>\d+) \/ 100/, render(view))
+      assert %{"turn" => "5"} = Regex.named_captures(~r/TURN: (?<turn>\d+)/, render(view))
     end
 
     test "when the game server dies, it will switch to the historical view",
          %{conn: conn} = context do
-      robot_game =
-        %RobotGame{}
-        |> RobotGame.complete_turn()
-        |> RobotGame.complete_turn()
+      marooned = %Marooned{}
 
       {:ok, _} =
         %Game{
           arena: context.arena,
           arena_id: context.arena.id,
-          robot_game: robot_game,
+          marooned: marooned,
           game_bots: context.game_bots,
-          game_type: RobotGame,
+          game_type: Marooned,
           id: @game_id
         }
         |> Repo.insert()
@@ -155,46 +149,6 @@ defmodule BattleBoxWeb.Live.GameViewerTest do
       Process.exit(context.game_server, :kill)
       Process.sleep(10)
       assert render(view) =~ "Game (#{@game_id}) has crashed"
-    end
-  end
-
-  describe "Arrow Keys let you change the turn you're viewing" do
-    setup %{game_bots: game_bots} do
-      robot_game =
-        %RobotGame{}
-        |> RobotGame.complete_turn()
-        |> RobotGame.complete_turn()
-
-      {:ok, %{id: id}} =
-        %Game{robot_game: robot_game, game_bots: game_bots, game_type: RobotGame}
-        |> Repo.insert()
-
-      %{game_id: id}
-    end
-
-    test "Arrow Keys move the page around but only to extent of game", %{
-      conn: conn,
-      game_id: game_id
-    } do
-      {:ok, view, html} =
-        live_isolated(conn, GameViewer, session: %{"game_id" => game_id, "turn" => "2"})
-
-      assert html =~ "TURN: 2 / 100"
-      assert render_keyup(view, "change-turn", %{"code" => "ArrowLeft"}) =~ "TURN: 1 / 100"
-      assert render_keyup(view, "change-turn", %{"code" => "ArrowLeft"}) =~ "TURN: 0 / 100"
-      assert render_keyup(view, "change-turn", %{"code" => "ArrowLeft"}) =~ "TURN: 0 / 100"
-      assert render_keyup(view, "change-turn", %{"code" => "ArrowRight"}) =~ "TURN: 1 / 100"
-      assert render_keyup(view, "change-turn", %{"code" => "ArrowRight"}) =~ "TURN: 2 / 100"
-      assert render_keyup(view, "change-turn", %{"code" => "ArrowRight"}) =~ "TURN: 2 / 100"
-    end
-
-    test "other arrow keys don't break it", %{conn: conn, game_id: game_id} do
-      {:ok, view, html} =
-        live_isolated(conn, GameViewer, session: %{"game_id" => game_id, "turn" => "2"})
-
-      assert html =~ "TURN: 2 / 100"
-      assert render_keyup(view, "change-turn", %{"code" => "ArrowUp"}) =~ "TURN: 2 / 100"
-      assert render_keyup(view, "change-turn", %{"code" => "ArrowDown"}) =~ "TURN: 2 / 100"
     end
   end
 end

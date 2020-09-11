@@ -1,7 +1,7 @@
 defmodule BattleBoxWeb.GameControllerTest do
   use BattleBoxWeb.ConnCase, async: false
   alias BattleBox.Game
-  alias BattleBox.Games.RobotGame
+  alias BattleBox.Games.Marooned
 
   @game1_id Ecto.UUID.generate()
   @game2_id Ecto.UUID.generate()
@@ -28,8 +28,8 @@ defmodule BattleBoxWeb.GameControllerTest do
       {:ok, user2} = create_user()
       {:ok, bot1} = create_bot(user: user1, bot_name: "bot1")
       {:ok, bot2} = create_bot(user: user2, bot_name: "bot2")
-      {:ok, arena1} = robot_game_arena(arena_name: "arena1")
-      {:ok, arena2} = robot_game_arena(arena_name: "arena2")
+      {:ok, arena1} = marooned_arena(arena_name: "arena1")
+      {:ok, arena2} = marooned_arena(arena_name: "arena2")
 
       arena1 = Repo.preload(arena1, :user)
       bot1 = Repo.preload(bot1, :user)
@@ -37,7 +37,7 @@ defmodule BattleBoxWeb.GameControllerTest do
       %Game{
         id: @game1_id,
         arena: arena1,
-        game_type: RobotGame,
+        game_type: Marooned,
         game_bots: [
           %{bot: bot1, score: 1, winner: true, player: 1},
           %{bot: bot2, score: 1, winner: false, player: 2}
@@ -48,7 +48,7 @@ defmodule BattleBoxWeb.GameControllerTest do
       %Game{
         id: @game2_id,
         arena: arena1,
-        game_type: RobotGame,
+        game_type: Marooned,
         game_bots: [
           %{bot: bot1, score: 1, winner: true, player: 1}
         ]
@@ -58,7 +58,7 @@ defmodule BattleBoxWeb.GameControllerTest do
       %Game{
         id: @game3_id,
         arena: arena2,
-        game_type: RobotGame,
+        game_type: Marooned,
         game_bots: [
           %{bot: bot2, score: 2, winner: true, player: 1}
         ]

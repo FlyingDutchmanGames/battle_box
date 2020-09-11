@@ -113,7 +113,7 @@ defmodule BattleBox.ArenaTest do
     assert {:ok, _arena} =
              user
              |> Ecto.build_assoc(:arenas)
-             |> Arena.changeset(%{name: "ABC", game_type: "robot_game", robot_game_settings: %{}})
+             |> Arena.changeset(%{name: "ABC", game_type: "marooned", marooned_settings: %{}})
              |> Repo.insert()
 
     assert %Arena{name: "ABC"} = Repo.get_by(Arena, name: "AbC")
@@ -128,8 +128,8 @@ defmodule BattleBox.ArenaTest do
                |> Ecto.build_assoc(:arenas)
                |> Arena.changeset(%{
                  name: "test-name",
-                 game_type: "robot_game",
-                 robot_game_settings: %{}
+                 game_type: "marooned",
+                 marooned_settings: %{}
                })
                |> Repo.insert()
 

@@ -1,7 +1,7 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{Bot, Arena, User}
-  alias BattleBox.Games.{RobotGame, RobotGame.Settings}
+  alias BattleBox.Games.{Marooned, Marooned.Settings}
   import BattleBox.GameEngine.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -16,8 +16,8 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       id: Ecto.UUID.generate(),
       user: user,
       user_id: user.id,
-      game_type: RobotGame,
-      robot_game_settings: %Settings{}
+      game_type: Marooned,
+      marooned_settings: %Settings{}
     }
 
     bot = %Bot{
@@ -92,22 +92,9 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     [%{game: game}] =
       make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], arena)
 
-    from_arena = [
-      :spawn_every,
-      :spawn_per_player,
-      :robot_hp,
-      :max_turns,
-      :attack_damage_min,
-      :attack_damage_max,
-      :collision_damage_min,
-      :collision_damage_max,
-      :explode_damage_min,
-      :explode_damage_max,
-      :terrain,
-      :spawn_enabled
-    ]
+    from_arena = [:rows, :cols]
 
-    assert Map.take(game.robot_game, from_arena) ==
+    assert Map.take(game.marooned, from_arena) ==
              Map.take(Arena.get_settings(arena), from_arena)
   end
 

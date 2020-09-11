@@ -31,13 +31,6 @@ defmodule BattleBoxWeb.Live.GameViewer do
         turn = String.to_integer(turn)
         {:noreply, assign(socket, turn: turn)}
 
-      %{"code" => "ArrowRight"} ->
-        {:noreply,
-         update(socket, :turn, fn turn -> min(turn + 1, socket.assigns.max_turn_so_far) end)}
-
-      %{"code" => "ArrowLeft"} ->
-        {:noreply, update(socket, :turn, fn turn -> max(0, turn - 1) end)}
-
       _ ->
         {:noreply, socket}
     end

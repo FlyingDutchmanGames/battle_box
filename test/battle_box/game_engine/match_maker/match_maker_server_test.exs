@@ -26,7 +26,7 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
       |> Bot.changeset(%{name: "FOO"})
       |> Repo.insert()
 
-    {:ok, arena} = robot_game_arena(user: user, arena_name: "test-arena")
+    {:ok, arena} = marooned_arena(user: user, arena_name: "test-arena")
 
     %{arena: arena, bot: bot, user: user}
   end
@@ -59,7 +59,7 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
     player_1_pid = named_proxy(:player_1)
     player_2_pid = named_proxy(:player_2)
 
-    {:ok, arena2} = robot_game_arena(user: user, arena_name: "test-arena-2")
+    {:ok, arena2} = marooned_arena(user: user, arena_name: "test-arena-2")
 
     :ok = MatchMaker.join_queue(names.game_engine, arena.id, bot, player_1_pid)
     :ok = MatchMaker.join_queue(names.game_engine, arena2.id, bot, player_2_pid)

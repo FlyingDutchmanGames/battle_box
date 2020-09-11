@@ -91,7 +91,7 @@ defmodule BattleBox.Connection.LogicTest do
   describe "match_making" do
     setup do
       {:ok, key} = create_key()
-      {:ok, arena} = robot_game_arena()
+      {:ok, arena} = marooned_arena()
       %{key: key, arena: arena}
     end
 
@@ -132,7 +132,7 @@ defmodule BattleBox.Connection.LogicTest do
   describe "practice" do
     setup do
       {:ok, key} = create_key()
-      {:ok, arena} = robot_game_arena()
+      {:ok, arena} = marooned_arena()
       %{key: key, arena: arena}
     end
 
@@ -183,7 +183,7 @@ defmodule BattleBox.Connection.LogicTest do
 
       {%{state: :match_making}, [send: msg], :continue} =
         Logic.handle_message(
-          {:client, %{"action" => "practice", "arena" => arena.name, "opponent" => "kansas"}},
+          {:client, %{"action" => "practice", "arena" => arena.name, "opponent" => "wild-card"}},
           data
         )
 

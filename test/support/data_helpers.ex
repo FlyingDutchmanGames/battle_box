@@ -77,10 +77,6 @@ defmodule BattleBox.Test.DataHelpers do
     create_arena(BattleBox.Games.Marooned, opts)
   end
 
-  def robot_game_arena(opts \\ %{}) do
-    create_arena(BattleBox.Games.RobotGame, opts)
-  end
-
   def create_arena(game_type, opts \\ %{}) do
     user =
       case opts do

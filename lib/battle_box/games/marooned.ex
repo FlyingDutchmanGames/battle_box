@@ -5,7 +5,7 @@ defmodule BattleBox.Games.Marooned do
 
   alias __MODULE__.{Settings, Logic}
   alias __MODULE__.Types.{Event, Location, PlayerStartingLocations}
-  alias __MODULE__.Ais.WildCard
+  alias __MODULE__.Ais.{WildCard, Wilson}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -32,7 +32,7 @@ defmodule BattleBox.Games.Marooned do
   def name, do: :marooned
   def settings_module, do: Settings
   def players_for_settings(_), do: [1, 2]
-  def ais, do: [WildCard]
+  def ais, do: [WildCard, Wilson]
 
   def from_settings(%{
         rows: rows,
