@@ -22,6 +22,14 @@ defmodule BattleBox.Connection.Logic do
     {data, [{:send, commands_request(request)}], :continue}
   end
 
+  def handle_system({:debug_info, _debug}, %{state: :playing} = data) do
+    {data, [], :continue}
+  end
+
+  def handle_system({:game_info, _info}, %{state: :playing} = data) do
+    {data, [], :continue}
+  end
+
   def handle_system({:game_over, result}, data) do
     data = Map.put(data, :state, :idle)
     {data, [{:send, game_over(result)}], :continue}
