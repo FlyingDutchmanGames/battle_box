@@ -12,7 +12,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
 
   describe "show" do
     test "you can view a arena", %{conn: conn, user: user} do
-      {:ok, arena} = robot_game_arena(user: user, arena_name: "test-name")
+      {:ok, arena} = marooned_arena(user: user, arena_name: "test-name")
 
       conn = get(conn, "/users/#{user.username}/arenas/#{arena.name}")
 
@@ -28,7 +28,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
 
   describe "scoreboard" do
     test "you can view a arena", %{conn: conn, user: user} do
-      {:ok, arena} = robot_game_arena(user: user, arena_name: "test-name")
+      {:ok, arena} = marooned_arena(user: user, arena_name: "test-name")
 
       conn = get(conn, "/users/#{user.username}/arenas/#{arena.name}/scoreboard")
 
@@ -53,7 +53,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
         conn
         |> signin(user: user)
         |> post("/arenas", %{
-          "arena" => %{"name" => "FOO", "game_type" => "robot_game", "robot_game_settings" => %{}}
+          "arena" => %{"name" => "FOO", "game_type" => "marooned", "marooned_settings" => %{}}
         })
 
       url = redirected_to(conn, 302)
@@ -65,13 +65,13 @@ defmodule BattleBoxWeb.ArenaControllerTest do
       conn: conn,
       user: user
     } do
-      {:ok, _arena} = robot_game_arena(user: user, arena_name: "FOO")
+      {:ok, _arena} = marooned_arena(user: user, arena_name: "FOO")
 
       conn =
         conn
         |> signin(user: user)
         |> post("/arenas", %{
-          "arena" => %{"name" => "FOO", "game_type" => "robot_game", "robot_game_settings" => %{}}
+          "arena" => %{"name" => "FOO", "game_type" => "marooned", "marooned_settings" => %{}}
         })
 
       assert html_response(conn, 200) =~ "has already been taken"
@@ -102,7 +102,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
       conn =
         conn
         |> signin(user: user)
-        |> get("/arenas/new?game_type=robot_game")
+        |> get("/arenas/new?game_type=marooned")
 
       html = html_response(conn, 200)
       {:ok, document} = Floki.parse_document(html)
@@ -118,7 +118,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
 
     test "it will show a user's arenas", %{conn: conn, user: user} do
       for i <- [1, 2, 3] do
-        {:ok, _} = robot_game_arena(%{user: user, arena_name: "test-name-#{i}"})
+        {:ok, _} = marooned_arena(%{user: user, arena_name: "test-name-#{i}"})
       end
 
       conn = get(conn, "/users/#{user.username}/arenas")
@@ -148,7 +148,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
 
     test "trying to edit someone else's arena is an error", %{conn: conn, user: user} do
       {:ok, some_other_user} = create_user()
-      {:ok, arena} = robot_game_arena(%{user: some_other_user})
+      {:ok, arena} = marooned_arena(%{user: some_other_user})
 
       conn =
         conn
@@ -160,7 +160,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
     end
 
     test "You can edit your own arena if it exists", %{user: user, conn: conn} do
-      {:ok, arena} = robot_game_arena(%{user: user})
+      {:ok, arena} = marooned_arena(%{user: user})
 
       conn =
         conn
@@ -190,7 +190,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
 
     test "trying to update someone else's arena is an error", %{conn: conn, user: user} do
       {:ok, some_other_user} = create_user()
-      {:ok, arena} = robot_game_arena(%{user: some_other_user})
+      {:ok, arena} = marooned_arena(%{user: some_other_user})
 
       conn =
         conn
@@ -202,7 +202,7 @@ defmodule BattleBoxWeb.ArenaControllerTest do
     end
 
     test "You can update your own arena if it exists", %{user: user, conn: conn} do
-      {:ok, %{id: arena_id} = arena} = robot_game_arena(%{user: user})
+      {:ok, %{id: arena_id} = arena} = marooned_arena(%{user: user})
 
       conn =
         conn

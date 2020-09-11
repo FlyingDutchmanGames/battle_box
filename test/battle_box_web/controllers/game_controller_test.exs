@@ -28,8 +28,8 @@ defmodule BattleBoxWeb.GameControllerTest do
       {:ok, user2} = create_user()
       {:ok, bot1} = create_bot(user: user1, bot_name: "bot1")
       {:ok, bot2} = create_bot(user: user2, bot_name: "bot2")
-      {:ok, arena1} = robot_game_arena(arena_name: "arena1")
-      {:ok, arena2} = robot_game_arena(arena_name: "arena2")
+      {:ok, arena1} = marooned_arena(arena_name: "arena1")
+      {:ok, arena2} = marooned_arena(arena_name: "arena2")
 
       arena1 = Repo.preload(arena1, :user)
       bot1 = Repo.preload(bot1, :user)

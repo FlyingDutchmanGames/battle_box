@@ -1,6 +1,6 @@
 use Mix.Config
 
-alias BattleBox.Games.{RobotGame, Marooned}
+alias BattleBox.Games.Marooned
 
 config :battle_box,
   ecto_repos: [BattleBox.Repo],
@@ -17,7 +17,7 @@ config :battle_box, BattleBoxWeb.Endpoint,
     signing_salt: "SECRET_SALT"
   ]
 
-config :battle_box, BattleBox.GameEngine, games: [RobotGame, Marooned]
+config :battle_box, BattleBox.GameEngine, games: [Marooned]
 
 config :battle_box, BattleBox.TcpConnectionServer, port: 4001
 

@@ -29,7 +29,7 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
 
   describe "practice match" do
     setup do
-      {:ok, arena} = robot_game_arena()
+      {:ok, arena} = marooned_arena()
       %{arena: arena}
     end
 

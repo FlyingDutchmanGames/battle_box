@@ -1,7 +1,7 @@
 defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{Bot, Arena, User}
-  alias BattleBox.Games.{RobotGame, RobotGame.Settings}
+  alias BattleBox.Games.{Marooned, Marooned.Settings}
   import BattleBox.GameEngine.MatchMaker.MatchMakerLogic
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
@@ -16,8 +16,8 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
       id: Ecto.UUID.generate(),
       user: user,
       user_id: user.id,
-      game_type: RobotGame,
-      robot_game_settings: %Settings{}
+      game_type: Marooned,
+      marooned_settings: %Settings{}
     }
 
     bot = %Bot{

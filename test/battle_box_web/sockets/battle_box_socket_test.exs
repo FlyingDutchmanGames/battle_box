@@ -103,7 +103,7 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
   end
 
   setup do
-    {:ok, arena} = robot_game_arena()
+    {:ok, arena} = marooned_arena()
 
     %{
       arena: arena,

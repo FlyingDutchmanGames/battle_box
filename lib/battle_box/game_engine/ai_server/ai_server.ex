@@ -56,6 +56,14 @@ defmodule BattleBox.GameEngine.AiServer do
     {:noreply, Map.put(state, :ai_state, ai_state)}
   end
 
+  def handle_info({:debug_info, _debug}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:game_info, _game_info}, state) do
+    {:noreply, state}
+  end
+
   def handle_info(
         {:DOWN, _ref, :process, pid, _reason},
         %{game_request: %{game_server: pid}} = state

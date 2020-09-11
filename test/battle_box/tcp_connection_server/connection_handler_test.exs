@@ -29,8 +29,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
   setup do
     {:ok, user} = create_user(id: @user_id)
 
-    {:ok, arena} =
-      robot_game_arena(user: user, arena_name: @arena_name, command_time_minimum_ms: 1)
+    {:ok, arena} = marooned_arena(user: user, arena_name: @arena_name, command_time_minimum_ms: 1)
 
     {:ok, key} = create_key(user: user)
 
@@ -168,20 +167,11 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       assert %{
                "game_info" => %{
                  "game_id" => <<_::288>> = game_id,
-                 "game_type" => "robot_game",
+                 "game_type" => "marooned",
                  "player" => _,
                  "settings" => %{
-                   "attack_damage_max" => _,
-                   "attack_damage_min" => _,
-                   "collision_damage_max" => _,
-                   "collision_damage_min" => _,
-                   "max_turns" => _,
-                   "robot_hp" => _,
-                   "spawn_every" => _,
-                   "spawn_per_player" => _,
-                   "explode_damage_max" => _,
-                   "explode_damage_min" => _,
-                   "terrain_base64" => _
+                   "rows" => 10,
+                   "cols" => 10
                  }
                },
                "request_type" => "game_request"
@@ -192,7 +182,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       :ok =
         :gen_tcp.send(
           p1,
-          encode(%{"action" => "practice", "arena" => arena.name, "opponent" => "kansas"})
+          encode(%{"action" => "practice", "arena" => arena.name})
         )
 
       assert_receive {:tcp, ^p1, start_match_making}
@@ -281,7 +271,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       :ok = :gen_tcp.send(p1, encode(accept_game))
       :ok = :gen_tcp.send(p2, encode(accept_game))
 
-      assert_receive {:tcp, ^p1, move_req}
+      assert_receive {:tcp, _conn, move_req}
 
       assert %{
                "request_type" => "commands_request",
@@ -290,13 +280,6 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                  "request_id" => <<_::288>>,
                  "game_state" => _
                }
-             } = Jason.decode!(move_req)
-
-      assert_receive {:tcp, ^p2, move_req}
-
-      assert %{
-               "request_type" => "commands_request",
-               "commands_request" => %{"game_id" => ^game_id}
              } = Jason.decode!(move_req)
     end
   end
@@ -336,45 +319,42 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       Map.merge(players, %{game_id: game_id})
     end
 
-    test "commands with the wrong id get the messages that they were invalid", %{
-      p1: %{socket: p1}
-    } do
-      assert_receive {:tcp, ^p1, commands_request}
+    test "commands with the wrong id get the messages that they were invalid" do
+      assert_receive {:tcp, conn, commands_request}
       incorrect_request_id = Ecto.UUID.generate()
       %{"commands_request" => _} = Jason.decode!(commands_request)
-      :ok = :gen_tcp.send(p1, empty_commands_msg(incorrect_request_id))
-      assert_receive {:tcp, ^p1, error}
+      :ok = :gen_tcp.send(conn, empty_commands_msg(incorrect_request_id))
+      assert_receive {:tcp, conn, error}
 
       assert %{"error" => "invalid_commands_submission", "request_id" => ^incorrect_request_id} =
                Jason.decode!(error)
     end
 
-    test "playing the game", %{p1: %{socket: p1}, p2: %{socket: p2}, game_id: game_id} do
-      Enum.each(0..99, fn _turn ->
-        assert_receive {:tcp, ^p1, commands_request}
+    test "playing the game", %{game_id: game_id} do
+      turns =
+        Stream.unfold(:ok, fn _ ->
+          receive do
+            {:tcp, conn, message} ->
+              case Jason.decode!(message) do
+                %{"commands_request" => %{"request_id" => request_id}} ->
+                  :gen_tcp.send(conn, empty_commands_msg(request_id))
+                  {:ok, :ok}
 
-        assert %{"commands_request" => %{"request_id" => request_id}} =
-                 Jason.decode!(commands_request)
+                %{
+                  "info" => "game_over",
+                  "game_id" => ^game_id,
+                  "result" => %{"1" => _, "2" => _},
+                  "watch" => "http://localhost:4002/games/" <> ^game_id
+                } ->
+                  nil
+              end
+          after
+            150 -> flunk("Something went wrong")
+          end
+        end)
+        |> Enum.to_list()
 
-        :ok = :gen_tcp.send(p1, empty_commands_msg(request_id))
-
-        assert_receive {:tcp, ^p2, commands_request}
-
-        assert %{"commands_request" => %{"request_id" => request_id}} =
-                 Jason.decode!(commands_request)
-
-        :ok = :gen_tcp.send(p2, empty_commands_msg(request_id))
-      end)
-
-      assert_receive {:tcp, ^p1, game_over}
-      assert_receive {:tcp, ^p2, ^game_over}
-
-      assert %{
-               "info" => "game_over",
-               "game_id" => ^game_id,
-               "result" => %{"1" => _, "2" => _},
-               "watch" => "http://localhost:4002/games/" <> ^game_id
-             } = Jason.decode!(game_over)
+      assert length(turns) > 2
     end
   end
 

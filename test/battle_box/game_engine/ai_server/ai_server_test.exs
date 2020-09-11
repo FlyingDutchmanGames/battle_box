@@ -1,7 +1,7 @@
 defmodule BattleBox.GameEngine.AiServerTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{Game, GameEngine, GameEngine.GameServer}
-  alias BattleBox.Games.RobotGame
+  alias BattleBox.Games.Marooned
 
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
@@ -9,7 +9,7 @@ defmodule BattleBox.GameEngine.AiServerTest do
   end
 
   setup do
-    {:ok, arena} = robot_game_arena()
+    {:ok, arena} = marooned_arena()
 
     game = %Game{
       id: Ecto.UUID.generate(),
@@ -17,7 +17,7 @@ defmodule BattleBox.GameEngine.AiServerTest do
       arena_id: arena.id,
       game_type: arena.game_type,
       game_bots: [],
-      robot_game: %RobotGame{}
+      marooned: %Marooned{}
     }
 
     %{game: game}
@@ -126,11 +126,19 @@ defmodule BattleBox.GameEngine.AiServerTest do
         players: %{1 => ai_server2, 2 => ai_server1}
       })
 
-    for turn <- 0..99 do
-      assert_receive {1, :got_commands_request, ^turn}
-      assert_receive {2, :got_commands_request, ^turn}
-    end
+    turns =
+      Stream.unfold(:ok, fn _ ->
+        receive do
+          {_player, :got_commands_request, turn} ->
+            {turn, :ok}
+        after
+          200 ->
+            nil
+        end
+      end)
+      |> Enum.to_list()
 
+    assert length(turns) > 2
     assert_receive {:DOWN, _ref, :process, ^ai_server1, :normal}
     assert_receive {:DOWN, _ref, :process, ^ai_server2, :normal}
   end
