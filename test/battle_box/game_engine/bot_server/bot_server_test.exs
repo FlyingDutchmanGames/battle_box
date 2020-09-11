@@ -254,6 +254,22 @@ defmodule BattleBox.GameEngine.BotServerTest do
         :ok = BotServer.submit_commands(server, id, [])
       end
 
+      test "You can get debug info", context do
+        {:ok, %{game_id: game_id}} = accept_game(context)
+        assert_receive {proxy_id, {:commands_request, %{request_id: id}}}
+        server = %{p1_connection: context.p1_server, p2_connection: context.p2_server}[proxy_id]
+        :ok = BotServer.submit_commands(server, id, "something that's invalid")
+        assert_receive {^proxy_id, {:debug_info, %{debug_info: %{}, game_id: ^game_id}}}
+      end
+
+      test "You can get game info", context do
+        {:ok, %{game_id: game_id}} = accept_game(context)
+        assert_receive {proxy_id, {:commands_request, %{request_id: id}}}
+        server = %{p1_connection: context.p1_server, p2_connection: context.p2_server}[proxy_id]
+        :ok = BotServer.submit_commands(server, id, "something that's invalid")
+        assert_receive {^proxy_id, {:game_info, %{game_id: ^game_id, game_info: %{}}}}
+      end
+
       test "trying to submit the wrong commands raises an error", context do
         {:ok, _} = accept_game(context)
         assert_receive {proxy_id, {:commands_request, _}}
