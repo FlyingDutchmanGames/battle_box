@@ -130,6 +130,12 @@ defmodule BattleBox.GameEngine.BotServer do
     {:next_state, :commands_request, data, {:next_event, :internal, :setup_commands_request}}
   end
 
+  def handle_event(:info, {type, _} = msg, :playing, data)
+      when type in [:debug_info, :game_info] do
+    send(data.connection, msg)
+    :keep_state_and_data
+  end
+
   def handle_event(
         :internal,
         :setup_commands_request,

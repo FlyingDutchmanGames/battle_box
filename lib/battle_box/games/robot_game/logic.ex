@@ -52,7 +52,9 @@ defmodule BattleBox.Games.RobotGame.Logic do
         do: calculate_winner(game),
         else: game
 
-    complete_turn(game)
+    game = complete_turn(game)
+
+    %{game: game, debug: %{}, info: %{}}
   end
 
   defp generate_guard_event(move), do: %{cause: move, effects: [guard_effect(move["robot_id"])]}

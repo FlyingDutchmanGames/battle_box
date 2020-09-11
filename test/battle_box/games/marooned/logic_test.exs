@@ -2,6 +2,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
   use ExUnit.Case, async: true
   alias BattleBox.Games.Marooned.Logic
   import BattleBox.Games.Marooned.Helpers
+  alias BattleBox.Games.Marooned.Error
 
   describe "opponent/1" do
     test "it gives the mortal enemy of a player" do
@@ -47,11 +48,15 @@ defmodule BattleBox.Games.Marooned.LogicTest do
     end
 
     test "It returns the spaces that can be removed" do
-      game = ~m/x 0 x
-                0 1 0
-                x 2 x/
+      game1 = ~m/x 0 x
+                 0 1 0
+                 x 2 x/
 
-      assert [[0, 1], [1, 2], [2, 1]] == Logic.available_to_be_removed(game)
+      assert [[0, 1], [1, 2], [2, 1]] == Logic.available_to_be_removed(game1)
+
+      game2 = ~m/0 1 2/
+
+      assert [[0, 0]] = Logic.available_to_be_removed(game2)
     end
   end
 
@@ -92,21 +97,25 @@ defmodule BattleBox.Games.Marooned.LogicTest do
       assert Logic.over?(game3)
     end
 
+    test "The game is over if the only space that can be removed is one that the player can move to" do
+      assert Logic.over?(~m/0 1 2/)
+    end
+
     test "A game is not over if there is an opportunity for the next player to move" do
-      game1 = ~m/x x x
+      game1 = ~m/x 0 x
                  x 1 x
                  x 0 x/
 
-      game2 = ~m/x 1 x
+      game2 = ~m/0 1 x
                  x 0 x
-                 0 0 0/
+                 0 x 0/
 
       refute Logic.over?(game1)
       refute Logic.over?(game2)
     end
 
     test "The game is not over if the next player can go even if the other player has lost" do
-      game1 = ~m/0 1 x
+      game1 = ~m/0 1 0
                  x x x
                  x 2 x/
 
@@ -136,27 +145,150 @@ defmodule BattleBox.Games.Marooned.LogicTest do
 
   describe "player_positions/1/2" do
     test "It can give the player positions" do
-      game = ~m/0 1 0
-                0 0 0
-                0 2 0/
+      game1 = ~m/0 1 0
+                 0 0 0
+                 0 2 0/
 
-      assert %{1 => [1, 2], 2 => [1, 0]} == Logic.player_positions(game)
+      assert %{1 => [1, 2], 2 => [1, 0]} == Logic.player_positions(game1)
+
+      game2 = ~m/0 1 2/
+
+      assert %{1 => [1, 0], 2 => [2, 0]} == Logic.player_positions(game2)
     end
   end
 
   describe "calculate_turn/2" do
+    test "timeouts yields no errors" do
+      start = ~m/0 1 2/
+      assert %{debug: %{1 => []}} = Logic.calculate_turn(start, %{1 => :timeout})
+    end
+
+    for input <- [
+          [],
+          [1, 2],
+          "foo",
+          %{},
+          %{"foo" => "bar"},
+          %{"remove" => [1, 2]},
+          %{"to" => [1, 2]},
+          %{"remove" => [1, 2], "to" => "foo"},
+          %{"remove" => "foo", "to" => [1, 2]},
+          %{"remove" => "foo", "to" => "bar"}
+        ] do
+      test "the input #{inspect(input)} is improperly formatted and yields an error" do
+        start = ~m/0 1 2/
+
+        expected_error = %Error.InvalidInputFormat{input: unquote(Macro.escape(input))}
+
+        %{debug: %{1 => error}} =
+          Logic.calculate_turn(start, %{1 => unquote(Macro.escape(input))})
+
+        assert expected_error in error
+      end
+    end
+
+    test "You can't remove the space your opponent is on" do
+      start = ~m/0 1 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveSquareAPlayerIsOn{target: [1, 0]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [1, 0], "to" => [0, 1]}})
+    end
+
+    test "You can't remove the space you're on" do
+      start = ~m/0 1 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveSquareAPlayerIsOn{target: [1, 1]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [1, 1], "to" => [0, 1]}})
+    end
+
+    test "You can't remove an already removed space" do
+      start = ~m/0 1 0
+                 x 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveASquareAlreadyRemoved{target: [0, 0]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 1]}})
+    end
+
+    test "you can't remove a square that is out of bounds" do
+      start = ~m/0 1 0
+                 0 2 0/
+
+      for bad_square <- [[-1, 0], [0, -1], [0, 10], [10, 0]] do
+        %{debug: %{1 => [%Error.CannotRemoveASquareOutsideTheBoard{target: ^bad_square}]}} =
+          Logic.calculate_turn(start, %{1 => %{"remove" => bad_square, "to" => [0, 1]}})
+      end
+    end
+
+    test "you can't move to the same place you're removing" do
+      start = ~m/0 1 0
+                 0 0 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotRemoveSameSquareAsMoveTo{target: [1, 1]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [1, 1], "to" => [1, 1]}})
+    end
+
+    test "you can't move into an opponent" do
+      start = ~m/0 0 0
+                 0 1 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotMoveIntoOpponent{target: [1, 0]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [1, 0]}})
+    end
+
+    test "you can't move into yourself" do
+      start = ~m/0 0 0
+                 0 1 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotMoveToSquareYouAlreadyOccupy{target: [1, 1]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [1, 1]}})
+    end
+
+    test "you can't move into a removed square" do
+      start = ~m/0 0 0
+                 x 1 0
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotMoveIntoRemovedSquare{target: [0, 1]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 1]}})
+    end
+
+    test "You can't move off the board" do
+      start = ~m/0 0 0
+                 0 0 1
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotMoveOffBoard{target: [3, 1]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [3, 1]}})
+    end
+
+    test "you can't move to a non adjacent location" do
+      start = ~m/0 0 0
+                 0 0 1
+                 0 2 0/
+
+      %{debug: %{1 => [%Error.CannotMoveToNonAdjacentSquare{target: [0, 1]}]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 1]}})
+    end
+
     test "you can issue a valid move" do
       start = ~m/0 1 0
                  0 0 0
                  0 2 0/
 
-      after_turn = Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [1, 1]}})
+      %{game: after_turn, debug: %{1 => []}, info: %{1 => [event], 2 => [event]}} =
+        Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [1, 1]}})
 
       expected = ~m/0 0 0
                     0 1 0
                     x 2 0/
 
       compare_games(after_turn, expected)
+      assert %{player: 1, removed_location: [0, 0], to: [1, 1], turn: 0} == event
     end
   end
 
