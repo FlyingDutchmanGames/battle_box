@@ -183,7 +183,7 @@ defmodule BattleBox.Connection.LogicTest do
 
       {%{state: :match_making}, [send: msg], :continue} =
         Logic.handle_message(
-          {:client, %{"action" => "practice", "arena" => arena.name, "opponent" => "kansas"}},
+          {:client, %{"action" => "practice", "arena" => arena.name, "opponent" => "wild-card"}},
           data
         )
 

@@ -92,22 +92,9 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     [%{game: game}] =
       make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], arena)
 
-    from_arena = [
-      :spawn_every,
-      :spawn_per_player,
-      :robot_hp,
-      :max_turns,
-      :attack_damage_min,
-      :attack_damage_max,
-      :collision_damage_min,
-      :collision_damage_max,
-      :explode_damage_min,
-      :explode_damage_max,
-      :terrain,
-      :spawn_enabled
-    ]
+    from_arena = [:rows, :cols]
 
-    assert Map.take(game.robot_game, from_arena) ==
+    assert Map.take(game.marooned, from_arena) ==
              Map.take(Arena.get_settings(arena), from_arena)
   end
 

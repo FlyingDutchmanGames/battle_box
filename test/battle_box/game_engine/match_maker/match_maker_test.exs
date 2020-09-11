@@ -39,7 +39,7 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
                  context.game_engine,
                  context.arena,
                  context.bot,
-                 "kansas"
+                 "wild-card"
                )
 
       assert_receive {:game_request, %{game_id: ^game_id}}

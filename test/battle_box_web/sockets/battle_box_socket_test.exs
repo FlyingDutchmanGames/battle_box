@@ -6,9 +6,16 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
   @bot_name "some-bot-name"
 
   defmacrop assert_recieve_msg(conn, msg) do
-    quote do
-      assert_receive({:gun_ws, ^unquote(conn), _ref, {:text, received_msg}})
-      assert unquote(msg) = Jason.decode!(received_msg)
+    if conn == :any do
+      quote do
+        assert_receive({:gun_ws, _, _ref, {:text, received_msg}})
+        assert unquote(msg) = Jason.decode!(received_msg)
+      end
+    else
+      quote do
+        assert_receive({:gun_ws, ^unquote(conn), _ref, {:text, received_msg}})
+        assert unquote(msg) = Jason.decode!(received_msg)
+      end
     end
   end
 
@@ -216,16 +223,14 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
 
     for conn <- [p1, p2], do: send_msg(conn, %{"action" => "accept_game", "game_id" => game_id})
 
-    for conn <- [p1, p2],
-        do:
-          assert_recieve_msg(conn, %{
-            "request_type" => "commands_request",
-            "commands_request" => %{
-              "game_id" => ^game_id,
-              "request_id" => _,
-              "game_state" => %{"turn" => _}
-            }
-          })
+    assert_recieve_msg(:any, %{
+      "request_type" => "commands_request",
+      "commands_request" => %{
+        "game_id" => ^game_id,
+        "request_id" => _,
+        "game_state" => %{"turn" => _}
+      }
+    })
   end
 
   test "commands with the wrong id get a message saying they're invalid", context do

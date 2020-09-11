@@ -19,7 +19,7 @@ defmodule BattleBoxWeb.Live.BotServersTest do
     {:ok, arena} =
       user
       |> Ecto.build_assoc(:arenas)
-      |> Arena.changeset(%{name: "test-arena", game_type: "robot_game", robot_game_settings: %{}})
+      |> Arena.changeset(%{name: "test-arena", game_type: "marooned", marooned_settings: %{}})
       |> Repo.insert()
 
     {:ok, bot} =
