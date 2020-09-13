@@ -40,6 +40,32 @@ defmodule BattleBox.BotTest do
            ]
   end
 
+  describe "system users" do
+    test "calling system_bot/1 will create a bot" do
+      assert [] == Repo.all(Bot)
+      assert {:ok, %{id: id, name: "foo"}} = Bot.system_bot("foo")
+      assert [%{id: ^id, name: "foo"}] = Repo.all(Bot)
+    end
+
+    test "calling system_bot/1 multiple times with the same name returns the same bot" do
+      assert {:ok, %{id: id, name: "foo"}} = Bot.system_bot("foo")
+      assert {:ok, %{id: ^id, name: "foo"}} = Bot.system_bot("foo")
+      assert {:ok, %{id: new_id, name: "bar"}} = Bot.system_bot("bar")
+      assert new_id != id
+    end
+
+    test "calling anon_human_bot/0 will create a bot" do
+      assert [] == Repo.all(Bot)
+      assert {:ok, %{id: id, name: "Human"}} = Bot.anon_human_bot()
+      assert [%{id: ^id, name: "Human"}] = Repo.all(Bot)
+    end
+
+    test "calling anon_Human_bot/0 multiple times returns the same bot" do
+      assert {:ok, %{id: id, name: "Human"}} = Bot.anon_human_bot()
+      assert {:ok, %{id: ^id, name: "Human"}} = Bot.anon_human_bot()
+    end
+  end
+
   test "bot names are case insensitive" do
     {:ok, user} = create_user()
 
