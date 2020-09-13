@@ -3,6 +3,7 @@ defmodule BattleBox.GameEngine do
   alias BattleBox.GameEngine.GameServer.GameSupervisor, as: GameSup
   alias BattleBox.GameEngine.BotServer.BotSupervisor, as: BotSup
   alias BattleBox.GameEngine.AiServer.AiSupervisor, as: AiSup
+  alias BattleBox.GameEngine.HumanServer.HumanSupervisor, as: HumanSup
   alias BattleBox.GameEngine.MatchMaker, as: MatchMakerSup
   alias BattleBox.GameEngine.PubSub, as: GameEnginePubSub
   alias BattleBox.GameEngine.MatchMakerServer
@@ -17,17 +18,20 @@ defmodule BattleBox.GameEngine do
 
   def init(opts) do
     name = Keyword.fetch!(opts, :name)
+    supervisor_opts = %{names: names(name)}
 
     children = [
       {Registry, keys: :unique, name: game_registry_name(name)},
       {Registry, keys: :unique, name: bot_registry_name(name)},
       {Registry, keys: :unique, name: ai_registry_name(name)},
       {Registry, keys: :unique, name: connection_registry_name(name)},
-      {GameEnginePubSub, %{names: names(name)}},
-      {AiSup, %{names: names(name)}},
-      {GameSup, %{names: names(name)}},
-      {BotSup, %{names: names(name)}},
-      {MatchMakerSup, %{names: names(name)}}
+      {Registry, keys: :unique, name: human_registry_name(name)},
+      {GameEnginePubSub, supervisor_opts},
+      {AiSup, supervisor_opts},
+      {HumanSup, supervisor_opts},
+      {GameSup, supervisor_opts},
+      {BotSup, supervisor_opts},
+      {MatchMakerSup, supervisor_opts}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
@@ -55,6 +59,8 @@ defmodule BattleBox.GameEngine do
 
   defdelegate start_ai(game_engine, opts), to: AiSup
 
+  defdelegate start_human(game_engine, opts), to: HumanSup
+
   defdelegate start_bot(game_engine, opts), to: BotSup
   defdelegate get_bot_servers_with_user_id(game_engine, user_id), to: BotSup
   defdelegate get_bot_servers_with_bot_id(game_engine, bot_id), to: BotSup
@@ -77,13 +83,15 @@ defmodule BattleBox.GameEngine do
   def names(name \\ @default_name) do
     %{
       ai_registry: ai_registry_name(name),
-      ai_supervisor: ai_supervisor(name),
+      ai_supervisor: ai_supervisor_name(name),
       bot_registry: bot_registry_name(name),
       bot_supervisor: bot_supervisor_name(name),
       connection_registry: connection_registry_name(name),
       game_engine: name,
       game_registry: game_registry_name(name),
       game_supervisor: game_supervisor_name(name),
+      human_registry: human_registry_name(name),
+      human_supervisor: human_supervisor_name(name),
       match_maker: match_maker_name(name),
       match_maker_registry: match_maker_registry_name(name),
       match_maker_server: match_maker_server_name(name),
@@ -92,12 +100,14 @@ defmodule BattleBox.GameEngine do
   end
 
   defp ai_registry_name(name), do: Module.concat(name, Ai.Registry)
-  defp ai_supervisor(name), do: Module.concat(name, AiSupervisor)
+  defp ai_supervisor_name(name), do: Module.concat(name, AiSupervisor)
   defp bot_registry_name(name), do: Module.concat(name, BotRegistry)
   defp bot_supervisor_name(name), do: Module.concat(name, BotSupervisor)
   defp connection_registry_name(name), do: Module.concat(name, Connection.Registry)
   defp game_registry_name(name), do: Module.concat(name, GameRegistry)
   defp game_supervisor_name(name), do: Module.concat(name, GameSupervisor)
+  defp human_registry_name(name), do: Module.concat(name, Human.Registry)
+  defp human_supervisor_name(name), do: Module.concat(name, Elixir.HumanSupervisor)
   defp match_maker_name(name), do: Module.concat(name, MatchMaker)
   defp match_maker_registry_name(name), do: Module.concat(name, MatchMaker.Registry)
   defp match_maker_server_name(name), do: Module.concat(name, MatchMaker.MatchMakerServer)
