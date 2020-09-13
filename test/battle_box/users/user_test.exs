@@ -42,6 +42,19 @@ defmodule BattleBox.UserTest do
     end
   end
 
+  describe "anon_human_user/0" do
+    test "If the anon user doesn't exist, this function will create it" do
+      assert Repo.all(User) == []
+      %User{username: "Anonymous", id: id} = User.anon_human_user()
+      assert [%{username: "Anonymous", id: ^id}] = Repo.all(User)
+    end
+
+    test "you can make multiple calls to `anon_human_user`" do
+      assert %User{username: "Anonymous", id: id} = User.anon_human_user()
+      assert %User{username: "Anonymous", id: ^id} = User.anon_human_user()
+    end
+  end
+
   describe "system_user/0" do
     test "If the system user doesn't exist, this function will create it" do
       assert Repo.all(User) == []
