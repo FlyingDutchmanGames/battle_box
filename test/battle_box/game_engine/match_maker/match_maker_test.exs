@@ -27,6 +27,26 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
            |> Process.alive?()
   end
 
+  describe "play_human" do
+    setup do
+      {:ok, arena} = marooned_arena()
+      %{arena: arena}
+    end
+
+    test "You can start a game against a human", context do
+      assert {:ok, %{game_id: game_id, human_server_id: human_server_id}} =
+               GameEngine.play_human(
+                 context.game_engine,
+                 context.arena,
+                 context.bot
+               )
+
+      assert_receive {:game_request, %{game_id: ^game_id}}
+      assert %{pid: pid} = GameEngine.get_human_server(context.game_engine, human_server_id)
+      assert Process.alive?(pid)
+    end
+  end
+
   describe "practice match" do
     setup do
       {:ok, arena} = marooned_arena()

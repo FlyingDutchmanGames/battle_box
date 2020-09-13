@@ -37,12 +37,13 @@ defmodule BattleBox.GameEngine do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  defdelegate practice_match(game_engine, arena, bot, opponent, pid \\ self()), to: MatchMakerSup
-  defdelegate join_queue(game_engine, arena, bot, pid \\ self()), to: MatchMakerSup
-  defdelegate queue_for_arena(game_engine, arena), to: MatchMakerSup
+  defdelegate arenas_with_queued_players(game_engine), to: MatchMakerSup
   defdelegate dequeue_self(game_engine), to: MatchMakerSup
   defdelegate dequeue_self(game_engine, arena_id), to: MatchMakerSup
-  defdelegate arenas_with_queued_players(game_engine), to: MatchMakerSup
+  defdelegate join_queue(game_engine, arena, bot, pid \\ self()), to: MatchMakerSup
+  defdelegate play_human(game_engine, arena, bot, pid \\ self()), to: MatchMakerSup
+  defdelegate practice_match(game_engine, arena, bot, opponent, pid \\ self()), to: MatchMakerSup
+  defdelegate queue_for_arena(game_engine, arena), to: MatchMakerSup
 
   defdelegate subscribe_to_bot_events(game_engine, bot_id, events), to: GameEnginePubSub
   defdelegate subscribe_to_user_events(game_engine, user_id, events), to: GameEnginePubSub
@@ -70,6 +71,9 @@ defmodule BattleBox.GameEngine do
   defdelegate get_live_games_with_arena_id(game_engine, arena_id), to: GameSup
 
   defdelegate force_match_make(game_engine), to: MatchMakerServer
+
+  def get_human_server(game_engine, human_server_id),
+    do: get_process(human_registry_name(game_engine), human_server_id, :human_server_id)
 
   def get_game_server(game_engine, game_id),
     do: get_process(game_registry_name(game_engine), game_id, :game_id)
