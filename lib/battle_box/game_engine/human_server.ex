@@ -67,6 +67,18 @@ defmodule BattleBox.GameEngine.HumanServer do
       else: {:next_state, :playing, data}
   end
 
+  def handle_event(:info, {:game_info, game_info} = msg, :playing, data) do
+    data = Map.put(data, :game_info, game_info)
+    if data.ui_pid, do: send(data.ui_pid, msg)
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:commands_request, commands_request} = msg, :playing, data) do
+    data = Map.put(data, :commands_request, commands_request)
+    if data.ui_pid, do: send(data.ui_pid, msg)
+    {:keep_state, data}
+  end
+
   def handle_event(:info, {:DOWN, _, _, game_server, _}, _state, %{
         game_request: %{game_server: game_server}
       }) do
@@ -78,10 +90,16 @@ defmodule BattleBox.GameEngine.HumanServer do
     {:keep_state, data}
   end
 
+  def handle_event(:info, msg, state, data) do
+    IO.inspect(msg, label: "Unexpected msg in state #{state}")
+    :keep_state_and_data
+  end
+
   defp on_connect_msg(data) do
     %{
       game_request: data[:game_request],
-      commands_request: data[:commands_request]
+      commands_request: data[:commands_request],
+      game_info: data[:game_info]
     }
   end
 

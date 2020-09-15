@@ -166,15 +166,37 @@ defmodule BattleBox.GameEngine.HumanServerTest do
     end
   end
 
-  # describe "submit_commands/2" do
-  #   test "The human server will ask the UI server for commands"
-  #   test "if the ui process crashes, it will ask for the same commands of the new connection"
-  # end
+  describe "submit_commands/2" do
+    test "The human server will ask the UI server for commands", context do
+      {:ok, human_server, _meta} =
+        GameEngine.start_human(context.game_engine, %{ui_pid: named_proxy(:ui_pid)})
+
+      {:ok, game_server} =
+        GameEngine.start_game(context.game_engine, %{
+          game: context.game,
+          players: %{1 => named_proxy(:other_player), 2 => human_server}
+        })
+
+      assert_receive {:other_player, {:game_request, %{player: player, game_id: game_id}}}
+
+      :ok = GameServer.accept_game(game_server, player)
+
+      assert_receive {:other_player, {:commands_request, %{player: player}}}
+      GameServer.submit_commands(game_server, player, %{})
+      {:ok, :ok}
+
+      assert_receive {:ui_pid, {:commands_request, commands_request}}
+      assert %{game_state: _, player: _} = commands_request
+    end
+
+    # test "if the ui process crashes, it will ask for the same commands of the new connection"
+  end
 
   # describe "inactivity timeouts" do
   #   test "if no one connects before the connection_timeout, the human server dies"
   #   test "if someone connects and then disconnects, the server dies after connection_timeout"
   # end
 
-  # test "when the game is over, it sends a game over message and dies" 
+  test "playing a full game" do
+  end
 end
