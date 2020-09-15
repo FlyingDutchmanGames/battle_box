@@ -14,6 +14,12 @@ defmodule BattleBox.Bot do
     timestamps()
   end
 
+  def anon_human_bot() do
+    {:ok, bot} = get_or_create_by_name(User.anon_human_user(), "Human")
+    bot = Repo.preload(bot, :user)
+    {:ok, bot}
+  end
+
   def system_bot(name) do
     {:ok, bot} = get_or_create_by_name(User.system_user(), name)
     bot = Repo.preload(bot, :user)

@@ -3,39 +3,49 @@ defmodule BattleBox.GameEngine.MatchMaker do
   alias BattleBox.{Arena, Bot, Game, GameEngine, GameEngine.MatchMakerServer}
   alias BattleBox.Games.AiOpponent
 
+  def play_human(game_engine, arena, bot, pid \\ self()) do
+    [bot_player, human_player | ai_players] = Enum.shuffle(Arena.players(arena))
+    {:ok, ai_mods} = AiOpponent.opponent_modules(arena.game_type)
+    {:ok, anon_bot} = Bot.anon_human_bot()
+
+    {:ok, human_player_pid, %{human_server_id: human_server_id}} =
+      GameEngine.start_human(game_engine, %{})
+
+    combatants =
+      create_ai_servers(game_engine, ai_players, ai_mods)
+      |> Map.put(bot_player, %{bot: bot, pid: pid})
+      |> Map.put(human_player, %{bot: anon_bot, pid: human_player_pid})
+
+    game = Game.build(arena, for({player, %{bot: bot}} <- combatants, do: {player, bot}))
+    player_pid_mapping = Map.new(for {player, %{pid: pid}} <- combatants, do: {player, pid})
+
+    {:ok, _pid} = GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
+
+    {:ok, %{game_id: game.id, human_server_id: human_server_id}}
+  end
+
   def practice_match(game_engine, arena, bot, opponent, pid \\ self()) do
     [bot_player | ai_players] = Enum.shuffle(Arena.players(arena))
 
-    with {:mods, {:ok, mods}} when mods != [] <-
-           {:mods, AiOpponent.opponent_modules(arena.game_type, opponent)} do
-      combatants =
-        for player <- ai_players, into: %{} do
-          opponent_module = Enum.random(mods)
-          {:ok, bot} = Bot.system_bot(opponent_module.name)
-          {:ok, ai_server} = GameEngine.start_ai(game_engine, %{logic: opponent_module})
-          {player, %{bot: bot, pid: ai_server}}
-        end
-        |> Map.put(bot_player, %{bot: bot, pid: pid})
+    case AiOpponent.opponent_modules(arena.game_type, opponent) do
+      {:ok, []} ->
+        {:error, :no_opponent_matching}
 
-      game = Game.build(arena, for({player, %{bot: bot}} <- combatants, do: {player, bot}))
-      player_pid_mapping = Map.new(for {player, %{pid: pid}} <- combatants, do: {player, pid})
+      {:ok, ai_mods} ->
+        combatants =
+          create_ai_servers(game_engine, ai_players, ai_mods)
+          |> Map.put(bot_player, %{bot: bot, pid: pid})
 
-      {:ok, _pid} = GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
+        game = Game.build(arena, for({player, %{bot: bot}} <- combatants, do: {player, bot}))
+        player_pid_mapping = Map.new(for {player, %{pid: pid}} <- combatants, do: {player, pid})
 
-      {:ok, %{game_id: game.id}}
-    else
-      {:mods, {:ok, []}} -> {:error, :no_opponent_matching}
+        {:ok, _pid} =
+          GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
+
+        {:ok, %{game_id: game.id}}
     end
   end
 
-  @doc """
-  Joining a queue in a arena
-
-  Potential Gotchas:
-  The registry will keep track of the registering pid, but the game will be matched to the
-  pid passed as the last arg. This was done to allow a proxy to wait in line for you, and
-  to make it easier to test
-  """
   def join_queue(game_engine, arena, %Bot{} = bot, pid \\ self()) when is_atom(game_engine) do
     {:ok, _registry} =
       Registry.register(match_maker_registry_name(game_engine), arena, %{
@@ -83,6 +93,15 @@ defmodule BattleBox.GameEngine.MatchMaker do
     ]
 
     Supervisor.init(children, strategy: :one_for_all)
+  end
+
+  defp create_ai_servers(game_engine, ai_players, ai_mods) when ai_mods != [] do
+    for player <- ai_players, into: %{} do
+      opponent_module = Enum.random(ai_mods)
+      {:ok, bot} = Bot.system_bot(opponent_module.name)
+      {:ok, ai_server} = GameEngine.start_ai(game_engine, %{logic: opponent_module})
+      {player, %{bot: bot, pid: ai_server}}
+    end
   end
 
   defp match_maker_registry_name(game_engine) do
