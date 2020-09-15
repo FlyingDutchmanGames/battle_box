@@ -47,6 +47,10 @@ defmodule BattleBox.GameEngine.HumanServer do
 
   def handle_event(:enter, _old_state, :connected, _data), do: :keep_state_and_data
 
+  def handle_event(:state_timeout, :disconnection_timeout, :disconnected, _data) do
+    {:stop, :normal}
+  end
+
   def handle_event({:call, from}, {:connect_ui, _ui_pid}, :connected, _data) do
     {:keep_state_and_data, {:reply, from, {:error, :already_connected}}}
   end

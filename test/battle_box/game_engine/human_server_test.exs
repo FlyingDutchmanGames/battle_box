@@ -259,7 +259,47 @@ defmodule BattleBox.GameEngine.HumanServerTest do
   end
 
   describe "inactivity timeouts" do
-    test "if no one connects before the connection_timeout, the human server dies"
-    test "if someone connects and then disconnects, the server dies after connection_timeout"
+    test "if no one connects before the connection_timeout, the human server dies", context do
+      {:ok, human_server, _meta} =
+        GameEngine.start_human(context.game_engine, %{connection_timeout: 2})
+
+      Process.monitor(human_server)
+      assert_receive {:DOWN, _, :process, ^human_server, :normal}
+    end
+
+    test "if someone connects and then disconnects, the server dies after connection_timeout",
+         context do
+      pid_to_kill = named_proxy(:foo)
+
+      {:ok, human_server, _meta} =
+        GameEngine.start_human(context.game_engine, %{connection_timeout: 2, ui_pid: pid_to_kill})
+
+      Process.flag(:trap_exit, true)
+      Process.monitor(human_server)
+      refute_receive {:DOWN, _, :process, ^human_server, :normal}, 100
+
+      Process.exit(pid_to_kill, :kill)
+      assert_receive {:DOWN, _, :process, ^human_server, :normal}
+    end
+
+    test "if a new process connects fast enough, the server doesn't die", context do
+      pid_to_kill = named_proxy(:foo)
+
+      {:ok, human_server, _meta} =
+        GameEngine.start_human(context.game_engine, %{connection_timeout: 10, ui_pid: pid_to_kill})
+
+      GameEngine.start_game(context.game_engine, %{
+        game: context.game,
+        players: %{1 => named_proxy(:other_player), 2 => human_server}
+      })
+
+      Process.flag(:trap_exit, true)
+      Process.monitor(human_server)
+      Process.exit(pid_to_kill, :kill)
+      Process.sleep(5)
+
+      {:ok, _} = HumanServer.connect_ui(human_server, self())
+      refute_receive {:DOWN, _, :process, ^human_server, :normal}, 50
+    end
   end
 end
