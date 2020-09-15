@@ -1,22 +1,7 @@
 defmodule BattleBoxWeb.GameController do
   use BattleBoxWeb, :controller
-  alias BattleBox.{Repo, Game, Bot, User, Arena, GameEngine}
+  alias BattleBox.{Repo, Game, Bot, User, Arena}
   import Ecto.Query
-
-  def show(conn, %{"id" => id} = params) do
-    game_pid =
-      case GameEngine.get_game_server(game_engine(), id) do
-        %{pid: pid} -> pid
-        nil -> nil
-      end
-
-    render(conn, "show.html",
-      id: id,
-      game_pid: game_pid,
-      follow: params["follow"],
-      turn: params["turn"]
-    )
-  end
 
   def index(conn, params) do
     with {:ok, subject} <- load_subject(params) do

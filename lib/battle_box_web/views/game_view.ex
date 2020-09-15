@@ -1,8 +1,6 @@
 defmodule BattleBoxWeb.GameView do
   use BattleBoxWeb, :view
-  alias BattleBoxWeb.Live.{FollowBack, GameViewer}
-  alias BattleBoxWeb.PageView
-  alias BattleBox.Game
+  alias BattleBoxWeb.Live.FollowBack
 
   def adjacent_turns(turn, max_turn) do
     case turn do
