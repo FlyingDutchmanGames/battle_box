@@ -33,6 +33,7 @@ defmodule BattleBox.GameEngine.HumanServer do
   end
 
   def init(data) do
+    if ui_pid = data[:ui_pid], do: Process.monitor(ui_pid)
     {:ok, :awaiting_game_request, data}
   end
 
@@ -67,16 +68,32 @@ defmodule BattleBox.GameEngine.HumanServer do
       else: {:next_state, :playing, data}
   end
 
+  def handle_event(:info, {:commands_request, commands_request} = msg, :playing, data) do
+    data = Map.put(data, :commands_request, commands_request)
+    if data.ui_pid, do: send(data.ui_pid, msg)
+    {:keep_state, data}
+  end
+
   def handle_event(:info, {:game_info, game_info} = msg, :playing, data) do
     data = Map.put(data, :game_info, game_info)
     if data.ui_pid, do: send(data.ui_pid, msg)
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:commands_request, commands_request} = msg, :playing, data) do
-    data = Map.put(data, :commands_request, commands_request)
+  def handle_event(:info, {:debug_info, _debug_info} = msg, :playing, data) do
     if data.ui_pid, do: send(data.ui_pid, msg)
     {:keep_state, data}
+  end
+
+  def handle_event(:info, {:game_over, _info} = msg, :playing, data) do
+    if data.ui_pid, do: send(data.ui_pid, msg)
+    {:stop, :normal}
+  end
+
+  def handle_event({:call, from}, {:submit_commands, commands}, :playing, data) do
+    GameServer.submit_commands(data.game_request.game_server, data.game_request.player, commands)
+    data = Map.put(data, :commands_request, nil)
+    {:keep_state, data, {:reply, from, :ok}}
   end
 
   def handle_event(:info, {:DOWN, _, _, game_server, _}, _state, %{
@@ -85,14 +102,9 @@ defmodule BattleBox.GameEngine.HumanServer do
     {:stop, :normal}
   end
 
-  def handle_event(:info, {:DOWN, _, _, ui_pid, _}, _state, %{ui_pid: ui_pid} = data) do
+  def handle_event(:info, {:DOWN, _, :process, ui_pid, _}, _state, %{ui_pid: ui_pid} = data) do
     data = Map.put(data, :ui_pid, nil)
     {:keep_state, data}
-  end
-
-  def handle_event(:info, msg, state, data) do
-    IO.inspect(msg, label: "Unexpected msg in state #{state}")
-    :keep_state_and_data
   end
 
   defp on_connect_msg(data) do
