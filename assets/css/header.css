@@ -6,60 +6,67 @@
   box-shadow: 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2);
   color: white;
   background-color: var(--primary-zero);
+
+  a { color: white; }
+
+  .logo {
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 1.5em;
+  }
+
+  .nav-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 20px;
+    font-weight: lighter;
+
+    &:first-of-type { margin-left: auto; }
+  }
+
+  .github-login {
+    display: flex;
+    align-items: center;
+    flex-flow: row nowrap;
+    margin: 10px 10px 10px auto;
+  }
+
+  .user {
+    display: flex;
+    align-items: center;
+    flex-flow: row nowrap;
+    padding: 10px;
+    margin-right: 5px;
+    .name {
+      margin-right: 20px;
+      font-weight: bold;
+    }
+    img {
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+    }
+
+  }
+
+  .logout-button {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+    background-color: transparent;
+    font-size: 18px;
+  }
 }
 
-.header a {
-  color: white;
-}
 
-.header .logo { 
-  user-select: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 10px;
-  border-radius: 3px;
-  font-weight: bold;
-  font-size: 1.5em;
-}
 
-.header .nav-item:first-of-type {
-  margin-left: auto;
-}
-
-.header .nav-item {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 20px;
-  font-weight: lighter;
-}
-
-.header .github-login {
-  display: flex;
-  align-items: center;
-  flex-flow: row nowrap;
-  margin: 10px 10px 10px auto;
-}
-
-.header .user {
-  display: flex;
-  align-items: center;
-  flex-flow: row nowrap;
-  padding: 10px;
-  margin-right: 5px;
-}
-
-.header .user .name {
-  margin-right: 20px;
-  font-weight: bold;
-}
-
-.header .user img {
-  width: 30px;
-  height: 30px;
-  border-radius: 5px;
-}
 
 .header .logout-button {
   color: white;
