@@ -1,8 +1,6 @@
 import css from "../css/app.css"
 import header_css from "../css/header.css"
-import not_found_css from "../css/not_found.css"
 import settings_css from "../css/settings.css"
-import docs_css from "../css/docs.css"
 
 import "phoenix_html"
 import {Socket} from "phoenix"
