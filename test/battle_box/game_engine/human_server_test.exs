@@ -140,7 +140,30 @@ defmodule BattleBox.GameEngine.HumanServerTest do
       assert_receive :success
     end
 
-    # test "if a connection dies, you can reconnect and get the current game state"
+    test "if a connection dies, you can reconnect and get the current game state", context do
+      {:ok, human_server, _meta} = GameEngine.start_human(context.game_engine, %{})
+
+      {:ok, _game_server} =
+        GameEngine.start_game(context.game_engine, %{
+          game: context.game,
+          players: %{1 => named_proxy(:other_player), 2 => human_server}
+        })
+
+      pid_to_kill = named_proxy(:pid_to_kill)
+
+      assert {:ok, %{game_request: gr, commands_request: cr}} =
+               HumanServer.connect_ui(human_server, pid_to_kill)
+
+      Process.flag(:trap_exit, true)
+      Process.exit(pid_to_kill, :kill)
+      Process.sleep(10)
+
+      assert {:ok, %{game_request: ^gr, commands_request: ^cr}} =
+               HumanServer.connect_ui(human_server, named_proxy(:some_other_process))
+
+      assert {:error, :already_connected} =
+               HumanServer.connect_ui(human_server, named_proxy(:nope))
+    end
   end
 
   # describe "submit_commands/2" do

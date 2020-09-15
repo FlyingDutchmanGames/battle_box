@@ -36,16 +36,6 @@ defmodule BattleBox.GameEngine.HumanServer do
     {:ok, :awaiting_game_request, data}
   end
 
-  def handle_event(
-        {:call, from},
-        {:connect_ui, ui_pid},
-        :awaiting_game_request,
-        %{ui_pid: nil} = data
-      ) do
-    data = Map.put(data, :pending_connect_ui, {from, ui_pid})
-    {:keep_state, data}
-  end
-
   def handle_event({:call, from}, {:connect_ui, _ui_pid}, _state, %{ui_pid: ui_pid})
       when not is_nil(ui_pid) do
     {:keep_state_and_data, {:reply, from, {:error, :already_connected}}}
@@ -55,7 +45,10 @@ defmodule BattleBox.GameEngine.HumanServer do
     Process.monitor(ui_pid)
     data = Map.put(data, :ui_pid, ui_pid)
     :ok = update_registry(data)
-    {:keep_state, data, {:reply, from, {:ok, on_connect_msg(data)}}}
+
+    if state == :awaiting_game_request,
+      do: {:keep_state, Map.put(data, :waiting_on_game_request, from)},
+      else: {:keep_state, data, {:reply, from, {:ok, on_connect_msg(data)}}}
   end
 
   def handle_event(:info, {:game_cancelled, game_id}, _state, data) do
@@ -63,34 +56,26 @@ defmodule BattleBox.GameEngine.HumanServer do
     {:stop, :normal}
   end
 
-  def handle_event(
-        :info,
-        {:game_request, game_request},
-        :awaiting_game_request,
-        %{pending_connect_ui: {from, ui_pid}} = data
-      ) do
-    Process.monitor(game_request.game_server)
-    :ok = GameServer.accept_game(game_request.game_server, game_request.player)
-    data = Map.put(data, :game_request, game_request)
-    :ok = update_registry(data)
-    {:next_state, :playing, data, {:reply, from, {:ok, on_connect_msg(data)}}}
-  end
-
   def handle_event(:info, {:game_request, game_request}, :awaiting_game_request, data) do
     Process.monitor(game_request.game_server)
     :ok = GameServer.accept_game(game_request.game_server, game_request.player)
     data = Map.put(data, :game_request, game_request)
     :ok = update_registry(data)
-    {:next_state, :playing, data}
+
+    if to = data[:waiting_on_game_request],
+      do: {:next_state, :playing, data, {:reply, to, {:ok, on_connect_msg(data)}}},
+      else: {:next_state, :playing, data}
   end
 
-  def handle_event(
-        :info,
-        {:DOWN, _, _, game_server, _},
-        state,
-        %{game_request: %{game_server: game_server}} = data
-      ) do
+  def handle_event(:info, {:DOWN, _, _, game_server, _}, _state, %{
+        game_request: %{game_server: game_server}
+      }) do
     {:stop, :normal}
+  end
+
+  def handle_event(:info, {:DOWN, _, _, ui_pid, _}, _state, %{ui_pid: ui_pid} = data) do
+    data = Map.put(data, :ui_pid, nil)
+    {:keep_state, data}
   end
 
   defp on_connect_msg(data) do
