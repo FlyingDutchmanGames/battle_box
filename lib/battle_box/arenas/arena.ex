@@ -37,6 +37,8 @@ defmodule BattleBox.Arena do
 
   schema "arenas" do
     field :name, :string
+    field :description, :string
+
     field :game_acceptance_time_ms, :integer, default: 2000
     field :command_time_minimum_ms, :integer, default: 250
     field :command_time_maximum_ms, :integer, default: 1000
