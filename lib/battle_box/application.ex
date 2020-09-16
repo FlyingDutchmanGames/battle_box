@@ -8,6 +8,7 @@ defmodule BattleBox.Application do
       BattleBox.GameEngine,
       {Phoenix.PubSub, [name: BattleBox.PubSub, adapter: Phoenix.PubSub.PG2]},
       BattleBoxWeb.Endpoint,
+      {BattleBox.Release.Seeder, skip_seed?: skip_seed?()},
       BattleBoxWeb.Telemetry,
       {BattleBox.TcpConnectionServer, port: tcp_connection_server_port()}
     ]
@@ -24,5 +25,9 @@ defmodule BattleBox.Application do
   defp tcp_connection_server_port do
     Application.fetch_env!(:battle_box, BattleBox.TcpConnectionServer)
     |> Keyword.fetch!(:port)
+  end
+
+  def skip_seed? do
+    Application.get_env(:BattleBox, BattleBox.Release.Seeder)[:skip_seed] == true
   end
 end

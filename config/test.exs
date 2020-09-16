@@ -11,6 +11,8 @@ config :battle_box, BattleBoxWeb.Endpoint,
   http: [port: 4002],
   server: true
 
+config :battle_box, BattleBox.Release.Seeder, skip_seed: true
+
 # pick a random port
 config :battle_box, BattleBox.TcpConnectionServer, port: 0
 
