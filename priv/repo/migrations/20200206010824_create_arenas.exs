@@ -5,7 +5,6 @@ defmodule BattleBox.Repo.Migrations.CreateArenas do
     create table("arenas") do
       add :name, :citext, null: false
       add :user_id, :uuid, null: false
-      add :description, :text
 
       add :game_type, :text, null: false
       add :game_acceptance_time_ms, :integer, null: false

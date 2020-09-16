@@ -1,7 +1,7 @@
 defmodule BattleBox.Release.Seeder do
   require Logger
   import BattleBox.InstalledGames, only: [installed_games: 0]
-  alias BattleBox.{User, Bot, Arena}
+  alias BattleBox.{Arena, Bot, User, Repo}
 
   @moduledoc """
   Used to set up all the default user/bots/arenas that
@@ -33,6 +33,28 @@ defmodule BattleBox.Release.Seeder do
 
       for ai <- game.ais,
           do: {:ok, %Bot{}} = Bot.system_bot(ai.name)
+
+      Logger.info("Creating/Updating System Arenas for #{game.title}")
+
+      for %{name: name} = params <- game.default_arenas() do
+        params =
+          params
+          |> Map.put(:game_type, game)
+          |> Map.put(game.settings_module.name, params[:settings])
+
+        {:ok, _arena} =
+          case Repo.get_by(Arena, name: name) do
+            nil ->
+              Ecto.build_assoc(system_user, :arenas)
+
+            %Arena{} = arena ->
+              Arena.preload_game_settings(arena)
+          end
+          |> Arena.changeset(params)
+          |> Repo.insert_or_update()
+      end
     end
+
+    :ok
   end
 end

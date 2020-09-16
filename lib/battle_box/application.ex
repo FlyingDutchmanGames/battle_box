@@ -28,6 +28,6 @@ defmodule BattleBox.Application do
   end
 
   def skip_seed? do
-    Application.get_env(:BattleBox, BattleBox.Release.Seeder)[:skip_seed] == true
+    Application.get_env(:battle_box, BattleBox.Release.Seeder)[:skip_seed] == true
   end
 end
