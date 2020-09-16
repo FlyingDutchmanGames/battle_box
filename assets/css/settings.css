@@ -331,3 +331,39 @@ a.btn {
   font-size: 2em;
   font-weight: lighter;
 }
+
+.play {
+  .opponents {
+    display: flex;
+    flex-flow: column nowrap;
+
+    button.opponent {
+      background: none;
+      color: inherit;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+
+      display: flex;
+      flex-flow: column nowrap;
+
+      padding: 20px 10px;
+      margin: 5px auto;
+      width: 100%;
+      max-width: 800px;
+
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+
+      .name { font-weight: bold; font-size: 1.5em; } 
+
+      &.difficulty-1 { border-left: 5px solid #72fb72; }
+      &.difficulty-2 { border-left: 5px solid #54bd54; }
+      &.difficulty-3 { border-left: 5px solid #439843; }
+      &.difficulty-4 { border-left: 5px solid #2c672c; }
+      &.difficulty-5 { border-left: 5px solid #235223; }
+      &.difficulty-6 { border-left: 5px solid #420b06; }
+      &.difficulty-7 { border-left: 5px solid #8a1407; }
+      &.difficulty-8 { border-left: 5px solid #d21f0b; }
+    }
+  }
+}

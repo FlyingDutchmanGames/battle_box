@@ -27,17 +27,6 @@
 - BattleBox Node Client
 - BattleBox Ruby Client
 - Update protocol to give the result of each move
-#### Robot Game
-- Remove `new` in favor of `from_settings`
-- limit memory usage of game servers (they're currently at 2 mbs)
-- Manual GC?
-- Robot game give out random player ids / color coding based on player 
-- Make sure user input can't cause a game to crash (maybe changesets)
-- Procedural terrain generation?
-- Area conquer mode
-- Robot Game Settings
-  - Reorgainze the code
-  - Add in team spawns
 #### ELO rankings
 - Provide optional ELOs to arenas
 #### General
@@ -49,7 +38,11 @@
   - preserve bread crumbs
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
-- Debug Messages in the protocol
+
+#### Humans in the fight!
+- [ ] I can play as a human vs one of the AIs
+- [ ] I can play as a human against one of my bots
+- [ ] I can play as a human against another human
 
 ### Nice to Haves
 
