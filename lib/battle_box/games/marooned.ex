@@ -45,6 +45,26 @@ defmodule BattleBox.Games.Marooned do
         player_starting_locations: player_starting_locations
       }
 
+  def default_arenas do
+    [
+      %{
+        name: "marooned-default",
+        description: "Classic Marooned",
+        settings: %{rows: 10, cols: 10}
+      },
+      %{
+        name: "marooned-small",
+        description: "Marooned on smaller playing field",
+        settings: %{rows: 7, cols: 7}
+      },
+      %{
+        name: "marooned-large",
+        description: "Marooned on a larger playing field",
+        settings: %{rows: 7, cols: 7}
+      }
+    ]
+  end
+
   def docs_tree, do: %{}
 
   def changeset(game, params \\ %{}) do
