@@ -1,6 +1,7 @@
 defmodule BattleBox.GameEngine.MatchMakerTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{Bot, GameEngine}
+  alias BattleBox.GameEngine.Message.GameRequest
 
   @user_id Ecto.UUID.generate()
 
@@ -41,7 +42,7 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
                  context.bot
                )
 
-      assert_receive {:game_request, %{game_id: ^game_id}}
+      assert_receive %GameRequest{game_id: ^game_id}
       assert %{pid: pid} = GameEngine.get_human_server(context.game_engine, human_server_id)
       assert Process.alive?(pid)
     end
@@ -62,7 +63,7 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
                  "wild-card"
                )
 
-      assert_receive {:game_request, %{game_id: ^game_id}}
+      assert_receive %GameRequest{game_id: ^game_id}
     end
 
     test "you can start a practice match if you match more than one bot", context do
@@ -74,7 +75,7 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
                  %{"difficulty" => %{"min" => 1}}
                )
 
-      assert_receive {:game_request, %{game_id: ^game_id}}
+      assert_receive %GameRequest{game_id: ^game_id}
     end
 
     test "You get an error if you ask for a nonsense opponent", context do
