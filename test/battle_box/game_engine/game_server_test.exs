@@ -4,6 +4,15 @@ defmodule BattleBox.GameEngine.GameServerTest do
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
+  alias BattleBox.GameEngine.Message.{
+    CommandsRequest,
+    DebugInfo,
+    GameInfo,
+    GameOver,
+    GameRequest,
+    GameCanceled
+  }
+
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
     {:ok, GameEngine.names(name)}
@@ -96,8 +105,8 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
         game_id = context.init_opts.game.id
 
-        assert_receive {:player_1, {:game_cancelled, ^game_id}}
-        assert_receive {:player_2, {:game_cancelled, ^game_id}}
+        assert_receive {:player_1, %GameCanceled{game_id: ^game_id}}
+        assert_receive {:player_2, %GameCanceled{game_id: ^game_id}}
         assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
       end
 
@@ -113,7 +122,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
         Process.exit(player_2_pid, :kill)
         assert_receive {:EXIT, ^player_2_pid, :killed}
 
-        assert_receive {:player_1, {:game_over, %{}}}
+        assert_receive {:player_1, %GameOver{}}
       end
 
       test "the starting of the game server will send init messages to p1 & p2", context do
@@ -128,8 +137,8 @@ defmodule BattleBox.GameEngine.GameServerTest do
           settings: Game.settings(game)
         }
 
-        expected_p1 = {:player_1, {:game_request, Map.put(expected, :player, 1)}}
-        expected_p2 = {:player_2, {:game_request, Map.put(expected, :player, 2)}}
+        expected_p1 = {:player_1, struct!(GameRequest, Map.put(expected, :player, 1))}
+        expected_p2 = {:player_2, struct!(GameRequest, Map.put(expected, :player, 2))}
 
         assert_receive ^expected_p1
         assert_receive ^expected_p2
@@ -150,7 +159,7 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
         game_id = context.init_opts.game.id
 
-        assert_receive {:player_1, {:game_cancelled, ^game_id}}
+        assert_receive {:player_1, %GameCanceled{game_id: ^game_id}}
         assert_receive {:DOWN, ^game_ref, :process, ^pid, :normal}
       end
 
@@ -166,14 +175,13 @@ defmodule BattleBox.GameEngine.GameServerTest do
           proxy = :"player_#{player}"
 
           assert_receive {^proxy,
-                          {:commands_request,
-                           %{
-                             game_id: ^game_id,
-                             maximum_time: 1000,
-                             minimum_time: 20,
-                             game_state: ^game_state,
-                             player: ^player
-                           }}}
+                          %CommandsRequest{
+                            game_id: ^game_id,
+                            maximum_time: 1000,
+                            minimum_time: 20,
+                            game_state: ^game_state,
+                            player: ^player
+                          }}
         end
       end
 
@@ -184,33 +192,31 @@ defmodule BattleBox.GameEngine.GameServerTest do
         :ok = GameServer.accept_game(pid, 2)
         :ok = GameServer.forfeit_game(pid, 1)
 
-        assert_receive {:player_1, {:game_over, %{}}}
-        assert_receive {:player_2, {:game_over, %{}}}
+        assert_receive {:player_1, %GameOver{}}
+        assert_receive {:player_2, %GameOver{}}
       end
 
       test "it will send out debug info", context do
         {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
 
-        assert_receive {:player_1,
-                        {:game_request, %{game_server: ^pid, player: 1, game_id: game_id}}}
+        assert_receive {:player_1, %GameRequest{game_server: ^pid, player: 1, game_id: game_id}}
 
-        assert_receive {:player_2,
-                        {:game_request, %{game_server: ^pid, player: 2, game_id: ^game_id}}}
+        assert_receive {:player_2, %GameRequest{game_server: ^pid, player: 2, game_id: ^game_id}}
 
         assert :ok = GameServer.accept_game(pid, 1)
         assert :ok = GameServer.accept_game(pid, 2)
 
         Stream.unfold([], fn _ ->
           receive do
-            {:player_1, {:commands_request, %{}}} ->
+            {:player_1, %CommandsRequest{}} ->
               GameServer.submit_commands(pid, 1, "something wildly invalid")
               {:ok, :ok}
 
-            {:player_2, {:commands_request, %{}}} ->
+            {:player_2, %CommandsRequest{}} ->
               GameServer.submit_commands(pid, 2, "something wildly invalid")
               {:ok, :ok}
 
-            {_player, {:debug_info, debug}} ->
+            {_player, %DebugInfo{} = debug} ->
               assert %{debug_info: %{}, game_id: ^game_id} = debug
               nil
           after
@@ -224,26 +230,23 @@ defmodule BattleBox.GameEngine.GameServerTest do
       test "it will send out game_info", context do
         {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
 
-        assert_receive {:player_1,
-                        {:game_request, %{game_server: ^pid, player: 1, game_id: game_id}}}
-
-        assert_receive {:player_2,
-                        {:game_request, %{game_server: ^pid, player: 2, game_id: ^game_id}}}
+        assert_receive {:player_1, %GameRequest{game_server: ^pid, player: 1, game_id: game_id}}
+        assert_receive {:player_2, %GameRequest{game_server: ^pid, player: 2, game_id: ^game_id}}
 
         assert :ok = GameServer.accept_game(pid, 1)
         assert :ok = GameServer.accept_game(pid, 2)
 
         Stream.unfold([], fn _ ->
           receive do
-            {:player_1, {:commands_request, %{}}} ->
+            {:player_1, %CommandsRequest{}} ->
               GameServer.submit_commands(pid, 1, :timeout)
               {:ok, :ok}
 
-            {:player_2, {:commands_request, %{}}} ->
+            {:player_2, %CommandsRequest{}} ->
               GameServer.submit_commands(pid, 2, :timeout)
               {:ok, :ok}
 
-            {_player, {:game_info, info}} ->
+            {_player, %GameInfo{} = info} ->
               assert %{game_id: ^game_id, game_info: %{}} = info
               nil
           after
@@ -259,26 +262,23 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
         ref = Process.monitor(pid)
 
-        assert_receive {:player_1,
-                        {:game_request, %{game_server: ^pid, player: 1, game_id: game_id}}}
-
-        assert_receive {:player_2,
-                        {:game_request, %{game_server: ^pid, player: 2, game_id: ^game_id}}}
+        assert_receive {:player_1, %GameRequest{game_server: ^pid, player: 1, game_id: game_id}}
+        assert_receive {:player_2, %GameRequest{game_server: ^pid, player: 2, game_id: ^game_id}}
 
         assert :ok = GameServer.accept_game(pid, 1)
         assert :ok = GameServer.accept_game(pid, 2)
 
         Stream.unfold([], fn game_overs ->
           receive do
-            {:player_1, {:commands_request, %{}}} ->
+            {:player_1, %CommandsRequest{}} ->
               GameServer.submit_commands(pid, 1, :timeout)
               {:ok, game_overs}
 
-            {:player_2, {:commands_request, %{}}} ->
+            {:player_2, %CommandsRequest{}} ->
               GameServer.submit_commands(pid, 2, :timeout)
               {:ok, game_overs}
 
-            {player, {:game_over, %{game_id: ^game_id}}} when player in [:player_1, :player_2] ->
+            {player, %GameOver{game_id: ^game_id}} when player in [:player_1, :player_2] ->
               nil
           after
             200 ->

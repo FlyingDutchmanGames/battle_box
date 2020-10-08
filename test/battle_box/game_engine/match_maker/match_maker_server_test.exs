@@ -4,6 +4,8 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
   alias BattleBox.GameEngine.{MatchMaker, MatchMakerServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
+  alias BattleBox.GameEngine.Message.GameRequest
+
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
 
@@ -46,12 +48,14 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
     :ok = MatchMakerServer.force_match_make(names.game_engine)
 
     assert_receive {:player_1,
-                    {:game_request,
-                     %{game_id: game_id, game_server: game_server, settings: settings}}}
+                    %GameRequest{game_id: game_id, game_server: game_server, settings: settings}}
 
     assert_receive {:player_2,
-                    {:game_request,
-                     %{game_id: ^game_id, game_server: ^game_server, settings: ^settings}}}
+                    %GameRequest{
+                      game_id: ^game_id,
+                      game_server: ^game_server,
+                      settings: ^settings
+                    }}
   end
 
   test "it will not match up two players in different arenas",
