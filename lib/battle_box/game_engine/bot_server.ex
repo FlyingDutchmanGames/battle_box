@@ -139,17 +139,16 @@ defmodule BattleBox.GameEngine.BotServer do
   def handle_event(:info, %GameCanceled{}, _state, _data), do: :keep_state_and_data
 
   def handle_event(:info, %CommandsRequest{} = commands_request, :playing, data) do
-    commands_request = Map.put_new(commands_request, :request_id, Ecto.UUID.generate())
     data = Map.put(data, :commands_request, commands_request)
     {:next_state, :commands_request, data, {:next_event, :internal, :setup_commands_request}}
   end
 
-  def handle_event(:info, %GameInfo{game_info: msg}, _state, data) do
+  def handle_event(:info, %GameInfo{} = msg, _state, data) do
     send(data.connection, msg)
     :keep_state_and_data
   end
 
-  def handle_event(:info, %DebugInfo{debug_info: msg}, _state, data) do
+  def handle_event(:info, %DebugInfo{} = msg, _state, data) do
     send(data.connection, msg)
     :keep_state_and_data
   end
@@ -160,7 +159,7 @@ defmodule BattleBox.GameEngine.BotServer do
         :commands_request,
         %{commands_request: commands_request} = data
       ) do
-    send(data.connection, {:commands_request, commands_request})
+    send(data.connection, commands_request)
     data = Map.put(data, :min_time_met, false)
 
     {:keep_state, data,
@@ -205,10 +204,21 @@ defmodule BattleBox.GameEngine.BotServer do
     do: {:keep_state_and_data, {:reply, from, {:error, :invalid_commands_submission}}}
 
   def handle_event(:enter, _old_state, new_state, %{names: names} = data) do
-    metadata = %{status: new_state, game_id: data[:game_info][:game_id]}
+    game_id =
+      case data do
+        %{game_info: %{game_id: id}} -> id
+        _ -> nil
+      end
 
     {_, _} =
-      Registry.update_value(names.bot_registry, data.bot_server_id, &Map.merge(&1, metadata))
+      Registry.update_value(
+        names.bot_registry,
+        data.bot_server_id,
+        &Map.merge(&1, %{
+          status: new_state,
+          game_id: game_id
+        })
+      )
 
     :ok =
       GameEngine.broadcast_bot_server_update(

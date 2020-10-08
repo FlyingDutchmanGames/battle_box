@@ -100,7 +100,8 @@ defmodule BattleBox.GameEngine.GameServer do
         game_state: request,
         minimum_time: data.game.arena.command_time_minimum_ms,
         maximum_time: data.game.arena.command_time_maximum_ms,
-        player: player
+        player: player,
+        request_id: Ecto.UUID.generate()
       })
     end
 

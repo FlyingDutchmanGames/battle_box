@@ -3,6 +3,15 @@ defmodule BattleBox.GameEngine.AiServerTest do
   alias BattleBox.{Game, GameEngine, GameEngine.GameServer}
   alias BattleBox.Games.Marooned
 
+  alias BattleBox.GameEngine.Message.{
+    CommandsRequest,
+    DebugInfo,
+    GameInfo,
+    GameOver,
+    GameRequest,
+    GameCanceled
+  }
+
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
     {:ok, GameEngine.names(name)}
@@ -46,10 +55,10 @@ defmodule BattleBox.GameEngine.AiServerTest do
         players: %{1 => self(), 2 => ai_server}
       })
 
-    assert_receive {:game_request, %{player: player, game_server: game_server}}
+    assert_receive %GameRequest{player: player, game_server: game_server}
     :ok = GameServer.accept_game(game_server, player)
     assert_receive :got_game_request
-    assert_receive {:commands_request, _request}
+    assert_receive %CommandsRequest{}
   end
 
   test "if the game dies, the ai server dies", context do
