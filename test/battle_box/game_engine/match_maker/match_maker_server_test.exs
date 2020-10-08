@@ -4,14 +4,7 @@ defmodule BattleBox.GameEngine.MatchMakerServerTest do
   alias BattleBox.GameEngine.{MatchMaker, MatchMakerServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
 
-  alias BattleBox.GameEngine.Message.{
-    CommandsRequest,
-    DebugInfo,
-    GameInfo,
-    GameOver,
-    GameRequest,
-    GameCanceled
-  }
+  alias BattleBox.GameEngine.Message.GameRequest
 
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)

@@ -5,11 +5,7 @@ defmodule BattleBox.GameEngine.AiServerTest do
 
   alias BattleBox.GameEngine.Message.{
     CommandsRequest,
-    DebugInfo,
-    GameInfo,
-    GameOver,
-    GameRequest,
-    GameCanceled
+    GameRequest
   }
 
   setup %{test: name} do
