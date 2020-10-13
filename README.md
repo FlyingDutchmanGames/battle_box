@@ -50,6 +50,7 @@
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
 - Debug Messages in the protocol
+- Require clients to connect with `game_type` param, optionally passing a specific arena. (default to the default arena)
 
 ### Nice to Haves
 
