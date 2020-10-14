@@ -178,12 +178,10 @@ defmodule BattleBox.Games.Marooned.LogicTest do
       test "the input #{inspect(input)} is improperly formatted and yields an error" do
         start = ~m/0 1 2/
 
-        expected_error = %Error.InvalidInputFormat{input: unquote(Macro.escape(input))}
-
-        %{debug: %{1 => error}} =
+        %{debug: %{1 => errors}} =
           Logic.calculate_turn(start, %{1 => unquote(Macro.escape(input))})
 
-        assert expected_error in error
+        assert for(%Error.InvalidInputFormat{} = error <- errors, do: error) != []
       end
     end
 
@@ -191,7 +189,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
       start = ~m/0 1 0
                  0 2 0/
 
-      %{debug: %{1 => [%Error.CannotRemoveSquareAPlayerIsOn{target: [1, 0]}]}} =
+      %{debug: %{1 => [%Error.CannotRemoveSquareAPlayerIsOn{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [1, 0], "to" => [0, 1]}})
     end
 
@@ -199,7 +197,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
       start = ~m/0 1 0
                  0 2 0/
 
-      %{debug: %{1 => [%Error.CannotRemoveSquareAPlayerIsOn{target: [1, 1]}]}} =
+      %{debug: %{1 => [%Error.CannotRemoveSquareAPlayerIsOn{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [1, 1], "to" => [0, 1]}})
     end
 
@@ -207,7 +205,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
       start = ~m/0 1 0
                  x 2 0/
 
-      %{debug: %{1 => [%Error.CannotRemoveASquareAlreadyRemoved{target: [0, 0]}]}} =
+      %{debug: %{1 => [%Error.CannotRemoveASquareAlreadyRemoved{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 1]}})
     end
 
@@ -216,7 +214,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                  0 2 0/
 
       for bad_square <- [[-1, 0], [0, -1], [0, 10], [10, 0]] do
-        %{debug: %{1 => [%Error.CannotRemoveASquareOutsideTheBoard{target: ^bad_square}]}} =
+        %{debug: %{1 => [%Error.CannotRemoveASquareOutsideTheBoard{}]}} =
           Logic.calculate_turn(start, %{1 => %{"remove" => bad_square, "to" => [0, 1]}})
       end
     end
@@ -226,7 +224,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                  0 0 0
                  0 2 0/
 
-      %{debug: %{1 => [%Error.CannotRemoveSameSquareAsMoveTo{target: [1, 1]}]}} =
+      %{debug: %{1 => [%Error.CannotRemoveSameSquareAsMoveTo{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [1, 1], "to" => [1, 1]}})
     end
 
@@ -235,7 +233,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                  0 1 0
                  0 2 0/
 
-      %{debug: %{1 => [%Error.CannotMoveIntoOpponent{target: [1, 0]}]}} =
+      %{debug: %{1 => [%Error.CannotMoveIntoOpponent{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [1, 0]}})
     end
 
@@ -244,7 +242,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                  0 1 0
                  0 2 0/
 
-      %{debug: %{1 => [%Error.CannotMoveToSquareYouAlreadyOccupy{target: [1, 1]}]}} =
+      %{debug: %{1 => [%Error.CannotMoveToSquareYouAlreadyOccupy{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [1, 1]}})
     end
 
@@ -253,7 +251,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                  x 1 0
                  0 2 0/
 
-      %{debug: %{1 => [%Error.CannotMoveIntoRemovedSquare{target: [0, 1]}]}} =
+      %{debug: %{1 => [%Error.CannotMoveIntoRemovedSquare{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 1]}})
     end
 
@@ -262,7 +260,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                  0 0 1
                  0 2 0/
 
-      %{debug: %{1 => [%Error.CannotMoveOffBoard{target: [3, 1]}]}} =
+      %{debug: %{1 => [%Error.CannotMoveOffBoard{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [3, 1]}})
     end
 
@@ -271,7 +269,7 @@ defmodule BattleBox.Games.Marooned.LogicTest do
                  0 0 1
                  0 2 0/
 
-      %{debug: %{1 => [%Error.CannotMoveToNonAdjacentSquare{target: [0, 1]}]}} =
+      %{debug: %{1 => [%Error.CannotMoveToNonAdjacentSquare{}]}} =
         Logic.calculate_turn(start, %{1 => %{"remove" => [0, 0], "to" => [0, 1]}})
     end
 

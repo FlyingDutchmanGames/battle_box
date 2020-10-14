@@ -31,8 +31,8 @@ defmodule BattleBox.Connection.Logic do
     {data, [{:send, commands_request(request)}], :continue}
   end
 
-  def handle_system(%DebugInfo{}, %{state: :playing} = data) do
-    {data, [], :continue}
+  def handle_system(%DebugInfo{} = debug, %{state: :playing} = data) do
+    {data, [{:send, debug_info(debug)}], :continue}
   end
 
   def handle_system(%GameInfo{}, %{state: :playing} = data) do
