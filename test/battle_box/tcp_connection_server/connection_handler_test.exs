@@ -338,7 +338,10 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
               case Jason.decode!(message) do
                 %{"commands_request" => %{"request_id" => request_id}} ->
                   :gen_tcp.send(conn, empty_commands_msg(request_id))
-                  {:ok, :ok}
+                  {:turn, :ok}
+
+                %{"info" => "debug"} ->
+                  {:debug, :ok}
 
                 %{
                   "info" => "game_over",
@@ -354,7 +357,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         end)
         |> Enum.to_list()
 
-      assert length(turns) > 2
+      assert length(for :turn <- turns, do: :turn) > 2
     end
   end
 

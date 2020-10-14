@@ -262,8 +262,11 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
              :ok <- send_msg(p1, commands.(id)),
              %{"commands_request" => %{"request_id" => id}} <- assert_recieve_msg(p2, _msg),
              :ok <- send_msg(p2, commands.(id)) do
-          {:ok, :ok}
+          {:turn, :ok}
         else
+          %{"info" => "debug"} ->
+            {:debug, :ok}
+
           %{
             "info" => "game_over",
             "game_id" => ^game_id,
@@ -275,7 +278,7 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
       end)
       |> Enum.to_list()
 
-    assert length(turns) > 1
+    assert length(for :turn <- turns, do: :turn) > 1
   end
 
   defp start_game(context) do
