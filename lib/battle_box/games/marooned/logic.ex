@@ -157,8 +157,8 @@ defmodule BattleBox.Games.Marooned.Logic do
              {:in_bounds?, 0 <= x && x < game.cols && 0 <= y && y < game.rows} do
         :no_error
       else
-        {:taken?, true} -> %CannotRemoveSquareAPlayerIsOn{target: [x, y]}
-        {:already_removed?, true} -> %CannotRemoveASquareAlreadyRemoved{target: [x, y]}
+        {:taken?, true} -> CannotRemoveSquareAPlayerIsOn.new(game, [x, y])
+        {:already_removed?, true} -> CannotRemoveASquareAlreadyRemoved.new(game, [x, y])
         {:in_bounds?, false} -> CannotRemoveASquareOutsideTheBoard.new(game, [x, y])
       end
 
@@ -183,9 +183,9 @@ defmodule BattleBox.Games.Marooned.Logic do
            {:adjacent?, true} <- {:adjacent?, [x, y] in adjacent(current_position)} do
         :no_error
       else
-        {:is_cur_loc?, true} -> %CannotMoveToSquareYouAlreadyOccupy{target: [x, y]}
-        {:taken?, true} -> %CannotMoveIntoOpponent{target: [x, y]}
-        {:already_removed?, true} -> %CannotMoveIntoRemovedSquare{target: [x, y]}
+        {:is_cur_loc?, true} -> CannotMoveToSquareYouAlreadyOccupy.new(game, [x, y])
+        {:taken?, true} -> CannotMoveIntoOpponent.new(game, [x, y])
+        {:already_removed?, true} -> CannotMoveIntoRemovedSquare.new(game, [x, y])
         {:in_bounds?, false} -> CannotMoveOffBoard.new(game, [x, y])
         {:adjacent?, false} -> CannotMoveToNonAdjacentSquare.new(game, [x, y])
       end

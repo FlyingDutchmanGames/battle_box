@@ -112,11 +112,37 @@ defmodule BattleBox.Games.Marooned.Error do
   end
 
   defmodule CannotMoveToSquareYouAlreadyOccupy do
-    defstruct [:target]
+    use Template
+
+    def new(game, _target) do
+      msg =
+        decoration(
+          """
+          You cannot move to a square you already occupy
+          """,
+          game,
+          __MODULE__
+        )
+
+      %__MODULE__{msg: msg}
+    end
   end
 
   defmodule CannotMoveIntoOpponent do
-    defstruct [:target]
+    use Template
+
+    def new(game, _target) do
+      msg =
+        decoration(
+          """
+          You cannot move into the square your opponent occupies
+          """,
+          game,
+          __MODULE__
+        )
+
+      %__MODULE__{msg: msg}
+    end
   end
 
   defmodule CannotMoveOffBoard do
@@ -144,15 +170,54 @@ defmodule BattleBox.Games.Marooned.Error do
   end
 
   defmodule CannotMoveIntoRemovedSquare do
-    defstruct [:target]
+    use Template
+
+    def new(game, _target) do
+      msg =
+        decoration(
+          """
+          You can not move into a square that's been removed
+          """,
+          game,
+          __MODULE__
+        )
+
+      %__MODULE__{msg: msg}
+    end
   end
 
   defmodule CannotRemoveSquareAPlayerIsOn do
-    defstruct [:target]
+    use Template
+
+    def new(game, _target) do
+      msg =
+        decoration(
+          """
+          You can not remove a square a player is on
+          """,
+          game,
+          __MODULE__
+        )
+
+      %__MODULE__{msg: msg}
+    end
   end
 
   defmodule CannotRemoveASquareAlreadyRemoved do
-    defstruct [:target]
+    use Template
+
+    def new(game, _target) do
+      msg =
+        decoration(
+          """
+          You can not remove a square a that is already removed
+          """,
+          game,
+          __MODULE__
+        )
+
+      %__MODULE__{msg: msg}
+    end
   end
 
   defmodule CannotRemoveASquareOutsideTheBoard do
