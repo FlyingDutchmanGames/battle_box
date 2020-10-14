@@ -4,31 +4,39 @@ defmodule BattleBox.Games.Marooned.Error do
   defmodule Template do
     defmacro __using__(_opts) do
       quote do
+        import unquote(__MODULE__), only: [decoration: 3, game_size_info: 1]
         @derive Jason.Encoder
         @enforce_keys [:msg]
         defstruct [:msg]
-
-        def decoration(msg, %Marooned{turn: turn, next_player: next_player}) do
-          error =
-            __MODULE__
-            |> Module.split()
-            |> List.last()
-
-          """
-
-          ====== (Debug) Marooned - #{error} ======
-          Turn: #{turn}
-          Player: #{next_player}
-          Explanation:
-          #{String.trim(msg)}
-
-          To keep the game moving, your player will move to and remove
-          a sqaure randomly this turn
-          ====== (Debug) Marooned - #{error} ======
-
-          """
-        end
       end
+    end
+
+    def decoration(msg, %Marooned{turn: turn, next_player: next_player}, module) do
+      error =
+        module
+        |> Module.split()
+        |> List.last()
+
+      """
+      ====== (Debug) Marooned - #{error} ======
+      Turn: #{turn}
+      Player: #{next_player}
+      Explanation:
+      #{String.trim(msg)}
+
+      To keep the game moving, your player will move randomly
+      ====== (Debug) Marooned - #{error} ======
+      """
+    end
+
+    def game_size_info(%Marooned{rows: rows, cols: cols}) do
+      """
+      The game board is always zero indexed and this particular ruleset has #{rows} rows,
+      and #{cols} cols, The range of acceptable coordinates are as follows (inclusive)
+
+      x -> 0..#{cols - 1}
+      y -> 0..#{rows - 1}
+      """
     end
   end
 
@@ -55,7 +63,8 @@ defmodule BattleBox.Games.Marooned.Error do
 
           #{Jason.encode!(%{"to" => [0, 0], "remove" => [1, 1]}, pretty: true)}
           """,
-          game
+          game,
+          __MODULE__
         )
 
       %__MODULE__{msg: msg}
@@ -63,43 +72,76 @@ defmodule BattleBox.Games.Marooned.Error do
   end
 
   defmodule CannotMoveToNonAdjacentSquare do
-    @enforce_keys [:target]
     defstruct [:target]
   end
 
   defmodule CannotMoveToSquareYouAlreadyOccupy do
-    @enforce_keys [:target]
     defstruct [:target]
   end
 
   defmodule CannotMoveIntoOpponent do
-    @enforce_keys [:target]
     defstruct [:target]
   end
 
   defmodule CannotMoveOffBoard do
-    @enforce_keys [:target]
-    defstruct [:target]
+    use Template
+
+    def new(game, target) do
+      msg =
+        decoration(
+          """
+          Your bot sent the following as part of it's commands
+
+          #{Jason.encode!(%{to: target})}
+
+          This is invalid because the square you tried to move to (#{inspect(target)})
+          falls outside of the field of play.
+
+          #{game_size_info(game)}
+          """,
+          game,
+          __MODULE__
+        )
+
+      IO.puts(msg)
+      %__MODULE__{msg: msg}
+    end
   end
 
   defmodule CannotMoveIntoRemovedSquare do
-    @enforce_keys [:target]
     defstruct [:target]
   end
 
   defmodule CannotRemoveSquareAPlayerIsOn do
-    @enforce_keys [:target]
     defstruct [:target]
   end
 
   defmodule CannotRemoveASquareAlreadyRemoved do
-    @enforce_keys [:target]
     defstruct [:target]
   end
 
   defmodule CannotRemoveASquareOutsideTheBoard do
-    @enforce_keys [:target]
-    defstruct [:target]
+    use Template
+
+    def new(game, target) do
+      msg =
+        decoration(
+          """
+          Your bot sent the following as part of it's commands
+
+          #{Jason.encode!(%{remove: target})}
+
+          This is invalid because the square you tried to remove (#{inspect(target)})
+          falls outside of the field of play.
+
+          #{game_size_info(game)}
+          """,
+          game,
+          __MODULE__
+        )
+
+      %__MODULE__{msg: msg}
+    end
   end
 
   defmodule CannotRemoveSameSquareAsMoveTo do
@@ -119,7 +161,8 @@ defmodule BattleBox.Games.Marooned.Error do
           This is invalid, as you can not move into the same square you
           are removing
           """,
-          game
+          game,
+          __MODULE__
         )
 
       %__MODULE__{msg: msg}

@@ -140,7 +140,7 @@ defmodule BattleBox.Games.Marooned.Logic do
     end
   end
 
-  defp validate_command(game, :timeout), do: {%{}, nil}
+  defp validate_command(_game, :timeout), do: {%{}, nil}
 
   defp validate_command(game, command) when is_map(command),
     do: {command, InvalidInputFormat.new(game, command)}
@@ -159,7 +159,7 @@ defmodule BattleBox.Games.Marooned.Logic do
       else
         {:taken?, true} -> %CannotRemoveSquareAPlayerIsOn{target: [x, y]}
         {:already_removed?, true} -> %CannotRemoveASquareAlreadyRemoved{target: [x, y]}
-        {:in_bounds?, false} -> %CannotRemoveASquareOutsideTheBoard{target: [x, y]}
+        {:in_bounds?, false} -> CannotRemoveASquareOutsideTheBoard.new(game, [x, y])
       end
 
     if error == :no_error,
@@ -186,7 +186,7 @@ defmodule BattleBox.Games.Marooned.Logic do
         {:is_cur_loc?, true} -> %CannotMoveToSquareYouAlreadyOccupy{target: [x, y]}
         {:taken?, true} -> %CannotMoveIntoOpponent{target: [x, y]}
         {:already_removed?, true} -> %CannotMoveIntoRemovedSquare{target: [x, y]}
-        {:in_bounds?, false} -> %CannotMoveOffBoard{target: [x, y]}
+        {:in_bounds?, false} -> CannotMoveOffBoard.new(game, [x, y])
         {:adjacent?, false} -> %CannotMoveToNonAdjacentSquare{target: [x, y]}
       end
 
