@@ -1,10 +1,11 @@
 defmodule BattleBox.Games.Marooned.Error do
   alias BattleBox.Games.Marooned
+  alias BattleBox.Games.Marooned.Logic
 
   defmodule Template do
     defmacro __using__(_opts) do
       quote do
-        import unquote(__MODULE__), only: [decoration: 3, game_size_info: 1]
+        import unquote(__MODULE__)
         @derive Jason.Encoder
         @enforce_keys [:msg]
         defstruct [:msg]
@@ -26,6 +27,19 @@ defmodule BattleBox.Games.Marooned.Error do
 
       To keep the game moving, your player will move randomly
       ====== (Debug) Marooned - #{error} ======
+      """
+    end
+
+    def adjacency_info do
+      """
+      If your bot is at 1, it can move to any space not removed/occupied/off the board
+      that has an x in it
+
+      0 0 0 0 0
+      0 x x x 0
+      0 x 1 x 0
+      0 x x x 0
+      0 0 0 0 0
       """
     end
 
@@ -72,7 +86,29 @@ defmodule BattleBox.Games.Marooned.Error do
   end
 
   defmodule CannotMoveToNonAdjacentSquare do
-    defstruct [:target]
+    use Template
+
+    def new(%Marooned{next_player: next_player} = game, target) do
+      %{^next_player => current_position} = Logic.player_positions(game)
+
+      msg =
+        decoration(
+          """
+          Your bot sent the following as part of it's commands
+
+          #{Jason.encode!(%{to: target})}
+
+          Your player is currently at #{inspect(current_position)} at can only move
+          to spaces that are adjacent to it's current position
+
+          #{adjacency_info()}
+          """,
+          game,
+          __MODULE__
+        )
+
+      %__MODULE__{msg: msg}
+    end
   end
 
   defmodule CannotMoveToSquareYouAlreadyOccupy do
@@ -103,7 +139,6 @@ defmodule BattleBox.Games.Marooned.Error do
           __MODULE__
         )
 
-      IO.puts(msg)
       %__MODULE__{msg: msg}
     end
   end

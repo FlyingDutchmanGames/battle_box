@@ -187,7 +187,7 @@ defmodule BattleBox.Games.Marooned.Logic do
         {:taken?, true} -> %CannotMoveIntoOpponent{target: [x, y]}
         {:already_removed?, true} -> %CannotMoveIntoRemovedSquare{target: [x, y]}
         {:in_bounds?, false} -> CannotMoveOffBoard.new(game, [x, y])
-        {:adjacent?, false} -> %CannotMoveToNonAdjacentSquare{target: [x, y]}
+        {:adjacent?, false} -> CannotMoveToNonAdjacentSquare.new(game, [x, y])
       end
 
     if error == :no_error,
