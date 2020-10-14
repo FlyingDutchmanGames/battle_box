@@ -15,7 +15,7 @@ defmodule BattleBox.Games.Marooned.Logic do
   import BattleBox.Utilities.Grid, only: [manhattan_distance: 2]
 
   def calculate_turn(game, commands) do
-    {command, input_error} = validate_command(commands[game.next_player])
+    {command, input_error} = validate_command(game, commands[game.next_player])
     {remove, remove_error} = validate_remove(game, game.next_player, command["remove"])
     {to, to_error} = validate_to(game, game.next_player, command["to"])
 
@@ -130,22 +130,22 @@ defmodule BattleBox.Games.Marooned.Logic do
     end
   end
 
-  defp validate_command(%{"to" => [a, b], "remove" => [c, d]} = command) do
+  defp validate_command(game, %{"to" => [a, b], "remove" => [c, d]} = command) do
     with {:integers?, true} <- {:integers?, Enum.all?([a, b, c, d], &is_integer/1)},
          {:same_space?, false} <- {:same_space?, [a, b] == [c, d]} do
       {command, nil}
     else
-      {:integers?, false} -> {command, %InvalidInputFormat{input: command}}
-      {:same_space?, true} -> {command, %CannotRemoveSameSquareAsMoveTo{target: [a, b]}}
+      {:integers?, false} -> {command, InvalidInputFormat.new(game, command)}
+      {:same_space?, true} -> {command, CannotRemoveSameSquareAsMoveTo.new(game, [a, b])}
     end
   end
 
-  defp validate_command(:timeout), do: {%{}, nil}
+  defp validate_command(game, :timeout), do: {%{}, nil}
 
-  defp validate_command(command) when is_map(command),
-    do: {command, %InvalidInputFormat{input: command}}
+  defp validate_command(game, command) when is_map(command),
+    do: {command, InvalidInputFormat.new(game, command)}
 
-  defp validate_command(other), do: {%{}, %InvalidInputFormat{input: other}}
+  defp validate_command(game, other), do: {%{}, InvalidInputFormat.new(game, other)}
 
   defp validate_remove(game, player, nil), do: {random_removal_space(game, player), nil}
 

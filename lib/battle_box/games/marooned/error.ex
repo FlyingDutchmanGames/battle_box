@@ -1,153 +1,128 @@
 defmodule BattleBox.Games.Marooned.Error do
-  alias BattleBox.Game.Error
+  alias BattleBox.Games.Marooned
+
+  defmodule Template do
+    defmacro __using__(_opts) do
+      quote do
+        @derive Jason.Encoder
+        @enforce_keys [:msg]
+        defstruct [:msg]
+
+        def decoration(msg, %Marooned{turn: turn, next_player: next_player}) do
+          error =
+            __MODULE__
+            |> Module.split()
+            |> List.last()
+
+          """
+
+          ====== (Debug) Marooned - #{error} ======
+          Turn: #{turn}
+          Player: #{next_player}
+          Explanation:
+          #{String.trim(msg)}
+
+          To keep the game moving, your player will move to and remove
+          a sqaure randomly this turn
+          ====== (Debug) Marooned - #{error} ======
+
+          """
+        end
+      end
+    end
+  end
 
   defmodule InvalidInputFormat do
-    @enforce_keys [:input]
-    defstruct [:input]
+    use Template
 
-    defimpl Error do
-      def level(_), do: :warn
+    def new(%Marooned{} = game, input) do
+      msg =
+        decoration(
+          """
+          Your bot sent the following commands with an invalid format:
 
-      def to_human(%{input: _input}) do
-        """
-        You need to format it correctly
-        """
-      end
+          #{Jason.encode!(input, pretty: true)}
+
+          All commands must be in the following format
+
+          #{Jason.encode!(%{"to" => "<location>", "remove" => "<location>"}, pretty: true)}
+
+          Where <location> is an [x, y] coordinate pair, such that x and y are integers and
+          within the board
+
+          If you'd like to move to the location [0, 0] and remove the location [1, 1] you'd
+          send the following JSON
+
+          #{Jason.encode!(%{"to" => [0, 0], "remove" => [1, 1]}, pretty: true)}
+          """,
+          game
+        )
+
+      %__MODULE__{msg: msg}
     end
   end
 
   defmodule CannotMoveToNonAdjacentSquare do
     @enforce_keys [:target]
     defstruct [:target]
-
-    defimpl Error do
-      def level(_), do: :warn
-
-      def to_human(%{target: _target}) do
-        """
-        You have to move adjacently
-        """
-      end
-    end
   end
 
   defmodule CannotMoveToSquareYouAlreadyOccupy do
     @enforce_keys [:target]
     defstruct [:target]
-
-    defimpl Error do
-      def level(_), do: :warn
-
-      def to_human(%{target: _target}) do
-        """
-        You can't move into the space you're already in
-        """
-      end
-    end
   end
 
   defmodule CannotMoveIntoOpponent do
     @enforce_keys [:target]
     defstruct [:target]
-
-    defimpl Error do
-      def level(_), do: :warn
-
-      def to_human(%{target: _target}) do
-        """
-        You can't move into an opponent
-        """
-      end
-    end
   end
 
   defmodule CannotMoveOffBoard do
     @enforce_keys [:target]
     defstruct [:target]
-
-    defimpl Error do
-      def level(_), do: :warn
-
-      def to_human(%{target: _target}) do
-        """
-        You can't move off the board
-        """
-      end
-    end
   end
 
   defmodule CannotMoveIntoRemovedSquare do
     @enforce_keys [:target]
     defstruct [:target]
-
-    defimpl Error do
-      def level(_), do: :warn
-
-      def to_human(%{target: _target}) do
-        """
-        You can't move into a removed space!
-        """
-      end
-    end
   end
 
   defmodule CannotRemoveSquareAPlayerIsOn do
     @enforce_keys [:target]
     defstruct [:target]
-
-    defimpl Error do
-      def level(_), do: :warn
-
-      def to_human(%{target: _target}) do
-        """
-        You tried to move into the same square that you're removing!!
-        """
-      end
-    end
   end
 
   defmodule CannotRemoveASquareAlreadyRemoved do
     @enforce_keys [:target]
     defstruct [:target]
-
-    defimpl Error do
-      def level(_), do: :warn
-
-      def to_human(%{target: _target}) do
-        """
-        You tried to move into the same square that you're removing!!
-        """
-      end
-    end
   end
 
   defmodule CannotRemoveASquareOutsideTheBoard do
     @enforce_keys [:target]
     defstruct [:target]
-
-    defimpl Error do
-      def level(_), do: :warn
-
-      def to_human(%{target: _target}) do
-        """
-        You tried to move into the same square that you're removing!!
-        """
-      end
-    end
   end
 
   defmodule CannotRemoveSameSquareAsMoveTo do
-    @enforce_keys [:target]
-    defstruct [:target]
+    use Template
 
-    defimpl Error do
-      def level(_), do: :warn
+    def new(game, target) do
+      msg =
+        decoration(
+          """
+          Your bot sent the following
 
-      def to_human(%{target: _target}) do
-        """
-        You tried to move into the same square that you're removing!!
-        """
-      end
+          #{Jason.encode!(%{to: target, remove: target})}
+
+          The square you tried to remove, and the square you tried to
+          move to are the same (#{inspect(target)})
+
+          This is invalid, as you can not move into the same square you
+          are removing
+          """,
+          game
+        )
+
+      %__MODULE__{msg: msg}
     end
   end
 end
