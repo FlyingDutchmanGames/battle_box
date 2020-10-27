@@ -10,6 +10,7 @@ defmodule BattleBox.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
+      dialyzer: [ plt_file: {:no_warn, "priv/plts/dialyzer.plt"} ],
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
@@ -52,9 +53,10 @@ defmodule BattleBox.MixProject do
       {:cowlib, "~> 2.8", override: true},
       {:bypass, "~> 1.0", only: :test},
       {:observer_cli, "~> 1.5"},
-      # Dev
+      # Dev/Test
       {:excoveralls, "~> 0.10", only: :test},
-      {:floki, ">= 0.25.0", only: :test}
+      {:floki, ">= 0.25.0", only: :test},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
   end
 
