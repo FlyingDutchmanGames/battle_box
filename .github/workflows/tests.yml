@@ -20,6 +20,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
     - uses: actions/checkout@v2
+
     - name: Setup elixir
       env:
         MIX_ENV: test
@@ -27,15 +28,31 @@ jobs:
       with:
         elixir-version: 1.10.0
         otp-version: 22.2
+
+    - name: Initialize Cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          deps
+          priv/plts
+        key: ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-mix-Install/Cache Dependencies
+
     - name: Install Dependencies
       env:
         MIX_ENV: test
       run: mix deps.get
+
     - name: Run Tests
       env:
         MIX_ENV: test
       run: mix test
+
     - name: Check Formatted
       env:
         MIX_ENV: test
       run: mix format --check-formatted
+
+    - name: Type Check
+      run: MIX_ENV=dev mix dialyzer

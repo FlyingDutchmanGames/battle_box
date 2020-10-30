@@ -22,7 +22,7 @@ defmodule BattleBoxWeb.GithubLoginControllerTest do
         "code" => "test code"
       })
 
-    assert_raise(RuntimeError, "Invalid state param in github callback", fn ->
+    assert_raise(RuntimeError, "Error exchaning token or fetching user", fn ->
       get(conn, "/auth/github/callback?" <> params)
     end)
   end
