@@ -9,7 +9,7 @@ ENV MIX_ENV=prod
 RUN apt-get update && \
   apt-get install -y curl git && \
   curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-  apt-get install -y inotify-tools nodejs
+  apt-get install -y inotify-tools nodejs npm
 
 RUN mix local.hex --force && \
   mix local.rebar --force
