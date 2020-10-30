@@ -49,9 +49,10 @@ defmodule BattleBox.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:gen_state_machine, "~> 2.0"},
       {:gun, "~> 1.3"},
+      {:tesla, "~> 1.3.0"},
+      {:idna, "~> 6.0"},
       # When Gun 2 comes out, update Gun and remove the override
       {:cowlib, "~> 2.8", override: true},
-      {:bypass, "~> 1.0", only: :test},
       {:observer_cli, "~> 1.5"},
       # Dev/Test
       {:floki, ">= 0.25.0", only: :test},

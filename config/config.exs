@@ -27,4 +27,6 @@ config :logger, :console,
 
 config :phoenix, :json_library, Jason
 
+config :tesla, :adapter, Tesla.Adapter.Gun
+
 import_config "#{Mix.env()}.exs"
