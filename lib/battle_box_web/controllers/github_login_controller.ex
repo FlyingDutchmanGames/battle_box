@@ -22,11 +22,8 @@ defmodule BattleBoxWeb.GithubLoginController do
       |> put_session(:user_id, user.id)
       |> redirect(to: "/")
     else
-      {1, false} ->
-        raise "Invalid state param in github callback"
-
-      {3, {:error, :timeout}} ->
-        raise "Timeout trying to get user"
+      _ ->
+        raise "Error exchaning token or fetching user"
     end
   end
 
@@ -71,8 +68,8 @@ defmodule BattleBoxWeb.GithubLoginController do
          {:ok, %{"access_token" => access_token}} <- Jason.decode(body) do
       {:ok, access_token}
     else
-      {:ok, %{"error" => "bad_verification_code"}} ->
-        raise "Invalid Verification Code"
+      _ ->
+        raise "Error exchanging token"
     end
   end
 

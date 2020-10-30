@@ -81,7 +81,7 @@ defmodule BattleBox.Game do
 
   def changeset(game, params \\ %{}) do
     game
-    |> cast(params, :game_type)
+    |> cast(params, [:game_type])
     |> validate_inclusion(:game_type, installed_games())
     |> cast_assoc(:game_bots)
     |> cast_assoc(game.game_type.name)
