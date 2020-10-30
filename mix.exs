@@ -10,7 +10,7 @@ defmodule BattleBox.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
-      dialyzer: [ plt_file: {:no_warn, "priv/plts/dialyzer.plt"} ],
+      dialyzer: [plt_file: {:no_warn, "priv/plts/dialyzer.plt"}],
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
