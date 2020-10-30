@@ -256,7 +256,11 @@ defmodule BattleBox.GameEngine.BotServerTest do
         :ok = BotServer.accept_game(context.p2_server, game_id)
 
         assert_receive {_connection_id,
-                        %CommandsRequest{game_id: ^game_id, maximum_time: max, minimum_time: min}}
+                        %CommandsRequest{
+                          game_id: ^game_id,
+                          maximum_time: _max,
+                          minimum_time: _min
+                        }}
 
         assert [{_pid, %{game_id: ^game_id}}] =
                  Registry.lookup(context.bot_registry, context.init_opts_p1.bot_server_id)

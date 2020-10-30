@@ -1,5 +1,5 @@
 # Build Stage
-FROM elixir:1.10.1-slim AS builder
+FROM hexpm/elixir:1.11.1-erlang-23.1.1-ubuntu-groovy-20201022.1 AS builder
 
 MAINTAINER the-notorious-gjp
 
@@ -31,7 +31,7 @@ RUN mix phx.digest
 RUN mix release --overwrite
 
 # Deploy Stage
-FROM elixir:1.9-slim
+FROM hexpm/elixir:1.11.1-erlang-23.1.1-ubuntu-groovy-20201022.1
 ENV MIX_ENV=prod
 
 WORKDIR /app

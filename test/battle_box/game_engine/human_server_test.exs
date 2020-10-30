@@ -179,7 +179,7 @@ defmodule BattleBox.GameEngine.HumanServerTest do
           players: %{1 => named_proxy(:other_player), 2 => human_server}
         })
 
-      assert_receive {:other_player, %GameRequest{player: player, game_id: game_id}}
+      assert_receive {:other_player, %GameRequest{player: player, game_id: _game_id}}
 
       :ok = GameServer.accept_game(game_server, player)
 
@@ -201,7 +201,7 @@ defmodule BattleBox.GameEngine.HumanServerTest do
           players: %{2 => named_proxy(:other_player), 1 => human_server}
         })
 
-      assert_receive {:other_player, %GameRequest{player: player, game_id: game_id}}
+      assert_receive {:other_player, %GameRequest{player: player, game_id: _game_id}}
 
       :ok = GameServer.accept_game(game_server, player)
       Process.sleep(10)
@@ -233,7 +233,7 @@ defmodule BattleBox.GameEngine.HumanServerTest do
 
     Process.monitor(human_server)
 
-    assert_receive {:other_player, %GameRequest{player: player, game_id: game_id}}
+    assert_receive {:other_player, %GameRequest{player: player, game_id: _game_id}}
 
     :ok = GameServer.accept_game(game_server, player)
 

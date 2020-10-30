@@ -41,6 +41,7 @@
 #### ELO rankings
 - Provide optional ELOs to arenas
 #### General
+- Switch to Tesla instead of hand rolled HTTP client
 - Handle when connection is closed on trying to send from connection server
 - Api Key -> Key
 - Root Api Keys under users
