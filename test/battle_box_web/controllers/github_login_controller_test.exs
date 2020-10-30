@@ -24,7 +24,7 @@ defmodule BattleBoxWeb.GithubLoginControllerTest do
         "code" => "test code"
       })
 
-    assert_raise(RuntimeError, "Invalid State Param", fn ->
+    assert_raise(MatchError, "no match of right hand side value: false", fn ->
       get(conn, "/auth/github/callback?" <> params)
     end)
   end
