@@ -54,10 +54,8 @@ defmodule BattleBox.MixProject do
       {:bypass, "~> 1.0", only: :test},
       {:observer_cli, "~> 1.5"},
       # Dev/Test
-      {:excoveralls, "~> 0.10", only: :test},
       {:floki, ">= 0.25.0", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:credo, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
   end
 
