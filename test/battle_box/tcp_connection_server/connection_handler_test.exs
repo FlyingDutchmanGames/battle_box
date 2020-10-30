@@ -85,7 +85,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{
                "status" => "idle",
-               "connection_id" => connection_id,
+               "connection_id" => _connection_id,
                "bot_server_id" => <<_::288>>,
                "watch" => watch_links
              } = Jason.decode!(msg)
@@ -166,7 +166,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert %{
                "game_info" => %{
-                 "game_id" => <<_::288>> = game_id,
+                 "game_id" => <<_::288>>,
                  "game_type" => "marooned",
                  "player" => _,
                  "settings" => %{
@@ -220,7 +220,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
         assert_receive {:tcp, ^socket, msg}
         %{"connection_id" => connection_id} = Jason.decode!(msg)
         :ok = :gen_tcp.send(socket, context.start_matchmaking_request)
-        assert_receive {:tcp, ^socket, msg}
+        assert_receive {:tcp, ^socket, _msg}
         {player, %{socket: socket, connection_id: connection_id}}
       end
       |> Map.new()
@@ -310,7 +310,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
       assert_receive {:tcp, ^p1, game_req}
       assert %{"game_info" => %{"game_id" => game_id}} = Jason.decode!(game_req)
-      assert_receive {:tcp, ^p2, game_req}
+      assert_receive {:tcp, ^p2, _game_req}
 
       accept_game = %{"action" => "accept_game", "game_id" => game_id}
       :ok = :gen_tcp.send(p1, encode(accept_game))
@@ -324,7 +324,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
       incorrect_request_id = Ecto.UUID.generate()
       %{"commands_request" => _} = Jason.decode!(commands_request)
       :ok = :gen_tcp.send(conn, empty_commands_msg(incorrect_request_id))
-      assert_receive {:tcp, conn, error}
+      assert_receive {:tcp, _conn, error}
 
       assert %{"error" => "invalid_commands_submission", "request_id" => ^incorrect_request_id} =
                Jason.decode!(error)

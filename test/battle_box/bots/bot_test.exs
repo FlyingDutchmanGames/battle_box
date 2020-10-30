@@ -86,7 +86,7 @@ defmodule BattleBox.BotTest do
     end
 
     test "when no bot exists, it creates one", %{user: user} do
-      assert {:ok, bot} = Bot.get_or_create_by_name(user, "foo")
+      assert {:ok, _bot} = Bot.get_or_create_by_name(user, "foo")
     end
 
     test "when a bot exists, it returns it", %{user: user} do

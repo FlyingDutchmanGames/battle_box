@@ -58,7 +58,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
     matches =
       make_matches([%{bot: bot, pid: player_1_pid}, %{bot: bot, pid: player_2_pid}], arena)
 
-    assert [%{game: game, players: %{1 => pid1, 2 => pid2}}] = matches
+    assert [%{game: _game, players: %{1 => pid1, 2 => pid2}}] = matches
     assert pid1 != pid2
     assert pid1 in [player_1_pid, player_2_pid]
     assert pid2 in [player_1_pid, player_2_pid]
@@ -79,7 +79,7 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogicTest do
         arena
       )
 
-    assert [%{game: game, players: %{1 => pid1, 2 => pid2}}] = matches
+    assert [%{game: _game, players: %{1 => pid1, 2 => pid2}}] = matches
     assert pid1 != pid2
     assert pid1 in [player_1_pid, player_2_pid, player_3_pid]
     assert pid2 in [player_1_pid, player_2_pid, player_3_pid]

@@ -29,18 +29,18 @@ defmodule BattleBox.Release.Seeder do
     %User{} = User.anon_human_user()
 
     for game <- installed_games() do
-      Logger.info("Creating/Updating System Bots for #{game.title}")
+      Logger.info("Creating/Updating System Bots for #{game.title()}")
 
-      for ai <- game.ais,
+      for ai <- game.ais(),
           do: {:ok, %Bot{}} = Bot.system_bot(ai.name)
 
-      Logger.info("Creating/Updating System Arenas for #{game.title}")
+      Logger.info("Creating/Updating System Arenas for #{game.title()}")
 
       for %{name: name} = params <- game.default_arenas() do
         params =
           params
           |> Map.put(:game_type, game)
-          |> Map.put(game.settings_module.name, params[:settings])
+          |> Map.put(game.settings_module().name(), params[:settings])
 
         {:ok, _arena} =
           case Repo.get_by(Arena, name: name) do

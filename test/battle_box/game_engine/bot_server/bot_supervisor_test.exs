@@ -34,7 +34,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
 
   describe "starting a bot" do
     test "you can start a bot with a bot name and a token", context do
-      assert {:ok, server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
+      assert {:ok, _server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  token: context.key.token,
                  bot_name: context.bot.name,
@@ -43,7 +43,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     end
 
     test "you can start a bot", context do
-      assert {:ok, server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
+      assert {:ok, _server, %{bot: %{user_id: @user_id}, bot_server_id: <<_::288>>}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  bot: context.bot,
                  connection: self()
@@ -115,7 +115,7 @@ defmodule BattleBox.GameEngine.BotServer.BotSupervisorTest do
     end
 
     test "it will not return the bots for a different user", context do
-      assert {:ok, server1, %{bot: %{user_id: @user_id}}} =
+      assert {:ok, _server, %{bot: %{user_id: @user_id}}} =
                BotSupervisor.start_bot(context.game_engine, %{
                  bot: context.bot,
                  connection: self()

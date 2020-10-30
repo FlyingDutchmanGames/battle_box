@@ -165,7 +165,7 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
 
       assert_recieve_msg(conn, %{
         "game_info" => %{
-          "game_id" => <<_::288>> = game_id,
+          "game_id" => <<_::288>>,
           "player" => _,
           "settings" => %{}
         },

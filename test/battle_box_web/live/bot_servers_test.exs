@@ -60,7 +60,7 @@ defmodule BattleBoxWeb.Live.BotServersTest do
 
     {:ok, view, html} = live_isolated(conn, BotServers, session: %{"bot" => context.bot})
     {:ok, document} = Floki.parse_document(html)
-    assert [bot] = Floki.find(document, ".bot-server")
+    assert [_bot] = Floki.find(document, ".bot-server")
 
     Process.exit(bot_server_pid, :kill)
     Process.sleep(10)
@@ -85,7 +85,7 @@ defmodule BattleBoxWeb.Live.BotServersTest do
     Process.sleep(10)
     html = render(view)
     {:ok, document} = Floki.parse_document(html)
-    assert [bot] = Floki.find(document, ".bot-server")
+    assert [_bot] = Floki.find(document, ".bot-server")
 
     Process.exit(bot_server_pid, :kill)
     Process.sleep(10)
