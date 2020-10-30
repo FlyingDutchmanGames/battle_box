@@ -1,4 +1,5 @@
 use Mix.Config
+require Logger
 
 config :battle_box, BattleBox.Repo,
   username: "postgres",
@@ -39,4 +40,6 @@ config :phoenix, :stacktrace_depth, 20
 
 config :phoenix, :plug_init_mode, :runtime
 
-import_config "#{Mix.env()}.secret.exs"
+if File.exists?(Path.join(__DIR__, "dev.secret.exs")),
+  do: import_config("dev.secret.exs"),
+  else: Logger.warn("dev.secret.exs not found")
