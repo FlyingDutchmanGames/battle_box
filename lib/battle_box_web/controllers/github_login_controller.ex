@@ -1,6 +1,6 @@
 defmodule BattleBoxWeb.GithubLoginController do
   use BattleBoxWeb, :controller
-  alias BattleBox.{User, Utilities.HTTP}
+  alias BattleBox.{User, Utilities.Github}
 
   def github_login(conn, _params) do
     state = make_state()
@@ -12,8 +12,8 @@ defmodule BattleBoxWeb.GithubLoginController do
 
   def github_callback(conn, %{"code" => code, "state" => state}) do
     with {1, true} <- {1, state == get_session(conn, :github_auth_state)},
-         {2, {:ok, access_token}} <- {2, token_exchange(code, state)},
-         {3, {:ok, user}} <- {3, get_user(access_token)} do
+         {2, {:ok, access_token}} <- {2, Github.token_exchange(code, state)},
+         {3, {:ok, user}} <- {3, Github.get_user(access_token)} do
       user = Map.put(user, "access_token", access_token)
       {:ok, user} = User.upsert_from_github(user)
 
@@ -22,54 +22,14 @@ defmodule BattleBoxWeb.GithubLoginController do
       |> put_session(:user_id, user.id)
       |> redirect(to: "/")
     else
+      {2, {:error, :bad_verification_code}} ->
+        raise "Invalid Verification Code"
+
+      {1, false} ->
+        raise "Invalid State Param"
+
       _ ->
-        raise "Error exchaning token or fetching user"
-    end
-  end
-
-  defp get_user(access_token) do
-    response =
-      HTTP.get(github_api_user_url(), [
-        {"authorization", "token #{access_token}"},
-        {"user-agent", "botskrieg"},
-        {"accept", "application/json"}
-      ])
-
-    case response do
-      {:ok, %HTTP.Response{status_code: 200, body: body}} ->
-        {:ok, %{"id" => _, "name" => _}} = Jason.decode(body)
-
-      {:error, :timeout} ->
-        {:error, :timeout}
-    end
-  end
-
-  defp token_exchange(code, state) do
-    body =
-      Jason.encode!(%{
-        "client_id" => Keyword.fetch!(config(), :client_id),
-        "client_secret" => Keyword.fetch!(config(), :client_secret),
-        "code" => code,
-        "state" => state
-      })
-
-    response =
-      HTTP.post(
-        github_access_token_url(),
-        [
-          {"accept", "application/json"},
-          {"content-type", "application/json"},
-          {"user-agent", "botskrieg"}
-        ],
-        body
-      )
-
-    with {:ok, %{status_code: 200, body: body}} <- response,
-         {:ok, %{"access_token" => access_token}} <- Jason.decode(body) do
-      {:ok, access_token}
-    else
-      _ ->
-        raise "Error exchanging token"
+        raise "Error, something went wrong setting up user"
     end
   end
 
@@ -81,7 +41,7 @@ defmodule BattleBoxWeb.GithubLoginController do
         "client_id" => Keyword.fetch!(config(), :client_id)
       })
 
-    "#{github_authorization_url()}?#{params}"
+    "https://github.com/login/oauth/authorize?#{params}"
   end
 
   defp config do
@@ -92,10 +52,4 @@ defmodule BattleBoxWeb.GithubLoginController do
     :crypto.strong_rand_bytes(32)
     |> Base.encode16(case: :lower)
   end
-
-  defp github_authorization_url, do: "#{github_base_url()}/login/oauth/authorize"
-  defp github_access_token_url, do: "#{github_base_url()}/login/oauth/access_token"
-  defp github_api_user_url, do: "#{github_api_base_url()}/user"
-  defp github_base_url, do: Process.get(:bypass) || "https://github.com"
-  defp github_api_base_url, do: Process.get(:bypass) || "https://api.github.com"
 end

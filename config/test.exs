@@ -21,3 +21,5 @@ config :battle_box, :github,
   client_secret: "TEST_GITHUB_CLIENT_SECRET"
 
 config :logger, level: :warn
+
+config :tesla, adapter: Tesla.Mock
