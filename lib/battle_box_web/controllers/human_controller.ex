@@ -6,7 +6,10 @@ defmodule BattleBoxWeb.HumanController do
   def start_game(conn, %{"game_type" => _game_type, "opponent" => _opponent}) do
   end
 
-  def play(conn, %{"game_type" => game_type}) do
+  def play(conn, %{"game_type" => game_type, "arena" => arena, "opponent" => opponent}) do
+  end
+
+  def play(conn, %{"game_type" => game_type, "arena" => arena}) do
     nav_segments = [{"play", Routes.human_path(conn, :play)}, game_type]
     game = game_type_name_to_module(game_type)
     {:ok, opponents} = opponent_modules(game)
@@ -14,6 +17,18 @@ defmodule BattleBoxWeb.HumanController do
     render(conn, "opponent_select.html",
       segments: nav_segments,
       opponents: opponents,
+      game: game
+    )
+  end
+
+  def play(conn, %{"game_type" => game_type}) do
+    nav_segments = [{"play", Routes.human_path(conn, :play)}, game_type]
+    game = game_type_name_to_module(game_type)
+    arenas = Arena.default_for_game_type(game)
+
+    render(conn, "arena_select.html",
+      segments: nav_segments,
+      arenas: arenas,
       game: game
     )
   end
