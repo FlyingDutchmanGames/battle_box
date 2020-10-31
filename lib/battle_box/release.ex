@@ -5,7 +5,7 @@ defmodule BattleBox.Release do
     def child_spec(_opts) do
       %{
         id: __MODULE__,
-        restart: :temporary,
+        restart: :transient,
         start: {Task, :start_link, [&BattleBox.Release.migrate/0]}
       }
     end

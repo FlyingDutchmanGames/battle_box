@@ -11,6 +11,10 @@ defmodule BattleBox.Connection.Message do
     })
   end
 
+  def debug_info(debug) do
+    encode(%{"info" => "debug", "debug" => debug})
+  end
+
   def commands_request(request) do
     encode(%{"request_type" => "commands_request", "commands_request" => request})
   end

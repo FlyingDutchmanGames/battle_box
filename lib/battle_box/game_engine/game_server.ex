@@ -2,6 +2,15 @@ defmodule BattleBox.GameEngine.GameServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   alias BattleBox.{Repo, Game, GameEngine}
 
+  alias BattleBox.GameEngine.Message.{
+    CommandsRequest,
+    DebugInfo,
+    GameInfo,
+    GameOver,
+    GameRequest,
+    GameCanceled
+  }
+
   def get_game(game_server) do
     GenStateMachine.call(game_server, :get_game)
   end
@@ -42,7 +51,15 @@ defmodule BattleBox.GameEngine.GameServer do
 
     for {player, pid} <- data.players do
       Process.monitor(pid)
-      send(pid, init_message(data.game, player))
+
+      send(pid, %GameRequest{
+        game_server: self(),
+        game_id: data.game.id,
+        game_type: data.game.game_type.name,
+        player: player,
+        accept_time: data.game.arena.game_acceptance_time_ms,
+        settings: Game.settings(data.game)
+      })
     end
 
     {:keep_state, Map.put(data, :acceptances, [])}
@@ -60,7 +77,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:cast, {:reject_game, _player}, :game_acceptance, data) do
     for {_player, pid} <- data.players do
-      send(pid, {:game_cancelled, data.game.id})
+      send(pid, %GameCanceled{game_id: data.game.id})
     end
 
     {:stop, :normal}
@@ -68,7 +85,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
   def handle_event(:info, {:DOWN, _, :process, _pid, _}, :game_acceptance, data) do
     for {_player, pid} <- data.players do
-      send(pid, {:game_cancelled, data.game.id})
+      send(pid, %GameCanceled{game_id: data.game.id})
     end
 
     {:stop, :normal}
@@ -78,7 +95,14 @@ defmodule BattleBox.GameEngine.GameServer do
     requests = Game.commands_requests(data.game)
 
     for {player, request} <- requests do
-      send(data.players[player], commands_request(data.game, player, request))
+      send(data.players[player], %CommandsRequest{
+        game_id: data.game.id,
+        game_state: request,
+        minimum_time: data.game.arena.command_time_minimum_ms,
+        maximum_time: data.game.arena.command_time_maximum_ms,
+        player: player,
+        request_id: Ecto.UUID.generate()
+      })
     end
 
     commands = Map.new(requests, fn {player, _} -> {player, nil} end)
@@ -94,11 +118,11 @@ defmodule BattleBox.GameEngine.GameServer do
       data = put_in(data.game, game)
 
       for {player, msgs} <- debug, msg <- msgs do
-        send(data.players[player], debug_info(data.game, msg))
+        send(data.players[player], %DebugInfo{game_id: data.game.id, debug_info: msg})
       end
 
       for {player, msgs} <- info, msg <- msgs do
-        send(data.players[player], game_info(data.game, msg))
+        send(data.players[player], %GameInfo{game_id: data.game.id, game_info: msg})
       end
 
       if Game.over?(data.game),
@@ -125,7 +149,7 @@ defmodule BattleBox.GameEngine.GameServer do
     {:ok, game} = Repo.insert(game)
 
     for {_player, pid} <- data.players do
-      send(pid, game_over_message(game))
+      send(pid, %GameOver{game_id: game.id, score: Game.score(game)})
     end
 
     {:stop, :normal}
@@ -136,49 +160,6 @@ defmodule BattleBox.GameEngine.GameServer do
     {_, _} = Registry.update_value(names.game_registry, game.id, &Map.merge(&1, metadata))
     :ok = GameEngine.broadcast_game_update(names.game_engine, game)
     :keep_state_and_data
-  end
-
-  defp commands_request(game, player, request) do
-    {:commands_request,
-     %{
-       game_id: game.id,
-       game_state: request,
-       minimum_time: game.arena.command_time_minimum_ms,
-       maximum_time: game.arena.command_time_maximum_ms,
-       player: player
-     }}
-  end
-
-  defp game_info(game, game_info) do
-    {:game_info,
-     %{
-       game_id: game.id,
-       game_info: game_info
-     }}
-  end
-
-  defp debug_info(game, debug) do
-    {:debug_info,
-     %{
-       game_id: game.id,
-       debug_info: debug
-     }}
-  end
-
-  defp init_message(game, player) do
-    {:game_request,
-     %{
-       game_server: self(),
-       game_id: game.id,
-       game_type: game.game_type.name,
-       player: player,
-       accept_time: game.arena.game_acceptance_time_ms,
-       settings: Game.settings(game)
-     }}
-  end
-
-  def game_over_message(game) do
-    {:game_over, %{game_id: game.id, score: Game.score(game)}}
   end
 
   defp initial_metadata(game), do: %{started_at: DateTime.utc_now(), game: game}

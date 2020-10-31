@@ -2,7 +2,7 @@
 
 <ul class="docs-toc">
   <%= for game <- installed_games() do %>
-    <% route = Routes.docs_path(@conn, :docs, ["games", kebabify(game.title)]) %>
+    <% route = Routes.docs_path(@conn, :docs, ["games", kebabify(game.title())]) %>
     <li><a href='<%= route %>'><%= game.title() %></a></li>
   <% end %>
 </ul>

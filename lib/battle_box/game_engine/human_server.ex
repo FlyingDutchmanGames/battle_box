@@ -3,6 +3,15 @@ defmodule BattleBox.GameEngine.HumanServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   import :timer, only: [minutes: 1]
 
+  alias BattleBox.GameEngine.Message.{
+    CommandsRequest,
+    DebugInfo,
+    GameInfo,
+    GameOver,
+    GameRequest,
+    GameCanceled
+  }
+
   @default_connection_timeout minutes(5)
 
   def connect_ui(human_server, pid) do
@@ -65,14 +74,12 @@ defmodule BattleBox.GameEngine.HumanServer do
       else: {:next_state, :connected, Map.put(data, :waiting_on_game_request, from)}
   end
 
-  def handle_event(:info, {:game_cancelled, game_id}, state, %{ui_pid: ui_pid}) do
-    if state == :connected,
-      do: send(ui_pid, {:game_cancelled, game_id})
-
+  def handle_event(:info, %GameCanceled{} = msg, state, %{ui_pid: ui_pid}) do
+    if state == :connected, do: send(ui_pid, msg)
     {:stop, :normal}
   end
 
-  def handle_event(:info, {:game_request, game_request}, state, data) do
+  def handle_event(:info, %GameRequest{} = game_request, state, data) do
     Process.monitor(game_request.game_server)
     :ok = GameServer.accept_game(game_request.game_server, game_request.player)
     data = Map.put(data, :game_request, game_request)
@@ -84,35 +91,25 @@ defmodule BattleBox.GameEngine.HumanServer do
       else: {:keep_state, data}
   end
 
-  def handle_event(:info, {:commands_request, commands_request} = msg, state, data) do
-    data = Map.put(data, :commands_request, commands_request)
-
-    if state == :connected,
-      do: send(data.ui_pid, msg)
-
+  def handle_event(:info, %CommandsRequest{} = msg, state, data) do
+    data = Map.put(data, :commands_request, msg)
+    if state == :connected, do: send(data.ui_pid, msg)
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:game_info, game_info} = msg, state, data) do
-    data = Map.put(data, :game_info, game_info)
-
-    if state == :connected,
-      do: send(data.ui_pid, msg)
-
+  def handle_event(:info, %GameInfo{} = msg, state, data) do
+    data = Map.put(data, :game_info, msg)
+    if state == :connected, do: send(data.ui_pid, msg)
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:debug_info, _debug_info} = msg, state, data) do
-    if state == :connected,
-      do: send(data.ui_pid, msg)
-
+  def handle_event(:info, %DebugInfo{} = msg, state, data) do
+    if state == :connected, do: send(data.ui_pid, msg)
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:game_over, _info} = msg, state, data) do
-    if state == :connected,
-      do: send(data.ui_pid, msg)
-
+  def handle_event(:info, %GameOver{} = msg, state, data) do
+    if state == :connected, do: send(data.ui_pid, msg)
     {:stop, :normal}
   end
 
@@ -142,10 +139,16 @@ defmodule BattleBox.GameEngine.HumanServer do
   end
 
   defp update_registry(%{names: names} = data) do
+    game_id =
+      case data do
+        %{game_request: %{game_id: game_id}} -> game_id
+        _ -> nil
+      end
+
     metadata =
       data
       |> Map.take([:ui_pid])
-      |> Map.put(:game_id, data[:game_request][:game_id])
+      |> Map.put(:game_id, game_id)
 
     {_, _} =
       Registry.update_value(names.human_registry, data.human_server_id, &Map.merge(&1, metadata))

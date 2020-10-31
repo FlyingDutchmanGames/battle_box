@@ -30,6 +30,7 @@
 #### ELO rankings
 - Provide optional ELOs to arenas
 #### General
+- Switch to Tesla instead of hand rolled HTTP client
 - Handle when connection is closed on trying to send from connection server
 - Api Key -> Key
 - Root Api Keys under users
@@ -38,11 +39,8 @@
   - preserve bread crumbs
 - Tests around rejecting games in the client
 - Add a color to the gamebot so the games look different
-
-#### Humans in the fight!
-- [ ] I can play as a human vs one of the AIs
-- [ ] I can play as a human against one of my bots
-- [ ] I can play as a human against another human
+- Debug Messages in the protocol
+- Require clients to connect with `game_type` param, optionally passing a specific arena. (default to the default arena)
 
 ### Nice to Haves
 

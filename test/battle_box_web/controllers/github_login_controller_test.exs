@@ -2,6 +2,8 @@ defmodule BattleBoxWeb.GithubLoginControllerTest do
   use BattleBoxWeb.ConnCase
   alias BattleBox.User
 
+  import Tesla.Mock
+
   test "GET /auth/github/login", %{conn: conn} do
     conn = get(conn, "/auth/github/login")
     assert "https://github.com/login/oauth/authorize?" <> params = redirected_to(conn, 302)
@@ -22,30 +24,15 @@ defmodule BattleBoxWeb.GithubLoginControllerTest do
         "code" => "test code"
       })
 
-    assert_raise(RuntimeError, "Invalid state param in github callback", fn ->
+    assert_raise(MatchError, "no match of right hand side value: false", fn ->
       get(conn, "/auth/github/callback?" <> params)
     end)
   end
 
   describe "github auth callback" do
-    setup do
-      bypass = Bypass.open()
-      {:ok, bypass: bypass}
-    end
-
-    test "it calls out to github to get the oauth token and user", %{conn: conn, bypass: bypass} do
-      Process.put(:bypass, endpoint_url(bypass.port))
-
-      params =
-        URI.encode_query(%{
-          "state" => "test state",
-          "code" => "test code"
-        })
-
-      Bypass.expect(bypass, fn
-        %{request_path: "/login/oauth/access_token", method: "POST"} = conn ->
-          {:ok, body, conn} = Plug.Conn.read_body(conn)
-
+    test "it calls out to github to get the oauth token and user", %{conn: conn} do
+      mock(fn
+        %{method: :post, url: "https://github.com/login/oauth/access_token", body: body} ->
           assert %{
                    "code" => "test code",
                    "state" => "test state",
@@ -53,32 +40,31 @@ defmodule BattleBoxWeb.GithubLoginControllerTest do
                    "client_secret" => "TEST_GITHUB_CLIENT_SECRET"
                  } = Jason.decode!(body)
 
-          conn
-          |> put_resp_header("content-type", "application/json")
-          |> resp(
-            200,
-            Jason.encode!(%{
-              "access_token" => "access_token",
-              "token_type" => "bearer"
-            })
-          )
+          json(%{
+            "access_token" => "access_token",
+            "token_type" => "bearer"
+          })
 
-        %{request_path: "/user", method: "GET"} = conn ->
-          assert [] == get_req_header(conn, "Authorization")
+        %{method: :get, url: "https://api.github.com/user", headers: headers} ->
+          assert Enum.find(headers, fn
+                   {"authorization", "token access_token"} -> true
+                   _ -> false
+                 end)
 
-          conn
-          |> put_resp_header("content-type", "application/json")
-          |> resp(
-            200,
-            Jason.encode!(%{
-              "avatar_url" => "https://avatars0.githubusercontent.com/u/16196910?v=4",
-              "html_url" => "https://github.com/GrantJamesPowell",
-              "id" => 1234,
-              "login" => "GrantJamesPowell",
-              "name" => "Grant Powell"
-            })
-          )
+          json(%{
+            "avatar_url" => "https://avatars0.githubusercontent.com/u/16196910?v=4",
+            "html_url" => "https://github.com/GrantJamesPowell",
+            "id" => 1234,
+            "login" => "GrantJamesPowell",
+            "name" => "Grant Powell"
+          })
       end)
+
+      params =
+        URI.encode_query(%{
+          "state" => "test state",
+          "code" => "test code"
+        })
 
       conn =
         conn
@@ -91,6 +77,4 @@ defmodule BattleBoxWeb.GithubLoginControllerTest do
       assert get_session(conn, :github_auth_state) == nil
     end
   end
-
-  defp endpoint_url(port), do: "http://localhost:#{port}"
 end

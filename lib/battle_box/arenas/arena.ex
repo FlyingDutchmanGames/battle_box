@@ -37,6 +37,7 @@ defmodule BattleBox.Arena do
 
   schema "arenas" do
     field :name, :string
+
     field :game_acceptance_time_ms, :integer, default: 2000
     field :command_time_minimum_ms, :integer, default: 250
     field :command_time_maximum_ms, :integer, default: 1000
@@ -50,7 +51,7 @@ defmodule BattleBox.Arena do
     belongs_to :user, User
 
     for game_type <- installed_games() do
-      has_one(game_type.settings_module.name, game_type.settings_module)
+      has_one(game_type.settings_module.name, game_type.settings_module, on_replace: :update)
     end
 
     timestamps()

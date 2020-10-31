@@ -165,7 +165,7 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
 
       assert_recieve_msg(conn, %{
         "game_info" => %{
-          "game_id" => <<_::288>> = game_id,
+          "game_id" => <<_::288>>,
           "player" => _,
           "settings" => %{}
         },
@@ -254,28 +254,19 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
     %{1 => %{conn: p1, game_id: game_id}, 2 => %{conn: p2, game_id: game_id}} =
       start_game(context)
 
-    commands = fn id -> %{"action" => "send_commands", "request_id" => id, "commands" => []} end
-
     turns =
       Stream.unfold(:unused, fn _ ->
-        with %{"commands_request" => %{"request_id" => id}} <- assert_recieve_msg(p1, _msg),
-             :ok <- send_msg(p1, commands.(id)),
-             %{"commands_request" => %{"request_id" => id}} <- assert_recieve_msg(p2, _msg),
-             :ok <- send_msg(p2, commands.(id)) do
-          {:ok, :ok}
+        with :ok <- do_turn(p1),
+             :ok <- do_turn(p2) do
+          {:turn, :ok}
         else
-          %{
-            "info" => "game_over",
-            "game_id" => ^game_id,
-            "result" => %{"1" => _, "2" => _},
-            "watch" => "http://localhost:4002/games/" <> ^game_id
-          } ->
+          {:game_over, ^game_id} ->
             nil
         end
       end)
       |> Enum.to_list()
 
-    assert length(turns) > 1
+    assert length(for :turn <- turns, do: :turn) > 1
   end
 
   defp start_game(context) do
@@ -323,5 +314,24 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
     end
 
     {:ok, conn}
+  end
+
+  defp do_turn(player) do
+    case assert_recieve_msg(player, _msg) do
+      %{"info" => "debug"} ->
+        do_turn(player)
+
+      %{"commands_request" => %{"request_id" => id}} ->
+        send_msg(player, %{"action" => "send_commands", "request_id" => id, "commands" => []})
+        :ok
+
+      %{
+        "info" => "game_over",
+        "game_id" => game_id,
+        "result" => %{"1" => _, "2" => _},
+        "watch" => "http://localhost:4002/games/" <> game_id
+      } ->
+        {:game_over, game_id}
+    end
   end
 end

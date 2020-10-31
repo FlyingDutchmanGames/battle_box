@@ -2,6 +2,15 @@ defmodule BattleBox.GameEngine.BotServer do
   use GenStateMachine, callback_mode: [:handle_event_function, :state_enter], restart: :temporary
   alias BattleBox.{Arena, GameEngine, GameEngine.GameServer}
 
+  alias BattleBox.GameEngine.Message.{
+    CommandsRequest,
+    DebugInfo,
+    GameInfo,
+    GameOver,
+    GameRequest,
+    GameCanceled
+  }
+
   def accept_game(bot_server, game_id, timeout \\ 5000) do
     GenStateMachine.call(bot_server, {:accept_game, game_id}, timeout)
   end
@@ -66,13 +75,13 @@ defmodule BattleBox.GameEngine.BotServer do
     end
   end
 
-  def handle_event(:info, {:game_request, game_info}, :match_making, data) do
+  def handle_event(:info, %GameRequest{} = game_info, :match_making, data) do
     :ok = GameEngine.dequeue_self(data.names.game_engine)
     {:ok, data} = setup_game(data, game_info)
     {:next_state, :game_acceptance, data, {:next_event, :internal, :setup_game_acceptance}}
   end
 
-  def handle_event(:info, {:game_request, game_info}, state, _data) when state != :match_making do
+  def handle_event(:info, %GameRequest{} = game_info, state, _data) when state != :match_making do
     :ok = GameServer.reject_game(game_info.game_server, game_info.player)
     :keep_state_and_data
   end
@@ -111,27 +120,35 @@ defmodule BattleBox.GameEngine.BotServer do
         _state,
         %{game_info: %{game_server: pid}} = data
       ) do
-    send(data.connection, {:game_cancelled, data.game_info.game_id})
+    send(data.connection, %GameCanceled{game_id: data.game_info.game_id})
     {:ok, data} = teardown_game(data.game_info.game_id, data)
     {:next_state, :options, data, cancel_move_timeout_actions()}
   end
 
-  def handle_event(:info, {:game_cancelled, id} = msg, _, %{game_info: %{game_id: id}} = data) do
+  def handle_event(
+        :info,
+        %GameCanceled{game_id: id} = msg,
+        _,
+        %{game_info: %{game_id: id}} = data
+      ) do
     send(data.connection, msg)
     {:ok, data} = teardown_game(id, data)
     {:next_state, :options, data, cancel_move_timeout_actions()}
   end
 
-  def handle_event(:info, {:game_cancelled, _id}, _state, _data), do: :keep_state_and_data
+  def handle_event(:info, %GameCanceled{}, _state, _data), do: :keep_state_and_data
 
-  def handle_event(:info, {:commands_request, commands_request}, :playing, data) do
-    commands_request = Map.put_new(commands_request, :request_id, Ecto.UUID.generate())
+  def handle_event(:info, %CommandsRequest{} = commands_request, :playing, data) do
     data = Map.put(data, :commands_request, commands_request)
     {:next_state, :commands_request, data, {:next_event, :internal, :setup_commands_request}}
   end
 
-  def handle_event(:info, {type, _} = msg, :playing, data)
-      when type in [:debug_info, :game_info] do
+  def handle_event(:info, %GameInfo{} = msg, _state, data) do
+    send(data.connection, msg)
+    :keep_state_and_data
+  end
+
+  def handle_event(:info, %DebugInfo{} = msg, _state, data) do
     send(data.connection, msg)
     :keep_state_and_data
   end
@@ -142,7 +159,7 @@ defmodule BattleBox.GameEngine.BotServer do
         :commands_request,
         %{commands_request: commands_request} = data
       ) do
-    send(data.connection, {:commands_request, commands_request})
+    send(data.connection, commands_request)
     data = Map.put(data, :min_time_met, false)
 
     {:keep_state, data,
@@ -187,10 +204,21 @@ defmodule BattleBox.GameEngine.BotServer do
     do: {:keep_state_and_data, {:reply, from, {:error, :invalid_commands_submission}}}
 
   def handle_event(:enter, _old_state, new_state, %{names: names} = data) do
-    metadata = %{status: new_state, game_id: data[:game_info][:game_id]}
+    game_id =
+      case data do
+        %{game_info: %{game_id: id}} -> id
+        _ -> nil
+      end
 
     {_, _} =
-      Registry.update_value(names.bot_registry, data.bot_server_id, &Map.merge(&1, metadata))
+      Registry.update_value(
+        names.bot_registry,
+        data.bot_server_id,
+        &Map.merge(&1, %{
+          status: new_state,
+          game_id: game_id
+        })
+      )
 
     :ok =
       GameEngine.broadcast_bot_server_update(
@@ -203,7 +231,7 @@ defmodule BattleBox.GameEngine.BotServer do
 
   def handle_event(
         :info,
-        {:game_over, %{game_id: game_id}} = msg,
+        %GameOver{game_id: game_id} = msg,
         _state,
         %{game_info: %{game_id: game_id}} = data
       ) do
@@ -214,7 +242,7 @@ defmodule BattleBox.GameEngine.BotServer do
 
   defp setup_game(data, game_info) do
     game_monitor = Process.monitor(game_info.game_server)
-    send(data.connection, {:game_request, game_info})
+    send(data.connection, game_info)
     data = Map.merge(data, %{game_info: game_info, game_monitor: game_monitor})
     {:ok, data}
   end

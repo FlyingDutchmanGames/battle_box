@@ -31,7 +31,7 @@ defmodule BattleBoxWeb.BotControllerTest do
   describe "create" do
     test "trying to create a bot without logging in redirects to the login page", %{conn: conn} do
       conn = post(conn, "/bots", %{"bot" => %{"name" => "FOO"}})
-      assert "/login" <> id = redirected_to(conn, 302)
+      assert "/login" <> _id = redirected_to(conn, 302)
     end
 
     test "you can create a bot", %{conn: conn, user: user} do

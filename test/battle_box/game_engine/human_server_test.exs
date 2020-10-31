@@ -5,6 +5,8 @@ defmodule BattleBox.GameEngine.HumanServerTest do
   alias BattleBox.GameEngine.{GameServer, HumanServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1, named_proxy: 2]
 
+  alias BattleBox.GameEngine.Message.{CommandsRequest, GameOver, GameRequest, GameCanceled}
+
   setup %{test: name} do
     {:ok, _} = GameEngine.start_link(name: name)
     {:ok, GameEngine.names(name)}
@@ -48,7 +50,7 @@ defmodule BattleBox.GameEngine.HumanServerTest do
       })
 
     assert_receive {:other_player,
-                    {:game_request, %{player: player, game_server: game_server, game_id: game_id}}}
+                    %GameRequest{player: player, game_server: game_server, game_id: game_id}}
 
     :ok = GameServer.accept_game(game_server, player)
     Process.sleep(10)
@@ -70,12 +72,12 @@ defmodule BattleBox.GameEngine.HumanServerTest do
     Process.monitor(human_server)
 
     assert_receive {:other_player,
-                    {:game_request, %{player: player, game_server: game_server, game_id: game_id}}}
+                    %GameRequest{player: player, game_server: game_server, game_id: game_id}}
 
     :ok = GameServer.reject_game(game_server, player)
     Process.sleep(10)
     assert_receive {:DOWN, _ref, :process, ^human_server, :normal}
-    assert_receive {:ui_pid, {:game_cancelled, ^game_id}}
+    assert_receive {:ui_pid, %GameCanceled{game_id: ^game_id}}
   end
 
   test "if the game server crashes, the human server dies", context do
@@ -177,15 +179,14 @@ defmodule BattleBox.GameEngine.HumanServerTest do
           players: %{1 => named_proxy(:other_player), 2 => human_server}
         })
 
-      assert_receive {:other_player, {:game_request, %{player: player, game_id: game_id}}}
+      assert_receive {:other_player, %GameRequest{player: player, game_id: _game_id}}
 
       :ok = GameServer.accept_game(game_server, player)
 
-      assert_receive {:other_player, {:commands_request, %{player: player}}}
+      assert_receive {:other_player, %CommandsRequest{player: player}}
       GameServer.submit_commands(game_server, player, %{})
 
-      assert_receive {:ui_pid, {:commands_request, commands_request}}
-      assert %{game_state: _, player: _} = commands_request
+      assert_receive {:ui_pid, %CommandsRequest{game_state: _, player: _}}
     end
 
     test "if the ui process crashes, it will ask for the same commands of the new connection",
@@ -200,13 +201,13 @@ defmodule BattleBox.GameEngine.HumanServerTest do
           players: %{2 => named_proxy(:other_player), 1 => human_server}
         })
 
-      assert_receive {:other_player, {:game_request, %{player: player, game_id: game_id}}}
+      assert_receive {:other_player, %GameRequest{player: player, game_id: _game_id}}
 
       :ok = GameServer.accept_game(game_server, player)
       Process.sleep(10)
       Process.monitor(ui_pid)
 
-      assert_receive {:ui_pid, {:commands_request, commands_request}}
+      assert_receive {:ui_pid, commands_request}
       Process.flag(:trap_exit, true)
       Process.exit(ui_pid, :kill)
       assert_receive {:DOWN, _, :process, ^ui_pid, _}
@@ -232,21 +233,21 @@ defmodule BattleBox.GameEngine.HumanServerTest do
 
     Process.monitor(human_server)
 
-    assert_receive {:other_player, {:game_request, %{player: player, game_id: game_id}}}
+    assert_receive {:other_player, %GameRequest{player: player, game_id: _game_id}}
 
     :ok = GameServer.accept_game(game_server, player)
 
     Stream.unfold(nil, fn _ ->
       receive do
-        {:other_player, {:commands_request, %{player: player}}} ->
+        {:other_player, %CommandsRequest{player: player}} ->
           GameServer.submit_commands(game_server, player, %{})
           {:ok, :ok}
 
-        {:ui_pid, {:commands_request, _commands_request}} ->
+        {:ui_pid, %CommandsRequest{}} ->
           HumanServer.submit_commands(human_server, %{})
           {:ok, :ok}
 
-        {:ui_pid, {:game_over, %{game_id: _game_id, score: %{1 => _, 2 => _}}}} ->
+        {:ui_pid, %GameOver{game_id: _game_id, score: %{1 => _, 2 => _}}} ->
           nil
       after
         100 ->

@@ -2,6 +2,15 @@ defmodule BattleBox.GameEngine.AiServer do
   alias BattleBox.GameEngine.GameServer
   use GenServer, restart: :temporary
 
+  alias BattleBox.GameEngine.Message.{
+    CommandsRequest,
+    DebugInfo,
+    GameInfo,
+    GameOver,
+    GameRequest,
+    GameCanceled
+  }
+
   def start_link(%{names: _} = config, data) do
     data = Map.put_new(data, :ai_id, Ecto.UUID.generate())
 
@@ -15,7 +24,7 @@ defmodule BattleBox.GameEngine.AiServer do
   end
 
   def handle_info(
-        {:game_request, %{player: player, game_server: game_server} = game_request},
+        %GameRequest{player: player, game_server: game_server} = game_request,
         state
       ) do
     Process.monitor(game_server)
@@ -29,7 +38,7 @@ defmodule BattleBox.GameEngine.AiServer do
      })}
   end
 
-  def handle_info({:commands_request, commands_request}, state) do
+  def handle_info(%CommandsRequest{} = commands_request, state) do
     %{game_state: game_state} = commands_request
 
     {commands, ai_state} =
@@ -56,11 +65,11 @@ defmodule BattleBox.GameEngine.AiServer do
     {:noreply, Map.put(state, :ai_state, ai_state)}
   end
 
-  def handle_info({:debug_info, _debug}, state) do
+  def handle_info(%DebugInfo{}, state) do
     {:noreply, state}
   end
 
-  def handle_info({:game_info, _game_info}, state) do
+  def handle_info(%GameInfo{}, state) do
     {:noreply, state}
   end
 
@@ -71,11 +80,11 @@ defmodule BattleBox.GameEngine.AiServer do
     {:stop, :normal, state}
   end
 
-  def handle_info({:game_cancelled, _game_id}, state) do
+  def handle_info(%GameCanceled{}, state) do
     {:stop, :normal, state}
   end
 
-  def handle_info({:game_over, _result}, state) do
+  def handle_info(%GameOver{}, state) do
     {:stop, :normal, state}
   end
 

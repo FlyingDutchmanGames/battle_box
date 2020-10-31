@@ -2,6 +2,15 @@ defmodule BattleBox.Connection.Logic do
   alias BattleBox.{Arena, GameEngine, GameEngine.BotServer}
   import BattleBox.Connection.Message
 
+  alias BattleBox.GameEngine.Message.{
+    CommandsRequest,
+    DebugInfo,
+    GameInfo,
+    GameOver,
+    GameRequest,
+    GameCanceled
+  }
+
   def init(%{names: %{game_engine: _}} = data) do
     Map.put(data, :state, :unauthed)
   end
@@ -13,29 +22,29 @@ defmodule BattleBox.Connection.Logic do
     end
   end
 
-  def handle_system({:game_request, game_info}, %{state: :match_making} = data) do
+  def handle_system(%GameRequest{} = game_info, %{state: :match_making} = data) do
     data = Map.put(data, :state, :game_acceptance)
     {data, [{:send, game_request(game_info)}], :continue}
   end
 
-  def handle_system({:commands_request, request}, %{state: :playing} = data) do
+  def handle_system(%CommandsRequest{} = request, %{state: :playing} = data) do
     {data, [{:send, commands_request(request)}], :continue}
   end
 
-  def handle_system({:debug_info, _debug}, %{state: :playing} = data) do
+  def handle_system(%DebugInfo{} = debug, %{state: :playing} = data) do
+    {data, [{:send, debug_info(debug)}], :continue}
+  end
+
+  def handle_system(%GameInfo{}, %{state: :playing} = data) do
     {data, [], :continue}
   end
 
-  def handle_system({:game_info, _info}, %{state: :playing} = data) do
-    {data, [], :continue}
-  end
-
-  def handle_system({:game_over, result}, data) do
+  def handle_system(%GameOver{} = result, data) do
     data = Map.put(data, :state, :idle)
     {data, [{:send, game_over(result)}], :continue}
   end
 
-  def handle_system({:game_cancelled, id}, data) do
+  def handle_system(%GameCanceled{game_id: id}, data) do
     data = Map.put(data, :state, :idle)
     {data, [{:send, game_cancelled(id)}], :continue}
   end
