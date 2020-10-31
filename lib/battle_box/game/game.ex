@@ -1,3 +1,17 @@
+defmodule BattleBox.Game.Behaviour do
+  # Due to the way we're using macros is BattleBox.Game,
+  # This behaviour has to live outside of that module
+
+  @callback color() :: binary()
+  @callback view_module() :: atom()
+  @callback title() :: binary()
+  @callback name() :: atom()
+  @callback players_for_settings(map()) :: [integer(), ...]
+  @callback ais() :: [atom(), ...]
+  @callback default_arenas() :: [%{name: binary(), description: binary(), settings: map()}]
+  @callback docs_tree() :: map()
+end
+
 defmodule BattleBox.Game do
   defmodule GameType do
     use Ecto.Type
@@ -17,6 +31,7 @@ defmodule BattleBox.Game do
   import Ecto.Changeset
   import BattleBox.InstalledGames
   alias BattleBox.{Repo, Arena, Bot, GameBot}
+  alias __MODULE__.Gameable
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -59,7 +74,7 @@ defmodule BattleBox.Game do
 
   def calculate_turn(game, commands) do
     %{game: after_turn, debug: debug, info: info} =
-      BattleBoxGame.calculate_turn(game_data(game), commands)
+      Gameable.calculate_turn(game_data(game), commands)
 
     game = update_game_data(game, fn _ -> after_turn end)
 
@@ -94,35 +109,35 @@ defmodule BattleBox.Game do
   end
 
   def initialize(game) do
-    update_game_data(game, &BattleBoxGame.initialize/1)
+    update_game_data(game, &Gameable.initialize/1)
   end
 
   def score(game) do
-    game |> game_data |> BattleBoxGame.score()
+    game |> game_data |> Gameable.score()
   end
 
   def winner(game) do
-    game |> game_data |> BattleBoxGame.winner()
+    game |> game_data |> Gameable.winner()
   end
 
   def commands_requests(game) do
-    game |> game_data |> BattleBoxGame.commands_requests()
+    game |> game_data |> Gameable.commands_requests()
   end
 
   def over?(game) do
-    game |> game_data |> BattleBoxGame.over?()
+    game |> game_data |> Gameable.over?()
   end
 
   def disqualify(game, player) do
-    update_game_data(game, &BattleBoxGame.disqualify(&1, player))
+    update_game_data(game, &Gameable.disqualify(&1, player))
   end
 
   def turn_info(game) do
-    game |> game_data() |> BattleBoxGame.turn_info()
+    game |> game_data() |> Gameable.turn_info()
   end
 
   def settings(game) do
-    game |> game_data() |> BattleBoxGame.settings()
+    game |> game_data() |> Gameable.settings()
   end
 
   def metadata_only(game) do
