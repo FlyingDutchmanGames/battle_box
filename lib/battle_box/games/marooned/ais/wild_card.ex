@@ -1,4 +1,6 @@
 defmodule BattleBox.Games.Marooned.Ais.WildCard do
+  @behaviour BattleBox.Games.AiOpponent
+
   def name, do: "wild-card"
   def description, do: "Does everything randomly"
   def difficulty, do: 1
