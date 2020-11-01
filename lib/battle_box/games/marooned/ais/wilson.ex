@@ -1,4 +1,6 @@
 defmodule BattleBox.Games.Marooned.Ais.Wilson do
+  @behaviour BattleBox.Games.AiOpponent
+
   def name, do: "wilson"
   def description, do: "Tries to stay close to you"
   def difficulty, do: 3
