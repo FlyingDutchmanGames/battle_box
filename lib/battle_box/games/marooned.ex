@@ -2,6 +2,7 @@ defmodule BattleBox.Games.Marooned do
   use Ecto.Schema
   import Ecto.Changeset
   alias BattleBox.Game
+  @behaviour BattleBox.Game.Behaviour
 
   alias __MODULE__.{Settings, Logic}
   alias __MODULE__.Types.{Event, Location, PlayerStartingLocations}
@@ -71,9 +72,8 @@ defmodule BattleBox.Games.Marooned do
     cast(game, params, [])
   end
 
-  defimpl BattleBoxGame do
+  defimpl Game.Gameable do
     alias BattleBox.Games.Marooned.Logic
-
     def initialize(game), do: game
 
     def disqualify(game, player) do

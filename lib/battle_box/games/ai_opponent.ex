@@ -1,4 +1,11 @@
 defmodule BattleBox.Games.AiOpponent do
+  @callback name() :: String.t()
+  @callback description() :: String.t()
+  @callback difficulty() :: integer()
+  @callback creator() :: String.t()
+  @callback commands(map()) :: map() | {map(), any()}
+  @callback initialize(map()) :: any()
+
   def opponent_modules(game_type, opponent \\ nil)
 
   def opponent_modules(game_type, nil), do: opponent_modules(game_type, %{})
