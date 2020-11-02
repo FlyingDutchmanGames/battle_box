@@ -36,9 +36,9 @@ defmodule BattleBoxWeb.Router do
     end
 
     get "/play", HumanController, :play
-    get "/play/:game_type", HumanController, :play
-    get "/play/:game_type/:arena", HumanController, :play
-    get "/play/:game_type/:arena/:opponent", HumanController, :play
+    get "/play/game_type/:game_type", HumanController, :play
+    get "/play/game_type/:game_type/arena/:arena", HumanController, :play
+    get "/play/game_type/:game_type/arena/:arena/opponent/:opponent", HumanController, :play
     post "/play", HumanController, :start_game
 
     resources "/users", UserController, only: [:show, :index], param: "username" do

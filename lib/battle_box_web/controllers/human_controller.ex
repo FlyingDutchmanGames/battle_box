@@ -2,29 +2,50 @@ defmodule BattleBoxWeb.HumanController do
   use BattleBoxWeb, :controller
   import BattleBox.Games.AiOpponent, only: [opponent_modules: 1]
   import BattleBox.InstalledGames, only: [installed_games: 0, game_type_name_to_module: 1]
+  alias BattleBox.{Arena, Repo, User}
+  import Ecto.Query
 
   def start_game(conn, %{"game_type" => _game_type, "opponent" => _opponent}) do
   end
 
-  def play(conn, %{"game_type" => game_type, "arena" => arena, "opponent" => opponent}) do
-  end
+  # def play(conn, %{"game_type" => game_type, "arena" => arena, "opponent" => opponent}) do
+  # end
 
   def play(conn, %{"game_type" => game_type, "arena" => arena}) do
-    nav_segments = [{"play", Routes.human_path(conn, :play)}, game_type]
+    %Arena{} = arena = Repo.get_by(Arena, name: arena)
+
+    nav_segments = [
+      "play",
+      {"game_type", Routes.human_path(conn, :play)},
+      game_type,
+      {"arena", Routes.human_path(conn, :play, game_type)},
+      arena.name
+    ]
+
     game = game_type_name_to_module(game_type)
     {:ok, opponents} = opponent_modules(game)
 
     render(conn, "opponent_select.html",
-      segments: nav_segments,
+      arena: arena,
+      game: game,
       opponents: opponents,
-      game: game
+      segments: nav_segments
     )
   end
 
   def play(conn, %{"game_type" => game_type}) do
-    nav_segments = [{"play", Routes.human_path(conn, :play)}, game_type]
+    nav_segments = [
+      "play",
+      {"game_type", Routes.human_path(conn, :play)},
+      game_type
+    ]
+
     game = game_type_name_to_module(game_type)
-    arenas = Arena.default_for_game_type(game)
+
+    arenas =
+      if user = conn.assigns[:current_user],
+        do: user_arenas(user, game),
+        else: []
 
     render(conn, "arena_select.html",
       segments: nav_segments,
@@ -43,5 +64,12 @@ defmodule BattleBoxWeb.HumanController do
       nav_options: nav_options,
       games: installed_games()
     )
+  end
+
+  defp user_arenas(%User{id: id}, game_type) do
+    Arena
+    |> where(user_id: ^id)
+    |> where(game_type: ^game_type)
+    |> Repo.all()
   end
 end

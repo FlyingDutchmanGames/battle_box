@@ -1,0 +1,27 @@
+<div class="page-content container play">
+  <div class="subhead">
+    <div class="subhead-heading">
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @segments) %>
+    </div>
+  </div>
+  <h1>Arenas for <%= @game.title() %></h1>
+  <h2>Default Arenas</h2>
+  <div class="arenas">
+    <%= for %{name: name, description: description} <- @game.default_arenas() do %>
+      <a class="arena option" href="<%= Routes.human_path(@conn, :play, @game.name, name) %>">
+        <div class="name"><%= name %></div>
+        <div class="description"><%= description %></div>
+      </a>
+    <% end %>
+  </div>
+  <%= if user = @conn.assigns[:current_user] do %>
+    <h2><%= user.username %>'s Arenas</h2>
+    <div class="arenas">
+      <%= for %Arena{name: name} <- @arenas do %>
+        <a class="arena option" href="<%= Routes.human_path(@conn, :play, @game.name, name) %>">
+          <div class="name"><%= name %></div>
+        </a>
+      <% end %>
+    </div>
+  <% end %>
+</div>

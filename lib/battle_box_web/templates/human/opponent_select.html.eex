@@ -6,6 +6,7 @@
   </div>
 
   <h1>Opponent</h1>
+  <h2>Server Ais</h2>
   <div class="opponents">
     <%= for opponent <- Enum.sort_by(@opponents, & &1.difficulty()) do %>
       <form action="<%= Routes.human_path(@conn, :start_game) %>" method="POST">
@@ -13,7 +14,7 @@
         <input name="game_type" type="hidden" value="<%= @game.name %>">
         <input name="opponent" type="hidden" value="<%= opponent.name() %>">
 
-        <button class="opponent difficulty-<%= opponent.difficulty() %>">
+        <button class="option opponent difficulty-<%= opponent.difficulty() %>">
           <div class="name"><%= opponent.name() %></div>
           <div class="difficulty">Difficulty: <%= opponent.difficulty() %></div>
           <div class="description">Description: <i><%= opponent.description() %></i></div>
