@@ -4,13 +4,8 @@ defmodule BattleBoxWeb.PageController do
   def index(conn, _params) do
     navigation_options = [
       {"Docs", Routes.docs_path(conn, :docs, [])},
-      {"Users", Routes.user_path(conn, :index)},
       {"Watch", Routes.follow_path(conn, :follow)},
-      {"Games", Routes.game_path(conn, :index)},
-      if(conn.assigns[:current_user] && conn.assigns.current_user.is_admin,
-        do: {"Admin", Routes.admin_page_path(conn, :index)},
-        else: {:inaccessible, "Admin"}
-      )
+      {"Play", Routes.human_path(conn, :play)}
     ]
 
     render(conn, "index.html", navigation_options: navigation_options)

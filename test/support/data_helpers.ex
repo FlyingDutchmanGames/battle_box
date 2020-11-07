@@ -78,6 +78,8 @@ defmodule BattleBox.Test.DataHelpers do
   end
 
   def create_arena(game_type, opts \\ %{}) do
+    opts = Enum.into(opts, %{})
+
     user =
       case opts do
         %{user: user} ->

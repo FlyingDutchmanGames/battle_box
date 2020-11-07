@@ -1,9 +1,5 @@
 <div class="header">
   <a href="/" style="display: flex; flex-flow: row nowrap; align-items: center; justify-content: flex-start;">
-    <svg viewBox="0 0 35 30" style="stroke-width: 3px; stroke-linejoin: round; font-family: ruda; width: 8%; margin-left: 10px;">
-      <rect x="2" y="2" height="26" width="31" style="fill: #ffcccc; stroke: #990000;"></rect>
-      <text x="17" y="20" style="text-anchor: middle; user-select: none;">42</text>
-    </svg>
     <div class="logo">Botskrieg</div>
   </a>
   <%= if @current_user do %>

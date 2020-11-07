@@ -40,6 +40,7 @@ defmodule BattleBoxWeb do
       alias BattleBoxWeb.Router.Helpers, as: Routes
       import Phoenix.LiveView.Helpers
       import BattleBox.Utilities.Humanize
+      import Plug.CSRFProtection, only: [get_csrf_token: 0]
     end
   end
 

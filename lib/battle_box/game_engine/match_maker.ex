@@ -3,28 +3,9 @@ defmodule BattleBox.GameEngine.MatchMaker do
   alias BattleBox.{Arena, Bot, Game, GameEngine, GameEngine.MatchMakerServer}
   alias BattleBox.Games.AiOpponent
 
-  def play_human(game_engine, arena, bot, pid \\ self()) do
-    [bot_player, human_player | ai_players] = Enum.shuffle(Arena.players(arena))
-    {:ok, ai_mods} = AiOpponent.opponent_modules(arena.game_type)
-    {:ok, anon_bot} = Bot.anon_human_bot()
-
-    {:ok, human_player_pid, %{human_server_id: human_server_id}} =
-      GameEngine.start_human(game_engine, %{})
-
-    combatants =
-      create_ai_servers(game_engine, ai_players, ai_mods)
-      |> Map.put(bot_player, %{bot: bot, pid: pid})
-      |> Map.put(human_player, %{bot: anon_bot, pid: human_player_pid})
-
-    game = Game.build(arena, for({player, %{bot: bot}} <- combatants, do: {player, bot}))
-    player_pid_mapping = Map.new(for {player, %{pid: pid}} <- combatants, do: {player, pid})
-
-    {:ok, _pid} = GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
-
-    {:ok, %{game_id: game.id, human_server_id: human_server_id}}
-  end
-
-  def practice_match(game_engine, arena, bot, opponent, pid \\ self()) do
+  @spec practice_match(atom(), %Arena{}, %Bot{}, opponent :: AiOpponent.t(), pid :: pid()) ::
+          {:ok, %{game_id: Ecto.UUID.t()}} | {:error, :no_opponent_matching}
+  def practice_match(game_engine, %Arena{} = arena, %Bot{} = bot, opponent, pid \\ self()) do
     [bot_player | ai_players] = Enum.shuffle(Arena.players(arena))
 
     case AiOpponent.opponent_modules(arena.game_type, opponent) do
@@ -46,28 +27,32 @@ defmodule BattleBox.GameEngine.MatchMaker do
     end
   end
 
-  def join_queue(game_engine, arena, %Bot{} = bot, pid \\ self()) when is_atom(game_engine) do
+  @spec join_queue(atom(), String.t(), String.t(), pid()) :: :ok
+  def join_queue(game_engine, arena_id, bot_id, pid \\ self())
+      when is_atom(game_engine) do
     {:ok, _registry} =
-      Registry.register(match_maker_registry_name(game_engine), arena, %{
-        bot: bot,
+      Registry.register(match_maker_registry_name(game_engine), arena_id, %{
+        bot: bot_id,
         pid: pid
       })
 
     :ok
   end
 
-  def queue_for_arena(game_engine, arena) do
-    Registry.lookup(match_maker_registry_name(game_engine), arena)
-    |> Enum.map(fn {enqueuer_pid, match_details} ->
-      Map.put(match_details, :enqueuer_pid, enqueuer_pid)
-    end)
+  @spec queue_for_arena(atom(), String.t()) :: [%{enqueuer_pid: pid(), pid: pid(), bot: %Bot{}}]
+  def queue_for_arena(game_engine, arena_id) do
+    for {enqueuer_pid, match_details} <-
+          Registry.lookup(match_maker_registry_name(game_engine), arena_id),
+        do: Map.put(match_details, :enqueuer_pid, enqueuer_pid)
   end
 
+  @spec arenas_with_queued_players(atom()) :: [Ecto.UUID.t()]
   def arenas_with_queued_players(game_engine) do
     Registry.select(match_maker_registry_name(game_engine), [{{:"$1", :_, :_}, [], [:"$1"]}])
     |> Enum.uniq()
   end
 
+  @spec dequeue_self(atom()) :: :ok
   def dequeue_self(game_engine) when is_atom(game_engine) do
     registry = match_maker_registry_name(game_engine)
 
@@ -78,6 +63,7 @@ defmodule BattleBox.GameEngine.MatchMaker do
     :ok
   end
 
+  @spec dequeue_self(atom(), Ecto.UUID.t()) :: :ok
   def dequeue_self(game_engine, arena_id) when is_atom(game_engine) do
     :ok = Registry.unregister(match_maker_registry_name(game_engine), arena_id)
   end

@@ -1,0 +1,14 @@
+<div class="page-content container">
+  <div class="subhead">
+    <div class="subhead-heading">
+      <%= BattleBoxWeb.PageView.render("_bread_crumbs.html", conn: @conn, segments: @nav_segments, options: @nav_options) %>
+    </div>
+  </div>
+
+  <h1>Games</h1>
+  <ul style="font-size: 1.3em">
+    <%= for game <- @games do %>
+      <a href="<%= Routes.human_path(@conn, :play, game.name) %>"><li><%= game.title %></li></a>
+    <% end %>
+  </ul>
+</div>
