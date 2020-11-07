@@ -3,27 +3,6 @@ defmodule BattleBox.GameEngine.MatchMaker do
   alias BattleBox.{Arena, Bot, Game, GameEngine, GameEngine.MatchMakerServer}
   alias BattleBox.Games.AiOpponent
 
-  def play_human(game_engine, arena, bot, pid \\ self()) do
-    [bot_player, human_player | ai_players] = Enum.shuffle(Arena.players(arena))
-    {:ok, ai_mods} = AiOpponent.opponent_modules(arena.game_type)
-    {:ok, anon_bot} = Bot.anon_human_bot()
-
-    {:ok, human_player_pid, %{human_server_id: human_server_id}} =
-      GameEngine.start_human(game_engine, %{})
-
-    combatants =
-      create_ai_servers(game_engine, ai_players, ai_mods)
-      |> Map.put(bot_player, %{bot: bot, pid: pid})
-      |> Map.put(human_player, %{bot: anon_bot, pid: human_player_pid})
-
-    game = Game.build(arena, for({player, %{bot: bot}} <- combatants, do: {player, bot}))
-    player_pid_mapping = Map.new(for {player, %{pid: pid}} <- combatants, do: {player, pid})
-
-    {:ok, _pid} = GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
-
-    {:ok, %{game_id: game.id, human_server_id: human_server_id}}
-  end
-
   def practice_match(game_engine, arena, bot, opponent, pid \\ self()) do
     [bot_player | ai_players] = Enum.shuffle(Arena.players(arena))
 
