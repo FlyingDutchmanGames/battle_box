@@ -1,15 +1,22 @@
 defmodule BattleBoxWeb.HumanController do
   use BattleBoxWeb, :controller
-  import BattleBox.Games.AiOpponent, only: [opponent_modules: 1]
+  import BattleBox.Games.AiOpponent, only: [opponent_modules: 1, opponent_modules: 2]
   import BattleBox.InstalledGames, only: [installed_games: 0, game_type_name_to_module: 1]
   alias BattleBox.{Arena, Repo, User}
   import Ecto.Query
 
-  def start_game(conn, %{"game_type" => _game_type, "opponent" => _opponent}) do
-  end
+  def start_game(conn, %{
+        "arena" => arena,
+        "game_type" => game_type,
+        "opponent" => opponent,
+        "opponent_type" => "server_ai"
+      }) do
+    %Arena{} = arena = Repo.get_by(Arena, name: arena)
+    game = game_type_name_to_module(game_type)
+    {:ok, [opponent]} = opponent_modules(game, opponent)
 
-  # def play(conn, %{"game_type" => game_type, "arena" => arena, "opponent" => opponent}) do
-  # end
+    text(conn, "hello")
+  end
 
   def play(conn, %{"game_type" => game_type, "arena" => arena}) do
     %Arena{} = arena = Repo.get_by(Arena, name: arena)

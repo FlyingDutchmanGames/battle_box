@@ -12,7 +12,9 @@
       <form action="<%= Routes.human_path(@conn, :start_game) %>" method="POST">
         <input name="_csrf_token" type="hidden" value="<%= get_csrf_token() %>">
         <input name="game_type" type="hidden" value="<%= @game.name %>">
+        <input name="opponent_type" type="hidden" value="server_ai">
         <input name="opponent" type="hidden" value="<%= opponent.name() %>">
+        <input name="arena" type="hidden" value="<%= @arena.name %>">
 
         <button class="option opponent difficulty-<%= opponent.difficulty() %>">
           <div class="name"><%= opponent.name() %></div>
