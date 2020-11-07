@@ -1,7 +1,13 @@
 defmodule BattleBoxWeb.HumanControllerTest do
   use BattleBoxWeb.ConnCase, async: false
-  alias BattleBox.Games.Marooned
-  alias BattleBox.InstalledGames
+  alias BattleBox.{InstalledGames, GameEngine, Games.Marooned}
+
+  setup %{test: name} do
+    {:ok, _pid} = GameEngine.start_link(name: name)
+    GameEngine.Provider.set_game_engine(name)
+    on_exit(fn -> GameEngine.Provider.reset!() end)
+    GameEngine.names(name)
+  end
 
   setup %{conn: conn} do
     {:ok, user} = create_user()
@@ -10,7 +16,7 @@ defmodule BattleBoxWeb.HumanControllerTest do
     %{arena: arena, conn: conn}
   end
 
-  describe "GET /play" do
+  describe "GET /play/(...etc)" do
     test "it will let you select a game", %{conn: conn} do
       html =
         conn
@@ -49,6 +55,26 @@ defmodule BattleBoxWeb.HumanControllerTest do
       for opponent <- Marooned.ais() do
         assert html =~ opponent.name()
       end
+    end
+  end
+
+  describe "POST /play" do
+    test "You can start a game", %{conn: conn, arena: arena, game_engine: game_engine} do
+      conn =
+        post(conn, "/play", %{
+          "arena" => arena.name,
+          "game_type" => "marooned",
+          "opponent" => "wilson",
+          "opponent_type" => "server_ai"
+        })
+
+      "/human/" <> id = redirected_to(conn, 302)
+
+      Process.sleep(30)
+      %{game_id: game_id, pid: pid} = GameEngine.get_human_server(game_engine, id)
+      assert Process.alive?(pid)
+      %{pid: pid} = GameEngine.get_game_server(game_engine, game_id)
+      assert Process.alive?(pid)
     end
   end
 end

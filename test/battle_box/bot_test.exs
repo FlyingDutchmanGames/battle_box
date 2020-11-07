@@ -40,6 +40,15 @@ defmodule BattleBox.BotTest do
            ]
   end
 
+  describe "human_bot/1" do
+    test "you can create human bots" do
+      {:ok, %{id: user_id} = user} = create_user()
+      assert [] == Repo.all(Bot)
+      assert {:ok, %{id: id, name: "Human", user_id: ^user_id}} = Bot.human_bot(user)
+      assert [%{id: ^id, name: "Human"}] = Repo.all(Bot)
+    end
+  end
+
   describe "system users" do
     test "calling system_bot/1 will create a bot" do
       assert [] == Repo.all(Bot)
@@ -60,7 +69,7 @@ defmodule BattleBox.BotTest do
       assert [%{id: ^id, name: "Human"}] = Repo.all(Bot)
     end
 
-    test "calling anon_Human_bot/0 multiple times returns the same bot" do
+    test "calling anon_human_bot/0 multiple times returns the same bot" do
       assert {:ok, %{id: id, name: "Human"}} = Bot.anon_human_bot()
       assert {:ok, %{id: ^id, name: "Human"}} = Bot.anon_human_bot()
     end

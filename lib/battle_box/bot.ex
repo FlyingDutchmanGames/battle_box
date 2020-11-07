@@ -14,18 +14,25 @@ defmodule BattleBox.Bot do
     timestamps()
   end
 
+  @spec human_bot(%User{}) :: {:ok, %__MODULE__{}}
+  def human_bot(%User{} = user), do: get_or_create_by_name(user, "Human")
+
+  @spec anon_human_bot() :: {:ok, %__MODULE__{}}
   def anon_human_bot() do
     {:ok, bot} = get_or_create_by_name(User.anon_human_user(), "Human")
     bot = Repo.preload(bot, :user)
     {:ok, bot}
   end
 
+  @spec system_bot(String.t()) :: {:ok, %__MODULE__{}}
   def system_bot(name) do
     {:ok, bot} = get_or_create_by_name(User.system_user(), name)
     bot = Repo.preload(bot, :user)
     {:ok, bot}
   end
 
+  @spec get_or_create_by_name(%User{}, String.t()) ::
+          {:ok, %__MODULE__{}} | {:error, Ecto.Changeset.t()}
   def get_or_create_by_name(user, name) do
     # Below is the ideal implementation of this function.
     # At the current time (May 27, 2020, ecto 3.4.3),

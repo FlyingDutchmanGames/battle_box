@@ -14,7 +14,7 @@ defmodule BattleBox.GameEngine.HumanServer do
 
   @default_connection_timeout minutes(5)
 
-  def connect_ui(human_server, pid) do
+  def connect_ui(human_server, pid \\ self()) do
     GenStateMachine.call(human_server, {:connect_ui, pid})
   end
 

@@ -36,6 +36,7 @@ defmodule BattleBox.Game do
     timestamps()
   end
 
+  @spec build(%Arena{}, %{optional(integer()) => %Bot{}}) :: %__MODULE__{}
   def build(arena, players) do
     game_bots = for {player, bot} <- players, do: %GameBot{player: player, bot: bot}
 
@@ -58,6 +59,11 @@ defmodule BattleBox.Game do
     Map.get(game, game.game_type.name)
   end
 
+  @spec calculate_turn(%__MODULE__{}, %{optional(integer) => any()}) :: %{
+          game: %__MODULE__{},
+          info: %{optional(integer) => any()},
+          debug: %{optional(integer) => any()}
+        }
   def calculate_turn(game, commands) do
     %{game: after_turn, debug: debug, info: info} =
       Gameable.calculate_turn(game_data(game), commands)
@@ -94,14 +100,17 @@ defmodule BattleBox.Game do
     Repo.preload(game, game.game_type.name)
   end
 
+  @spec initialize(%__MODULE__{}) :: %__MODULE__{}
   def initialize(game) do
     update_game_data(game, &Gameable.initialize/1)
   end
 
+  @spec score(%__MODULE__{}) :: %{optional(integer) => integer}
   def score(game) do
     game |> game_data |> Gameable.score()
   end
 
+  @spec winner(%__MODULE__{}) :: integer() | nil
   def winner(game) do
     game |> game_data |> Gameable.winner()
   end
@@ -110,10 +119,12 @@ defmodule BattleBox.Game do
     game |> game_data |> Gameable.commands_requests()
   end
 
+  @spec over?(%__MODULE__{}) :: boolean()
   def over?(game) do
     game |> game_data |> Gameable.over?()
   end
 
+  @spec disqualify(%__MODULE__{}, integer()) :: %__MODULE__{}
   def disqualify(game, player) do
     update_game_data(game, &Gameable.disqualify(&1, player))
   end

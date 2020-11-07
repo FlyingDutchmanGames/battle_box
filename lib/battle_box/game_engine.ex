@@ -1,5 +1,6 @@
 defmodule BattleBox.GameEngine do
   use Supervisor
+  alias BattleBox.{Bot, Game}
   alias BattleBox.GameEngine.GameServer.GameSupervisor, as: GameSup
   alias BattleBox.GameEngine.BotServer.BotSupervisor, as: BotSup
   alias BattleBox.GameEngine.AiServer.AiSupervisor, as: AiSup
@@ -42,6 +43,7 @@ defmodule BattleBox.GameEngine do
   defdelegate dequeue_self(game_engine, arena_id), to: MatchMakerSup
   defdelegate join_queue(game_engine, arena, bot, pid \\ self()), to: MatchMakerSup
   defdelegate practice_match(game_engine, arena, bot, opponent, pid \\ self()), to: MatchMakerSup
+  defdelegate human_vs_ai(game_engine, arena, human_bot, ai_mods), to: MatchMakerSup
   defdelegate queue_for_arena(game_engine, arena), to: MatchMakerSup
 
   defdelegate subscribe_to_bot_events(game_engine, bot_id, events), to: GameEnginePubSub
@@ -71,15 +73,28 @@ defmodule BattleBox.GameEngine do
 
   defdelegate force_match_make(game_engine), to: MatchMakerServer
 
+  @spec get_human_server(atom(), Ecto.UUID.t()) ::
+          nil | %{game_id: Ecto.UUID.t() | nil, pid: pid(), started_at: NaiveDateTime.t()}
   def get_human_server(game_engine, human_server_id),
     do: get_process(human_registry_name(game_engine), human_server_id, :human_server_id)
 
+  @spec get_game_server(atom(), Ecto.UUID.t()) ::
+          nil | %{game: %Game{}, pid: pid(), started_at: DateTime.t(), status: atom()}
   def get_game_server(game_engine, game_id),
     do: get_process(game_registry_name(game_engine), game_id, :game_id)
 
+  @spec get_bot_server(atom(), Ecto.UUID.t()) ::
+          nil
+          | %{
+              bot: %Bot{},
+              game_id: Ecto.UUID.t() | nil,
+              pid: pid(),
+              started_at: NaiveDateTime.t()
+            }
   def get_bot_server(game_engine, bot_server_id),
     do: get_process(bot_registry_name(game_engine), bot_server_id, :bot_server_id)
 
+  @spec get_connection(atom(), Ecto.UUID.t()) :: nil | %{pid: pid(), started_at: DateTime.t()}
   def get_connection(game_engine, connection_id),
     do: get_process(connection_registry_name(game_engine), connection_id, :connection_id)
 

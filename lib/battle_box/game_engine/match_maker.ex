@@ -3,6 +3,24 @@ defmodule BattleBox.GameEngine.MatchMaker do
   alias BattleBox.{Arena, Bot, Game, GameEngine, GameEngine.MatchMakerServer}
   alias BattleBox.Games.AiOpponent
 
+  @typep maybe_list(t) :: t | [t, ...]
+
+  @spec human_vs_ai(atom(), %Arena{}, %Bot{}, opponents :: maybe_list(atom())) ::
+          {:ok, %{human_server_id: Ecto.UUID.t(), game_id: Ecto.UUID.t()}}
+  def human_vs_ai(game_engine, %Arena{} = arena, %Bot{} = human_bot, ai_mods) do
+    [human_player | ai_players] = Enum.shuffle(Arena.players(arena))
+
+    {:ok, human_player_pid, %{human_server_id: human_server_id}} =
+      GameEngine.start_human(game_engine, %{})
+
+    combatants =
+      create_ai_servers(game_engine, ai_players, ai_mods)
+      |> Map.put(human_player, %{bot: human_bot, pid: human_player_pid})
+
+    game = start_game(game_engine, arena, combatants)
+    {:ok, %{game_id: game.id, human_server_id: human_server_id}}
+  end
+
   @spec practice_match(atom(), %Arena{}, %Bot{}, opponent :: AiOpponent.t(), pid :: pid()) ::
           {:ok, %{game_id: Ecto.UUID.t()}} | {:error, :no_opponent_matching}
   def practice_match(game_engine, %Arena{} = arena, %Bot{} = bot, opponent, pid \\ self()) do
@@ -17,12 +35,7 @@ defmodule BattleBox.GameEngine.MatchMaker do
           create_ai_servers(game_engine, ai_players, ai_mods)
           |> Map.put(bot_player, %{bot: bot, pid: pid})
 
-        game = Game.build(arena, for({player, %{bot: bot}} <- combatants, do: {player, bot}))
-        player_pid_mapping = Map.new(for {player, %{pid: pid}} <- combatants, do: {player, pid})
-
-        {:ok, _pid} =
-          GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
-
+        game = start_game(game_engine, arena, combatants)
         {:ok, %{game_id: game.id}}
     end
   end
@@ -92,5 +105,15 @@ defmodule BattleBox.GameEngine.MatchMaker do
 
   defp match_maker_registry_name(game_engine) do
     GameEngine.names(game_engine).match_maker_registry
+  end
+
+  defp start_game(game_engine, arena, combatants) do
+    player_bot_mapping = Map.new(combatants, fn {player, %{bot: bot}} -> {player, bot} end)
+    player_pid_mapping = Map.new(combatants, fn {player, %{pid: pid}} -> {player, pid} end)
+
+    game = Game.build(arena, player_bot_mapping)
+    {:ok, _pid} = GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
+
+    game
   end
 end

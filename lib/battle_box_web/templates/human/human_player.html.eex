@@ -1,0 +1,1 @@
+<%= live_render(@conn, HumanPlayer, session: %{"human_server_id" => @human_server_id}) %>

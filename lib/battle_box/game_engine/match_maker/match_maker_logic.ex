@@ -16,8 +16,9 @@ defmodule BattleBox.GameEngine.MatchMaker.MatchMakerLogic do
     enqueued_players
     |> match_players(players, grouper_function)
     |> Enum.map(fn match ->
-      player_pid_mapping = Map.new(for {player, %{pid: pid}} <- match, do: {player, pid})
-      game = Game.build(arena, for({player, %{bot: bot}} <- match, do: {player, bot}))
+      player_bot_mapping = Map.new(match, fn {player, %{bot: bot}} -> {player, bot} end)
+      player_pid_mapping = Map.new(match, fn {player, %{pid: pid}} -> {player, pid} end)
+      game = Game.build(arena, player_bot_mapping)
       %{game: game, players: player_pid_mapping}
     end)
   end
