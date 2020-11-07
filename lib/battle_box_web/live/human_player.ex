@@ -17,23 +17,18 @@ defmodule BattleBoxWeb.Live.HumanPlayer do
   end
 
   def render(%{already_connected: true} = assigns) do
-    ~L"""
-    <h1>Already Connected</h1>
-    """
+    ~L"<h1>Already Connected</h1>"
   end
 
   def render(%{connected?: false} = assigns) do
-    ~L"""
-    <h1>Connecting</h1>
-    """
+    ~L"<h1>Connecting</h1>"
   end
 
   def render(%{not_found: true} = assigns) do
-    HumanView.render("_human_player_not_found.html", assigns)
+    ~L"<h1>Not Found</h1>"
   end
 
   def render(assigns) do
-    IO.inspect(assigns, label: "ASSIGNS")
     HumanView.render("_human_player.html", assigns)
   end
 end
