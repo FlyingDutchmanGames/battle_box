@@ -2,7 +2,7 @@ defmodule BattleBoxWeb.HumanController do
   use BattleBoxWeb, :controller
   import BattleBox.Games.AiOpponent, only: [opponent_modules: 1, opponent_modules: 2]
   import BattleBox.InstalledGames, only: [installed_games: 0, game_type_name_to_module: 1]
-  alias BattleBox.{Arena, Repo, User}
+  alias BattleBox.{Arena, Bot, GameEngine, Repo, User}
   import Ecto.Query
 
   def start_game(conn, %{
@@ -13,7 +13,15 @@ defmodule BattleBoxWeb.HumanController do
       }) do
     %Arena{} = arena = Repo.get_by(Arena, name: arena)
     game = game_type_name_to_module(game_type)
-    {:ok, [opponent]} = opponent_modules(game, opponent)
+    {:ok, opponents} = opponent_modules(game, opponent)
+
+    {:ok, human_bot} =
+      if user = conn.assigns[:user],
+        do: Bot.human_bot(user),
+        else: Bot.anon_human_bot()
+
+    {:ok, %{game_id: game_id, human_server_id: human_server_id}} =
+      GameEngine.human_vs_ai(game_engine(), arena, human_bot, opponents)
 
     text(conn, "hello")
   end
