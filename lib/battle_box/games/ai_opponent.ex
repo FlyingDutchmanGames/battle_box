@@ -1,4 +1,6 @@
 defmodule BattleBox.Games.AiOpponent do
+  @type t :: String.t() | %{optional(String.t()) => any()}
+
   @callback name() :: String.t()
   @callback description() :: String.t()
   @callback difficulty() :: integer()
