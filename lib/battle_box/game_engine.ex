@@ -42,6 +42,7 @@ defmodule BattleBox.GameEngine do
   defdelegate dequeue_self(game_engine, arena_id), to: MatchMakerSup
   defdelegate join_queue(game_engine, arena, bot, pid \\ self()), to: MatchMakerSup
   defdelegate practice_match(game_engine, arena, bot, opponent, pid \\ self()), to: MatchMakerSup
+  defdelegate human_vs_ai(game_engine, arena, human_bot, ai_mods), to: MatchMakerSup
   defdelegate queue_for_arena(game_engine, arena), to: MatchMakerSup
 
   defdelegate subscribe_to_bot_events(game_engine, bot_id, events), to: GameEnginePubSub

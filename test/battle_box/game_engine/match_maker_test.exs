@@ -2,6 +2,7 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
   use BattleBox.DataCase, async: false
   alias BattleBox.{Bot, GameEngine}
   alias BattleBox.GameEngine.Message.GameRequest
+  alias BattleBox.Games.Marooned.Ais.WildCard
 
   @user_id Ecto.UUID.generate()
 
@@ -26,6 +27,23 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
     assert match_maker
            |> Process.whereis()
            |> Process.alive?()
+  end
+
+  describe "human_vs_ai/4" do
+    setup do
+      {:ok, arena} = marooned_arena()
+      %{arena: arena}
+    end
+
+    test "You can start a game against ais", %{game_engine: game_engine, arena: arena, bot: bot} do
+      {:ok, %{game_id: game_id, human_server_id: human_server_id}} =
+        GameEngine.human_vs_ai(game_engine, arena, bot, [WildCard])
+
+      assert %{human_server_id: ^human_server_id} =
+               GameEngine.get_human_server(game_engine, human_server_id)
+
+      assert %{game_id: ^game_id} = GameEngine.get_game_server(game_engine, game_id)
+    end
   end
 
   describe "practice match" do
