@@ -80,6 +80,7 @@ defmodule BattleBox.Arena do
     |> unique_constraint(:name)
   end
 
+  @spec from_name(String.t()) :: nil | %__MODULE__{}
   def from_name(name) do
     Repo.get_by(__MODULE__, name: name)
   end
@@ -92,10 +93,12 @@ defmodule BattleBox.Arena do
 
   def preload_game_settings(nil), do: nil
 
+  @spec preload_game_settings(%__MODULE__{} | nil) :: %__MODULE__{} | nil
   def preload_game_settings(arena) do
     Repo.preload(arena, arena.game_type.settings_module.name)
   end
 
+  @spec players(%__MODULE__{}) :: [integer(), ...]
   def players(arena) do
     settings = get_settings(arena)
     arena.game_type.players_for_settings(settings)

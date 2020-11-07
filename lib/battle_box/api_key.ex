@@ -27,6 +27,8 @@ defmodule BattleBox.ApiKey do
     |> put_change(:hashed_token, hash(token))
   end
 
+  @spec authenticate(String.t()) ::
+          {:ok, %User{}} | {:error, %{token: [String.t()]}} | {:error, %{user: [String.t()]}}
   def authenticate(token) do
     Repo.get_by(__MODULE__, hashed_token: hash(token))
     |> Repo.preload(:user)
@@ -43,15 +45,16 @@ defmodule BattleBox.ApiKey do
     end
   end
 
+  @spec gen_token() :: String.t()
+  def gen_token do
+    :crypto.strong_rand_bytes(16)
+    |> Base.encode32(padding: false, case: :lower)
+  end
+
   defp mark_used!(%__MODULE__{} = api_key) do
     api_key
     |> change(last_used: now())
     |> Repo.update()
-  end
-
-  def gen_token do
-    :crypto.strong_rand_bytes(16)
-    |> Base.encode32(padding: false, case: :lower)
   end
 
   defp hash(token) do

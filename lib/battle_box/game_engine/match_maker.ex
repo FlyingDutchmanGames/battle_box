@@ -108,9 +108,10 @@ defmodule BattleBox.GameEngine.MatchMaker do
   end
 
   defp start_game(game_engine, arena, combatants) do
-    game = Game.build(arena, for({player, %{bot: bot}} <- combatants, do: {player, bot}))
-    player_pid_mapping = Map.new(for {player, %{pid: pid}} <- combatants, do: {player, pid})
+    player_bot_mapping = Map.new(combatants, fn {player, %{bot: bot}} -> {player, bot} end)
+    player_pid_mapping = Map.new(combatants, fn {player, %{pid: pid}} -> {player, pid} end)
 
+    game = Game.build(arena, player_bot_mapping)
     {:ok, _pid} = GameEngine.start_game(game_engine, %{players: player_pid_mapping, game: game})
 
     game
