@@ -3,9 +3,9 @@ defmodule BattleBoxWeb.Live.HumanPlayer do
   alias BattleBoxWeb.HumanView
   alias BattleBox.{GameEngine, GameEngine.HumanServer}
 
-
   def mount(_params, %{"human_server_id" => human_server_id, "user_id" => user_id}, socket) do
-    with {:hs, %{pid: hs_pid} = hs} <- {:hs, GameEngine.get_human_server(game_engine(), human_server_id)},
+    with {:hs, %{pid: hs_pid} = hs} <-
+           {:hs, GameEngine.get_human_server(game_engine(), human_server_id)},
          {:connected?, true} <- {:connected?, connected?(socket)},
          {:connect, {:ok, game_info}} <- {:connect, HumanServer.connect_ui(hs_pid)} do
       {:ok, assign(socket, human_server: hs, game_info: game_info)}
