@@ -5,6 +5,10 @@ defmodule BattleBoxWeb.HumanController do
   alias BattleBox.{Arena, Bot, GameEngine, Repo, User}
   import Ecto.Query
 
+  def human(conn, %{"human_server_id" => human_server_id}) do
+    render(conn, "human_player.html", human_server_id: human_server_id)
+  end
+
   def start_game(conn, %{
         "arena" => arena,
         "game_type" => game_type,
@@ -20,10 +24,10 @@ defmodule BattleBoxWeb.HumanController do
         do: Bot.human_bot(user),
         else: Bot.anon_human_bot()
 
-    {:ok, %{game_id: game_id, human_server_id: human_server_id}} =
+    {:ok, %{human_server_id: human_server_id}} =
       GameEngine.human_vs_ai(game_engine(), arena, human_bot, opponents)
 
-    text(conn, "hello")
+    redirect(conn, to: Routes.human_path(conn, :human, human_server_id))
   end
 
   def play(conn, %{"game_type" => game_type, "arena" => arena}) do

@@ -41,6 +41,8 @@ defmodule BattleBoxWeb.Router do
     get "/play/game_type/:game_type/arena/:arena/opponent/:opponent", HumanController, :play
     post "/play", HumanController, :start_game
 
+    get "/human/:human_server_id", HumanController, :human
+
     resources "/users", UserController, only: [:show, :index], param: "username" do
       get "/follow", FollowController, :follow
       resources "/games", GameController, only: [:index]
