@@ -1,0 +1,7 @@
+<%= live_component(
+  @socket,
+  @component,
+  commands_request: @game_info.commands_request,
+  game_request: @game_info.game_request,
+  id: @game_info.game_request.game_id
+) %>

@@ -1,0 +1,21 @@
+<% %{rows: rows, cols: cols} = @game_request.settings %>
+<% position_to_player = Map.new(@commands_request.game_state.player_positions, fn {key, val} -> {val, key} end) %>
+
+<div class="marooned content container">
+  <h1>Marooned</h1>
+  <p>Player: <%= @commands_request.player %></p>
+  <p>Game ID: <%= @game_request.game_id %></p>
+
+  <div class="game-board" style="grid-template-rows: repeat(<%= rows %>, 1fr); grid-template-columns: repeat(<%= cols %>, 1fr)">
+    <%= for row <- Enum.reverse(0..rows-1), col <- (0..cols-1) do %>
+      <% removed? = [row, col] in @commands_request.game_state.removed_locations %>
+      <% player = position_to_player[[row, col]] %>
+      <div class='square <%= if removed?, do: "removed" %>'>
+        <div class="number">(<%= row %>, <%= col %>)</div>
+        <%= if player do %>
+          <div class="player"><%= player %></div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

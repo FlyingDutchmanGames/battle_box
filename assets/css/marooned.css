@@ -1,0 +1,27 @@
+.marooned {
+  .game-board {
+    display: grid;
+
+    .square {
+      height: 50px;
+      border: 1px solid black;
+      position: relative;
+
+      .player {
+        font-size: 1.4em;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .number {
+        position: absolute;
+        bottom: 2px;
+        left: 2px;
+        font-size: 0.7em;
+        user-select: none;
+      }
+    }
+  }
+}
