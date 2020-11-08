@@ -233,7 +233,11 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
       "commands_request" => %{
         "game_id" => ^game_id,
         "request_id" => _,
-        "game_state" => %{"turn" => _}
+        "game_state" => %{"turn" => _},
+        "score" => %{
+          "1" => _,
+          "2" => _
+        }
       }
     })
   end

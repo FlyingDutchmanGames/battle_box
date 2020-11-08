@@ -28,9 +28,7 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
 
   setup do
     {:ok, user} = create_user(id: @user_id)
-
     {:ok, arena} = marooned_arena(user: user, arena_name: @arena_name, command_time_minimum_ms: 1)
-
     {:ok, key} = create_key(user: user)
 
     %{user: user, arena: arena, key: key}
@@ -292,7 +290,11 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                "commands_request" => %{
                  "game_id" => ^game_id,
                  "request_id" => <<_::288>>,
-                 "game_state" => _
+                 "game_state" => _,
+                 "score" => %{
+                   "1" => _,
+                   "2" => _
+                 }
                }
              } = Jason.decode!(move_req)
     end
