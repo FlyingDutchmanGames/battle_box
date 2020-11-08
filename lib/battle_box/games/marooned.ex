@@ -90,6 +90,9 @@ defmodule BattleBox.Games.Marooned do
         game.next_player => %{
           removed_locations: Logic.removed_locations(game),
           player_positions: Logic.player_positions(game),
+          available_to_be_removed: Logic.available_to_be_removed(game),
+          available_to_move_to:
+            Logic.available_adjacent_locations_for_player(game, game.next_player),
           turn: game.turn
         }
       }
