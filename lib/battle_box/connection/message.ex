@@ -33,7 +33,7 @@ defmodule BattleBox.Connection.Message do
   end
 
   def game_request(game_info) do
-    game_info = Map.take(game_info, [:game_type, :settings, :game_id, :player])
+    game_info = Map.take(game_info, [:arena, :game_type, :settings, :game_id, :player, :players])
     encode(%{"game_info" => game_info, "request_type" => "game_request"})
   end
 
