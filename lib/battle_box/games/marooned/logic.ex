@@ -1,4 +1,6 @@
 defmodule BattleBox.Games.Marooned.Logic do
+  alias BattleBox.Games.Marooned
+
   alias BattleBox.Games.Marooned.Error.{
     CannotMoveIntoOpponent,
     CannotMoveIntoRemovedSquare,
@@ -14,6 +16,11 @@ defmodule BattleBox.Games.Marooned.Logic do
 
   import BattleBox.Utilities.Grid, only: [manhattan_distance: 2]
 
+  @spec calculate_turn(%Marooned{}, %{optional(integer()) => map()}) :: %{
+          game: %Marooned{},
+          debug: %{optional(integer()) => map()},
+          info: %{optional(integer()) => [any()]}
+        }
   def calculate_turn(game, commands) do
     {command, input_error} = validate_command(game, commands[game.next_player])
     {remove, remove_error} = validate_remove(game, game.next_player, command["remove"])
@@ -32,6 +39,7 @@ defmodule BattleBox.Games.Marooned.Logic do
     %{game: game, debug: debug, info: %{1 => [event], 2 => [event]}}
   end
 
+  @spec winner(%Marooned{}) :: nil | integer()
   def winner(game) do
     game.winner
 
@@ -42,6 +50,7 @@ defmodule BattleBox.Games.Marooned.Logic do
     end
   end
 
+  @spec over?(%Marooned{}) :: boolean()
   def over?(game) do
     case available_adjacent_locations_for_player(game, game.next_player) do
       [] -> true
@@ -50,6 +59,7 @@ defmodule BattleBox.Games.Marooned.Logic do
     end
   end
 
+  @spec score(%Marooned{}, integer() | nil) :: %{optional(integer()) => integer()}
   def score(game, turn \\ nil) do
     turn = turn || game.turn
 
@@ -58,6 +68,9 @@ defmodule BattleBox.Games.Marooned.Logic do
         do: {player, length(available_adjacent_locations_for_player(game, player, turn))}
   end
 
+  @spec player_positions(%Marooned{}, integer() | nil) :: %{
+          optional(integer()) => [integer(), ...]
+        }
   def player_positions(game, turn \\ nil) do
     turn = turn || game.turn
 
@@ -73,6 +86,7 @@ defmodule BattleBox.Games.Marooned.Logic do
     Map.merge(player_starting_locations(game), recent_positions)
   end
 
+  @spec removed_locations(%Marooned{}, integer() | nil) :: [[integer(), ...]]
   def removed_locations(game, turn \\ nil) do
     events =
       if turn,
@@ -82,6 +96,7 @@ defmodule BattleBox.Games.Marooned.Logic do
     for(%{removed_location: location} <- events, do: location) ++ game.starting_removed_locations
   end
 
+  @spec available_to_be_removed(%Marooned{}, integer() | nil) :: [[integer(), ...]]
   def available_to_be_removed(game, turn \\ nil) do
     turn = turn || game.turn
 
@@ -95,6 +110,9 @@ defmodule BattleBox.Games.Marooned.Logic do
         do: [x, y]
   end
 
+  @spec available_adjacent_locations_for_player(%Marooned{}, integer() | nil) :: [
+          [integer(), ...]
+        ]
   def available_adjacent_locations_for_player(game, player, turn \\ nil) do
     turn = turn || game.turn
 
@@ -111,6 +129,7 @@ defmodule BattleBox.Games.Marooned.Logic do
         do: [x, y]
   end
 
+  @spec opponent(integer()) :: integer()
   def opponent(player), do: %{1 => 2, 2 => 1}[player]
 
   defp adjacent([x, y]) do
