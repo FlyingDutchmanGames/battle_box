@@ -167,7 +167,12 @@ defmodule BattleBoxWeb.Sockets.BattleBoxSocketTest do
         "game_info" => %{
           "game_id" => <<_::288>>,
           "player" => _,
-          "settings" => %{}
+          "settings" => %{},
+          "arena" => %{"name" => _},
+          "players" => %{
+            "1" => %{"bot" => %{"name" => _, "user" => %{"username" => _, "avatar_url" => _}}},
+            "2" => %{"bot" => %{"name" => _, "user" => %{"username" => _, "avatar_url" => _}}}
+          }
         },
         "request_type" => "game_request"
       })

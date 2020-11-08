@@ -54,7 +54,7 @@ defmodule BattleBox.Test.DataHelpers do
     |> Repo.insert()
   end
 
-  def create_bot(opts) do
+  def create_bot(opts \\ %{}) do
     opts = Enum.into(opts, %{})
 
     user =
