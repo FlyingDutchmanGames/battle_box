@@ -25,6 +25,4 @@ defprotocol BattleBox.Game.Gameable do
 
   @spec winner(game) :: nil | player
   def winner(game)
-
-  def turn_info(game)
 end

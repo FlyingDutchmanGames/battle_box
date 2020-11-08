@@ -1,6 +1,6 @@
 defmodule BattleBox.GameEngine.MatchMakerTest do
   use BattleBox.DataCase, async: false
-  alias BattleBox.{Bot, GameEngine}
+  alias BattleBox.{GameEngine, Repo}
   alias BattleBox.GameEngine.Message.GameRequest
   alias BattleBox.Games.Marooned.Ais.WildCard
 
@@ -13,12 +13,9 @@ defmodule BattleBox.GameEngine.MatchMakerTest do
 
   setup do
     {:ok, user} = create_user(id: @user_id)
+    {:ok, bot} = create_bot(%{user: user, bot_name: "FOO"})
 
-    {:ok, bot} =
-      user
-      |> Ecto.build_assoc(:bots)
-      |> Bot.changeset(%{name: "FOO"})
-      |> Repo.insert()
+    bot = Repo.preload(bot, :user)
 
     %{bot: bot}
   end

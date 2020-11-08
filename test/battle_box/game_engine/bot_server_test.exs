@@ -155,7 +155,9 @@ defmodule BattleBox.GameEngine.BotServerTest do
             game_server: game_server,
             game_type: :foo,
             player: 1,
-            settings: %{}
+            settings: %{},
+            players: %{},
+            arena: %{}
           }
         )
 

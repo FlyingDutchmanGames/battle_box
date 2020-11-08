@@ -169,6 +169,20 @@ defmodule BattleBox.TcpConnectionServer.ConnectionHandlerTest do
                  "game_id" => <<_::288>>,
                  "game_type" => "marooned",
                  "player" => _,
+                 "players" => %{
+                   "1" => %{
+                     "bot" => %{
+                       "name" => "bot-name",
+                       "user" => %{"username" => _, "avatar_url" => _}
+                     }
+                   },
+                   "2" => %{
+                     "bot" => %{
+                       "name" => "bot-name",
+                       "user" => %{"username" => _, "avatar_url" => _}
+                     }
+                   }
+                 },
                  "settings" => %{
                    "rows" => 10,
                    "cols" => 10

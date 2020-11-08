@@ -1,6 +1,5 @@
 defmodule BattleBox.GameEngine.GameServerTest do
-  alias BattleBox.{Game, GameEngine, GameEngine.GameServer}
-  alias BattleBox.InstalledGames
+  alias BattleBox.{Game, GameBot, GameEngine, InstalledGames, Repo, GameEngine.GameServer}
   import BattleBox.TestConvenienceHelpers, only: [named_proxy: 1]
   use BattleBox.DataCase
 
@@ -27,6 +26,8 @@ defmodule BattleBox.GameEngine.GameServerTest do
     describe "GameServer (with #{game_type.title}})" do
       setup do
         {:ok, user} = create_user()
+        {:ok, bot} = create_bot(user: user)
+        bot = Repo.preload(bot, :user)
         {:ok, arena} = create_arena(unquote(game_type), %{user: user, arena_name: "test-arena"})
 
         init_opts = %{
@@ -38,7 +39,10 @@ defmodule BattleBox.GameEngine.GameServerTest do
             id: Ecto.UUID.generate(),
             arena: arena,
             arena_id: arena.id,
-            game_bots: []
+            game_bots: [
+              %GameBot{player: 1, bot: bot},
+              %GameBot{player: 2, bot: bot}
+            ]
           }
         }
 
@@ -51,7 +55,9 @@ defmodule BattleBox.GameEngine.GameServerTest do
 
         %{
           init_opts: init_opts,
-          arena: arena
+          arena: arena,
+          user: user,
+          bot: bot
         }
       end
 
@@ -129,12 +135,24 @@ defmodule BattleBox.GameEngine.GameServerTest do
         {:ok, pid} = GameEngine.start_game(context.game_engine, context.init_opts)
         game = context.init_opts.game
 
+        player = %{
+          bot: %{
+            name: context.bot.name,
+            user: %{username: context.user.username, avatar_url: context.user.avatar_url}
+          }
+        }
+
         expected = %{
           game_server: pid,
           game_id: game.id,
           accept_time: 2000,
           game_type: game.game_type.name,
-          settings: Game.settings(game)
+          settings: Game.settings(game),
+          arena: %{name: context.arena.name},
+          players: %{
+            1 => player,
+            2 => player
+          }
         }
 
         expected_p1 = {:player_1, struct!(GameRequest, Map.put(expected, :player, 1))}

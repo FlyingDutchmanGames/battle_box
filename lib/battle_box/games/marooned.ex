@@ -91,6 +91,9 @@ defmodule BattleBox.Games.Marooned do
         game.next_player => %{
           removed_locations: Logic.removed_locations(game),
           player_positions: Logic.player_positions(game),
+          available_to_be_removed: Logic.available_to_be_removed(game),
+          available_to_move_to:
+            Logic.available_adjacent_locations_for_player(game, game.next_player),
           turn: game.turn
         }
       }
@@ -100,14 +103,5 @@ defmodule BattleBox.Games.Marooned do
     def calculate_turn(game, commands), do: Logic.calculate_turn(game, commands)
     def score(game), do: Logic.score(game)
     def winner(game), do: Logic.winner(game)
-
-    def turn_info(game) do
-      max_turn = Enum.max(for(%{turn: turn} <- game.events, do: turn), fn -> 0 end)
-
-      %{
-        current_turn: game.turn,
-        max_turn: max_turn
-      }
-    end
   end
 end
