@@ -198,7 +198,11 @@ defmodule BattleBox.GameEngine.GameServerTest do
                             maximum_time: 1000,
                             minimum_time: 20,
                             game_state: ^game_state,
-                            player: ^player
+                            player: ^player,
+                            score: %{
+                              1 => _,
+                              2 => _
+                            }
                           }}
         end
       end
