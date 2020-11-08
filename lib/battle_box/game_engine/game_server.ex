@@ -51,15 +51,7 @@ defmodule BattleBox.GameEngine.GameServer do
 
     for {player, pid} <- data.players do
       Process.monitor(pid)
-
-      send(pid, %GameRequest{
-        game_server: self(),
-        game_id: data.game.id,
-        game_type: data.game.game_type.name,
-        player: player,
-        accept_time: data.game.arena.game_acceptance_time_ms,
-        settings: Game.settings(data.game)
-      })
+      send(pid, GameRequest.new(self(), player, data.game))
     end
 
     {:keep_state, Map.put(data, :acceptances, [])}
