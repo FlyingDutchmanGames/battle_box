@@ -129,10 +129,6 @@ defmodule BattleBox.Game do
     update_game_data(game, &Gameable.disqualify(&1, player))
   end
 
-  def turn_info(game) do
-    game |> game_data() |> Gameable.turn_info()
-  end
-
   def settings(game) do
     game |> game_data() |> Gameable.settings()
   end

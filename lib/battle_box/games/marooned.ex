@@ -99,14 +99,5 @@ defmodule BattleBox.Games.Marooned do
     def calculate_turn(game, commands), do: Logic.calculate_turn(game, commands)
     def score(game), do: Logic.score(game)
     def winner(game), do: Logic.winner(game)
-
-    def turn_info(game) do
-      max_turn = Enum.max(for(%{turn: turn} <- game.events, do: turn), fn -> 0 end)
-
-      %{
-        current_turn: game.turn,
-        max_turn: max_turn
-      }
-    end
   end
 end
