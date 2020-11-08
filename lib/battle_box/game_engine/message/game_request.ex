@@ -38,7 +38,7 @@ defmodule BattleBox.GameEngine.Message.GameRequest do
         name: arena.name
       },
       game_id: game_id,
-      game_server: self(),
+      game_server: game_server,
       game_type: game_type.name(),
       player: player,
       players: players,
