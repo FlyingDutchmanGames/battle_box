@@ -10,8 +10,8 @@ defmodule BattleBoxWeb.Live.HumanPlayer do
          {:connected?, true} <- {:connected?, connected?(socket)},
          {:connect, {:ok, game_info}} <- {:connect, connect_ui(hs.pid)} do
       Process.monitor(hs.pid)
-      component = game_type_name_to_module(game_info.game_request.game_type).play_component()
-      {:ok, assign(socket, human_server: hs, game_info: game_info, component: component)}
+      game_module = game_type_name_to_module(game_info.game_request.game_type)
+      {:ok, assign(socket, human_server: hs, game_info: game_info, game_module: game_module)}
     else
       {:hs, nil} -> {:ok, assign(socket, not_found: true)}
       {:connected?, false} -> {:ok, assign(socket, connected?: false)}
