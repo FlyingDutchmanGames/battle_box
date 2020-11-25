@@ -1,9 +1,14 @@
 .marooned {
+  .instructions {
+   font-size: 1.5em; 
+  }
+
   .game-board {
     display: grid;
 
     .square {
       height: 50px;
+      width: 50px;
       border: 1px solid black;
       position: relative;
 
@@ -27,8 +32,36 @@
         position: absolute;
         bottom: 2px;
         left: 2px;
-        font-size: 0.7em;
+        font-size: 0.5em;
         user-select: none;
+      }
+
+      .available-move {
+        position: absolute;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        background-color: yellow;
+        opacity: 30%;
+
+        &:hover {
+          box-shadow: inset 0 0 20px #000000;
+        }
+      }
+
+      .available-to-be-removed {
+        position: absolute;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        background-color: yellow;
+        opacity: 30%;
+
+        &:hover {
+          box-shadow: inset 0 0 20px #000000;
+        }
       }
     }
   }

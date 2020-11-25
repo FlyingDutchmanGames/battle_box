@@ -2,16 +2,43 @@
 <% position_to_player = Map.new(@commands_request.game_state.player_positions, fn {key, val} -> {val, key} end) %>
 
 <div class="marooned">
-  <div class="game-board" style="grid-template-rows: repeat(<%= rows %>, 1fr); grid-template-columns: repeat(<%= cols %>, 1fr)">
-    <%= for row <- Enum.reverse(0..rows-1), col <- (0..cols-1) do %>
-      <% removed? = [row, col] in @commands_request.game_state.removed_locations %>
-      <% player = position_to_player[[row, col]] %>
-      <div class='square <%= if removed?, do: "removed" %>'>
-        <div class="number">(<%= row %>, <%= col %>)</div>
-        <%= if player do %>
-          <div class="player player_<%=player %>"><%= player %></div>
-        <% end %>
-      </div>
-    <% end %>
+  <div class="flex-center">
+    <div class="game-board" style="grid-template-rows: repeat(<%= rows %>, max-content); grid-template-columns: repeat(<%= cols %>, max-content)">
+      <%= for y <- Enum.reverse(0..rows-1), x <- (0..cols-1) do %>
+        <% removed? = [x, y] in @commands_request.game_state.removed_locations %>
+        <% player = position_to_player[[x, y]] %>
+        <div class='square <%= if removed?, do: "removed" %>'>
+          <div class="number">(<%= x %>, <%= y %>)</div>
+          <%= if player do %>
+            <div class="player player_<%=player %>"><%= player %></div>
+          <% end %>
+          <%= if !@move_to && [x, y] in @commands_request.game_state.available_to_move_to do %>
+            <div 
+                 class="available-move"
+                 phx-value-x="<%= x %>"
+                 phx-value-y="<%= y %>"
+                 phx-target="<%= @myself %>"
+                 phx-click="select-move"></div>
+          <% end %>
+          <%= if @move_to &&
+                !@remove &&
+                ([x, y] != @move_to) &&
+                [x, y] in @commands_request.game_state.available_to_be_removed do %>
+            <div 
+                 class="available-to-be-removed"
+                 phx-value-x="<%= x %>"
+                 phx-value-y="<%= y %>"
+                 phx-target="<%= @myself %>"
+                 phx-click="select-remove">X</div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="instructions">
+    <div>Move to: <%= if @move_to, do: inspect(@move_to) %></div>
+    <div>Remove: <%= if @remove, do: inspect(@remove) %></div>
+      <button phx-click="reset" phx-target="<%= @myself %>" <%= unless @move_to || @remove, do: "disabled" %>>Reset</div>
+  <button phx-click="submit" phx-target="<%= @myself %>" <%= unless @move_to && @remove, do: "disabled" %>>Submit</button>
   </div>
 </div>

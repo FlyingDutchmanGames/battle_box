@@ -2,8 +2,17 @@ defmodule BattleBoxWeb.Live.HumanPlayer do
   use BattleBoxWeb, :live_view
   alias BattleBoxWeb.HumanView
   import BattleBox.InstalledGames, only: [game_type_name_to_module: 1]
-  import BattleBox.GameEngine.HumanServer, only: [connect_ui: 1]
+  import BattleBox.GameEngine.HumanServer, only: [connect_ui: 1, submit_commands: 2]
   import BattleBox.GameEngine, only: [get_human_server: 2]
+
+  alias BattleBox.GameEngine.Message.{
+    CommandsRequest,
+    DebugInfo,
+    GameInfo,
+    GameOver,
+    GameRequest,
+    GameCanceled
+  }
 
   def mount(_params, %{"human_server_id" => human_server_id, "user_id" => user_id}, socket) do
     with {:hs, %{pid: _} = hs} <- {:hs, get_human_server(game_engine(), human_server_id)},
@@ -17,6 +26,24 @@ defmodule BattleBoxWeb.Live.HumanPlayer do
       {:connected?, false} -> {:ok, assign(socket, connected?: false)}
       {:connect, {:error, :already_connected}} -> {:ok, assign(socket, already_connected: true)}
     end
+  end
+
+  def handle_info(%GameInfo{} = gi, socket) do
+    {:noreply, assign(socket, game_info: gi)}
+  end
+
+  def handle_info(%CommandsRequest{} = cr, socket) do
+    {:noreply, assign(socket, commands_request: cr)}
+  end
+
+  def handle_info({:commands, commands}, socket) do
+    :ok = submit_commands(socket.assigns.human_server.pid, commands)
+    {:noreply, socket}
+  end
+
+  def handle_info(msg, socket) do
+    IO.inspect(msg, label: "UNHANDLED MESSAGE")
+    {:noreply, socket}
   end
 
   def render(%{already_connected: true} = assigns), do: ~L"<h1>Already Connected</h1>"

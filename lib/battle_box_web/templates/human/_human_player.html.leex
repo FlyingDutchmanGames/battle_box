@@ -1,3 +1,4 @@
+<% IO.inspect(@game_info, label: "WTF") %>
 <% %{game_request: game_request, commands_request: commands_request} = @game_info %>
 <div class="human-player content container">
   <div class="scoreboard">
@@ -20,5 +21,5 @@
     </div>
   </div>
 
-  <%= live_component( @socket, @game_module.play_component(), commands_request: commands_request, game_request: game_request, id: game_request.game_id) %>
+  <%= live_component( @socket, @game_module.play_component(), commands_request: commands_request, game_request: game_request, id: Map.get(commands_request, :request_id) ) %>
 </div>
