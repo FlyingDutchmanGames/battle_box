@@ -1,0 +1,25 @@
+<% IO.inspect(@game_info, label: "WTF") %>
+<% %{game_request: game_request, commands_request: commands_request} = @game_info %>
+<div class="human-player content container">
+  <div class="scoreboard">
+    <div class="game-type">
+      <div class="game"><%= @game_module.title() %></div>
+      <div class="arena-name"><%= game_request.arena.name %></div>
+    </div>
+    <div class="players">
+      <%= for {player, %{bot: %{name: bot_name, user: user}}} <- game_request.players do %>
+        <div class="player player-<%= player %>">
+          <img src="<%= user.avatar_url %>">
+          <div class="info">
+            <div class="bot-name"><%= bot_name %></div>
+            <div class="username"><%= user.username %></div>
+            <div class="player-id">Player: <%= player %></div>
+          </div>
+          <div class="score"><%= Map.get(commands_request.score, player) %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%= live_component( @socket, @game_module.play_component(), commands_request: commands_request, game_request: game_request, id: Map.get(commands_request, :request_id) ) %>
+</div>

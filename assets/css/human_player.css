@@ -1,0 +1,65 @@
+.human-player {
+  .scoreboard {
+    display: flex;
+    flex-flow: row nowrap;
+    padding: 10px 20px;
+    margin: 10px 0px;
+    border-radius: 5px;
+    justify-content: space-between;
+
+    background-color: #a8a5a5;
+    min-width: max-content;
+
+    color: #6e6969;
+
+    .game-type {
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: center;
+
+      .game { font-size: 1.5em; }
+      .arena-name { font-size: 0.8em; }
+    }
+
+    .players {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(100px, 1fr));
+      grid-gap: 10px;
+      color: white;
+
+      .player {
+        display: flex;
+        flex-flow: row nowrap;
+        padding: 5px 10px;
+        border-radius: 10px;
+        align-items: center;
+        min-width: max-content;
+
+        .info {
+          width: 75px;
+          overflow:hidden;
+          white-space:nowrap;
+          text-overflow: ellipsis;
+          font-size: 0.7em;
+          margin-left: 10px;
+
+          .bot-name { font-weight: bold; }
+          .player-id { font-weight: lighter; }
+        }
+
+        .score {
+          font-size: 2em;
+        }
+
+        &.player-1 { background-color: blue; }
+        &.player-2 { background-color: red; }
+
+        img {
+          border-radius: 5px;
+          height: 40px;
+          width: 40px;
+        }
+      }
+    }
+  }
+}

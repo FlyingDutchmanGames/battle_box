@@ -29,6 +29,7 @@ defmodule BattleBox.Games.Marooned do
 
   def color, do: "orange"
   def view_module, do: BattleBoxWeb.MaroonedView
+  def play_component, do: BattleBoxWeb.Live.Games.Marooned
   def title, do: "Marooned"
   def name, do: :marooned
   def settings_module, do: Settings

@@ -1,6 +1,8 @@
 import css from "../css/app.css"
 import header_css from "../css/header.css"
 import settings_css from "../css/settings.css"
+import marooned_css from "../css/marooned.css"
+import human_player_css from "../css/human_player.css"
 
 import "phoenix_html"
 import {Socket} from "phoenix"
