@@ -16,7 +16,9 @@ defmodule BattleBox.Games.Marooned.Logic do
 
   import BattleBox.Utilities.Grid, only: [manhattan_distance: 2]
 
-  @spec calculate_turn(%Marooned{}, %{optional(integer()) => map()}) :: %{
+  @type commands :: %{optional(String.t()) => [integer(), ...]}
+
+  @spec calculate_turn(%Marooned{}, %{optional(integer()) => nil | commands}) :: %{
           game: %Marooned{},
           debug: %{optional(integer()) => map()},
           info: %{optional(integer()) => [any()]}
