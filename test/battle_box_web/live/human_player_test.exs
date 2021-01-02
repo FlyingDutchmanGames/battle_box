@@ -32,7 +32,7 @@ defmodule BattleBoxWeb.Live.HumanPlayerTest do
     {:ok, %{human_server_id: human_server_id}} =
       GameEngine.human_vs_ai(game_engine, arena, bot, [WildCard])
 
-    {:ok, _view, html} =
+    {:ok, _view, _html} =
       live_isolated(conn, HumanPlayer, session: %{"human_server_id" => human_server_id})
 
     # TODO implement
